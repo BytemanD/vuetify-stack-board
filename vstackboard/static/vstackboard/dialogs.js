@@ -1,0 +1,19 @@
+import { NewFlavorDialog } from "./dialogs/newFlavor.js";
+import { NewServerDialog } from "./dialogs/newServer.js";
+import { NewVolumeDialog } from "./dialogs/newVolume.js";
+import { ChangePasswordDialog } from "./dialogs/changePassword.js";
+import { ChangeServerNameDialog } from "./dialogs/changeServerName.js";
+import { VolumeAttachDialog } from "./dialogs/volumeAttach.js";
+import { VolumeDetachDialog } from "./dialogs/volumeDetach.js";
+import { InterfaceAttachDialog } from "./dialogs/interfaceAttach.js";
+import { InterfaceDetachDialog } from "./dialogs/interfaceDetach.js";
+
+export const newVolume = new NewVolumeDialog()
+export const newFlavor = new NewFlavorDialog()
+export const changePassword = new ChangePasswordDialog()
+export const changeServerName = new ChangeServerNameDialog()
+export const volumeAttach = new VolumeAttachDialog()
+export const volumeDetach = new VolumeDetachDialog()
+export const interfaceDetach = new InterfaceDetachDialog()
+export const interfaceAttach = new InterfaceAttachDialog()
+export const newServer = new NewServerDialog()

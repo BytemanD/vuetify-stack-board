@@ -1,0 +1,31 @@
+<v-card dense>
+    <v-card-text>
+      <v-row>
+        <v-col>
+          <v-btn small color="error" @click="computing.serviceTable.deleteSelected()"><v-icon small>mdi-trash-can</v-icon> 删除</v-btn>
+        </v-col>
+        <v-col>
+          <v-text-field small dense v-model="computing.serviceTable.search" append-icon="mdi-magnify" label="搜索"
+            single-line hide-details></v-text-field>
+        </v-col>
+      </v-row>
+    </v-card-text>
+  </v-card>
+  
+  <v-data-table :headers="computing.serviceTable.headers" :items="computing.serviceTable.items"
+    :items-per-page="computing.serviceTable.itemsPerPage" :search="computing.serviceTable.search" class="elevation-1" dense
+    show-select v-model="computing.serviceTable.selected">
+    <template v-slot:item.status="{ item }">
+        <v-switch class="my-auto" v-model="item.status == 'enabled'" hide-details color="success" :disabled="item.binary!='nova-compute'"
+               @click="computing.serviceTable.enable(item)"></v-switch>
+    </template>
+    <template v-slot:item.forced_down="{ item }">
+      <v-switch class="my-auto" v-model="item.forced_down" hide-details color="warning" :disabled="item.binary!='nova-compute'"
+               @click="computing.serviceTable.forceDown(item)"></v-switch>
+      <v-chip v-else text x-small>不支持</v-chip>
+   </template>
+   <template v-slot:item.state="{ item }" >
+      <v-icon v-if="item.state == 'up'" color="success">mdi-power-on</v-icon>
+      <v-icon v-else color="error">mdi-power-off</v-icon>
+    </template>
+  </v-data-table>

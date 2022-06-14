@@ -1,0 +1,84 @@
+<v-card dense>
+  <v-card-text>
+    <v-row>
+      <v-col>
+        <v-btn small color="primary" v-on:click="newServerDialog.open()"><v-icon>mdi-plus</v-icon> 新建</v-btn>
+        <v-btn small color="success" v-on:click="computing.serverTable.startSelected()" :disabled="computing.serverTable.selected.length == 0">开机</v-btn>
+        <v-btn small color="warning" v-on:click="computing.serverTable.stopSelected()" :disabled="computing.serverTable.selected.length == 0">关机</v-btn>
+        <v-btn small color="error" @click="computing.serverTable.deleteSelected()" :disabled="computing.serverTable.selected.length == 0">
+          <v-icon small>mdi-trash-can</v-icon>删除
+        </v-btn>
+        <v-menu  offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn small color="info" v-bind="attrs" v-on="on" :disabled="computing.serverTable.selected.length == 0"><v-icon small>mdi-menu</v-icon> 重启</v-btn>
+          </template>
+          <v-list >
+            <v-list-item small @click="computing.serverTable.rebootSelected('SOFT')"><v-list-item-title>软重启</v-list-item-title></v-list-item>
+            <v-list-item small @click="computing.serverTable.rebootSelected('HARD')"><v-list-item-title>硬重启</v-list-item-title></v-list-item>
+          </v-list>
+        </v-menu>
+      </v-col>
+      <v-col cols="1">
+        <v-btn small color="info" v-on:click="computing.serverTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
+      </v-col>
+      <v-col>
+        <v-text-field small dense v-model="computing.serverTable.search" append-icon="mdi-magnify" label="搜索"
+          single-line hide-details></v-text-field>
+      </v-col>
+    </v-row>
+  </v-card-text>
+</v-card>
+
+<v-data-table class="mt-2" :headers="computing.serverTable.headers" :items="computing.serverTable.items"
+  :items-per-page="computing.serverTable.itemsPerPage" :search="computing.serverTable.search" dense
+  show-select v-model="computing.serverTable.selected">
+  <template v-slot:item.name="{ item }">
+    [[ item.name ]]
+    <v-btn @click="changeServerNameDialog.open(item)" x-small icon><v-icon>mdi-pencil-minus</v-icon></v-btn>
+  </template>
+  <template v-slot:item.power_state="{ item }">
+    <!-- power on -->
+    <v-icon v-if="item['OS-EXT-STS:power_state'] == 1" color="success">mdi-power</v-icon>
+    <!-- pause -->
+    <v-icon v-else-if="item['OS-EXT-STS:power_state'] == 3" color="warning">mdi-pause</v-icon>
+    <!-- power off -->
+    <v-icon v-else-if="item['OS-EXT-STS:power_state'] == 4" color="error">mdi-power</v-icon>
+  </template>
+  <template v-slot:item.addresses="{ item }">
+    <template v-for="(ports, net, i) in item.addresses">
+      <template v-for="(port, j) in ports">
+        <v-chip x-small>[[ port.addr ]]</v-chip>
+      </template>
+    </template>
+  </template>
+  <template v-slot:item.flavor="{ item }">
+      <v-chip x-small color="cyan" text-color="white">[[ item.flavor.original_name ]]</v-chip>
+  </template>
+  <template v-slot:item.image="{ item }" >
+    [[ computing.serverTable.getImage(item).name ]]
+  </template>
+  <template v-slot:item.action="{ item }">
+    <v-btn small icon color="info" v-on:click="loginVnc(item)"><v-icon>mdi-console</v-icon></v-btn>
+    <v-menu  offset-y>
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn x-small color="primary" dark v-bind="attrs" v-on="on"><v-icon small>mdi-menu</v-icon>操作</v-btn>
+      </template>
+      <v-list >
+        <v-list-item @click="changePasswordDialog.open(item)"><v-list-item-title>修改密码</v-list-item-title></v-list-item>
+        <v-list-item @click="volumeAttachDialog.open(item)"><v-list-item-title>卷挂载</v-list-item-title></v-list-item>
+        <v-list-item @click="volumeDetachDialog.open(item)"><v-list-item-title>卷卸载</v-list-item-title></v-list-item>
+        <v-list-item @click="interfaceAttachDialog.open(item)"><v-list-item-title>网卡挂载</v-list-item-title></v-list-item>
+        <v-list-item @click="interfaceDetachDialog.open(item)"><v-list-item-title>网卡卸载</v-list-item-title></v-list-item>
+      </v-list>
+    </v-menu>
+  </template>
+
+</v-data-table>
+
+{% include "dialog/newServer.html" %}
+{% include 'dialog/changeServerName.html' %}
+{% include 'dialog/changePassword.html' %}
+{% include 'dialog/volumeAttach.html' %}
+{% include 'dialog/volumeDetach.html' %}
+{% include 'dialog/interfaceAttach.html' %}
+{% include 'dialog/interfaceDetach.html' %}

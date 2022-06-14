@@ -1,0 +1,9 @@
+[Unit]
+Description=EC Test VM Server
+
+[Service]
+Type=simple
+NotifyAccess=all
+TimeoutStartSec=0
+ExecStartPre=/usr/bin/mkdir -p /var/log/vstackboard/
+ExecStart=/usr/bin/vstackboard

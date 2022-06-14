@@ -1,0 +1,11 @@
+<v-tabs v-model="tabs" background-color="deep-purple accent-4" class="elevation-2" dark centered>
+  <v-tabs-slider></v-tabs-slider>
+  <v-tab > 卷 </v-tab>
+  <v-tab > 快照 </v-tab>
+  <v-tab > 卷类型 </v-tab>
+  <v-tabs-items v-model="tabs">
+    <v-tab-item>{% include 'volumes.html' %}</v-tab-item>
+    <v-tab-item>{% include 'snapshots.html' %}</v-tab-item>
+    <v-tab-item>{% include 'volumeTypes.html' %}</v-tab-item>
+  </v-tabs-items>
+</v-tabs>

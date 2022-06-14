@@ -1,0 +1,97 @@
+<h3>概览</h3>
+<v-row>
+  <v-col cols="6" lg="2" md="4" sm="4">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="100" width="20"
+              :value="computing.hypervisorTable.statistics.memory_mb_used * 100 / computing.hypervisorTable.statistics.memory_mb"
+              color="teal">
+              内存
+            </v-progress-circular>
+          </template>
+          <span>
+            百分比: [[ (computing.hypervisorTable.statistics.memory_mb_used * 100 / computing.hypervisorTable.statistics.memory_mb).toFixed(2) ]]%
+            <br>
+            剩余: [[ computing.hypervisorTable.statistics.free_ram_mb ]]
+          </span>
+        </v-tooltip>
+  </v-col>
+  <v-col cols="6" lg="2" md="4" sm="4">
+    <v-tooltip bottom>
+      <template v-slot:activator="{ on, attrs }">
+        <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="100" width="20"
+          :value="computing.hypervisorTable.statistics.vcpus_used * 100 / computing.hypervisorTable.statistics.vcpus"
+          color="teal">
+          CPU
+        </v-progress-circular>
+      </template>
+      <span>
+        百分比: [[ (computing.hypervisorTable.statistics.vcpus_used * 100 / computing.hypervisorTable.statistics.vcpus).toFixed(2) ]]%
+        <br>
+        剩余: [[computing.hypervisorTable.statistics.vcpus - computing.hypervisorTable.statistics.vcpus_used ]]
+      </span>
+    </v-tooltip>
+  </v-col>
+  <v-col cols="6" lg="2" md="4" sm="4">
+    <v-tooltip bottom>
+      <template v-slot:activator="{ on, attrs }">
+        <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="100" width="20"
+          :value="computing.hypervisorTable.statistics.local_gb_used * 100 / computing.hypervisorTable.statistics.local_gb"
+          color="teal">
+          磁盘
+        </v-progress-circular>
+      </template>
+      <span>
+        百分比: [[ (computing.hypervisorTable.statistics.local_gb_used * 100 / computing.hypervisorTable.statistics.local_gb).toFixed(2) ]]%
+        <br>
+        剩余: [[computing.hypervisorTable.statistics.local_gb - computing.hypervisorTable.statistics.local_gb_used ]]
+      </span>
+    </v-tooltip>
+  </v-col>
+  <v-col cols="6" lg="2" md="4" sm="4" lg>
+    <v-progress-circular rotate="360" size="100" width="10"
+      :value="computing.hypervisorTable.statistics.count * 100 / computing.hypervisorTable.items.length"
+      color="primary">
+      节点<br>
+      [[computing.hypervisorTable.statistics.count]]/[[computing.hypervisorTable.items.length]]
+    </v-progress-circular>
+  </v-col>
+  <v-col cols="6" lg="2" md="4" sm="4">
+    <v-avatar color="purple" size="90">
+      <span class="white--text">虚拟机<br>[[computing.hypervisorTable.statistics.running_vms]]</span>
+    </v-avatar>
+  </v-col>
+</v-row>
+
+<v-card dense class="mt-2">
+  <v-card-text>
+    <v-row>
+      <v-col>
+        <v-btn small color="primary" v-on:click="refreshContainer()">刷新</v-btn>
+      </v-col>
+      <v-col>
+        <v-text-field small dense v-model="computing.hypervisorTable.search" append-icon="mdi-magnify" label="搜索"
+          single-line hide-details></v-text-field>
+      </v-col>
+    </v-row>
+  </v-card-text>
+</v-card>
+<br>
+[[ computing.hypervisorTable.search ]]
+<v-data-table :headers="computing.hypervisorTable.headers" :items="computing.hypervisorTable.items"
+  :items-per-page="computing.hypervisorTable.itemsPerPage" :search="computing.hypervisorTable.search"
+  class="elevation-1" dense>
+  <template v-slot:item.status="{ item }">
+    <v-icon v-if="item.status == 'enabled'" color="success">mdi-check-circle</v-icon>
+    <v-icon v-else color="error">mdi-close-circle</v-icon>
+  </template>
+</v-data-table>
+
+
+<!-- <v-date-picker v-model="computing.usageTable.start"></v-date-picker>
+<v-date-picker v-model="computing.usageTable.end"></v-date-picker> -->
+<!-- 
+<v-data-table :headers="computing.usageTable.headers" :items="computing.usageTable.items"
+  :items-per-page="computing.usageTable.itemsPerPage" :search="computing.usageTable.search" dense>
+
+</v-data-table> -->

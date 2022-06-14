@@ -1,0 +1,23 @@
+<v-card dense>
+  <v-card-text>
+    <v-row>
+      <v-col>
+        <v-btn small color="primary">创建</v-btn>
+        <v-btn small color="error"  @click="image.imageTable.deleteSelected(image.imageTable)"
+               :disabled="image.imageTable.selected.length == 0"><v-icon small>mdi-trash-can</v-icon>删除
+        </v-btn>
+      </v-col>
+      <v-col>
+        <v-text-field small dense v-model="image.imageTable.search" append-icon="mdi-magnify" label="搜索" single-line
+          hide-details></v-text-field>
+
+      </v-col>
+    </v-row>
+
+  </v-card-text>
+</v-card>
+
+<v-data-table :headers="image.imageTable.headers" :items="image.imageTable.items"
+  :items-per-page="image.imageTable.itemsPerPage" :search="image.imageTable.search" class="elevation-1" dense
+  show-select v-model="image.imageTable.selected"
+  ></v-data-table>

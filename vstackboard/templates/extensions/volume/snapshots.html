@@ -1,0 +1,30 @@
+<v-card dense>
+    <v-card-text>
+      <v-row>
+        <v-col>
+          {% include '../dialog/newVolume.html %}
+          <v-btn small color="error" @click="volume.snapshotTable.deleteSelected()"><v-icon small>mdi-trash-can</v-icon> 删除</v-btn>
+          <v-btn small color="info" v-on:click="volume.snapshotTable.refresh()" icon><v-icon>mdi-refresh</v-icon></v-btn>
+        </v-col>
+        <v-col cols="4">
+          <v-text-field small dense v-model="volume.snapshotTable.search" append-icon="mdi-magnify" label="搜索" single-line
+            hide-details></v-text-field>
+        </v-col>
+      </v-row>
+    </v-card-text>
+  </v-card>
+  
+  <v-data-table class="mt-10 outlined" :headers="volume.snapshotTable.headers" :items="volume.snapshotTable.items"
+    :items-per-page="volume.snapshotTable.itemsPerPage" :search="volume.snapshotTable.search" class="elevation-1" dense
+    show-select v-model="volume.snapshotTable.selected">
+    <template v-slot:item.status="{ item }">
+      <v-icon v-if="item.status == 'available'" color="success">mdi-check-circle</v-icon>
+      <v-icon v-else-if="item.status == 'error'" color="error">mdi-close-circle</v-icon>
+      <p v-else>[[item.status]]</p>
+    </template>
+  
+    <template v-slot:item.bootable="{ item }">
+      <v-icon v-if="item.bootable == 'true'" color="success">mdi-check</v-icon>
+      <v-icon v-else color="error">mdi-close</v-icon>
+    </template>
+  </v-data-table>

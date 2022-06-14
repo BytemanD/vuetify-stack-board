@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ name }}</title>
+    {% include "requires.html" %}
+
+</head>
+<body>
+    <div id="app">
+        <v-app>
+            {% include "extensions/navigation.html" %}
+            <!-- <v-app-bar app>
+                <v-btn>close</v-btn>
+            </v-app-bar> -->
+            <v-main>
+                <v-container fluid>
+                    <v-row>
+                        <v-col cols="12" :hidden="navigation.items[navigation.item].title != '服务'">{% include "extensions/identity/services.html" %}</v-col>
+                        <v-col cols="12" :hidden="navigation.items[navigation.item].title != '用户'">{% include "extensions/identity/users.html" %}</v-col>
+                        <v-col cols="12" :hidden="navigation.items[navigation.item].title != '规格'">{% include "extensions/flavors.html" %}</v-col>
+                        <v-col cols="12" :hidden="navigation.items[navigation.item].title != '实例'">{% include "extensions/servers.html" %}</v-col>
+                        <v-col cols="12" :hidden="navigation.items[navigation.item].title != '虚拟化资源'">{% include "extensions/hypervisors.html" %}</v-col>
+                        <v-col cols="12" :hidden="navigation.items[navigation.item].title != '计算服务'">{% include "extensions/compute/service.html" %}</v-col>
+                        <v-col cols="12" :hidden="navigation.items[navigation.item].title != '网络'">{% include "extensions/networking/networks.html" %}</v-col>
+                        <v-col cols="12" :hidden="navigation.items[navigation.item].title != '端口'">{% include "extensions/networking/ports.html" %}</v-col>
+                        <v-col cols="12" :hidden="navigation.items[navigation.item].title != '路由'">{% include "extensions/networking/routers.html" %}</v-col>
+                        <v-col cols="12" :hidden="navigation.items[navigation.item].title != '镜像'">{% include "extensions/images.html" %}</v-col>
+                        <v-col cols="12" :hidden="navigation.items[navigation.item].title != '存储'">{% include "extensions/volume/storage.html" %}</v-col>
+                    </v-row>
+                </v-container>
+            </v-main>
+            <!-- <v-snackbar timeout="-1" :value="true" color="primary" right class="mt-5" top > 111 </v-snackbar>
+            <v-snackbar timeout="-1" :value="true" color="primary" right class="mt-20" top style="top: 70px;"> 2222</v-snackbar>
+            <v-snackbar timeout="-1" :value="true" color="primary" right class="mt-20" top style="top: 120px;"> 33333 </v-snackbar>
+            <v-snackbar timeout="-1" :value="true" color="primary" right class="mt-20" top style="top: 170px;"> 4444 </v-snackbar> -->
+
+           
+            <!-- <v-footer app>
+                author: fjboy
+              </v-footer> -->
+        </v-app>
+    </div>
+</body>
+<script src="/static/dashboard.js" type="module"></script>

@@ -1,0 +1,16 @@
+<v-dialog v-model="volumeDetachDialog.show" width="600">
+    <v-card>
+      <v-card-title class="headline grey lighten-2" primary-title>卸载</v-card-title>
+      <v-card-text>
+          <v-text-field disabled label="实例名字" placeholder="请选择磁盘设备" v-model="volumeDetachDialog.params.server.name"></v-text-field>
+          <v-select :items="volumeDetachDialog.params.attachments" label="选择磁盘设备"
+            item-value="id" item-text="device" multiple chips outlined v-model="volumeDetachDialog.params.selectedVolumes">
+          </v-select>
+      </v-card-text>
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="volumeDetachDialog.commit()">卸载</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>

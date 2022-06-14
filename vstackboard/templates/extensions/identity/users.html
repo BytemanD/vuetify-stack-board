@@ -1,0 +1,20 @@
+<v-card dense>
+  <v-card-text>
+    <v-row>
+      <v-col>
+        <v-btn small color="primary">创建</v-btn>
+        <v-btn small color="error" @click="identity.userTable.deleteSelected()">删除</v-btn>
+        <v-btn small color="info" v-on:click="identity.userTable.refresh()" icon><v-icon>mdi-refresh</v-icon></v-btn>
+      </v-col>
+      <v-col>
+        <v-text-field small dense v-model="identity.userTable.search" append-icon="mdi-magnify" label="搜索"
+          single-line hide-details></v-text-field>
+      </v-col>
+    </v-row>
+  </v-card-text>
+</v-card>
+
+<v-data-table :headers="identity.userTable.headers" :items="identity.userTable.items"
+  :items-per-page="identity.userTable.itemsPerPage" :search="identity.userTable.search" class="elevation-1"
+  dense show-select v-model="identity.userTable.selected">
+</v-data-table>

@@ -1,0 +1,38 @@
+<v-dialog v-model="newFlavorDialog.show" width="900">
+    <v-card>
+      <v-card-title class="headline grey lighten-2" primary-title>新建规格</v-card-title>
+      <v-card-text>
+        <v-row>
+          <v-col cols="6"><v-text-field hide-details label="ID" placeholder="请输入规格ID" v-model="newFlavorDialog.params.id"></v-text-field></v-col>
+          <v-col cols="6"><v-text-field hide-details label="名字" placeholder="请输入规格名" v-model="newFlavorDialog.params.name"></v-text-field></v-col>
+          <v-col cols="12">
+            <v-slider v-model="newFlavorDialog.params.ram" hidde-details dense label="内存大小" :max="newFlavorDialog.ramValues.length - 1" ticks="always" track-color="grey">
+                <template v-slot:append>
+                  <v-chip label small>[[ newFlavorDialog.ramLabels[newFlavorDialog.params.ram] ]]</v-chip>
+                </template>
+            </v-slider>
+              <v-slider v-model="newFlavorDialog.params.vcpu" hidde-details dense label="CPU个数" max="128" min="1" track-color="grey">
+                    <template v-slot:append>
+                      <v-text-field v-model="newFlavorDialog.params.vcpu" class="mt-0 pt-0" hide-details single-line type="number" style="width: 60px"></v-text-field>
+                    </template>
+              </v-slider>
+              <v-slider v-model="newFlavorDialog.params.disk" hidde-details dense class="my-auto" label="磁盘(GB)" max="100" min="0" step="10" track-color="grey">
+                  <template v-slot:append>
+                    <v-text-field v-model="newFlavorDialog.params.disk" class="mt-0 pt-0" hide-details single-line type="number" style="width: 60px"></v-text-field>
+                  </template>
+              </v-slider>
+            </v-col>
+            <v-col cols="6">
+              <v-textarea hide-details filled label="设置规格属性" placeholder="请输入规格的属性,例如: hw:page_size=large, 多个属性换行输入。"
+                      v-model="newFlavorDialog.params.extrasContent"></v-textarea>
+            </v-col>
+            <v-col cols="6"><v-switch hide-details v-model="newFlavorDialog.params.isPublic" label="设为共享" ></v-switch></v-col>
+          </v-row>
+      </v-card-text>
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn small color="primary" @click="newFlavorDialog.commit()">创建</v-btn>
+      </v-card-actions>
+    </v-card>
+</v-dialog>
