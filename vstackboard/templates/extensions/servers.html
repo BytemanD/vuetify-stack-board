@@ -29,20 +29,31 @@
   </v-card-text>
 </v-card>
 
-<v-data-table class="mt-2" :headers="computing.serverTable.headers" :items="computing.serverTable.items"
+<v-data-table :headers="computing.serverTable.headers" :items="computing.serverTable.items"
   :items-per-page="computing.serverTable.itemsPerPage" :search="computing.serverTable.search" dense
-  show-select v-model="computing.serverTable.selected">
+  show-select v-model="computing.serverTable.selected" show-expand single-expand>
   <template v-slot:item.name="{ item }">
     [[ item.name ]]
     <v-btn @click="changeServerNameDialog.open(item)" x-small icon><v-icon>mdi-pencil-minus</v-icon></v-btn>
   </template>
+  <template v-slot:item.status="{ item }">
+    <v-icon v-if="item['OS-EXT-STS:vm_state'] == 'active'" color="success">mdi-check-circle</v-icon>
+
+    <v-tooltip top v-if="item['OS-EXT-STS:vm_state'] == 'error'" >
+      <template v-slot:activator="{ on, attrs }">
+        <v-icon color="error" v-bind="attrs" v-on="on">mdi-alpha-x-circle</v-icon>
+      </template>
+      [[ item.fault.message ]]
+    </v-tooltip>
+    [[ item['OS-EXT-STS:task_state'] ]]
+  </template>
   <template v-slot:item.power_state="{ item }">
     <!-- power on -->
-    <v-icon v-if="item['OS-EXT-STS:power_state'] == 1" color="success">mdi-power</v-icon>
+    <v-icon v-if="item['OS-EXT-STS:power_state'] == 1" color="success">mdi-power-on</v-icon>
     <!-- pause -->
     <v-icon v-else-if="item['OS-EXT-STS:power_state'] == 3" color="warning">mdi-pause</v-icon>
     <!-- power off -->
-    <v-icon v-else-if="item['OS-EXT-STS:power_state'] == 4" color="error">mdi-power</v-icon>
+    <v-icon v-else-if="item['OS-EXT-STS:power_state'] == 4" color="error">mdi-power-off</v-icon>
   </template>
   <template v-slot:item.addresses="{ item }">
     <template v-for="(ports, net, i) in item.addresses">
@@ -52,10 +63,10 @@
     </template>
   </template>
   <template v-slot:item.flavor="{ item }">
-      <v-chip x-small color="cyan" text-color="white">[[ item.flavor.original_name ]]</v-chip>
+      <v-chip x-small label color="cyan" text-color="white">[[ item.flavor.original_name ]]</v-chip>
   </template>
   <template v-slot:item.image="{ item }" >
-    [[ computing.serverTable.getImage(item).name ]]
+    <v-chip x-small label>[[ computing.serverTable.getImage(item).name ]]</v-chip>
   </template>
   <template v-slot:item.action="{ item }">
     <v-btn small icon color="info" v-on:click="loginVnc(item)"><v-icon>mdi-console</v-icon></v-btn>
@@ -71,6 +82,23 @@
         <v-list-item @click="interfaceDetachDialog.open(item)"><v-list-item-title>网卡卸载</v-list-item-title></v-list-item>
       </v-list>
     </v-menu>
+  </template>
+  <template v-slot:item.updated="{ item }">
+    <v-chip x-small>[[item.updated]]</v-chip>
+  </template>
+  <template v-slot:expanded-item="{ headers, item }">
+    <td></td><td></td>
+    <td :colspan="headers.length -1">
+      <table>
+        <tr><td>UUID </td><td>[[ item.id ]]</td></tr>
+        <tr><td>实例名 </td><td>[[ item['OS-EXT-SRV-ATTR:instance_name'] ]]</td></tr>
+        <tr><td>创建时间 </td><td>[[ item.created ]]</td></tr>
+        <tr><td>更新时间 </td><td>[[ item.updated ]]</td></tr>
+        <tr><td>user_id </td><td>[[ item['user_id'] ]]</td></tr>
+        <tr><td>tenant_id </td><td>[[ item['tenant_id'] ]]</td></tr>
+        <tr><td>diskConfig </td><td>[[ item['OS-DCF:diskConfig'] ]]</td></tr>
+      </table>
+    </td>
   </template>
 
 </v-data-table>

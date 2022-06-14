@@ -22,7 +22,6 @@
     <template v-slot:item.forced_down="{ item }">
       <v-switch class="my-auto" v-model="item.forced_down" hide-details color="warning" :disabled="item.binary!='nova-compute'"
                @click="computing.serviceTable.forceDown(item)"></v-switch>
-      <v-chip v-else text x-small>不支持</v-chip>
    </template>
    <template v-slot:item.state="{ item }" >
       <v-icon v-if="item.state == 'up'" color="success">mdi-power-on</v-icon>

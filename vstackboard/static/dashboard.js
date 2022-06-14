@@ -1,9 +1,9 @@
 import { Message, Utils } from "./vstackboard/lib.js";
 import DataTable from "./vstackboard/tables/_base.js";
 
-import { volumeTable, serviceTable, serverTable, flavorTable, usageTable }  from "./vstackboard/tables.js";
+import { volumeTable, serviceTable, serverTable, flavorTable, usageTable, routerTable, netTable, portTable }  from "./vstackboard/tables.js";
 
-import { newFlavor, newServer, changePassword, changeServerName, newVolume } from "./vstackboard/dialogs.js";
+import { newFlavor, newServer, changePassword, changeServerName, newVolume, newNetDialog, newSubnetDialog } from "./vstackboard/dialogs.js";
 import { volumeAttach, volumeDetach, interfaceDetach, interfaceAttach } from "./vstackboard/dialogs.js";
 import API from "./vstackboard/api.js";
 
@@ -25,7 +25,6 @@ const navigationItems = [
 ]
 
 
-console.log()
 new Vue({
     el: '#app',
     delimiters: ['[[', ']]'],
@@ -75,23 +74,9 @@ new Vue({
             ], API.image, 'images'),
         },
         networking: {
-            routerTable: new DataTable([{ text: 'name', value: 'name' },
-            { text: 'name', value: 'name' },
-            { text: 'status', value: 'status' },
-            { text: 'routes', value: 'routes' },
-            ], API.router, 'routers'),
-            networkTable: new DataTable([{ text: 'name', value: 'name' },
-            { text: 'status', value: 'status' },
-            { text: 'admin_state_up', value: 'admin_state_up' },
-            { text: 'subnets', value: 'subnets' }
-            ], API.network, 'networks'),
-            portTable: new DataTable([{ text: 'id', value: 'id' },
-            { text: 'name', value: 'name' },
-            { text: 'status', value: 'status' },
-            { text: 'admin_state_up', value: 'admin_state_up' },
-            { text: 'device_owner', value: 'device_owner' },
-            { text: 'fixed_ips', value: 'fixed_ips' },
-            ], API.port, 'ports'),
+            routerTable: routerTable,
+            networkTable: netTable,
+            portTable: portTable,
         },
         volume: {
             volumeTable: volumeTable,
@@ -120,6 +105,8 @@ new Vue({
         interfaceDetachDialog: interfaceDetach,
         interfaceAttachDialog: interfaceAttach,
         newServerDialog: newServer,
+        newNetDialog: newNetDialog,
+        newSubnetDialog: newSubnetDialog,
     },
     methods: {
         getServices: function () {
@@ -230,6 +217,7 @@ new Vue({
                     break;
                 case '网络':
                     this.networking.networkTable.refresh();
+                    this.networking.networkTable.refreshSubnets();
                 case '端口':
                     this.networking.portTable.refresh();
                     break;

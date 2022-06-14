@@ -2,8 +2,8 @@ CONF_DIR="/etc/vstackboard"
 
 mkdir -p ${CONF_DIR}
 
-if [[ ! -f ${CONF_DIR}/auth.json ]]; then
-    cp etc/auth.json ${CONF_DIR}
+if [[ ! -f ${CONF_DIR}/vstackboard.conf ]]; then
+    cp etc/vstackboard.conf ${CONF_DIR}
 fi
 
 SERVICE_DIR=/usr/lib/systemd/system/

@@ -2,25 +2,47 @@
   <v-card-text>
     <v-row>
       <v-col>
-        <v-btn small color="primary">创建</v-btn>
-        <v-btn small color="primary" v-on:click="networking.networkTable.refresh()">刷新</v-btn>
-        <v-btn small color="error" v-on:click="networkDelete()">删除</v-btn>
+        <v-btn small color="primary"  @click="newNetDialog.open()"><v-icon>mdi-plus</v-icon> 新建网络</v-btn>
+        <v-btn small color="error" v-on:click="networking.networkTable.deleteSelected()">删除</v-btn>
+        <v-btn small color="info" v-on:click="networking.networkTable.refresh()">刷新</v-btn>
+      </v-col>
+      <v-col>
+        <v-btn small color="primary"  @click="newSubnetDialog.open()">新建子网</v-btn>
+
       </v-col>
       <v-col>
         <v-text-field small dense v-model="networking.networkTable.search" append-icon="mdi-magnify" label="搜索"
-          single-line hide-details></v-text-field>
+        single-line hide-details></v-text-field>
       </v-col>
     </v-row>
   </v-card-text>
 </v-card>
 
 <v-data-table :headers="networking.networkTable.headers" :items="networking.networkTable.items"
-  :items-per-page="networking.networkTable.itemsPerPage" :search="networking.networkTable.search" class="elevation-1"
-  dense show-select v-model="networking.networkTable.selected">
+  :items-per-page="networking.networkTable.itemsPerPage" :search="networking.networkTable.search"
+  class="elevation-1" dense show-select v-model="networking.networkTable.selected">
 
   <template v-slot:item.status="{ item }">
     <v-icon v-if="item.status == 'ACTIVE'" color="success">mdi-check-circle</v-icon>
     <v-icon v-else color="error">mdi-close-circle</v-icon>
   </template>
+  <template v-slot:item.admin_state_up="{ item }">
+    <v-switch class="my-auto" color="success" v-model="item.admin_state_up" hide-details @click="networking.networkTable.adminStateDown(item)"></v-switch>
+ </template>
+ <template v-slot:item.shared="{ item }">
+  <v-switch class="my-auto" v-model="item.shared" hide-details @click="networking.networkTable.shared(item)"></v-switch>
+</template>
+<template v-slot:item.subnets="{ item }">
+  <template v-for="subnet_id in item.subnets">
+    <v-chip close @click:close="networking.networkTable.deleteSubnet(subnet_id)"
+         color="cyan" text-color="white" x-small label class="mr-1"
+       v-if="networking.networkTable.subnets[subnet_id]">[[ networking.networkTable.subnets[subnet_id].cidr ]]
+  </v-chip>
+  </template>
+</template>
+
 
 </v-data-table>
+
+{% include '../dialog/newNetwork.html' %}
+{% include '../dialog/newSubnet.html' %}

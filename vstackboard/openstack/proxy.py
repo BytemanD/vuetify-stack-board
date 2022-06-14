@@ -12,12 +12,13 @@ CONF = conf.CONF
 
 class OpenstackV3AuthProxy(object):
 
-    def __init__(self):
-        self.auth_url = CONF.openstack.auth_url
-        self.auth_user = CONF.openstack.auth_user
-        self.auth_password = CONF.openstack.auth_password
-        self.auth_project = CONF.openstack.auth_project
-        self.domain_name = CONF.openstack.domain_name
+    def __init__(self, auth_url, auth_project, auth_user, auth_password,
+                 domain_name=None):
+        self.auth_url = auth_url
+        self.auth_project = auth_project
+        self.auth_user = auth_user
+        self.auth_password = auth_password
+        self.domain_name = domain_name or 'Default'
 
         self.auth_body = self._get_auth_body()
         self.auth_token = {}

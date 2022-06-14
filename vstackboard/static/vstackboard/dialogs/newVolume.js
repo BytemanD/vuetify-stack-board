@@ -1,4 +1,7 @@
 import Dialog from './_base.js'
+import { Utils, MESSAGE } from '../lib.js';
+import API from '../api.js';
+import { volumeTable } from '../tables.js';
 
 export class NewVolumeDialog extends Dialog {
     constructor() {
@@ -17,7 +20,7 @@ export class NewVolumeDialog extends Dialog {
             if (this.params.image != '') { data.imageRef = this.params.image; }
             if (this.params.snapshot != '') { data.snapshot_id = this.params.snapshot; }
             if (this.params.type != '') { data.volume_type = this.params.type; }
-            api.volume.create(data).then(resp => {
+            API.volume.create(data).then(resp => {
                 volumeTable.refresh();
                 Utils.checkVolumeStatus(resp.data.volume.id);
             }).catch(error => {
@@ -29,15 +32,15 @@ export class NewVolumeDialog extends Dialog {
     }
     open() {
         this.params.name = Utils.getRandomName('volume');
-        api.snapshot.detail().then(resp => {
+        API.snapshot.detail().then(resp => {
             this.params.snapshots = resp.data.snapshots;
             this.params.snapshots.splice(this.params.snapshots, 0, { name: '无', id: '' })
         })
-        api.image.list().then(resp => {
+        API.image.list().then(resp => {
             this.params.images = resp.data.images;
             this.params.images.splice(this.params.images, 0, { name: '无', id: '' })
         })
-        api.volumeType.list().then(resp => {
+        API.volumeType.list().then(resp => {
             this.params.types.push()
             this.params.types = resp.data.volume_types;
             this.params.types.splice(this.params.types, 0, { name: '无', id: '' })
@@ -47,6 +50,5 @@ export class NewVolumeDialog extends Dialog {
     cleanUpImageShapshot() {
         this.params.image = '';
         this.params.snapshot = '';
-
     }
 }

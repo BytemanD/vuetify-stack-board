@@ -28,6 +28,7 @@ class Restfulclient {
 }
 class ClientExt extends Restfulclient {
     constructor(baseUrl) { super(baseUrl); }
+
     detail(filters = {}) {
         let queryString = this._parseToQueryString(filters);
         let url = `${this.baseUrl}/detail`;
@@ -78,6 +79,13 @@ class Usage extends Restfulclient {
 
 class Server extends ClientExt {
     constructor() { super('/computing/servers') };
+    detail(){
+        return super.detail({all_tenants: 1})
+    }
+    list(){
+        return super.list({all_tenants: 1})
+    }
+    
     _parseToQueryString(filters) {
         if (!filters) {
             return ''
@@ -107,6 +115,16 @@ class Server extends ClientExt {
             data.networks = 'none';
         } else {
             data.networks = options.networks;
+        }
+        if (options.password && options.password != ''){
+            let userData = [
+                '#cloud-config',
+                'chpasswd:',
+                '  list: |',
+                '    root:' + options.password.trim(),
+                '  expire: False',
+                '']
+            data.user_data = window.btoa(userData.join('\n'));
         }
         if (options.az && options.az != '') {
             data.availability_zone = options.az;
@@ -213,6 +231,15 @@ class VolumeType extends Restfulclient {
     constructor() { super('/volume/types') };
 }
 
+class Env extends Restfulclient{
+    constructor() { super('/env') };
+
+    add(data){
+        return this.post({env: data})
+    }
+}
+
+
 export class OpenstackProxyApi {
     constructor() {
         // keystone
@@ -237,8 +264,11 @@ export class OpenstackProxyApi {
         this.volume = new Volume();
         this.volumeType = new VolumeType();
         this.snapshot = new Snapshot();
+
+        this.env = new Env()
     }
 }
+
 
 const API = new OpenstackProxyApi();
 

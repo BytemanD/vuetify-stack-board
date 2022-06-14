@@ -6,6 +6,7 @@ from tornado import httpserver
 from tornado import web
 
 from vstackboard import views
+from vstackboard.db import api as db_api
 from vstackboard.common import conf
 
 
@@ -16,6 +17,9 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 ROUTES = [
     (r'/', views.Index),
     (r'/dashboard', views.Dashboard),
+    (r'/welcome', views.Welcome),
+    (r'/config', views.Config),
+    (r'/env', views.Environment),
     (r'/[computing|image|networking|volume](.*)',
      views.OpenstackProxy),
 ]
@@ -28,8 +32,8 @@ def start(develop=False):
                           static_path=static_path)
 
     LOG.info('Staring server ...')
-    views.init()
-    views.PROXY.update_auth_token()
+
+    db_api.init()
 
     if develop:
         app.listen(CONF.port)

@@ -8,7 +8,8 @@ export class NewServerDialog extends Dialog {
         super({
             name: '', flavor: '', image: '', netId: '',
             useBdm: true, volumeSize: 40,
-            nums: 1, az: '', host: ''
+            nums: 1, az: '', host: '',
+            password: ''
         })
         this.flavors = [];
         this.images = [];
@@ -53,7 +54,9 @@ export class NewServerDialog extends Dialog {
                 minCount: this.params.nums, maxCount: this.params.nums,
                 useBdm: this.params.useBdm, volumeSize: this.params.volumeSize,
                 networks: this.params.netId ? [{ uuid: this.params.netId }] : 'none',
-                az: this.params.az, host: this.params.host
+                az: this.params.az,
+                host: this.params.host,
+                password: this.params.password,
             }
         ).then(resp => {
             MESSAGE.info(`实例 ${this.params.name} 创建中...`);
@@ -78,8 +81,8 @@ export class NewServerDialog extends Dialog {
                     setTimeout(function () { self.checkServerStatus(server_id, status, taskState) }, 5 * 1000);
                     break;
             }
-            if ((oldTaskState && oldTaskState.toUpperCase() != status.toUpperCase()) ||
-                (oldStatus && oldStatus.toUpperCase() != status.toUpperCase())) {
+            if ((oldTaskState && taskState && oldTaskState.toUpperCase() != taskState.toUpperCase()) ||
+                (oldStatus && status && oldStatus.toUpperCase() != status.toUpperCase())) {
                 serverTable.refresh();
             }
         });

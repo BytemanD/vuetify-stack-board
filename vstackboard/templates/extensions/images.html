@@ -10,7 +10,6 @@
       <v-col>
         <v-text-field small dense v-model="image.imageTable.search" append-icon="mdi-magnify" label="搜索" single-line
           hide-details></v-text-field>
-
       </v-col>
     </v-row>
 
@@ -19,5 +18,29 @@
 
 <v-data-table :headers="image.imageTable.headers" :items="image.imageTable.items"
   :items-per-page="image.imageTable.itemsPerPage" :search="image.imageTable.search" class="elevation-1" dense
-  show-select v-model="image.imageTable.selected"
-  ></v-data-table>
+  show-select v-model="image.imageTable.selected" show-expand single-expand>
+  <template v-slot:expanded-item="{ headers, item }">
+    <td></td><td></td>
+    <td :colspan="headers.length -1">
+      <table class="text-left">
+        <!-- <template v-for="(value, key, index) in item">
+          <tr><th>[key]</th><td>[[ item[key] ]]</td></tr>
+        </template> -->
+        <tr><th>protected </th><td>[[ item.protected ]]</td></tr>
+        <tr><th>direct_url </th><td>[[ item.direct_url ]]</td></tr>
+        <tr><th>container_format </th><td>[[ item.container_format ]]</td></tr>
+        <tr><th>disk_format </th><td>[[ item.disk_format ]]</td></tr>
+        <tr><th>created_at </th><td>[[ item.created_at ]]</td></tr>
+        <tr><th>checksum </th><td>[[ item.checksum ]]</td></tr>
+        <tr>
+          <th>Properties </th>
+          <td>
+            <template v-for="(value, key, index) in item">
+                <v-chip x-small label v-if="key.startsWith('hw')" class="mr-4">[[key]] = [[value]] </v-chip> 
+              </template>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </template>
+</v-data-table>

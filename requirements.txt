@@ -1,2 +1,9 @@
+wheel
+cffi>=1.4.1
+setuptools_rust
 tornado
+requests
+jinja2
+bs4
+sqlalchemy
 # git+https://github.com/fjboy/easy-to-use.git@py2.7

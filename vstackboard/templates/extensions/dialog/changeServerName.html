@@ -1,10 +1,9 @@
 
-<v-dialog v-model="changeServerNameDialog.show" width="700">
+<v-dialog v-model="changeServerNameDialog.show" width="500">
     <v-card>
       <v-card-title class="headline grey lighten-2" primary-title>修改实例名</v-card-title>
       <v-card-text>
-
-        <v-text-field hide-details disabled label="旧实例名" placeholder="旧实例名" v-model="changeServerNameDialog.params.server.name"></v-text-field>
+        <v-text-field disabled label="旧实例名" placeholder="旧实例名" v-model="changeServerNameDialog.params.server.name"></v-text-field>
         <v-text-field hide-details label="新实例名" placeholder="请输入新实例名" v-model="changeServerNameDialog.params.newName"></v-text-field>
       </v-card-text>
       <v-divider></v-divider>

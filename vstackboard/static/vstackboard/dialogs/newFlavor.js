@@ -1,5 +1,7 @@
 import Dialog from './_base.js'
-import {Utils} from '../lib.js'
+import API from '../api.js'
+import {Utils, MESSAGE} from '../lib.js'
+import { flavorTable } from '../tables.js'
 
 export class NewFlavorDialog extends Dialog {
     constructor() {
