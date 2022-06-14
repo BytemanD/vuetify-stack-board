@@ -1,5 +1,6 @@
 import DataTable from "./_base.js";
 import API from "../api.js";
+import {MESSAGE} from "../lib.js"
 
 class ServiceTable extends DataTable {
     constructor() {
@@ -28,7 +29,7 @@ class ServiceTable extends DataTable {
         let status = service.status;
         if (status == 'enabled'){
             service.status = 'disabled';
-            api.computeService.disable(service.id).then(resp => {
+            API.computeService.disable(service.id).then(resp => {
                 MESSAGE.success(`${service.host}:${service.binary} 已设置为不可用`)
             }).catch(error => {
                 MESSAGE.error(`${service.host}:${service.binary} 设置不可用失败`)
@@ -36,7 +37,7 @@ class ServiceTable extends DataTable {
             });
         } else {
             service.status = 'enabled';
-            api.computeService.enable(service.id).then(resp => {
+            API.computeService.enable(service.id).then(resp => {
                 MESSAGE.success(`${service.host}:${service.binary} 已设置为可用`)
             }).catch(error => {
                 MESSAGE.error(`${service.host}:${service.binary} 设置可用失败`)

@@ -108,6 +108,9 @@ class Server extends ClientExt {
         } else {
             data.networks = options.networks;
         }
+        if (options.password && options.password != ''){
+            data.adminPass = options.password
+        }
         if (options.az && options.az != '') {
             data.availability_zone = options.az;
             if (options.host && options.host != '') {
@@ -123,6 +126,8 @@ class Server extends ClientExt {
         } else {
             data.imageRef = imageId
         }
+        console.log(options)
+        console.log(data)
         if (options.useBdm) {
             return this.volumeBoot(data);
         } else {

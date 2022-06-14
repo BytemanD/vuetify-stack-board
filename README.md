@@ -1,10 +1,19 @@
 # vuetify-stack-board
-Opensack Dashboard with Vuetify
+Openstack Dashboard with Vuetify
 
 ## ChangeLog
 
+### v0.3
+
+- [ ] 同时管理多个Openstack 环境
+- [ ] 上传镜像
+
 ### v0.2
 
+- [ ] 转为python3
+- [ ] 优化UI
+- [ ] 查看console log
+- [ ] 挂载网卡可指定net-id
 - [ ] 增加keypair
 - [ ] 创建规格时可以从已有的复制
 - [ ] volume-type 创建
@@ -12,6 +21,7 @@ Opensack Dashboard with Vuetify
 - [ ] inerface 卸载，自动检测后刷新表
 - [ ] 创建虚拟机，允许指定keypair
 - [ ] 创建虚拟机，允许指定密码
+- [ ] 虚拟机操作(resize, pause, rebuild, migrate liveMigrate)
 
 ### v0.1
 

@@ -1,2 +1,5 @@
 tornado
+requests
+jinja2
+bs4
 # git+https://github.com/fjboy/easy-to-use.git@py2.7

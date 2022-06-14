@@ -6,13 +6,11 @@ class ServerDataTable extends DataTable {
     constructor() {
         super([{ text: '名字', value: 'name' },
         { text: '宿主机', value: 'OS-EXT-SRV-ATTR:host' },
-        { text: '状态', value: 'OS-EXT-STS:vm_state' },
+        { text: '状态', value: 'status' },
         { text: '电源状态', value: 'power_state' },
-        { text: '任务状态', value: 'OS-EXT-STS:task_state' },
         { text: '规格', value: 'flavor' },
-        { text: '更新时间', value: 'updated' },
-        { text: 'IP地址', value: 'addresses' },
         { text: '镜像', value: 'image' },
+        { text: 'IP地址', value: 'addresses' },
         { text: '操作', value: 'action' },
         ],
             API.server, 'servers', '实例');

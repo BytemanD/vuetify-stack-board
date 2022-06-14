@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>欢迎</title>
+    {% include "requires.html" %}
+</head>
+
+<body>
+    <div id="app">
+        <v-app>
+            <!-- style="background: url('/static/svg3.png'); background-repeat: no-repeat;  background-attachment: fixed; filter: blur(5px)" -->
+            <v-content class="indigo lighten-4">
+                <v-card class="mx-auto my-auto mt-10 blue-grey lighten-4" width="60%" elevation="4">
+                    <v-img class="white--text align-end" src="/static/welcome.svg">
+                        <v-card-title>欢迎使用 VStackBoard</v-card-title>
+                        <v-card-subtitle>版本：v0.1</v-card-subtitle>
+                    </v-img>
+                    <v-card-text class="text--primary">
+                        VStackBoard 是一个 基于vuetify实现的Openstack Dashboard。
+                        <v-alert class="blue-grey lighten-4" border="left" colored-border color="deep-purple accent-1">
+                            <v-icon>mdi-information-outline</v-icon>
+                            当前集群数目为0，请添加新集群。
+                        </v-alert>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-btn color="orange" text @click="window.open('/dashboard', '_self')">进入</v-btn>
+                        <v-btn color="orange" text>
+                            <v-icon>mdi-plus</v-icon> 添加集群
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-content>
+        </v-app>
+    </div>
+</body>
+<script src="/static/dashboard.js" type="module"></script>

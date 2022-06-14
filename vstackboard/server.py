@@ -16,6 +16,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 ROUTES = [
     (r'/', views.Index),
     (r'/dashboard', views.Dashboard),
+    (r'/welcome', views.Welcome),
     (r'/[computing|image|networking|volume](.*)',
      views.OpenstackProxy),
 ]

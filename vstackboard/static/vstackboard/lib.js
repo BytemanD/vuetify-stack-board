@@ -1,4 +1,5 @@
 import API from "./api.js";
+import { volumeTable } from "./tables.js";
 
 export class Message {
     constructor() {
@@ -47,7 +48,7 @@ export class Utils {
                 return;
             } else if (status == 'error') {
                 MESSAGE.error(`卷 ${volume_id} 创建成功`);
-                this.volume.volumeTable.refresh();
+                volumeTable.refresh();
                 return;
             };
         });
@@ -65,7 +66,7 @@ export class Utils {
                 return;
             } else if (status == 'error') {
                 MESSAGE.error(`卷 ${volume_id} 创建失败`);
-                volume.volumeTable.refresh();
+                volumeTable.refresh();
                 return;
             };
             setTimeout(function () {

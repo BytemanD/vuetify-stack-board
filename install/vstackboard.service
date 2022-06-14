@@ -1,9 +1,9 @@
 [Unit]
-Description=EC Test VM Server
+Description=Vuetify Openstack Dashboard
 
 [Service]
 Type=simple
 NotifyAccess=all
 TimeoutStartSec=0
 ExecStartPre=/usr/bin/mkdir -p /var/log/vstackboard/
-ExecStart=/usr/bin/vstackboard
+ExecStart=/usr/local/bin/vstackboard

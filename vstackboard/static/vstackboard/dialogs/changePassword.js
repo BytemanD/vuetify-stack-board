@@ -19,6 +19,7 @@ export class ChangePasswordDialog extends Dialog {
         API.server.changePassword(this.server.id, this.params.password.trim(),
                                   this.params.userName).then(resp => {
             MESSAGE.success(`${this.server.name} 密码修改成功`)
+            this.hide()
         }).catch(error => {
             MESSAGE.error(`${this.server.name} 密码修改失败`)
         });

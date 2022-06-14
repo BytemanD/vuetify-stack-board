@@ -15,6 +15,7 @@ default_options = [
     cfg.Option('log_file', default=None),
     cfg.IntOption('port', default=80),
     cfg.IntOption('workers', default=None),
+    cfg.BooleanOption('use_cdn', default=True),
 ]
 
 openstack_options = [

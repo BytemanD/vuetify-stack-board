@@ -3,7 +3,9 @@ import logging
 from tornado import web
 
 from vstackboard.common import conf
+from vstackboard.common import constants
 from vstackboard.openstack import proxy
+
 
 LOG = logging.getLogger(__name__)
 CONF = conf.CONF
@@ -26,7 +28,21 @@ class Index(web.RequestHandler):
 class Dashboard(web.RequestHandler):
 
     def get(self):
-        self.render('dashboard.html', name='VStackBoard')
+        if CONF.use_cdn:
+            cdn = constants.CDN
+        else:
+            cdn = {k: '/static/cdn' for k in constants.CDN}
+        self.render('dashboard.html', name='VStackBoard', cdn=cdn)
+
+
+class Welcome(web.RequestHandler):
+
+    def get(self):
+        if CONF.use_cdn:
+            cdn = constants.CDN
+        else:
+            cdn = {k: '/static/cdn' for k in constants.CDN}
+        self.render('welcome.html', cdn=cdn)
 
 
 class OpenstackProxy(web.RequestHandler):
