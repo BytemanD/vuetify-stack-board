@@ -2,7 +2,7 @@ import json
 import logging
 
 from tornado import web
-
+from requests import delete, exceptions
 from vstackboard.common import conf
 from vstackboard.common import constants
 from vstackboard.common import utils
@@ -27,18 +27,10 @@ class Index(web.RequestHandler):
 class Dashboard(web.RequestHandler):
 
     def _select_cluster(self):
-        cluster_name = self.get_cookie('envName')
-        LOG.debug('envName in cookies is: %s', cluster_name)
-
-        if cluster_name:
-            self._update_auth_token(api.get_env_by_name(cluster_name))
-            return cluster_name
-
-        clusters = api.query_env()
-        LOG.debug('clusters in db: %s', clusters)
-        if clusters:
-            self._update_auth_token(clusters[0])
-            return clusters[0].name
+        cluster_id = self.get_cookie('clusterId')
+        LOG.debug('cluster id in cookies is: %s', cluster_id)
+        if cluster_id:
+            return api.get_cluster_by_id(cluster_id)
 
         return None
 
@@ -48,19 +40,27 @@ class Dashboard(web.RequestHandler):
                                               cluster.auth_project,
                                               cluster.auth_user,
                                               cluster.auth_password)
+        if not identity.is_connectable():
+            raise exceptions.ConnectionError()
         identity.update_auth_token()
-        PROXY_MAP[cluster.name] = identity
+        PROXY_MAP[str(cluster.id)] = identity
 
     def get(self):
-        cluster_name = None
+        cluster = self._select_cluster()
+        if not cluster:
+            self.redirect('/welcome')
+            return
+
         try:
-            cluster_name = self._select_cluster()
-            self.set_cookie('envName', cluster_name)
+            self._update_auth_token(cluster)
+        except exceptions.ConnectionError:
+            self.set_status(400)
+            self.finish({'error': 'Connect to {} failed'.format(cluster.name)})
+            return
         except Exception as e:
             LOG.exception(e)
-
-        if not cluster_name:
-            self.redirect('/welcome')
+            self.set_status(500)
+            self.finish({'error': e})
             return
 
         if CONF.use_cdn:
@@ -68,7 +68,7 @@ class Dashboard(web.RequestHandler):
         else:
             cdn = {k: '/static/cdn' for k in constants.CDN}
         self.render('dashboard.html', name='VStackBoard', cdn=cdn,
-                    cluster=cluster_name)
+                    cluster=cluster.name)
 
 
 class Welcome(web.RequestHandler):
@@ -88,49 +88,60 @@ class Config(web.RequestHandler):
         self.finish({})
 
 
-class Environment(web.RequestHandler):
+class Cluster(web.RequestHandler):
 
     def get(self):
+        cluster_list = api.query_cluster()
         self.set_status(200)
-        env_list = api.query_env()
-        self.finish({'envs': [env.to_dict() for env in env_list]})
+        self.finish({
+            'clusters': [cluster.to_dict() for cluster in cluster_list]
+        })
 
     def post(self):
         data = json.loads(self.request.body)
-        env = data.get('env', {})
-        LOG.debug('add env: %s', data)
+        cluster = data.get('cluster', {})
+        LOG.debug('add cluster: %s', data)
         try:
-            identity = proxy.OpenstackV3AuthProxy(env.get('authUrl'),
-                                                  env.get('authProject'),
-                                                  env.get('authUser'),
-                                                  env.get('authPassword'))
+            identity = proxy.OpenstackV3AuthProxy(cluster.get('authUrl'),
+                                                  cluster.get('authProject'),
+                                                  cluster.get('authUser'),
+                                                  cluster.get('authPassword'))
             identity.update_auth_token()
-            api.create_env(env.get('name'), env.get('authUrl'),
-                           env.get('authProject'), env.get('authUser'),
-                           env.get('authPassword'))
+            api.create_cluster(cluster.get('name'), cluster.get('authUrl'),
+                               cluster.get('authProject'),
+                               cluster.get('authUser'),
+                               cluster.get('authPassword'))
             self.set_status(200)
-            self.set_cookie('envName', env.get('name'))
             self.finish(json.dumps({}))
         except Exception as e:
             self.set_status(400)
             self.finish({'error': e})
+
+    def delete(self, cluster_id):
+        deleted = api.delete_cluster_by_id(cluster_id)
+        if deleted >= 1:
+            self.set_status(204)
+            self.finish()
+            return
+        else:
+            self.set_status(404)
+            self.finish({'error': f'cluster {cluster_id} is not found'})
 
 
 class OpenstackProxy(web.RequestHandler):
 
     def prepare(self):
         global PROXY_MAP
-
-        if self.get_cookie('envName') not in PROXY_MAP:
-            cluster = api.get_env_by_name(self.get_cookie('envName'))
+        if self.get_cookie('clusterId') not in PROXY_MAP:
+            cluster = api.get_cluster_by_id(self.get_cookie('clusterId'))
             identity = proxy.OpenstackV3AuthProxy(cluster.auth_url,
                                                   cluster.auth_project,
                                                   cluster.auth_user,
                                                   cluster.auth_password)
             identity.update_auth_token()
-            PROXY_MAP[cluster.name] = identity
+            PROXY_MAP[self.get_cookie('clusterId')] = identity
 
-        cluster_proxy = PROXY_MAP[self.get_cookie('envName')]
+        cluster_proxy = PROXY_MAP[self.get_cookie('clusterId')]
         resp = cluster_proxy.proxy_reqeust(self.request)
         self.set_status(resp.status_code, resp.reason)
         if resp.status_code in [204]:

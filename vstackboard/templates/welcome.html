@@ -21,23 +21,19 @@
                         VStackBoard 是一个 基于vuetify实现的Openstack Dashboard。
                         <br>
                         <v-alert class="blue-grey lighten-4" border="left" colored-border color="deep-purple accent-1"
-                            v-if="envs.length == 0">
-                            <v-icon>mdi-information-outline</v-icon>当前集群数目为[[ envs.length ]]，请添加新集群。
+                                 v-if="clusterTable.items.length == 0">
+                            <v-icon>mdi-information-outline</v-icon>当前集群数目为 [[ clusterTable.items.length ]]，请添加新集群。
                         </v-alert>
-
-                        常用集群:
-
-                        <template v-for="item in envs">
-                            <v-btn text color="primary" @click="useCluster(item)">[[item.name]]</v-btn>
+                        常用集群: <br>
+                        <template v-for="item in clusterTable.items">
+                            <v-chip close label color="primary" class="ml-1" @click:close="clusterTable.delete(item)" @click="useCluster(item)">[[item.name]]</v-chip>
                         </template>
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn color="orange" text @click="newEnv.display()">
-                            <v-icon>mdi-plus</v-icon> 添加集群
-                        </v-btn>
+                        <v-btn color="orange" text @click="newCluster.display()"><v-icon>mdi-plus</v-icon> 添加集群</v-btn>
                     </v-card-actions>
                 </v-card>
-                {% include 'extensions/dialog/newEnv.html' %}
+                {% include 'extensions/dialog/newCluster.html' %}
             </v-main>
         </v-app>
     </div>

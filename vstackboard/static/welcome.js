@@ -1,7 +1,8 @@
 import { MESSAGE, Message, Utils } from "./vstackboard/lib.js";
-import { newEnv } from "./vstackboard/dialogs.js";
+import { newCluster } from "./vstackboard/dialogs.js";
 
 import API from "./vstackboard/api.js";
+import { clusterTable } from "./vstackboard/tables.js";
 
 new Vue({
     el: '#app',
@@ -9,19 +10,22 @@ new Vue({
     vuetify: new Vuetify(),
     data: {
         api: API,
-        newEnv: newEnv,
-        envs: []
+        newCluster: newCluster,
+        clusterTable: clusterTable,
     },
     methods: {
         useCluster: function(cluster){
-            $cookies.set('envName', cluster.name);
-            window.open('/dashboard', '_self');
+            $cookies.set('clusterId', cluster.id);
+            $cookies.set('clusterName', cluster.name);
+            axios.get('/dashboard').then(resp => {
+                window.open('/dashboard', '_self');
+            }).catch(error => {
+                MESSAGE.error(`连接 ${cluster.name} 失败`)
+            })
         }
     },
     created: function () {
-        API.env.list().then(resp => {
-            this.envs = resp.data.envs
-        })
+        this.clusterTable.refresh();
     },
 
 });

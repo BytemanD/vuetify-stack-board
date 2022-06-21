@@ -5,8 +5,11 @@
         <v-btn small color="primary" @click="newFlavorDialog.open()"><v-icon small>mdi-plus</v-icon>新建</v-btn>
         <v-btn small color="error" @click="computing.flavorTable.deleteSelected()">删除</v-btn>
       </v-col>
-      <v-col>
-        <v-switch hide-details v-model="computing.flavorTable.isPublic" label="共享" @click="computing.flavorTable.refresh()"></v-switch>
+      <v-col cols="1">
+        <v-switch dense class="my-auto" hide-details v-model="computing.flavorTable.isPublic" label="共享" @click="computing.flavorTable.refresh()"></v-switch>
+      </v-col>
+      <v-col class="text-right">
+        <v-btn fab x-small outlined color="info" v-on:click="computing.flavorTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
       </v-col>
       <v-col>
         <v-text-field small dense v-model="computing.flavorTable.search" append-icon="mdi-magnify" label="搜索"

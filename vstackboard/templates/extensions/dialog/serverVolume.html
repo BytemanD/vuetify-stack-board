@@ -1,0 +1,23 @@
+<v-dialog v-model="serverVolumeDialog.show" width="800">
+  <v-card>
+    <v-card-title class="headline grey lighten-2" primary-title>卷管理</v-card-title>
+    <v-card-text>
+      <br>
+      <v-row>
+        <v-col cols="12">
+          <template v-for="item in serverVolumeDialog.params.attachments">
+            <v-chip :close="item.device !='/dev/vda' " @click:close="serverVolumeDialog.detach(item)" color="info" label class="mr-2">
+                [[ item.device ]]
+            </v-chip>
+          </template>
+        </v-col>
+        <v-col cols="10">
+          <v-select :items="serverVolumeDialog.params.volumes" label="可用卷"
+                    item-value="id" item-text="name" multiple chips outlined v-model="serverVolumeDialog.params.selectedVolumes">
+          </v-select>
+        </v-col>
+        <v-col cols="2"><v-btn color="primary" @click="serverVolumeDialog.attachSelected()">挂载</v-btn></v-col>
+      </v-row>
+    </v-card-text>
+  </v-card>
+</v-dialog>

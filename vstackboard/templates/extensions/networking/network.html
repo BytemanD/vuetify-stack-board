@@ -1,0 +1,11 @@
+<v-tabs v-model="tabs" background-color="deep-purple accent-4" class="elevation-2" dark centered>
+    <v-tabs-slider></v-tabs-slider>
+    <v-tab><v-icon>mdi-network</v-icon>网络</v-tab>
+    <v-tab><v-icon>mdi-router</v-icon> 路由</v-tab>
+    <v-tab><v-icon>mdi-ethernet</v-icon>端口</v-tab>
+    <v-tabs-items v-model="tabs">
+      <v-tab-item>{% include 'networks.html' %}</v-tab-item>
+      <v-tab-item>{% include 'routers.html' %}</v-tab-item>
+      <v-tab-item>{% include 'ports.html' %}</v-tab-item>
+    </v-tabs-items>
+  </v-tabs>

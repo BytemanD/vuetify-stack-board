@@ -12,8 +12,8 @@ class BaseModel(object):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-class Env(Base, BaseModel):
-    __tablename__ = 'env'
+class Cluster(Base, BaseModel):
+    __tablename__ = 'cluster'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(20))

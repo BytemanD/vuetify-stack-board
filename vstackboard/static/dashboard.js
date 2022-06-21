@@ -1,18 +1,27 @@
 import { Message, Utils } from "./vstackboard/lib.js";
-import DataTable from "./vstackboard/tables/_base.js";
-
-import { volumeTable, serviceTable, serverTable, flavorTable, usageTable, routerTable, netTable, portTable }  from "./vstackboard/tables.js";
-
-import { newFlavor, newServer, changePassword, changeServerName, newVolume, newNetDialog, newSubnetDialog } from "./vstackboard/dialogs.js";
-import { volumeAttach, volumeDetach, interfaceDetach, interfaceAttach } from "./vstackboard/dialogs.js";
+import DataTable, { ClusterTable, clusterTable, keypairTable } from "./vstackboard/tables.js";
 import API from "./vstackboard/api.js";
+
+import {
+    volumeTable, serviceTable, serverTable, flavorTable, usageTable,
+    routerTable, netTable, portTable, volumeTypeTable, snapshotTable
+} from "./vstackboard/tables.js";
+import {
+    newFlavor, newServer,
+    changePassword, changeServerName,
+    volumeAttach, volumeDetach, interfaceDetach, interfaceAttach,
+    newVolume, serverVolumeDialog, serverInterfaceDialog,
+    newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog, newPortDialog, resizeDialog, migrateDialog,
+} from "./vstackboard/dialogs.js";
+
 
 const MESSAGE = new Message()
 const navigationItems = [
-    { title: '虚拟化资源', icon: 'mdi-alpha-h-circle'},
+    { title: '虚拟化资源', icon: 'mdi-alpha-h-circle' },
     { title: '实例', icon: 'mdi-laptop-account', group: 'compute' },
     { title: '规格', icon: 'mdi-alpha-f-circle', },
     { title: '计算服务', icon: 'mdi-server' },
+    { title: '密钥对', icon: 'mdi-key-chain', },
     { title: '存储', icon: 'mdi-storage-tank' },
     { title: '镜像', icon: 'mdi-alpha-i-circle' },
 
@@ -20,8 +29,6 @@ const navigationItems = [
     { title: '用户', icon: 'mdi-account-supervisor' },
 
     { title: '网络', icon: 'mdi-network', group: 'network' },
-    { title: '端口', icon: 'mdi-ethernet' },
-    { title: '路由', icon: 'mdi-router' },
 ]
 
 
@@ -32,8 +39,7 @@ new Vue({
     data: {
         tabs: 0,
         UTILS: Utils,
-        api: API,
-        messages: [],
+        clusterTable: clusterTable,
         identity: {
             showAllService: false,
             serviceMap: {},
@@ -63,15 +69,16 @@ new Vue({
                                             ], API.hypervisor, 'hypervisors'),
             serviceTable: serviceTable,
             usageTable: usageTable,
+            keypairTable: keypairTable,
         },
         image: {
             imageTable: new DataTable([{ text: 'name', value: 'name' },
-            { text: 'status', value: 'status' },
-            { text: 'size', value: 'size' },
-            { text: 'visibility', value: 'visibility' },
-            { text: 'image_state', value: 'image_state' },
-            { text: 'image_type', value: 'image_type' },
-            ], API.image, 'images'),
+                                        { text: 'status', value: 'status' },
+                                        { text: 'size', value: 'size' },
+                                        { text: 'visibility', value: 'visibility' },
+                                        { text: 'image_state', value: 'image_state' },
+                                        { text: 'image_type', value: 'image_type' },
+                                        ], API.image, 'images'),
         },
         networking: {
             routerTable: routerTable,
@@ -80,15 +87,8 @@ new Vue({
         },
         volume: {
             volumeTable: volumeTable,
-            volumeTypeTable: new DataTable([{ text: '名字', value: 'name' },
-                                            { text: '是否公共', value: 'is_public' },
-                                            { text: '属性', value: 'extra_specs' },
-                                            ], API.volumeType, 'volume_types'),
-            snapshotTable: new DataTable([{ text: '名字', value: 'name' },
-                                            { text: '状态', value: 'status' },
-                                            { text: '大小', value: 'size' },
-                                            { text: '卷ID', value: 'volume_id' },
-                                            ], API.snapshot, 'snapshots', '快照'),
+            volumeTypeTable: volumeTypeTable,
+            snapshotTable: snapshotTable,
         },
         navigation: {
             item: $cookies.get('navigationItem') || 0,
@@ -98,15 +98,22 @@ new Vue({
         miniVariant: false,
         newVolumeDialog: newVolume,
         newFlavorDialog: newFlavor,
+        // server dialogs
+        newServerDialog: newServer,
         changePasswordDialog: changePassword,
         changeServerNameDialog: changeServerName,
         volumeAttachDialog: volumeAttach,
         volumeDetachDialog: volumeDetach,
-        interfaceDetachDialog: interfaceDetach,
-        interfaceAttachDialog: interfaceAttach,
-        newServerDialog: newServer,
+        serverVolumeDialog: serverVolumeDialog,
+        serverInterfaceDialog: serverInterfaceDialog,
+        resizeDialog: resizeDialog,
+        migrateDialog: migrateDialog,
+        // network dialogs
         newNetDialog: newNetDialog,
+        newRouterDialog: newRouterDialog,
         newSubnetDialog: newSubnetDialog,
+        routerInterfacesDialog: routerInterfacesDialog,
+        newPortDialog: newPortDialog,
     },
     methods: {
         getServices: function () {
@@ -155,7 +162,7 @@ new Vue({
         },
         newVolume: function (params) {
             let self = this;
-            for (var i=1; i <= params.nums; i++) {
+            for (var i = 1; i <= params.nums; i++) {
                 let data = {
                     name: params.nums > 1 ? `${params.name}-${i}` : params.name,
                     size: parseInt(params.size)
@@ -192,6 +199,9 @@ new Vue({
             });
         },
         refreshContainer: function () {
+            if (this.navigation.item >= this.navigation.items.length) {
+                this.navigation.item = 0;
+            }
             switch (this.navigation.items[this.navigation.item].title) {
                 case '服务':
                     this.getServices();
@@ -215,9 +225,14 @@ new Vue({
                 case '计算服务':
                     this.computing.serviceTable.refresh();
                     break;
-                case '网络':
+                case '密钥对':
+                    this.computing.keypairTable.refresh();
+                    break;
+                    case '网络':
                     this.networking.networkTable.refresh();
                     this.networking.networkTable.refreshSubnets();
+                    this.networking.portTable.refresh();
+                    this.networking.routerTable.refresh();
                 case '端口':
                     this.networking.portTable.refresh();
                     break;
@@ -244,19 +259,17 @@ new Vue({
         getMessageTop: function (index) {
             return `top: ${50 * index}px`;
         },
+        changeCluster: function(item){
+            $cookies.set('clusterId', item.id);
+            $cookies.set('clusterName', item.name);
+            window.open('/dashboard', '_self');
+        },
     },
     created: function () {
-        let self = this;
-        // init
-        // this.navigation.item =  this.$cookies.get('navigationItem') || 0;
+        this.clusterTable.selected = $cookies.get('clusterName');
+        this.clusterTable.refresh();
         this.refreshContainer()
-        // setInterval(function(){
-        //     self.getServers();
-        // }, 5 * 1000);
-
-        // setInterval(function(){
-        //     self.hypersorList();
-        // }, 5 * 1000);
+        document.getElementById('loader').remove();
 
     },
     watch: {
@@ -271,14 +284,14 @@ new Vue({
 
         "newVolumeDialog.params.image": {
             handler(newValue, oldValue) {
-                if (newValue != ''){
+                if (newValue != '') {
                     this.newVolumeDialog.params.snapshot = '';
                 }
             }
         },
         "newVolumeDialog.params.snapshot": {
             handler(newValue, oldValue) {
-                if (newValue != ''){
+                if (newValue != '') {
                     this.newVolumeDialog.params.image = '';
                     this.newVolumeDialog.params.type = '';
                 }

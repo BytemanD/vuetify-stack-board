@@ -2,8 +2,11 @@
   <v-card-text>
     <v-row>
       <v-col>
-        <v-btn small color="primary">创建</v-btn>
-        <v-btn small color="error">删除</v-btn>
+        <v-btn small color="primary" @click="newRouterDialog.open()"><v-icon>mdi-plus</v-icon> 新建路由</v-btn>
+        <v-btn small color="error" v-on:click="networking.routerTable.deleteSelected()">删除</v-btn>
+      </v-col>
+      <v-col class="text-right">
+        <v-btn fab x-small outlined color="info" v-on:click="networking.routerTable.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
       </v-col>
       <v-col>
         <v-text-field small dense v-model="networking.routerTable.search" append-icon="mdi-magnify" label="搜索"
@@ -15,12 +18,25 @@
 
 <v-data-table :headers="networking.routerTable.headers" :items="networking.routerTable.items"
   :items-per-page="networking.routerTable.itemsPerPage" :search="networking.routerTable.search" class="elevation-1"
-  dense show-select>
+  dense show-select v-model="networking.routerTable.selected">
 
+  <template v-slot:item.name="{ item }">
+    [[item.name]]
+    <v-btn icon @click="routerInterfacesDialog.open(item)"><v-icon>mdi-serial-port</v-icon></v-btn>
+    
+  </template>
   <template v-slot:item.status="{ item }">
     <v-icon v-if="item.status == 'ACTIVE'" color="success">mdi-check-circle</v-icon>
     <v-icon v-else color="error">mdi-close-circle</v-icon>
   </template>
+  <template v-slot:item.admin_state_up="{ item }">
+    <v-switch class="my-auto" color="success" v-model="item.admin_state_up" hide-details @click="networking.routerTable.adminStateDown(item)"></v-switch>
+  </template>
+  <template v-slot:item.interfaces="{ item }">
+    [[ networking.routerTable.listPorts(item) ]]
+  </template>
 
 </v-data-table>
 
+{% include '../dialog/newRouter.html' %}
+{% include '../dialog/routerInterfaces.html' %}

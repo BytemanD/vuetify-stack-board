@@ -3,9 +3,11 @@
       <v-row>
         <v-col>
           <v-btn small color="error" @click="volume.volumeTypeTable.deleteSelected()"><v-icon small>mdi-trash-can</v-icon> 删除</v-btn>
-          <v-btn small color="info" v-on:click="volume.volumeTypeTable.refresh()" icon><v-icon>mdi-refresh</v-icon></v-btn>
         </v-col>
-        <v-col cols="4">
+        <v-col class="text-right">
+          <v-btn fab x-small outlined color="info" v-on:click="volume.volumeTypeTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
+        </v-col>
+        <v-col>
           <v-text-field small dense v-model="volume.volumeTypeTable.search" append-icon="mdi-magnify" label="搜索" single-line
             hide-details></v-text-field>
         </v-col>

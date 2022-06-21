@@ -23,8 +23,6 @@ class Restfulclient {
     delete(id) { return axios.delete(`${this.baseUrl}/${id}`) };
     post(body) { return axios.post(`${this.baseUrl}`, body) };
     put(id, body) { return axios.put(`${this.baseUrl}/${id}`, body) };
-
-
 }
 class ClientExt extends Restfulclient {
     constructor(baseUrl) { super(baseUrl); }
@@ -58,7 +56,9 @@ class Flavor extends ClientExt {
 class AZ extends ClientExt {
     constructor() { super('/computing/os-availability-zone') }
 }
-
+class Keypair extends Restfulclient {
+    constructor() { super('/computing/os-keypairs') }
+}
 class ComputeService extends Restfulclient {
     constructor() { super('/computing/os-services') }
 
@@ -79,13 +79,12 @@ class Usage extends Restfulclient {
 
 class Server extends ClientExt {
     constructor() { super('/computing/servers') };
-    detail(){
-        return super.detail({all_tenants: 1})
+    detail() {
+        return super.detail({ all_tenants: 1 })
     }
-    list(){
-        return super.list({all_tenants: 1})
+    list() {
+        return super.list({ all_tenants: 1 })
     }
-    
     _parseToQueryString(filters) {
         if (!filters) {
             return ''
@@ -116,7 +115,7 @@ class Server extends ClientExt {
         } else {
             data.networks = options.networks;
         }
-        if (options.password && options.password != ''){
+        if (options.password && options.password != '') {
             let userData = [
                 '#cloud-config',
                 'chpasswd:',
@@ -186,6 +185,19 @@ class Server extends ClientExt {
     interfaceDetach(id, portId) {
         return axios.delete(`${this.baseUrl}/${id}/os-interface/${portId}`);
     }
+    doAction(id, body) {
+        return axios.post(`${this.baseUrl}/${id}/action`, body);
+    }
+    resize(id, flavor_id) {
+        return this.doAction(id, { resize: { flavorRef: flavor_id } })
+    }
+    liveMigrate(id) {
+        let data = { block_migration: "auto", host: null }
+        return this.doAction(id, { 'os-migrateLive': data })
+    }
+    migrate(id) {
+        return this.doAction(id, { migrate: {} })
+    }
 }
 
 class Endpoint extends Restfulclient {
@@ -206,10 +218,6 @@ class Image extends Restfulclient {
     constructor() { super('/image/v2/images') };
 }
 
-class Router extends Restfulclient {
-    constructor() { super('/networking/v2.0/routers') };
-    // interface=public
-}
 class Network extends Restfulclient {
     constructor() { super('/networking/v2.0/networks') };
 }
@@ -218,6 +226,19 @@ class Subnet extends Restfulclient {
 }
 class Port extends Restfulclient {
     constructor() { super('/networking/v2.0/ports') };
+}
+class Router extends Restfulclient {
+    constructor() { super('/networking/v2.0/routers'), this.portClient = new Port() };
+    // interface=public
+    listInterface(id) {
+        return this.portClient.list({ device_id: id })
+    }
+    addInterface(id, subnet_id) {
+        return this.put(`${id}/add_router_interface`, { subnet_id: subnet_id })
+    }
+    removeSubnet(id, subnet_id) {
+        return this.put(`${id}/remove_router_interface`, { subnet_id: subnet_id })
+    }
 }
 class Volume extends ClientExt {
     constructor() { super('/volume/volumes') };
@@ -231,11 +252,11 @@ class VolumeType extends Restfulclient {
     constructor() { super('/volume/types') };
 }
 
-class Env extends Restfulclient{
-    constructor() { super('/env') };
+class Cluster extends Restfulclient {
+    constructor() { super('/cluster') };
 
-    add(data){
-        return this.post({env: data})
+    add(data) {
+        return this.post({ cluster: data })
     }
 }
 
@@ -244,17 +265,18 @@ export class OpenstackProxyApi {
     constructor() {
         // keystone
         this.service = new Service();
-        this.endpoint = new Endpoint()
+        this.endpoint = new Endpoint();
         this.user = new User();
         // nova
         this.hypervisor = new Hypervisor();
-        this.flavor = new Flavor()
+        this.flavor = new Flavor();
         this.az = new AZ();
-        this.computeService = new ComputeService()
-        this.server = new Server()
-        this.usage = new Usage()
+        this.computeService = new ComputeService();
+        this.server = new Server();
+        this.usage = new Usage();
+        this.keypair = new Keypair();
         // glance
-        this.image = new Image()
+        this.image = new Image();
         // neutron
         this.router = new Router();
         this.network = new Network();
@@ -265,7 +287,7 @@ export class OpenstackProxyApi {
         this.volumeType = new VolumeType();
         this.snapshot = new Snapshot();
 
-        this.env = new Env()
+        this.cluster = new Cluster();
     }
 }
 

@@ -4,9 +4,11 @@
         <v-col>
           <v-btn small color="error" @click="computing.serviceTable.deleteSelected()"><v-icon small>mdi-trash-can</v-icon> 删除</v-btn>
         </v-col>
+        <v-col class="text-right">
+          <v-btn fab x-small outlined color="info" v-on:click="computing.serviceTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
+        </v-col>
         <v-col>
-          <v-text-field small dense v-model="computing.serviceTable.search" append-icon="mdi-magnify" label="搜索"
-            single-line hide-details></v-text-field>
+          <v-text-field small dense v-model="computing.serviceTable.search" append-icon="mdi-magnify" label="搜索" single-line hide-details></v-text-field>
         </v-col>
       </v-row>
     </v-card-text>

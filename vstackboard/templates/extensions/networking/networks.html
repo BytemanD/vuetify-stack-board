@@ -4,11 +4,10 @@
       <v-col>
         <v-btn small color="primary"  @click="newNetDialog.open()"><v-icon>mdi-plus</v-icon> 新建网络</v-btn>
         <v-btn small color="error" v-on:click="networking.networkTable.deleteSelected()">删除</v-btn>
-        <v-btn small color="info" v-on:click="networking.networkTable.refresh()">刷新</v-btn>
-      </v-col>
-      <v-col>
         <v-btn small color="primary"  @click="newSubnetDialog.open()">新建子网</v-btn>
-
+      </v-col>
+      <v-col class="text-right">
+        <v-btn fab x-small outlined color="info" v-on:click="networking.networkTable.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
       </v-col>
       <v-col>
         <v-text-field small dense v-model="networking.networkTable.search" append-icon="mdi-magnify" label="搜索"
@@ -28,20 +27,18 @@
   </template>
   <template v-slot:item.admin_state_up="{ item }">
     <v-switch class="my-auto" color="success" v-model="item.admin_state_up" hide-details @click="networking.networkTable.adminStateDown(item)"></v-switch>
- </template>
- <template v-slot:item.shared="{ item }">
-  <v-switch class="my-auto" v-model="item.shared" hide-details @click="networking.networkTable.shared(item)"></v-switch>
-</template>
-<template v-slot:item.subnets="{ item }">
-  <template v-for="subnet_id in item.subnets">
-    <v-chip close @click:close="networking.networkTable.deleteSubnet(subnet_id)"
-         color="cyan" text-color="white" x-small label class="mr-1"
-       v-if="networking.networkTable.subnets[subnet_id]">[[ networking.networkTable.subnets[subnet_id].cidr ]]
-  </v-chip>
   </template>
-</template>
-
-
+  <template v-slot:item.shared="{ item }">
+    <v-switch class="my-auto" v-model="item.shared" hide-details @click="networking.networkTable.shared(item)"></v-switch>
+  </template>
+  <template v-slot:item.subnets="{ item }">
+    <template v-for="subnet_id in item.subnets">
+      <v-chip close @click:close="networking.networkTable.deleteSubnet(subnet_id)"
+          color="cyan" text-color="white" x-small label class="mr-1"
+        v-if="networking.networkTable.subnets[subnet_id]">[[ networking.networkTable.subnets[subnet_id].cidr ]]
+    </v-chip>
+    </template>
+  </template>
 </v-data-table>
 
 {% include '../dialog/newNetwork.html' %}

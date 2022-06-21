@@ -19,7 +19,8 @@ ROUTES = [
     (r'/dashboard', views.Dashboard),
     (r'/welcome', views.Welcome),
     (r'/config', views.Config),
-    (r'/env', views.Environment),
+    (r'/cluster', views.Cluster),
+    (r'/cluster/(.*)', views.Cluster),
     (r'/[computing|image|networking|volume](.*)',
      views.OpenstackProxy),
 ]

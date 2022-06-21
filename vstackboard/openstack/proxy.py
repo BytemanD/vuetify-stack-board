@@ -36,9 +36,17 @@ class OpenstackV3AuthProxy(object):
             self.update_auth_token()
         return self.auth_token.get('project', {}).get('id')
 
+    def is_connectable(self):
+        try:
+            requests.get(self.auth_url, timeout=5)
+            return True
+        except requests.exceptions.ConnectionError:
+            return False
+
     def update_auth_token(self):
         resp = requests.post('{}/v3/auth/tokens'.format(self.auth_url),
-                             json=self.auth_body)
+                             json=self.auth_body,
+                             timeout=10)
         token = json.loads(resp.content).get('token', {})
         self.auth_token = {
             'token': resp.headers.get('x-subject-token', None),

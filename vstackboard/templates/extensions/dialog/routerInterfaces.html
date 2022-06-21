@@ -1,0 +1,23 @@
+<v-dialog v-model="routerInterfacesDialog.show" width="800">
+    <v-card>
+      <v-card-title class="headline grey lighten-2" primary-title>路由端口管理</v-card-title>
+      <v-card-text>
+        <br>
+        <v-row>
+          <v-col cols="12">
+            <template v-for="item in routerInterfacesDialog.interfaces">
+              <v-chip close @click:close="routerInterfacesDialog.remove(item)" color="info" label outlined class="ml-1 mt-1">
+                <code>[[ item.fixed_ips[0].subnet_id ]]</code>[[ item.fixed_ips[0].ip_address ]]
+              </v-chip>
+            </template>
+          </v-col>
+          <v-col cols="10">
+            <v-select :items="routerInterfacesDialog.subnets" label="可用子网"
+                      item-value="id" item-text="name" multiple chips outlined v-model="routerInterfacesDialog.selected">
+            </v-select>
+          </v-col>
+          <v-col cols="2"><v-btn color="primary" @click="routerInterfacesDialog.attachSelected()">添加</v-btn></v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
+  </v-dialog>

@@ -4,9 +4,11 @@
         <v-col>
           <v-btn small color="primary" @click="newVolumeDialog.open()"><v-icon small>mdi-plus</v-icon>新建</v-btn>
           <v-btn small color="error" @click="volume.volumeTable.deleteSelected()"><v-icon small>mdi-trash-can</v-icon>删除</v-btn>
-          <v-btn small color="info" v-on:click="volume.volumeTable.refresh()" icon><v-icon>mdi-refresh</v-icon></v-btn>
         </v-col>
-        <v-col cols="4">
+        <v-col class="text-right">
+          <v-btn fab x-small outlined color="info" v-on:click="volume.volumeTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
+        </v-col>
+        <v-col>
           <v-text-field small dense v-model="volume.volumeTable.search" append-icon="mdi-magnify" label="搜索" single-line
             hide-details></v-text-field>
         </v-col>

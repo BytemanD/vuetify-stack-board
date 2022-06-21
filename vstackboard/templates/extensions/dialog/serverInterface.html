@@ -1,0 +1,23 @@
+<v-dialog v-model="serverInterfaceDialog.show" width="800">
+  <v-card>
+    <v-card-title class="headline grey lighten-2" primary-title>卷管理</v-card-title>
+    <v-card-text>
+      <br>
+      <v-row>
+        <v-col cols="12">
+          <template v-for="item in routerInterfacesDialog.interfaces">
+            <v-chip close @click:close="serverInterfaceDialog.detach(item)" color="info" label class="mr-2">
+                [[ item.fixed_ips[0]['ip_address'] ]]
+            </v-chip>
+          </template>
+        </v-col>
+        <v-col cols="10">
+          <v-select :items="serverInterfaceDialog.ports" label="可用端口"
+                    item-value="id" item-text="name" multiple chips outlined v-model="routerInterfacesDialog.selected">
+          </v-select>
+        </v-col>
+        <v-col cols="2"><v-btn color="primary" @click="serverInterfaceDialog.attachSelected()">挂载</v-btn></v-col>
+      </v-row>
+    </v-card-text>
+  </v-card>
+</v-dialog>

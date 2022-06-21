@@ -1,3 +1,4 @@
+from cgi import print_arguments
 import logging
 import os
 import sys
@@ -8,6 +9,7 @@ import requests
 from urllib import parse
 from jinja2 import PackageLoader, Environment
 
+from easy2use.downloader.urllib import driver
 from easy2use.globals import cli
 from easy2use.globals import log
 
@@ -80,11 +82,55 @@ class Version(cli.SubCli):
 
     def __call__(self, args):
         from vstackboard.common import constants
+        print(version.VersionInfo(constants.NAME).version_string())
+
+
+class Upgrade(cli.SubCli):
+    NAME = 'upgrade'
+    ARGUMENTS = [
+        cli.Arg('-y', '--yes', action='store_true',
+                help='answer yes for all questions')
+    ]
+    def __call__(self, args):
+        from vstackboard.common import constants                 # noqa
         try:
-            info = version.VersionInfo(constants.NAME)
-        except ModuleNotFoundError:
-            info = 'dev'
-        print(info.version_string())
+            releases = requests.get(constants.RELEASES_API).json()
+        except Exception as e:
+            LOG.error('Check releases failed, %s', e)
+            return
+
+        if not releases:
+            print('The current version is the latest.')
+            return
+        current_version = version.VersionInfo(constants.NAME).version_string()
+
+        latest = releases[0]
+        if latest.get('tag_name') <= current_version:
+            print('The current version is the latest.')
+        else:
+            asset = latest.get('assets')[0] if latest.get('assets', []) \
+                else None
+            download_url = asset.get("browser_download_url")
+            msg = f'\nA new {constants.NAME} release is available: ' \
+                  f'{latest["tag_name"]}\n' \
+                  f'Upgrade from:\n    {download_url}\n'
+            print(msg)
+            if args.yes:
+                self.download(download_url, yes=True)
+            else:
+                while True:
+                    input_str = input(r'Upgrade now ? [y/n] ')
+                    if input_str == 'y':
+                        self.download(download_url)
+                    elif input_str == 'n':
+                        break
+                    else:
+                        print('Error, invalid input, must be y or n.')
+
+
+    def download(self, url):
+        downloader = driver.Urllib3Driver(progress=True)
+        downloader.download(url)
 
 
 class Serve(cli.SubCli):
@@ -107,7 +153,7 @@ class Serve(cli.SubCli):
 
 def main():
     cli_parser = cli.SubCliParser('VStackBoard Command Client')
-    cli_parser.register_clis(Version, Serve, StaticDownload)
+    cli_parser.register_clis(Version, Upgrade, Serve, StaticDownload)
     cli_parser.call()
 
 

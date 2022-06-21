@@ -3,19 +3,25 @@ Openstack Dashboard with Vuetify
 
 ## ChangeLog
 
-### v0.0.3
+### TODO
 
-- [ ] 上传镜像
 - [ ] 查看console log
 - [ ] 挂载网卡可指定net-id
-- [ ] 增加keypair
 - [ ] 创建规格时可以从已有的复制
 - [ ] volume-type 创建
 - [ ] volume支持状态重置
 - [ ] inerface 卸载，自动检测后刷新表
 - [ ] 创建虚拟机，允许指定keypair
-- [ ] 虚拟机操作(resize, pause, rebuild, migrate liveMigrate)
-- [ ] 路由/端口管理
+- [ ] 上传镜像
+
+### v0.0.3
+
+- [X] 虚机操作添加：卷管理，网卡管理 Dailog, 可进行挂载/卸载操作
+- [X] 加载dashboard前显示'骨架装饰器'
+- [X] 路由/端口管理
+- [X] 虚拟机操作(resize, migrate liveMigrate)
+- [ ] 增加keypair
+- [ ] 虚拟机操作(pause, rebuild)
 
 ### v0.0.2
 
