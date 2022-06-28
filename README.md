@@ -19,9 +19,9 @@ Openstack Dashboard with Vuetify
 - [X] 虚机操作添加：卷管理，网卡管理 Dailog, 可进行挂载/卸载操作
 - [X] 加载dashboard前显示'骨架装饰器'
 - [X] 路由/端口管理
-- [X] 虚拟机操作(resize, migrate liveMigrate)
-- [ ] 增加keypair
-- [ ] 虚拟机操作(pause, rebuild)
+- [X] 虚拟机 resize/migrate/pause/unpause
+- [X] 增加keypair
+- [X] 虚拟机rebuild
 
 ### v0.0.2
 

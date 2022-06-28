@@ -3,12 +3,11 @@
     <v-row>
       <v-col>
         <v-btn small color="primary" v-on:click="newServerDialog.open()"><v-icon>mdi-plus</v-icon> 新建</v-btn>
-        <v-btn small color="success" v-on:click="computing.serverTable.startSelected()" :disabled="computing.serverTable.selected.length == 0">开机</v-btn>
-        <v-btn small color="warning" v-on:click="computing.serverTable.stopSelected()" :disabled="computing.serverTable.selected.length == 0">关机</v-btn>
-        <v-btn small color="primary" @click="migrateDialog.open()" :disabled="computing.serverTable.selected.length == 0">
-              </v-icon>迁移</v-btn>
-        <v-btn small color="error" @click="computing.serverTable.deleteSelected()" :disabled="computing.serverTable.selected.length == 0">
-            <v-icon small>mdi-trash-can</v-icon>删除</v-btn>
+        <v-btn class="rounded-l-xl" small color="success" v-on:click="computing.serverTable.startSelected()" :disabled="computing.serverTable.selected.length == 0">开机</v-btn>
+        <v-btn class="rounded-r-xl" small color="warning" v-on:click="computing.serverTable.stopSelected()" :disabled="computing.serverTable.selected.length == 0">关机</v-btn>
+        <v-btn class="rounded-l-xl" small color="success" v-on:click="computing.serverTable.unpauseSelected()" :disabled="computing.serverTable.selected.length == 0">开启</v-btn>
+        <v-btn class="rounded-r-xl" small color="warning" v-on:click="computing.serverTable.pauseSelected()" :disabled="computing.serverTable.selected.length == 0">暂停</v-btn>
+
         <v-menu  offset-y>
           <template v-slot:activator="{ on, attrs }">
             <v-btn small color="info" v-bind="attrs" v-on="on" :disabled="computing.serverTable.selected.length == 0"><v-icon small>mdi-menu</v-icon> 重启</v-btn>
@@ -18,6 +17,12 @@
             <v-list-item small @click="computing.serverTable.rebootSelected('HARD')"><v-list-item-title>硬重启</v-list-item-title></v-list-item>
           </v-list>
         </v-menu>
+
+        <v-btn small color="primary" @click="migrateDialog.open()" :disabled="computing.serverTable.selected.length == 0">
+              </v-icon>迁移</v-btn>
+        <v-btn small color="error" @click="computing.serverTable.deleteSelected()" :disabled="computing.serverTable.selected.length == 0">
+            <v-icon small>mdi-trash-can</v-icon>删除</v-btn>
+
       </v-col>
       <v-col cols="1" class="text-right">
         <v-btn fab x-small outlined color="info" v-on:click="computing.serverTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
@@ -35,10 +40,12 @@
   <template v-slot:item.name="{ item }">
     [[ item.name ]]
     <v-btn @click="changeServerNameDialog.open(item)" x-small icon><v-icon>mdi-pencil-minus</v-icon></v-btn>
+    <v-btn @click="loginVnc(item)" x-small icon><v-icon>mdi-console</v-icon></v-btn>
   </template>
   <template v-slot:item.status="{ item }">
     <v-icon v-if="item['OS-EXT-STS:vm_state'] == 'active'" color="success">mdi-check-circle</v-icon>
     <v-icon v-if="item['OS-EXT-STS:vm_state'] == 'stopped'" color="warning">mdi-stop-circle</v-icon>
+    <v-icon v-if="item['OS-EXT-STS:vm_state'] == 'paused'" color="warning">mdi-pause-circle</v-icon>
     <v-tooltip top v-if="item['OS-EXT-STS:vm_state'] == 'error'" >
       <template v-slot:activator="{ on, attrs }">
         <v-icon color="error" v-bind="attrs" v-on="on">mdi-alpha-x-circle</v-icon>
@@ -66,19 +73,16 @@
     <v-chip x-small label>[[ computing.serverTable.getImage(item) && computing.serverTable.getImage(item).name ]]</v-chip>
   </template>
   <template v-slot:item.action="{ item }">
-    <v-btn small icon color="info" v-on:click="loginVnc(item)"><v-icon>mdi-console</v-icon></v-btn>
     <v-menu  offset-y>
       <template v-slot:activator="{ on, attrs }">
-        <v-btn x-small color="primary" dark v-bind="attrs" v-on="on"><v-icon small>mdi-menu</v-icon>操作</v-btn>
+        <v-btn icon color="primary" v-bind="attrs" v-on="on"><v-icon small>mdi-menu</v-icon></v-btn>
       </template>
       <v-list dense>
         <v-list-item @click="changePasswordDialog.open(item)"><v-list-item-title>修改密码</v-list-item-title></v-list-item>
         <v-list-item @click="serverVolumeDialog.open(item)"><v-list-item-title>卷管理</v-list-item-title></v-list-item>
         <v-list-item @click="serverInterfaceDialog.open(item)"><v-list-item-title>网卡管理</v-list-item-title></v-list-item>
         <v-list-item small @click="resizeDialog.open(item)"><v-list-item-title>规格变更</v-list-item-title></v-list-item>
-        <v-list-item small @click="resizeDialog.open(item)"><v-list-item-title>TODO 冷迁移</v-list-item-title></v-list-item>
-        <v-list-item small @click="resizeDialog.open(item)"><v-list-item-title>TODO 热迁移</v-list-item-title></v-list-item>
-        <v-list-item small @click="resizeDialog.open(item)"><v-list-item-title>TODO 重建</v-list-item-title></v-list-item>
+        <v-list-item small @click="rebuildDialog.open(item)"><v-list-item-title>重建</v-list-item-title></v-list-item>
       </v-list>
     </v-menu>
   </template>
@@ -109,3 +113,4 @@
 {% include 'dialog/serverInterface.html' %}
 {% include 'dialog/resize.html' %}
 {% include 'dialog/migrate.html' %}
+{% include 'dialog/rebuild.html' %}

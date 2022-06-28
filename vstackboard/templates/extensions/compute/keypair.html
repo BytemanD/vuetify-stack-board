@@ -2,7 +2,7 @@
   <v-card-text>
     <v-row>
       <v-col>
-        <v-btn small color="primary" @click="newFlavorDialog.open()"><v-icon small>mdi-plus</v-icon>新建</v-btn>
+        <v-btn small color="primary" @click="newKeypairDialog.open()"><v-icon small>mdi-plus</v-icon>添加</v-btn>
         <v-btn small color="error" @click="computing.keypairTable.deleteSelected()">删除</v-btn>
       </v-col>
       <v-col class="text-right">
@@ -19,9 +19,6 @@
 <v-data-table :headers="computing.keypairTable.headers" :items="computing.keypairTable.items" item-key="name"
   :items-per-page="computing.keypairTable.itemsPerPage" :search="computing.keypairTable.search" class="elevation-1" dense
   show-select v-model="computing.keypairTable.selected" show-expand single-expand>
-  <!-- <template v-slot:item.name="{ item }">[[ item.name ]]</template>
-  <template v-slot:item.type="{ item }">[[ item.type ]]</template>
-  <template v-slot:item.fingerprint="{ item }">[[ item.fingerprint ]]</template> -->
   <template v-slot:expanded-item="{ headers, item }">
     <td><v-icon @click="computing.keypairTable.copyPublicKey(item)">mdi-content-copy</v-icon></td>
     <td :colspan="headers.length -1" >
@@ -29,3 +26,5 @@
     </td>
   </template>
 </v-data-table>
+
+{% include "../dialog/newKeypair.html" %}

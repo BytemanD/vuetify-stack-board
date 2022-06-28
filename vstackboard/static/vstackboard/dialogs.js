@@ -3,6 +3,7 @@ import API from './api.js';
 
 import {
     clusterTable,
+    keypairTable,
     netTable, portTable, routerTable,
     serverTable, volumeTable
 } from './tables.js';
@@ -356,9 +357,17 @@ export class ResizeDialog extends Dialog {
     commit() {
         API.server.resize(this.server.id, this.flavorRef).then(resp => {
             MESSAGE.info(`虚拟机 ${this.server.id} 变更中...`);
+            serverTable.waitServerActive(this.server).then(data => {
+                MESSAGE.success(`虚拟机 ${this.server.id} 变更成功`);
+                serverTable.refresh();
+            }).catch(data => {
+                MESSAGE.error(`虚拟机 ${this.server.id} 变更失败`);
+                serverTable.refresh()
+            });
             this.hide();
         }).catch(error => {
-            MESSAGE.error(`虚拟机 ${this.server.id} 变更失败`);
+            console.error(error);
+            MESSAGE.error(`请求变更 ${this.server.id} 失败`);
             this.hide();
         });
     }
@@ -376,13 +385,30 @@ export class MigrateDialog extends Dialog {
     }
     commit() {
         this.servers.forEach(item => {
-            console.log(item.status)
-            if (item.status.toUpperCase() == 'ACTIVE'){
-                MESSAGE.info(`热迁移 ${item.name} ...`)
-                API.server.liveMigrate(item.id);
-            }else if (item.status.toUpperCase() == 'SHUTOFF') {
-                MESSAGE.info(`冷迁移 ${item.name} ...`)
-                API.server.migrate(item.id);
+            switch (item.status.toUpperCase()){
+                case 'ACTIVE':
+                    MESSAGE.info(`热迁移 ${item.name} ...`)
+                    API.server.liveMigrate(item.id).then(resp => {
+                        serverTable.waitServerActive(item).then(data => {
+                            MESSAGE.success(`虚拟机 ${item.id} 迁移成功`);
+                            serverTable.refresh();
+                        }).catch(data => {
+                            MESSAGE.error(`虚拟机 ${item.id} 迁移失败`);
+                            serverTable.refresh()
+                        });
+                    });
+                    break;
+                case 'SHUTOFF':
+                    MESSAGE.info(`冷迁移 ${item.name} ...`)
+                    API.server.migrate(item.id).then(resp => {
+                        serverTable.waitServerActive(item).then(data => {
+                            MESSAGE.success(`虚拟机 ${item.id} 迁移成功`);
+                            serverTable.refresh();
+                        }).catch(data => {
+                            MESSAGE.error(`虚拟机 ${item.id} 迁移失败`);
+                            serverTable.refresh()
+                        });
+                    });
             }
         })
     }
@@ -578,6 +604,74 @@ export class NewFlavorDialog extends Dialog {
             extras[key] = value;
         }
         return extras;
+    }
+}
+export class NewKeypairDialog extends Dialog {
+    constructor() {
+        super();
+        this.keyTypes = ['ssh', 'x509'];
+        this.newKeypair = {
+            type: 'ssh',
+            name: ''
+        }
+        this.privateKey = ''
+    }
+    randomName(){
+        return Utils.getRandomName('keypair').replace(/:/g, '');
+    }
+    open(){
+        this.newKeypair.name = this.randomName();
+        this.privateKey = ''
+        super.open();
+    }
+    commit() {
+        if (!this.newKeypair.name) {
+            ALERT.error(`密钥对名字不能为空`);
+            return;
+        }
+        this.newKeypair.name = this.newKeypair.name.trim();
+        API.keypair.post({keypair: this.newKeypair }).then(resp => {
+            MESSAGE.success(`密钥对创建成功`)
+            this.privateKey = resp.data.keypair.private_key;
+            keypairTable.refresh()
+        }).catch(error => {
+            MESSAGE.error(`密钥对创建失败`)
+        })
+    }
+}
+export class RebuildDialog extends Dialog {
+    constructor() {
+        super();
+        this.server = {};
+        this.images = [];
+        this.data = { imageRef: '', description: ''};
+    }
+    randomName(){
+        return Utils.getRandomName('keypair').replace(/:/g, '');
+    }
+    open(server){
+        this.server = server;
+        this.images = [{id: '', name: ''}];
+        this.data.imageRef = ''
+        API.image.list().then(resp => {
+            this.images = this.images.concat(resp.data.images);
+        })
+        super.open();
+    }
+    commit() {
+        let options = {}
+
+        API.server.rebuild(this.server.id, this.data).then(resp => {
+            MESSAGE.info(`虚拟机${this.server.name}重建中`)
+            serverTable.waitServerActive(this.server, 'ACTIVE').then(resp => {
+                MESSAGE.success(`虚拟机${this.server.name}重建成功`)
+            }).catch(error => {
+                MESSAGE.error(`虚拟机${this.server.name}重建失败`)
+            });
+            super.hide();
+        }).catch(error => {
+            MESSAGE.error(`请求失败`)
+        })
     }
 }
 export class NewVolumeDialog extends Dialog {
@@ -802,5 +896,7 @@ export const routerInterfacesDialog = new RouterInterfacesDialog();
 export const newPortDialog = new NewPortDialog();
 export const resizeDialog = new ResizeDialog();
 export const migrateDialog = new MigrateDialog();
+export const newKeypairDialog  = new NewKeypairDialog();
+export const rebuildDialog = new RebuildDialog();
 
 export default Dialog;

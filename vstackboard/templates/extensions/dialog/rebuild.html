@@ -1,0 +1,23 @@
+<v-dialog v-model="rebuildDialog.show" width="800">
+    <v-card>
+      <v-card-title class="headline grey lighten-2" primary-title>虚拟机重建</v-card-title>
+      <v-card-text>
+        <br>
+        <v-row>
+            <v-col cols="12">
+              <v-text-field label="描述" v-model="rebuildDialog.data.description"></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-select :items="rebuildDialog.images" label="可用镜像"
+                        item-value="id" item-text="name" outlined v-model="rebuildDialog.data.imageRef">
+              </v-select>
+            </v-col>
+        </v-row>
+      </v-card-text>
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="rebuildDialog.commit()">重建</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>

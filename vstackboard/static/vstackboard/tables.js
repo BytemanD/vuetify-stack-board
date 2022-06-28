@@ -1,5 +1,5 @@
 import API from './api.js'
-import { MESSAGE } from './lib.js'
+import { ALERT, Alert, MESSAGE } from './lib.js'
 
 class DataTable {
     constructor(headers, api, bodyKey = null, name='') {
@@ -44,7 +44,17 @@ class DataTable {
     resetSelected() {
         this.selected = [];
     }
-
+    updateItem(newItem){
+        for(var i=0; i < this.items.length; i++) {
+            if (this.items[i].id != newItem.id){
+                continue;
+            }
+            for (var key in newItem){
+                this.items[i][key] = newItem[key];
+            }
+            break
+        }
+    }
     refresh(filters={}) {
         let result = null
         if (this.api.detail) {
@@ -262,6 +272,38 @@ export class ServerDataTable extends DataTable {
             API.server, 'servers', '实例');
         this.imageMap = {}
     }
+
+    waitServerActive(server, expectStatus='ACTIVE'){
+        let self = this;
+        return new Promise(function(resolve, reject){
+            API.server.show(server.id).then(resp => {
+                let currentServer = resp.data.server;
+                if (currentServer['OS-EXT-STS:task_state'] != server['OS-EXT-STS:task_state']){
+                    self.updateItem(currentServer);
+                }
+                switch (currentServer.status.toUpperCase()){
+                    case expectStatus.toUpperCase():
+                        self.updateItem(currentServer);
+                        resolve(currentServer);
+                        break
+                        case 'ERROR':
+                        self.updateItem(currentServer);
+                        reject(currentServer);
+                        break;
+                    default:
+                        setTimeout(function(){
+                            self.waitServerActive(server, expectStatus).then(data => {
+                                resolve(data)
+                            }).catch(data => {
+                                reject(data)
+                            })
+                        }, 3 * 1000)
+                        break;
+                }
+            })
+        })
+    }
+
     checkServerStatusUntil(server, status = 'active', message = null) {
         let self = this;
         API.server.show(server.id).then(resp => {
@@ -282,51 +324,76 @@ export class ServerDataTable extends DataTable {
     stopSelected() {
         let self = this;
         this.selected.forEach(item => {
+            if (item.status.toUpperCase() != 'ACTIVE'){
+                ALERT.warn(`虚拟机 ${item.name} 不是运行状态`)
+                return;
+            }
             self.api.stop(item.id).then(resp => {
-                self.checkServerStatusUntil(item, 'shutoff', '已关机')
+                self.waitServerActive(item, 'SHUTOFF').then(resp => {
+                    MESSAGE.success(`虚拟机 ${item.name}已关机`)
+                })
             });
         });
-        MESSAGE.info('关机中 ...')
-        this.refresh();
-        this.resetSelected();
     }
     startSelected() {
         let self = this;
         this.selected.forEach(item => {
+            if (item.status.toUpperCase() != 'SHUTOFF'){
+                ALERT.warn(`虚拟机 ${item.name} 不是关机状态`)
+                return;
+            }
             self.api.start(item.id).then(resp => {
-                self.checkServerStatusUntil(item, 'active', '已开机')
+                self.waitServerActive(item, 'ACTIVE').then(resp => {
+                    MESSAGE.success(`虚拟机 ${item.name}已开机`)
+                })
             });
         });
-        MESSAGE.info('开机中 ...')
-        this.refresh();
-        this.resetSelected();
+    }
+    pauseSelected(){
+        let self = this;
+        this.selected.forEach(item => {
+            if (item.status.toUpperCase() != 'ACTIVE'){
+                ALERT.warn(`虚拟机 ${item.name} 不是运行状态`)
+                return;
+            }
+            self.api.pause(item.id).then(resp => {
+                self.waitServerActive(item, 'PAUSED').then(resp => {
+                    MESSAGE.success(`虚拟机 ${item.name}已暂停`)
+                })
+            });
+        });
+    }
+    unpauseSelected(){
+        let self = this;
+        this.selected.forEach(item => {
+            if (item.status.toUpperCase() != 'PAUSED'){
+                ALERT.warn(`虚拟机 ${item.name} 不是暂停状态`)
+                return;
+            }
+            self.api.unpause(item.id).then(resp => {
+                self.waitServerActive(item, 'ACTIVE').then(resp => {
+                    MESSAGE.success(`虚拟机 ${item.name}已开启`)
+                })
+            });
+        });
     }
     rebootSelected(type = 'SOFT') {
         let self = this;
         this.selected.forEach(item => {
+            if (item.status.toUpperCase() != 'ACTIVE'){
+                ALERT.warn(`虚拟机 ${item.name} 不是运行状态`)
+                return;
+            }
             self.api.reboot(item.id, type).then(resp => {
-                self.checkServerStatusUntil(item, 'active', '已重启')
+                self.waitServerActive(item, 'ACTIVE').then(resp => {
+                    MESSAGE.success(`虚拟机 ${item.name}已重启`)
+                })
             });
         });
-        MESSAGE.info('重启中 ...')
         this.refresh();
         this.resetSelected();
     }
-    changePasswordSelected(params) {
-        let self = this;
-        let password = params.password;
-        if (!password) {
-            MESSAGE.error(`密码不能为空`)
-            return;
-        }
-        this.selected.forEach(item => {
-            self.api.changePassword(item.id, password, params.userName).then(resp => {
-                MESSAGE.success(`${self.name} ${item.name} 密码修改成功`)
-            }).catch(error => {
-                MESSAGE.error(`${self.name} ${item.name} 密码修改失败`)
-            });
-        });
-    }
+
     getImage(server) {
         let imageId = server.image.id;
         if (!imageId) { return }

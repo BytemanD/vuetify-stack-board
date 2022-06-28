@@ -1,0 +1,24 @@
+<v-dialog v-model="newKeypairDialog.show" width="700">
+    <v-card>
+      <v-card-title class="headline grey lighten-2" primary-title>新建密钥对</v-card-title>
+      <v-card-text>
+        <v-row>
+            <v-col cols="10"><v-text-field label="名字" placeholder="请输入密钥对名" v-model="newKeypairDialog.newKeypair.name"></v-text-field></v-col>
+            <v-col cols="2" class="my-auto">
+                <v-btn text color="primary" @click="newKeypairDialog.randomName()">随机名字</v-btn>
+            </v-col>
+            <v-col cols="10">
+                <v-select :items="newKeypairDialog.keyTypes" label="类型" dense outlined hide-details
+                            v-model="newKeypairDialog.newKeypair.type">
+                </v-select>
+            </v-col>
+            <v-col cols="2">
+                <v-btn color="primary" @click="newKeypairDialog.commit()">创建</v-btn>
+            </v-col>
+            <v-col cols="12">
+                <v-textarea hide-details filled label="私钥内容" v-model="newKeypairDialog.privateKey"></v-textarea>
+            </v-col>
+          </v-row>
+      </v-card-text>
+    </v-card>
+</v-dialog>

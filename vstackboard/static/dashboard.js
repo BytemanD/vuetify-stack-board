@@ -11,7 +11,7 @@ import {
     changePassword, changeServerName,
     volumeAttach, volumeDetach, interfaceDetach, interfaceAttach,
     newVolume, serverVolumeDialog, serverInterfaceDialog,
-    newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog, newPortDialog, resizeDialog, migrateDialog,
+    newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog, newPortDialog, resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog,
 } from "./vstackboard/dialogs.js";
 
 
@@ -114,6 +114,8 @@ new Vue({
         newSubnetDialog: newSubnetDialog,
         routerInterfacesDialog: routerInterfacesDialog,
         newPortDialog: newPortDialog,
+        newKeypairDialog: newKeypairDialog,
+        rebuildDialog: rebuildDialog,
     },
     methods: {
         getServices: function () {

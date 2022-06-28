@@ -26,6 +26,9 @@ export class Alert {
         this.error = function (msg, timeout = 5) {
             VuetifyMessageSnackbar.Notify.top().timeout(timeout * 1000).error(msg)
         };
+        this.warn = function (msg, timeout = 5) {
+            VuetifyMessageSnackbar.Notify.top().timeout(timeout * 1000).warning(msg)
+        };
     }
 }
 

@@ -160,6 +160,12 @@ class Server extends ClientExt {
     reboot(id, type = 'SOFT') {
         return axios.post(`${this.baseUrl}/${id}/action`, { 'reboot': { type: type } })
     }
+    pause(id) {
+        return this.doAction(id, {'pause': null})
+    }
+    unpause(id){
+        return this.doAction(id, {'unpause': null})
+    }
     changePassword(id, password, userName = null) {
         let data = { adminPass: password }
         if (userName) { data.userName = userName; }
@@ -197,6 +203,15 @@ class Server extends ClientExt {
     }
     migrate(id) {
         return this.doAction(id, { migrate: {} })
+    }
+    rebuild(id, options={}){
+        let data = {description: null}
+        for(let key in options){
+            if (options[key]){
+                data[key] = options[key]
+            }
+        }
+        return this.doAction(id, {rebuild: data})
     }
 }
 

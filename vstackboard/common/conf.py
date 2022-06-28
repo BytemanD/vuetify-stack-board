@@ -20,10 +20,6 @@ default_options = [
 ]
 
 openstack_options = [
-    cfg.Option('auth_url', default='http://keystone-server:35357'),
-    cfg.Option('auth_project', default='admin'),
-    cfg.Option('auth_user', default='admin'),
-    cfg.Option('auth_password'),
     cfg.Option('domain_name', default='Default'),
     cfg.IntOption('expires_time', default=60 * 60),
     cfg.MapOption('api_version', default={}),

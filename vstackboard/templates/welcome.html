@@ -10,23 +10,21 @@
 <body>
     <div id="app">
         <v-app>
-            <!-- style="background: url('/static/svg3.png'); background-repeat: no-repeat;  background-attachment: fixed; filter: blur(5px)" -->
             <v-main class="indigo lighten-4">
-                <v-card class="mx-auto my-auto mt-10 blue-grey lighten-4" width="60%" elevation="4">
+                <v-card class="mx-auto my-auto mt-10 blue-grey lighten-4" width="56%" elevation="4">
                     <v-img class="white--text align-end" src="/static/welcome.svg">
                         <v-card-title>欢迎使用 VStackBoard</v-card-title>
                         <v-card-subtitle>版本：{{ version }} </v-card-subtitle>
+                        <v-card-subtitle>VStackBoard ( Vuetify Stack Board ) 是一个基于Vuetify实现的 Openstack 管理服务。</v-card-subtitle>
                     </v-img>
                     <v-card-text class="text--primary">
-                        VStackBoard 是一个 基于vuetify实现的Openstack Dashboard。
-                        <br>
                         <v-alert class="blue-grey lighten-4" border="left" colored-border color="deep-purple accent-1"
                                  v-if="clusterTable.items.length == 0">
                             <v-icon>mdi-information-outline</v-icon>当前集群数目为 [[ clusterTable.items.length ]]，请添加新集群。
                         </v-alert>
-                        常用集群: <br>
+                        <h4>常用集群</h4>
                         <template v-for="item in clusterTable.items">
-                            <v-chip close label color="primary" class="ml-1" @click:close="clusterTable.delete(item)" @click="useCluster(item)">[[item.name]]</v-chip>
+                            <v-chip close label color="primary" class="mr-2 mt-2" @click:close="clusterTable.delete(item)" @click="useCluster(item)">[[item.name]]</v-chip>
                         </template>
                     </v-card-text>
                     <v-card-actions>
