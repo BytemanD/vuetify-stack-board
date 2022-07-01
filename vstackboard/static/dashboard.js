@@ -1,17 +1,18 @@
 import { Message, Utils } from "./vstackboard/lib.js";
-import DataTable, { ClusterTable, clusterTable, keypairTable } from "./vstackboard/tables.js";
 import API from "./vstackboard/api.js";
 
-import {
+import DataTable, {
     volumeTable, serviceTable, serverTable, flavorTable, usageTable,
-    routerTable, netTable, portTable, volumeTypeTable, snapshotTable
+    backupTable, clusterTable, keypairTable, volumeServiceTable,
+    routerTable, netTable, portTable, volumeTypeTable, snapshotTable,
+    hypervisorTable
 } from "./vstackboard/tables.js";
 import {
     newFlavor, newServer,
     changePassword, changeServerName,
-    volumeAttach, volumeDetach, interfaceDetach, interfaceAttach,
     newVolume, serverVolumeDialog, serverInterfaceDialog,
-    newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog, newPortDialog, resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog,
+    newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog,
+    newPortDialog, resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog, newSnapshotDialog, newBackupDialog,
 } from "./vstackboard/dialogs.js";
 
 
@@ -31,13 +32,12 @@ const navigationItems = [
     { title: '网络', icon: 'mdi-network', group: 'network' },
 ]
 
-
 new Vue({
     el: '#app',
     delimiters: ['[[', ']]'],
     vuetify: new Vuetify(),
     data: {
-        tabs: 0,
+        tabs: {},
         UTILS: Utils,
         clusterTable: clusterTable,
         identity: {
@@ -58,15 +58,7 @@ new Vue({
         computing: {
             serverTable: serverTable,
             flavorTable: flavorTable,
-            hypervisorTable: new DataTable([{ text: '主机名', value: 'hypervisor_hostname', class: 'blue--text' },
-                                            { text: 'IP', value: 'host_ip', class: 'blue--text' },
-                                            { text: '状态', value: 'status', class: 'blue--text' },
-                                            { text: '总内存', value: 'memory_mb', class: 'blue--text' },
-                                            { text: '已用内存', value: 'memory_mb_used', class: 'blue--text' },
-                                            { text: 'CPU', value: 'vcpus', class: 'blue--text' },
-                                            { text: '已用CPU', value: 'vcpus_used', class: 'blue--text' },
-                                            { text: '虚拟化版本', value: 'hypervisor_version', class: 'blue--text' },
-                                            ], API.hypervisor, 'hypervisors'),
+            hypervisorTable: hypervisorTable,
             serviceTable: serviceTable,
             usageTable: usageTable,
             keypairTable: keypairTable,
@@ -89,6 +81,8 @@ new Vue({
             volumeTable: volumeTable,
             volumeTypeTable: volumeTypeTable,
             snapshotTable: snapshotTable,
+            backupTable: backupTable,
+            volumeServiceTable: volumeServiceTable,
         },
         navigation: {
             item: $cookies.get('navigationItem') || 0,
@@ -97,108 +91,36 @@ new Vue({
         drawer: '',
         miniVariant: false,
         newVolumeDialog: newVolume,
-        newFlavorDialog: newFlavor,
+        newSnapshotDialog: newSnapshotDialog,
+        newBackupDialog: newBackupDialog,
         // server dialogs
+        newFlavorDialog: newFlavor,
         newServerDialog: newServer,
         changePasswordDialog: changePassword,
         changeServerNameDialog: changeServerName,
-        volumeAttachDialog: volumeAttach,
-        volumeDetachDialog: volumeDetach,
         serverVolumeDialog: serverVolumeDialog,
         serverInterfaceDialog: serverInterfaceDialog,
         resizeDialog: resizeDialog,
         migrateDialog: migrateDialog,
+        rebuildDialog: rebuildDialog,
+        newKeypairDialog: newKeypairDialog,
         // network dialogs
         newNetDialog: newNetDialog,
         newRouterDialog: newRouterDialog,
         newSubnetDialog: newSubnetDialog,
         routerInterfacesDialog: routerInterfacesDialog,
         newPortDialog: newPortDialog,
-        newKeypairDialog: newKeypairDialog,
-        rebuildDialog: rebuildDialog,
     },
     methods: {
-        getServices: function () {
-            let self = this;
-            API.service.list().then(resp => {
-                resp.data.services.forEach(item => {
-                    self.identity.serviceMap[item.id] = item
-                });
+        getServices: async function () {
+            let body = await API.service.list()
+            body.services.forEach(item => {
+                this.identity.serviceMap[item.id] = item
             });
         },
-        networkDelete: function () {
-            let self = this;
-            self.networking.networkTable.selected.forEach(item => {
-                API.network.delete(item).then(resp => {
-                    console.log(`delete network ${item.id} success`);
-                });
-            });
-            self.networking.networkTable.refresh();
-        },
-        loginVnc: function (server) {
-            API.server.getVncConsole(server.id).then(resp => {
-                if (resp.data.remote_console.url) {
-                    window.open(resp.data.remote_console.url, '_blank');
-                } else {
-                    console.error(`get console url failed, response: ${resp.data}`)
-                }
-            });
-        },
-        checkVolumeStatus: function (volume_id) {
-            let self = this;
-            API.volume.show(volume_id).then(resp => {
-                let status = resp.data.volume.status;
-                if (status == 'available') {
-                    MESSAGE.success(`卷 ${volume_id} 创建成功`);
-                    self.volume.volumeTable.refresh()
-                    return;
-                } else if (status == 'error') {
-                    MESSAGE.error(`卷 ${volume_id} 创建失败`);
-                    self.volume.volumeTable.refresh();
-                    return;
-                };
-                setTimeout(function () {
-                    self.checkVolumeStatus(volume_id)
-                }, 5 * 1000)
-            });
-        },
-        newVolume: function (params) {
-            let self = this;
-            for (var i = 1; i <= params.nums; i++) {
-                let data = {
-                    name: params.nums > 1 ? `${params.name}-${i}` : params.name,
-                    size: parseInt(params.size)
-                };
-                if (params.image != '') { data.imageRef = params.image; }
-                if (params.type != '') { data.volume_type = params.type; }
-                API.volume.create(data).then(resp => {
-                    self.volume.volumeTable.refresh();
-                    self.checkVolumeStatus(resp.data.volume.id);
-                })
-            }
-            MESSAGE.info(`卷 ${params.name} 创建中`);
-            this.newVolumeDialog.show = false;
-        },
-        checkServerStatus: function (server_id) {
-            let self = this;
-            API.server.show(server_id).then(resp => {
-                let status = resp.data.server.status;
-                switch (status.toUpperCase()) {
-                    case 'ACTIVE':
-                        MESSAGE.success(`实例 ${server_id} 创建成功`);
-                        self.computing.serverTable.refresh();
-                        break;
-                    case 'ERROR':
-                        MESSAGE.error(`实例 ${volume_id} 创建失败`);
-                        self.computing.serverTable.refresh();
-                        break;
-                    default:
-                        setTimeout(function () {
-                            self.checkServerStatus(server_id)
-                        }, 5 * 1000);
-                        break;
-                }
-            });
+        loginVnc: async function (server) {
+            let body = await API.server.getVncConsole(server.id);
+            window.open(body.remote_console.url, '_blank');
         },
         refreshContainer: function () {
             if (this.navigation.item >= this.navigation.items.length) {
@@ -221,7 +143,7 @@ new Vue({
                     break;
                 case '虚拟化资源':
                     this.computing.hypervisorTable.refresh();
-                    this.hyperStatistics();
+                    this.computing.hypervisorTable.refreshStatics();
                     this.computing.usageTable.refresh();
                     break;
                 case '计算服务':
@@ -247,16 +169,12 @@ new Vue({
                 case '存储':
                     this.volume.volumeTable.refresh();
                     this.volume.volumeTypeTable.refresh();
-                    this.volume.snapshotTable.refresh()
+                    this.volume.snapshotTable.refresh();
                     this.image.imageTable.refresh();
+                    this.volume.backupTable.refresh();
+                    this.volume.volumeServiceTable.refresh();
                     break;
             }
-        },
-        hyperStatistics: function () {
-            let self = this;
-            API.hypervisor.statistics().then(resp => {
-                self.computing.hypervisorTable.statistics = resp.data.hypervisor_statistics;
-            })
         },
         getMessageTop: function (index) {
             return `top: ${50 * index}px`;

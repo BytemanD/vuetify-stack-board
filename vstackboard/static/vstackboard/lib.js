@@ -3,10 +3,10 @@ import { volumeTable } from "./tables.js";
 
 export class Message {
     constructor() {
-        this.info = function (msg, timeout = 5) {
+        this.info = function (msg, timeout = 3) {
             VuetifyMessageSnackbar.Notify.topRight().timeout(timeout * 1000).info(msg);
         };
-        this.success = function (msg, timeout = 5) {
+        this.success = function (msg, timeout = 2) {
             VuetifyMessageSnackbar.Notify.topRight().timeout(timeout * 1000).success(msg);
         };
         this.error = function (msg, timeout = 5) {
@@ -77,7 +77,7 @@ export class Utils {
             }, 5 * 1000)
         });
     }
-    static checkVolumeAttached(volume_id){
+    static checkVolumeAttached(volume_id) {
         API.volume.show(volume_id).then(resp => {
             let status = resp.data.volume.status;
             if (status == 'in-use') {
@@ -92,7 +92,7 @@ export class Utils {
             }, 3 * 1000)
         });
     }
-    static checkVolumeDetached(volume_id){
+    static checkVolumeDetached(volume_id) {
         API.volume.show(volume_id).then(resp => {
             let status = resp.data.volume.status;
             if (status == 'available') {
@@ -107,13 +107,59 @@ export class Utils {
             }, 5 * 1000)
         });
     }
-    static humanRam(size){
-        if ( size < 1024 ) {
+    static humanRam(size) {
+        if (size < 1024) {
             return `${size}MB`
         }
         return `${(size / 1024).toFixed(0)}GB`
     }
+    static sleep(seconds) {
+        seconds = (seconds || 0);
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve(true);
+            }, seconds * 1000)
+        })
+    }
+}
+
+//             error  warning info debug
+// logLevels = [0,    1,      2,   3]
+export var Level = {
+    ERROR: 0,
+    WARNING: 1,
+    INFO: 2,
+    DEBUG: 3,
+}
+
+export class Logger {
+    constructor(kwargs = {}) {
+        this.level = kwargs['level'] || Level.INFO;
+    }
+    debug(msg) {
+        if (this.level < Level.DEBUG){
+            return
+        }
+        console.debug(`${new Date().toISOString()} DEBUG ${msg}`)
+    };
+    info(msg) {
+        if (this.level < Level.INFO){
+            return
+        }
+        console.info(`${new Date().toISOString()} INFO ${msg}`)
+    };
+    warn(msg) {
+        if (this.level < Level.WARNING){
+            return
+        }
+        console.warn(`${new Date().toISOString()} WARN ${msg}`)
+    };
+    error(msg) {
+        console.error(`${new Date().toISOString()} ERROR ${msg}`)
+        VuetifyMessageSnackbar.Notify.top().timeout(timeout * 1000).error(msg)
+    };
 }
 
 export const MESSAGE = new Message();
 export const ALERT = new Alert();
+export const LOG = new Logger({level: Level.DEBUG});

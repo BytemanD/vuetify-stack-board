@@ -1,11 +1,13 @@
-import { Utils, MESSAGE } from './lib.js';
+import { Utils, MESSAGE, ALERT, LOG } from './lib.js';
 import API from './api.js';
 
 import {
+    backupTable,
     clusterTable,
+    flavorTable,
     keypairTable,
     netTable, portTable, routerTable,
-    serverTable, volumeTable
+    serverTable, snapshotTable, volumeTable
 } from './tables.js';
 
 
@@ -70,14 +72,12 @@ export class NewSubnetDialog extends Dialog {
     randomName() {
         this.params.name = Utils.getRandomName('subnet');
     }
-    open() {
-        API.network.list().then(resp => {
-            this.networks = resp.data.networks
-        });
+    async open() {
         this.randomName();
         super.open();
+        this.networks = (await API.network.list()).networks
     }
-    commit() {
+    async commit() {
         let data = {
             name: this.params.name,
             network_id: this.params.network,
@@ -87,14 +87,17 @@ export class NewSubnetDialog extends Dialog {
         }
         if (this.params.gateway != '') { data.gateway = this.params.gateway };
 
-        API.subnet.post({ subnet: data }).then(resp => {
+        try {
+            await API.subnet.post({ subnet: data })
+            this.hide();
             MESSAGE.success(`子网 ${this.params.name} 创建成功`)
+            await netTable.refreshSubnets();
             netTable.refresh();
-            netTable.refreshSubnets();
-        }).catch(error => {
-            MESSAGE.error(`子网 ${this.params.name} 创建失败, ${error.response.data.NeutronError.message}`)
-        });
-        this.hide()
+        } catch {
+            // MESSAGE.error(`子网 ${this.params.name} 创建失败, ${error.response.data.NeutronError.message}`)
+            MESSAGE.error(`子网 ${this.params.name} 创建失败`)
+
+        }
     }
 }
 
@@ -109,16 +112,18 @@ export class NewRouterkDialog extends Dialog {
         this.randomName();
         super.open();
     }
-    commit() {
+    async commit() {
         let data = { name: this.params.name }
         if (this.params.azHint != '') { data.availability_zone_hints = [this.params.azHint] };
-        API.router.post({ router: data }).then(resp => {
+        try {
+            await API.router.post({ router: data });
+            this.hide();
+            MESSAGE.success(`路由 ${this.params.name} 创建成功`)
             routerTable.refresh();
-            this.hide();
-        }).catch(error => {
-            MESSAGE.error(`路由 ${this.params.name} 创建失败, ${error.response.data.NeutronError.message}`)
-            this.hide();
-        });
+        } catch {
+            // MESSAGE.error(`路由 ${this.params.name} 创建失败, ${error.response.data.NeutronError.message}`)
+            MESSAGE.error(`路由 ${this.params.name} 创建失败`)
+        }
     }
 }
 
@@ -127,107 +132,117 @@ export class ServerVolumeDialog extends Dialog {
         super({ server: {}, attachments: [], volumes: [], selectedVolumes: [] })
     }
 
-    refreshAttachments() {
-        API.server.volumeAttachments(this.params.server.id).then(resp => {
-            this.params.attachments = resp.data.volumeAttachments;
-        });
+    async refreshAttachments() {
+        this.params.attachments = (
+            await API.server.volumeAttachments(this.params.server.id)
+        ).volumeAttachments;
     }
-    refreshAvailableVolumes() {
-        API.volume.detail({ status: 'available' }).then(resp => {
-            this.params.volumes = resp.data.volumes;
-        });
+    async refreshAvailableVolumes() {
+        this.params.volumes = (
+            await API.volume.detail({ status: 'available' })
+        ).volumes;
     }
     open(server) {
         this.params.server = server;
         this.params.volumes = []
         this.params.selectedVolumes = [];
         this.refreshAttachments();
-
         this.refreshAvailableVolumes();
-
         super.open();
     }
-    detach(attachment) {
-        API.server.volumeDetach(this.params.server.id, attachment.volumeId).then(resp => {
-            MESSAGE.info(`卷 ${attachment.volumeId} 卸载中 ...`);
-            Utils.checkVolumeDetached(attachment.volumeId);
-        }).catch(error => {
-            MESSAGE.error(`卷 ${attachment.volumeId} 卸载失败`);
-        });
+    async detach(attachment) {
+        await API.server.volumeDetach(this.params.server.id, attachment.volumeId)
+        MESSAGE.info(`卷 ${attachment.volumeId} 卸载中 ...`);
+        await this.waitVolumeStatus(attachment.volumeId, ['available', 'error']);
+        MESSAGE.success(`卷 ${attachment.volumeId} 卸载成功`);
+        this.refreshAttachments();
     }
-    checkVolumeAttached(volume_id) {
-        let self = this;
-        API.volume.show(volume_id).then(resp => {
-            let status = resp.data.volume.status;
-            if (status == 'in-use') {
-                MESSAGE.success(`卷 ${volume_id} 挂载成功`);
-                self.refreshAttachments();
-                return;
-            } else if (status == 'error') {
-                MESSAGE.error(`卷 ${volume_id} 挂载失败`);
-                return;
-            };
-            setTimeout(function () {
-                self.checkVolumeAttached(volume_id)
-            }, 3 * 1000)
-        });
+    async waitVolumeStatus(volume_id, expectStatus=['available', 'error']) {
+        let body = {}
+        while (true){
+            body = await API.volume.show(volume_id);
+            let status = body.volume.status;
+            LOG.debug(`wait volume ${volume_id} status to be ${expectStatus}, now: ${status}`)
+            if (expectStatus.indexOf(status) >= 0) {
+                break;
+            }
+            await Utils.sleep(3);
+        }
+        return body
     }
-    attachSelected() {
-        this.params.selectedVolumes.forEach(volume_id => {
-            API.server.attachVolume(this.params.server.id, volume_id).then(resp => {
-                MESSAGE.info(`卷 ${volume_id} 挂载中 ...`);
-                this.checkVolumeAttached(volume_id);
-                this.params.selectedVolumes = [];
-            }).catch(error => {
-                console.error(error);
-                MESSAGE.error(`卷 ${volume_id} 挂载失败`);
-            });
-        });
+    async attachSelected() {
+        for (let i in this.params.selectedVolumes){
+            let volume_id = this.params.selectedVolumes[i];
+            await API.server.attachVolume(this.params.server.id, volume_id)
+            MESSAGE.info(`卷 ${volume_id} 挂载中 ...`);
+            await this.waitVolumeStatus(volume_id, ['in-use', 'error']);
+            MESSAGE.success(`卷 ${volume_id} 挂载成功`);
+            this.refreshAttachments();
+        }
     }
 }
 
 export class ServerInterfaceDialog extends Dialog {
     constructor() {
-        super({ server: {}, attachments: [], selected: [] })
+        super();
+        this.server = {};
+        this.attachments = [];
+        this.selected = [];
         this.ports = [];
     }
 
-    refreshInterfaces() {
-        API.server.interfaceList(this.params.server.id).then(resp => {
-            this.params.attachments = resp.data.interfaceAttachments;
-        });
+    async refreshInterfaces() {
+        this.attachments = (
+            await API.server.interfaceList(this.server.id)
+        ).interfaceAttachments;
     }
-    refreshPorts() {
-        API.port.list({ device_id: '+' }).then(resp => {
-            this.ports = resp.data.ports;
-        });
+    async refreshPorts() {
+        this.selected = [];
+        let body = await API.port.list({ device_id: '+' })
+        this.ports = body.ports
     }
     open(server) {
-        this.params.server = server;
-        this.params.selected = [];
+        this.server = server;
+        this.selected = [];
         this.refreshInterfaces();
         this.refreshPorts();
         super.open();
     }
-    detach(item) {
-        API.server.interfaceDetach(this.params.server.id, item.port_id).then(resp => {
-            MESSAGE.info(`网卡 ${item.port_id} 卸载中 ...`);
-            // TODO 循环检查 port 状态判断是否 卸载
-        }).catch(error => {
-            MESSAGE.error(`网卡 ${item.port_id} 卸载失败`);
-        });
+    async detach(item) {
+        await API.server.interfaceDetach(this.server.id, item.port_id);
+        MESSAGE.info(`网卡 ${item.port_id} 卸载中 ...`);
+        while (true) {
+            let detached = true;
+            let interfaces = await API.server.interfaceList(this.server.id);
+            for (var i in interfaces) {
+                if (interfaces[i].port_id == item.port_id) {
+                    detached = false;
+                }
+            }
+            if (detached) {
+                break;
+            }
+        }
+        MESSAGE.success(`网卡 ${item.port_id} 卸载成功`);
+        await this.refreshPorts();
+        for (let i in this.attachments) {
+            if (this.attachments[i].port_id == item.port_id) {
+                this.attachments.splice(i, 1)
+                break;
+            }
+        }
+        serverTable.refresh();
     }
-    attachSelected() {
-        this.params.selected.forEach(item => {
-            API.server.interfaceAttach(this.params.server.id, { port_id: item }).then(resp => {
-                MESSAGE.success(`网卡 ${item} 挂载成功`);
-                this.refreshInterfaces();
-                this.refreshPorts();
-            }).catch(error => {
-                MESSAGE.error(`网卡 ${item} 挂载失败`);
-            });
-        });
-        MESSAGE.info(`网卡挂载中 ...`);
+    async attachSelected() {
+        for (let i in this.selected) {
+            let item = this.selected[i];
+            MESSAGE.info(`网卡 ${item} 挂载中`);
+            await API.server.interfaceAttach(this.server.id, { port_id: item })
+            MESSAGE.success(`网卡 ${item} 挂载成功`);
+            this.refreshInterfaces();
+        }
+        this.refreshPorts();
+        serverTable.refresh();
     }
 }
 
@@ -240,99 +255,34 @@ export class ChangePasswordDialog extends Dialog {
         this.server = server;
         super.open()
     }
-    commit() {
+    async commit() {
         if (!this.params.password.trim()) {
             ALERT.error(`密码不能为空`)
             return;
         }
-        API.server.changePassword(this.server.id, this.params.password.trim(),
-            this.params.userName).then(resp => {
-                MESSAGE.success(`${this.server.name} 密码修改成功`)
-                this.hide()
-            }).catch(error => {
-                MESSAGE.error(`${this.server.name} 密码修改失败`)
-            });
+        await API.server.changePassword(this.server.id, this.params.password.trim(), this.params.userName)
+        MESSAGE.success(`${this.server.name} 密码修改成功`)
+        this.hide()
     }
 }
 
 export class ChangeServerNameDialog extends Dialog {
     constructor() { super({ newName: '', server: {} }) }
 
-    commit() {
-        API.server.put(this.params.server.id,
-            {
-                server: { name: this.params.newName }
-            }).then(resp => {
-                this.hide();
-                MESSAGE.success('实例名修改成功');
-                this.params.server.name = this.params.newName;
-            }).catch(error => {
-                console.error(error)
-                MESSAGE.error('实例名修改失败');
-            })
-    }
     open(server) {
         this.params.server = server;
         this.params.newName = '';
         this.show = true;
     }
-}
-
-export class InterfaceAttachDialog extends Dialog {
-    constructor() {
-        super({ server: {}, selectedPorts: [], ports: [] })
-    }
-
-    commit() {
-        this.params.selectedPorts.forEach(item => {
-            API.server.interfaceAttach(this.params.server.id, { port_id: item }).then(resp => {
-                MESSAGE.success(`网卡 ${item} 挂载成功`);
-                serverTable.refresh();
-            }).catch(error => {
-                MESSAGE.error(`网卡 ${item} 挂载失败`);
-            });
-        });
-        MESSAGE.info(`网卡挂载中 ...`);
+    async commit() {
+        await API.server.update(this.params.server.id, { name: this.params.newName });
+        MESSAGE.success('实例名修改成功');
+        serverTable.refresh();
         this.hide();
     }
-    open(server) {
-        this.params.server = server;
-        this.params.ports = []
-        this.params.selectedPorts = [];
-        API.port.list({ device_id: '+' }).then(resp => {
-            this.params.ports = resp.data.ports;
-        });
-        this.show = true;
-    }
 }
 
-export class InterfaceDetachDialog extends Dialog {
-    constructor() {
-        super({ server: {}, selectedInterfaces: [], attachments: [] })
-    }
 
-    commit() {
-        this.params.selectedInterfaces.forEach(item => {
-            API.server.interfaceDetach(this.params.server.id, item).then(resp => {
-                MESSAGE.info(`网卡 ${item} 卸载中 ...`);
-                // TODO 循环检查 port 状态判断是否 卸载
-                setTimeout(function () { serverTable.refresh(); }, 5 * 1000);
-                this.hide();
-            }).catch(error => {
-                MESSAGE.error(`网卡 ${item} 卸载失败`);
-            });
-        });
-    }
-    open(server) {
-        this.params.server = server;
-        this.params.volumes = []
-        this.params.selectedInterfaces = [];
-        API.server.interfaceList(this.params.server.id).then(resp => {
-            this.params.attachments = resp.data.interfaceAttachments;
-        });
-        this.show = true;
-    }
-}
 export class ResizeDialog extends Dialog {
     constructor() {
         super();
@@ -341,35 +291,27 @@ export class ResizeDialog extends Dialog {
         this.oldFlavorRef = ''
         this.flavorRef = '';
     }
-    open(server) {
+    async open(server) {
         this.server = server;
         this.oldFlavorRef = this.server.flavor.original_name;
         this.flavors = [];
-        API.flavor.detail().then(resp => {
-            resp.data.flavors.forEach(item => {
-                if (item.name != this.server.flavor.original_name){
-                    this.flavors.push(item)
-                }
-            });
-        });
-        super.open()
+        let body = await API.flavor.detail();
+        super.open();
+        for (let i in body.flavors){
+            let item = body.flavors[i];
+            if (item.name != this.server.flavor.original_name) {
+                this.flavors.push(item)
+            }
+        }
     }
-    commit() {
-        API.server.resize(this.server.id, this.flavorRef).then(resp => {
-            MESSAGE.info(`虚拟机 ${this.server.id} 变更中...`);
-            serverTable.waitServerActive(this.server).then(data => {
-                MESSAGE.success(`虚拟机 ${this.server.id} 变更成功`);
-                serverTable.refresh();
-            }).catch(data => {
-                MESSAGE.error(`虚拟机 ${this.server.id} 变更失败`);
-                serverTable.refresh()
-            });
-            this.hide();
-        }).catch(error => {
-            console.error(error);
-            MESSAGE.error(`请求变更 ${this.server.id} 失败`);
-            this.hide();
-        });
+    async commit() {
+        await API.server.resize(this.server.id, this.flavorRef)
+        MESSAGE.info(`虚拟机 ${this.server.id} 变更中...`);
+        this.hide();
+
+        await serverTable.waitServerStatus(this.server.id);
+        MESSAGE.success(`虚拟机 ${this.server.id} 变更成功`);
+        serverTable.refresh();
     }
 }
 export class MigrateDialog extends Dialog {
@@ -383,34 +325,31 @@ export class MigrateDialog extends Dialog {
         this.servers = serverTable.selected;
         super.open()
     }
-    commit() {
-        this.servers.forEach(item => {
-            switch (item.status.toUpperCase()){
+    async commit() {
+        for (let i in this.servers) {
+            let item = this.servers[i];
+            switch (item.status.toUpperCase()) {
                 case 'ACTIVE':
                     MESSAGE.info(`热迁移 ${item.name} ...`)
-                    API.server.liveMigrate(item.id).then(resp => {
-                        serverTable.waitServerActive(item).then(data => {
-                            MESSAGE.success(`虚拟机 ${item.id} 迁移成功`);
-                            serverTable.refresh();
-                        }).catch(data => {
-                            MESSAGE.error(`虚拟机 ${item.id} 迁移失败`);
-                            serverTable.refresh()
-                        });
-                    });
+                    await API.server.liveMigrate(item.id)
+                    await serverTable.waitServerStatus(item.id);
+                    MESSAGE.success(`虚拟机 ${item.id} 迁移完成`);
+                    // MESSAGE.error(`虚拟机 ${item.id} 迁移失败`);
+                    serverTable.refresh();
                     break;
                 case 'SHUTOFF':
                     MESSAGE.info(`冷迁移 ${item.name} ...`)
-                    API.server.migrate(item.id).then(resp => {
-                        serverTable.waitServerActive(item).then(data => {
-                            MESSAGE.success(`虚拟机 ${item.id} 迁移成功`);
-                            serverTable.refresh();
-                        }).catch(data => {
-                            MESSAGE.error(`虚拟机 ${item.id} 迁移失败`);
-                            serverTable.refresh()
-                        });
-                    });
+                    await API.server.migrate(item.id);
+                    await serverTable.waitServerStatus(item.id, ['SHUTOFF', 'ERROR'])
+                    MESSAGE.success(`虚拟机 ${item.id} 迁移完成`);
+                    serverTable.refresh();
+                    serverTable.refresh()
+                    break;
+                default:
+                    ALERT.warn(`虚拟机 ${item.name} 状态异常，无法迁移`, 1)
+                    break;
             }
-        })
+        }
     }
 }
 export class NewClusterDialog extends Dialog {
@@ -430,7 +369,7 @@ export class NewClusterDialog extends Dialog {
             authUser: this.params.authUser,
             authPassword: this.params.authPassword
         };
-        if (data.name.endsWith('/')){
+        if (data.name.endsWith('/')) {
             data.name = data.name.slice(0, -1);
         }
         API.cluster.add(data).then(resp => {
@@ -459,29 +398,26 @@ export class NewServerDialog extends Dialog {
         this.hosts = [];
         this.azHosts = {};
     }
-    open() {
+    async open() {
         this.params.name = Utils.getRandomName('server');
-
-        API.flavor.detail().then(resp => {
-            this.flavors = resp.data.flavors;
-            this.flavors.sort(function (flavor1, flavor2) { return flavor1.name.localeCompare(flavor2.name) })
-        })
-        API.image.list().then(resp => {
-            this.images = resp.data.images;
-        })
-        API.network.list().then(resp => {
-            this.networks = resp.data.networks;
-            this.networks.splice(this.networks, 0, { name: '无', id: null })
-        })
-        API.az.detail().then(resp => {
-            this.azList = resp.data.availabilityZoneInfo.filter(az => { return az.zoneName != 'internal' });
-            this.azList.splice(this.azList, 0, { zoneName: '无', hosts: [] })
-            this.azHosts = { '无': '' };
-            this.azList.forEach(az => { this.azHosts[az.zoneName] = Object.keys(az.hosts); })
-        });
         this.display()
+
+        this.flavors = (await API.flavor.detail()).flavors;
+        this.flavors.sort(function (flavor1, flavor2) { return flavor1.name.localeCompare(flavor2.name) })
+
+        this.images = (await API.image.list()).images;
+
+        this.networks = (await API.network.list()).networks;
+        this.networks.splice(this.networks, 0, { name: '', id: null })
+
+        let body = await API.az.detail();
+        this.azList = body.availabilityZoneInfo.filter(az => { return az.zoneName != 'internal' });
+        this.azList.splice(this.azList, 0, { zoneName: '', hosts: [] })
+        this.azHosts = { '无': '' };
+        this.azList.forEach(az => { this.azHosts[az.zoneName] = Object.keys(az.hosts); })
+
     }
-    commit() {
+    async commit() {
         if (!this.params.name) { ALERT.error(`实例名不能为空`); return; }
         if (!this.params.flavor) { ALERT.error(`请选择规格`); return; }
         if (!this.params.image) { ALERT.error(`请选择镜像`); return; }
@@ -490,7 +426,7 @@ export class NewServerDialog extends Dialog {
             MESSAGE.error(`实例名字不能为空`);
             return;
         }
-        API.server.boot(this.params.name, this.params.flavor, this.params.image,
+        let body = await API.server.boot(this.params.name, this.params.flavor, this.params.image,
             {
                 minCount: this.params.nums, maxCount: this.params.nums,
                 useBdm: this.params.useBdm, volumeSize: this.params.volumeSize,
@@ -499,34 +435,13 @@ export class NewServerDialog extends Dialog {
                 host: this.params.host,
                 password: this.params.password,
             }
-        ).then(resp => {
-            MESSAGE.info(`实例 ${this.params.name} 创建中...`);
-            this.hide();
-            serverTable.refresh();
-            this.checkServerStatus(resp.data.server.id);
-        })
-    }
-    checkServerStatus(server_id, oldStatus = '', oldTaskState = '') {
-        API.server.show(server_id).then(resp => {
-            let status = resp.data.server.status;
-            let taskState = resp.data.server['OS-EXT-STS:task_state'];
-            switch (status.toUpperCase()) {
-                case 'ACTIVE':
-                    MESSAGE.success(`实例 ${server_id} 创建成功`);
-                    break;
-                case 'ERROR':
-                    MESSAGE.error(`实例 ${volume_id} 创建失败`);
-                    break;
-                default:
-                    let self = this;
-                    setTimeout(function () { self.checkServerStatus(server_id, status, taskState) }, 5 * 1000);
-                    break;
-            }
-            if ((oldTaskState && taskState && oldTaskState.toUpperCase() != taskState.toUpperCase()) ||
-                (oldStatus && status && oldStatus.toUpperCase() != status.toUpperCase())) {
-                serverTable.refresh();
-            }
-        });
+
+        )
+        MESSAGE.info(`实例 ${this.params.name} 创建中...`);
+        this.hide();
+        serverTable.refresh();
+        await serverTable.waitServerStatus(body.server.id)
+        MESSAGE.success(`实例 ${this.params.name} 创建成功`);
     }
 }
 
@@ -552,7 +467,7 @@ export class NewFlavorDialog extends Dialog {
     getRam() {
         return this.ramValues[this.params.ram];
     }
-    commit() {
+    async commit() {
         if (!this.params.id || !this.params.name) {
             ALERT.error(`规格ID规格和名字不能为空`, 2);
             return;
@@ -562,27 +477,18 @@ export class NewFlavorDialog extends Dialog {
             return;
         }
 
-        API.flavor.create({
-            id: this.params.id,
-            name: this.params.name,
-            ram: this.getRam(),
-            vcpus: this.params.vcpu,
-            disk: this.params.disk,
-            'os-flavor-access:is_public': this.params.isPublic,
-        }).then(resp => {
-            let flavor = resp.data.flavor;
-            MESSAGE.success(`规格 ${this.params.name} 创建成功`);
-            if (extraSpcs && Object.keys(extraSpcs).length >= 1) {
-                API.flavor.updateExtras(flavor.id, extraSpcs).then(resp2 => {
-                    MESSAGE.success(`规格 ${this.params.name} 属性设置成功`);
-                    flavorTable.refresh();
-                    this.hide()
-                });
-            } else {
-                flavorTable.refresh();
-                this.hide()
-            }
-        })
+        let body = await API.flavor.create({
+            id: this.params.id, name: this.params.name,
+            ram: this.getRam(), vcpus: this.params.vcpu, disk: this.params.disk,
+            'os-flavor-access:is_public': this.params.isPublic
+        });
+        console.log(body);
+        let flavor = body.flavor;
+        console.log(extraSpcs)
+        await API.flavor.updateExtras(flavor.id, extraSpcs);
+        MESSAGE.success(`规格 ${this.params.name} 创建成功`);
+        flavorTable.refresh();
+        this.hide();
     }
     checkExtras() {
         let extras = {};
@@ -616,27 +522,24 @@ export class NewKeypairDialog extends Dialog {
         }
         this.privateKey = ''
     }
-    randomName(){
-        return Utils.getRandomName('keypair').replace(/:/g, '');
+    randomName() {
+        return this.newKeypair.name = Utils.getRandomName('keypair').replace(/:/g, '');
     }
-    open(){
-        this.newKeypair.name = this.randomName();
+    open() {
+        this.randomName();
         this.privateKey = ''
         super.open();
     }
-    commit() {
+    async commit() {
         if (!this.newKeypair.name) {
             ALERT.error(`密钥对名字不能为空`);
             return;
         }
         this.newKeypair.name = this.newKeypair.name.trim();
-        API.keypair.post({keypair: this.newKeypair }).then(resp => {
-            MESSAGE.success(`密钥对创建成功`)
-            this.privateKey = resp.data.keypair.private_key;
-            keypairTable.refresh()
-        }).catch(error => {
-            MESSAGE.error(`密钥对创建失败`)
-        })
+        let body = await API.keypair.post({ keypair: this.newKeypair })
+        MESSAGE.success(`密钥对创建成功`)
+        this.privateKey = body.keypair.private_key;
+        keypairTable.refresh()
     }
 }
 export class RebuildDialog extends Dialog {
@@ -644,34 +547,25 @@ export class RebuildDialog extends Dialog {
         super();
         this.server = {};
         this.images = [];
-        this.data = { imageRef: '', description: ''};
+        this.data = { imageRef: '', description: '' };
     }
-    randomName(){
+    randomName() {
         return Utils.getRandomName('keypair').replace(/:/g, '');
     }
-    open(server){
+    async open(server) {
         this.server = server;
-        this.images = [{id: '', name: ''}];
+        this.images = [{ id: '', name: '' }];
         this.data.imageRef = ''
-        API.image.list().then(resp => {
-            this.images = this.images.concat(resp.data.images);
-        })
+        let body = await API.image.list();
+        this.images = this.images.concat(body.images);
         super.open();
     }
-    commit() {
-        let options = {}
-
-        API.server.rebuild(this.server.id, this.data).then(resp => {
-            MESSAGE.info(`虚拟机${this.server.name}重建中`)
-            serverTable.waitServerActive(this.server, 'ACTIVE').then(resp => {
-                MESSAGE.success(`虚拟机${this.server.name}重建成功`)
-            }).catch(error => {
-                MESSAGE.error(`虚拟机${this.server.name}重建失败`)
-            });
-            super.hide();
-        }).catch(error => {
-            MESSAGE.error(`请求失败`)
-        })
+    async commit() {
+        await API.server.rebuild(this.server.id, this.data)
+        MESSAGE.info(`虚拟机${this.server.name}重建中`)
+        super.hide();
+        await serverTable.waitServerStatus(this.server.id)
+        MESSAGE.success(`虚拟机${this.server.name}重建成功`)
     }
 }
 export class NewVolumeDialog extends Dialog {
@@ -681,8 +575,12 @@ export class NewVolumeDialog extends Dialog {
             snapshots: [], images: [], types: []
         })
     }
-
-    commit() {
+    async waitVOlumeCreated(volume){
+        await API.volume.waitVolumeStatus(volume.id);
+        MESSAGE.success(`卷 ${volume.name} 创建成功`);
+        volumeTable.refresh();
+    }
+    async commit() {
         for (var i = 1; i <= this.params.nums; i++) {
             let data = {
                 name: this.params.nums > 1 ? `${this.params.name}-${i}` : this.params.name,
@@ -691,32 +589,26 @@ export class NewVolumeDialog extends Dialog {
             if (this.params.image != '') { data.imageRef = this.params.image; }
             if (this.params.snapshot != '') { data.snapshot_id = this.params.snapshot; }
             if (this.params.type != '') { data.volume_type = this.params.type; }
-            API.volume.create(data).then(resp => {
-                volumeTable.refresh();
-                Utils.checkVolumeStatus(resp.data.volume.id);
-            }).catch(error => {
-                MESSAGE.error(`${this.params.name} ${this.params.name} 创建失败, ${error.response.data.badRequest.message}`)
-            })
+            let body = await API.volume.create(data)
+            this.waitVOlumeCreated(body.volume)
         }
         MESSAGE.info(`卷 ${this.params.name} 创建中`);
-        this.show = false;
+        this.hide();
     }
-    open() {
+    async open() {
         this.params.name = Utils.getRandomName('volume');
-        API.snapshot.detail().then(resp => {
-            this.params.snapshots = resp.data.snapshots;
-            this.params.snapshots.splice(this.params.snapshots, 0, { name: '无', id: '' })
-        })
-        API.image.list().then(resp => {
-            this.params.images = resp.data.images;
-            this.params.images.splice(this.params.images, 0, { name: '无', id: '' })
-        })
-        API.volumeType.list().then(resp => {
-            this.params.types.push()
-            this.params.types = resp.data.volume_types;
-            this.params.types.splice(this.params.types, 0, { name: '无', id: '' })
-        })
-        this.show = true;
+        super.open();
+        let body = await API.snapshot.detail();
+        this.params.snapshots = body.snapshots;
+        this.params.snapshots.splice(this.params.snapshots, 0, { name: '无', id: '' })
+
+        body = await API.image.list();
+        this.params.images = body.images;
+        this.params.images.splice(this.params.images, 0, { name: '无', id: '' })
+        body = await API.volumeType.list();
+        this.params.types = body.volume_types;
+        this.params.types.splice(this.params.types, 0, { name: '无', id: '' })
+
     }
     cleanUpImageShapshot() {
         this.params.image = '';
@@ -724,60 +616,86 @@ export class NewVolumeDialog extends Dialog {
     }
 }
 
-export class VolumeAttachDialog extends Dialog {
+export class NewSnapshotDialog extends Dialog {
     constructor() {
-        super({ volumes: [], server: {}, selectedVolumes: [] })
+        super();
+        this.name = '';
+        this.volume_id = '';
+        this.volumes = [];
+        this.force = false;
+        this.description = '';
+        this.metadata = {}
     }
-
-    commit() {
-        this.params.selectedVolumes.forEach(volume_id => {
-            API.server.attachVolume(this.params.server.id, volume_id).then(resp => {
-                MESSAGE.info(`卷 ${volume_id} 挂载中 ...`);
-                this.hide();
-                Utils.checkVolumeAttached(volume_id);
-            }).catch(error => {
-                MESSAGE.error(`卷 ${volume_id} 挂载失败`);
-            });
-        });
+    randomName() {
+        return this.name = Utils.getRandomName('snapshot');
     }
-    open(server) {
-        this.params.volumes = []
-        this.params.selectedVolumes = [];
-        API.volume.detail({ status: 'available' }).then(resp => {
-            this.params.volumes = resp.data.volumes;
-        });
-        this.params.server = server;
-        this.show = true;
+    async commit() {
+        if (! this.name) { ALERT.error(`快照名不能为空`); return; }
+        if (! this.volume_id) { ALERT.error(`请选择一个卷`); return; }
+        let data = {
+            name: this.name,
+            volume_id: this.volume_id,
+            metadata: this.metadata,
+            force: this.force,
+        }
+        if (this.description){
+            data.description = this.description
+        }
+        let body = await API.snapshot.create(data);
+        MESSAGE.info(`快照 ${this.name} 创建中`);
+        this.hide();
+        await snapshotTable.waitSnapshotCreated(body.snapshot.id)
+        MESSAGE.success(`快照 ${this.name} 创建成功`);
+    }
+    async open() {
+        this.randomName();
+        super.open();
+        let body = await API.volume.list();
+        this.volumes = body.volumes;
     }
 }
-
-export class VolumeDetachDialog extends Dialog {
+export class NewBackupDialog extends Dialog {
     constructor() {
-        super({ server: {}, selectedVolumes: [], attachments: [] })
+        super();
+        this.name = '';
+        this.volume_id = '';
+        this.snapshot_id = ''
+        this.volumes = [];
+        this.description = '';
+        this.force = true;
+        this.incremental = false;
     }
-
-    open(server) {
-        this.params.server = server;
-        this.params.volumes = []
-        this.params.selectedVolumes = [];
-        API.server.volumeAttachments(this.params.server.id).then(resp => {
-            this.params.attachments = resp.data.volumeAttachments.filter(item => { return item.device != '/dev/vda' });
-        });
-        this.display();
+    randomName() {
+        return this.name = Utils.getRandomName('backup');
     }
-    commit() {
-        this.params.selectedVolumes.forEach(volume_id => {
-            API.server.volumeDetach(this.params.server.id, volume_id).then(resp => {
-                MESSAGE.info(`卷 ${volume_id} 卸载中 ...`);
-                Utils.checkVolumeDetached(volume_id);
-                this.hide()
-            }).catch(error => {
-                MESSAGE.error(`卷 ${volume_id} 卸载失败`);
-            });
-        });
+    async commit() {
+        if (! this.name) { ALERT.error(`备份名不能为空`); return; }
+        if (! this.volume_id) { ALERT.error(`请选择一个卷`); return; }
+        let data = {
+            name: this.name,
+            incremental: this.incremental,
+            volume_id: this.volume_id,
+            force: this.force,
+        }
+        if (this.description){
+            data.description = this.description
+        }
+        let backup = (await API.backup.create(data)).backup;
+        MESSAGE.info(`备份 ${this.name} 创建中`);
+        this.hide();
+        let result = await backupTable.waitBackupCreated(backup.id);
+        if (result.status == 'error') {
+            MESSAGE.error(`备份 ${this.name} 创建失败`);
+        } else {
+            MESSAGE.success(`备份 ${this.name} 创建成功`);
+        }
+    }
+    async open() {
+        this.randomName();
+        super.open();
+        this.volumes = (await API.volume.list()).volumes;
     }
 }
-
 export class RouterInterfacesDialog extends Dialog {
     constructor() {
         super()
@@ -787,57 +705,47 @@ export class RouterInterfacesDialog extends Dialog {
         this.subnets = []
     }
 
-    refreshInterfaces() {
-        API.port.list({ device_id: this.router.id }).then(resp => {
-            this.interfaces = resp.data.ports;
-            this.refreshSubnets();
-        });
+    async refreshInterfaces() {
+        this.interfaces = (await API.port.list({ device_id: this.router.id })).ports;
+        this.refreshSubnets();
     }
-    refreshSubnets() {
+    async refreshSubnets() {
         let subnetIds = [];
-        this.subnets = [];
         this.interfaces.forEach(item => {
             item.fixed_ips.forEach(fixed_ip => {
-                if (subnetIds.indexOf(fixed_ip.subnet_id) < 0){
+                if (subnetIds.indexOf(fixed_ip.subnet_id) < 0) {
                     subnetIds.push(fixed_ip.subnet_id)
                 }
             })
         })
-        API.subnet.list().then(resp => {
-            resp.data.subnets.forEach(item => {
-                if (subnetIds.indexOf(item.id) < 0){
-                    this.subnets.push(item)
-                }
-            })
-        });
+        this.subnets = [];
+        (await API.subnet.list()).subnets.forEach(item => {
+            if (subnetIds.indexOf(item.id) < 0) {
+                this.subnets.push(item)
+            }
+        })
     }
     open(router) {
         this.router = router;
         this.selected = [];
-        this.refreshInterfaces();
-        // this.refreshPorts();
         super.open();
+        this.refreshInterfaces();
     }
-    remove(item) {
+    async remove(item) {
         let subneId = item.fixed_ips[0].subnet_id;
         MESSAGE.info(`子网 ${subneId} 移除中`);
-        API.router.removeSubnet(this.router.id, subneId).then(resp => {
-            MESSAGE.success(`子网 ${subneId} 移除成功`);
-            this.refreshInterfaces();
-        }).catch(error => {
-            MESSAGE.error(`子网 ${subneId} 移除失败`);
-        });
+        await API.router.removeSubnet(this.router.id, subneId)
+        MESSAGE.success(`子网 ${subneId} 移除成功`);
+        this.refreshInterfaces();
     }
-    attachSelected() {
+    async attachSelected() {
         MESSAGE.info(`子网添加中`);
-        this.selected.forEach(item => {
-            API.router.addInterface(this.router.id, item).then(resp => {
-                MESSAGE.success(`子网 ${item} 添加成功`);
-                this.refreshInterfaces();
-            }).catch(error => {
-                MESSAGE.error(`子网 ${item} 添加失败`);
-            });
-        });
+        for (let i in this.selected){
+            let item = this.selected[i];
+            await  API.router.addInterface(this.router.id, item)
+            MESSAGE.success(`子网 ${item} 添加成功`);
+            this.refreshInterfaces();
+        }
     }
 }
 export class NewPortDialog extends Dialog {
@@ -852,51 +760,50 @@ export class NewPortDialog extends Dialog {
         this.name = Utils.getRandomName('port');
     }
     open() {
-        this.refreshNetwork();
         this.randomName();
+        this.refreshNetwork();
         super.open();
     }
-    refreshNetwork(){
-        API.network.list().then(resp => {
-            this.networks = resp.data.networks;
-        });
+    async refreshNetwork() {
+        this.networks = (await API.network.list()).networks;
     }
-    commit() {
-        for (var i = 1; i <= this.nums; i++) {
-            let data = {name: this.nums > 1 ? `${this.name}-${i}` : this.name,
-                        network_id: this.networkId};
-            API.port.post({ port: data }).then(resp => {
-                portTable.refresh();
-                MESSAGE.success(`端口 ${this.name} 创建成功`);
-            }).catch(error => {
-                MESSAGE.error(`端口 ${this.name} 创建失败, ${error.response.data.NeutronError.message}`)
-            });
-        }
+    async commit() {
         MESSAGE.info(`端口 ${this.name} 创建中`);
+        for (var i = 1; i <= this.nums; i++) {
+            let data = {
+                name: this.nums > 1 ? `${this.name}-${i}` : this.name,
+                network_id: this.networkId
+            };
+            await API.port.post({ port: data })
+            MESSAGE.success(`端口 ${this.name} 创建成功`);
+            portTable.refresh();
+            // MESSAGE.error(`端口 ${this.name} 创建失败, ${error.response.data.NeutronError.message}`)
+        }
         this.hide();
     }
 }
 
-export const newVolume = new NewVolumeDialog()
+export const newCluster = new NewClusterDialog()
+
+export const newServer = new NewServerDialog()
+export const serverVolumeDialog = new ServerVolumeDialog();
+export const serverInterfaceDialog = new ServerInterfaceDialog();
 export const newFlavor = new NewFlavorDialog()
 export const changePassword = new ChangePasswordDialog()
 export const changeServerName = new ChangeServerNameDialog()
-export const volumeAttach = new VolumeAttachDialog()
-export const volumeDetach = new VolumeDetachDialog()
-export const interfaceDetach = new InterfaceDetachDialog()
-export const interfaceAttach = new InterfaceAttachDialog()
-export const newServer = new NewServerDialog()
-export const newCluster = new NewClusterDialog()
-export const newNetDialog = new NewNetworkDialog();
-export const newSubnetDialog = new NewSubnetDialog();
-export const newRouterDialog = new NewRouterkDialog();
-export const serverVolumeDialog = new ServerVolumeDialog();
-export const serverInterfaceDialog = new ServerInterfaceDialog();
-export const routerInterfacesDialog = new RouterInterfacesDialog();
-export const newPortDialog = new NewPortDialog();
 export const resizeDialog = new ResizeDialog();
 export const migrateDialog = new MigrateDialog();
-export const newKeypairDialog  = new NewKeypairDialog();
+export const newKeypairDialog = new NewKeypairDialog();
 export const rebuildDialog = new RebuildDialog();
+
+export const newVolume = new NewVolumeDialog()
+export const newSnapshotDialog = new NewSnapshotDialog();
+export const newBackupDialog = new NewBackupDialog();
+
+export const newRouterDialog = new NewRouterkDialog();
+export const newNetDialog = new NewNetworkDialog();
+export const newSubnetDialog = new NewSubnetDialog();
+export const routerInterfacesDialog = new RouterInterfacesDialog();
+export const newPortDialog = new NewPortDialog();
 
 export default Dialog;

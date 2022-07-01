@@ -8,11 +8,13 @@ Openstack Dashboard with Vuetify
 - [ ] 查看console log
 - [ ] 挂载网卡可指定net-id
 - [ ] 创建规格时可以从已有的复制
-- [ ] volume-type 创建
 - [ ] volume支持状态重置
 - [ ] inerface 卸载，自动检测后刷新表
 - [ ] 创建虚拟机，允许指定keypair
 - [ ] 上传镜像
+- [ ] Flavor更新extra_specs
+- [ ] 新建port，添加 vnic_type 等可选属性
+- [ ] volume-type 管理
 
 ### v0.0.3
 
@@ -22,6 +24,13 @@ Openstack Dashboard with Vuetify
 - [X] 虚拟机 resize/migrate/pause/unpause
 - [X] 增加keypair
 - [X] 虚拟机rebuild
+- [X] cinder backup 管理
+- [X] cinder 服务管理
+- [X] 虚拟化资源以进度条形式显示已用百分比
+- [X] 简化代码(使用 async/await 语法代替原来的then，)
+- [X] 路由端口管理
+- [X] 卷快照管理
+- [X] 卷备份管理
 
 ### v0.0.2
 

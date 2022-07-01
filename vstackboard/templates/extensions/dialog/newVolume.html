@@ -1,4 +1,4 @@
-<v-dialog v-model="newVolumeDialog.show" width="700">
+<v-dialog v-model="newVolumeDialog.show" width="740">
     <v-card>
       <v-card-title class="headline grey lighten-2" primary-title>新建卷</v-card-title>
       <v-card-text>
@@ -13,11 +13,11 @@
         <v-row>
           <v-col cols="4">
             <v-text-field label="大小(GB)" placeholder="请输入卷大小" v-model="newVolumeDialog.params.size" dense outlined></v-text-field>
-            <v-text-field label="数目" placeholder="请输入新建数量" v-model="newVolumeDialog.params.nums" dense outlined> </v-text-field>
             <v-select :items="newVolumeDialog.params.types" label="卷类型" item-text="name" item-value="id" dense outlined
-                      v-model="newVolumeDialog.params.type">
+                v-model="newVolumeDialog.params.type">
                 <template v-slot:selection="{ item }"> [[ item.name ]] </template>
             </v-select>
+          <v-text-field label="数目" placeholder="请输入新建数量" v-model="newVolumeDialog.params.nums" dense outlined> </v-text-field>
           </v-col>
           <v-col>
             <v-select :items="newVolumeDialog.params.images" label="镜像" item-text="name" item-value="id" dense outlined
@@ -28,7 +28,7 @@
                       v-model="newVolumeDialog.params.snapshot">
               <template v-slot:selection="{ item }"> [[ item.name || item.id ]] </template>
             </v-select>
-            <v-alert type="info" outlined dense>镜像和快照不能同时选择,选择快照后不能选择类型。</v-alert>
+            <v-alert type="info" dense text>镜像和快照不能同时选择,选择快照后不能选择类型。</v-alert>
           </v-col>
         </v-row>
       </v-card-text>

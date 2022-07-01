@@ -21,7 +21,7 @@ PROXY_MAP = {}
 class Index(web.RequestHandler):
 
     def get(self):
-        self.redirect('/dashboard')
+        self.redirect('/welcome')
 
 
 class Dashboard(web.RequestHandler):

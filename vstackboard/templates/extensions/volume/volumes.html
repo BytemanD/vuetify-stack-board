@@ -35,6 +35,7 @@
     <template v-slot:expanded-item="{ headers, item }">
       <td></td><td></td>
       <td :colspan="headers.length -1">
+        <strong>id: </strong> [[ item.id ]] <br>
         <strong>migration_status: </strong> [[ item.migration_status ]] <br>
         <strong>availability_zone: </strong> [[ item.availability_zone ]] <br>
         <strong>updated_at: </strong> [[ item.updated_at ]] <br>

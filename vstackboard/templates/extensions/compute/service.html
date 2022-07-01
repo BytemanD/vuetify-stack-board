@@ -25,8 +25,8 @@
       <v-switch class="my-auto" v-model="item.forced_down" hide-details color="warning" :disabled="item.binary!='nova-compute'"
                @click="computing.serviceTable.forceDown(item)"></v-switch>
    </template>
-   <template v-slot:item.state="{ item }" >
-      <v-icon v-if="item.state == 'up'" color="success">mdi-power-on</v-icon>
-      <v-icon v-else color="error">mdi-power-off</v-icon>
+   <template v-slot:item.state="{ item }">
+      <v-icon v-if="item.state == 'up'" color="success">mdi-emoticon-happy</v-icon>
+      <v-icon v-else color="error">mdi-emoticon-sad</v-icon>
     </template>
   </v-data-table>

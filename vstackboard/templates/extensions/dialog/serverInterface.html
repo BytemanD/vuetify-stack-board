@@ -5,7 +5,7 @@
       <br>
       <v-row>
         <v-col cols="12">
-          <template v-for="item in routerInterfacesDialog.interfaces">
+          <template v-for="item in serverInterfaceDialog.attachments">
             <v-chip close @click:close="serverInterfaceDialog.detach(item)" color="info" label class="mr-2">
                 [[ item.fixed_ips[0]['ip_address'] ]]
             </v-chip>
@@ -13,7 +13,7 @@
         </v-col>
         <v-col cols="10">
           <v-select :items="serverInterfaceDialog.ports" label="可用端口"
-                    item-value="id" item-text="name" multiple chips outlined v-model="routerInterfacesDialog.selected">
+                    item-value="id" item-text="name" multiple chips outlined v-model="serverInterfaceDialog.selected">
           </v-select>
         </v-col>
         <v-col cols="2"><v-btn color="primary" @click="serverInterfaceDialog.attachSelected()">挂载</v-btn></v-col>

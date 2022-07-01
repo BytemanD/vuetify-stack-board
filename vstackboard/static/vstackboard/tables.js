@@ -1,5 +1,7 @@
 import API from './api.js'
-import { ALERT, Alert, MESSAGE } from './lib.js'
+import { ALERT, Level, LOG, MESSAGE, Utils } from './lib.js'
+
+// LOG.level = Level.DEBUG;
 
 class DataTable {
     constructor(headers, api, bodyKey = null, name='') {
@@ -14,32 +16,29 @@ class DataTable {
         this.selected = []
         this.extendItems = []
     }
-    deleteSelected() {
-        let self = this;
+    async deleteSelected() {
         if (this.selected.length == 0){
             return;
         }
         MESSAGE.info(`${this.name} 删除中`)
-        this.selected.forEach(item => {
-            self.api.delete(item.id).then(resp => {
-                self.checkDeleted(item.id);
-            });
-        });
+        for (let i in this.selected){
+            let item = this.selected[i];
+            await this.api.delete(item.id || item.name);
+            this.waitDeleted(item.id || item.name);
+        }
         this.refresh();
         this.resetSelected();
     }
-    checkDeleted(id) {
-        let self = this;
-        this.api.list({ id: id }).then(resp => {
-            if (resp.data[self.bodyKey].length >= 1) {
-                setTimeout(function () {
-                    self.checkDeleted(id)
-                }, 5 * 1000)
-            } else {
-                MESSAGE.success(`${self.name} ${id} 删除成功`, 2);
-                self.refresh();
+    async waitDeleted(id) {
+        while (true){
+            let body = await this.api.list({ id: id })
+            if (body[this.bodyKey].length == 0) {
+                MESSAGE.success(`${this.name} ${id} 删除成功`, 2);
+                this.refresh();
+                break;
             }
-        });
+            await Utils.sleep(5);
+        }
     }
     resetSelected() {
         this.selected = [];
@@ -55,16 +54,14 @@ class DataTable {
             break
         }
     }
-    refresh(filters={}) {
+    async refresh(filters={}) {
         let result = null
         if (this.api.detail) {
-            result = this.api.detail(filters);
+            result = await this.api.detail(filters);
         } else {
-            result = this.api.list(filters)
+            result = await this.api.list(filters)
         }
-        result.then(resp => {
-            this.items = this.bodyKey ? resp.data[this.bodyKey] : resp.data;
-        })
+        this.items = this.bodyKey ? result[this.bodyKey] : resp;
         return result;
     };
 }
@@ -109,39 +106,37 @@ export class NetDataTable extends DataTable{
         ], API.network, 'networks', '网络')
         this.subnets = {};
     }
-    refreshSubnets(){
-        API.subnet.list().then(resp => {
-            resp.data.subnets.forEach(item => {
-                Vue.set(this.subnets, item.id, item)
-            })
+    async refreshSubnets(){
+        let body = await API.subnet.list();
+        body.subnets.forEach(item => {
+            Vue.set(this.subnets, item.id, item)
         });
     }
-    deleteSubnet(subnet_id){
+    async deleteSubnet(subnet_id){
         let subnet = this.subnets[subnet_id];
-        API.subnet.delete(subnet_id).then(resp => {
+        try {
+            await API.subnet.delete(subnet_id)
             MESSAGE.success(`子网 ${subnet.cidr} 删除成功`)
             netTable.refresh();
-        }).catch(error => {
+        } catch {
             MESSAGE.error(`子网 ${subnet.cidr} 删除失败， ${error.response.data.NeutronError.message}`)
-        }) ;
+        }
     }
-    adminStateDown(item){
-        API.network.put(item.id, {network: {admin_state_up: item.admin_state_up}}).then(resp => {
-            if (item.admin_state_up){
-                MESSAGE.success(`网络 ${item.name} 已设置为 UP`)
-            } else {
-                MESSAGE.success(`网络 ${item.name} 已设置为 down`)
-            }
-        })
+    async adminStateDown(item){
+        await API.network.put(item.id, {network: {admin_state_up: item.admin_state_up}})
+        if (item.admin_state_up){
+            MESSAGE.success(`网络 ${item.name} 已设置为 UP`)
+        } else {
+            MESSAGE.success(`网络 ${item.name} 已设置为 down`)
+        }
     }
-    shared(item){
-        API.network.put(item.id, {network: {shared: item.shared}}).then(resp => {
-            if (item.shared){
-                MESSAGE.success(`网络 ${item.name} 已设置为共享`)
-            } else {
-                MESSAGE.success(`网络 ${item.name} 已取消共享`)
-            }
-        })
+    async shared(item){
+        await API.network.put(item.id, {network: {shared: item.shared}})
+        if (item.shared){
+            MESSAGE.success(`网络 ${item.name} 已设置为共享`)
+        } else {
+            MESSAGE.success(`网络 ${item.name} 已取消共享`)
+        }
     }
 }
 export class PortDataTable extends DataTable{
@@ -193,30 +188,40 @@ export class FlavorDataTable extends DataTable {
         this.extraSpecsMap = {};
         this.isPublic = true;
     }
-    checkDeleted(id) {
-        MESSAGE.success(`规格 ${id} 删除成功`);
+    waitDeleted(id) {
     }
-    refreshExtraSpecs(){
-        this.items.forEach(item => {
+    async deleteSelected() {
+        if (this.selected.length == 0){
+            return;
+        }
+        for (let i in this.selected){
+            let item = this.selected[i];
+            await this.api.delete(item.id);
+            MESSAGE.success(`规格 ${item.id} 删除成功`);
+        }
+        this.refresh();
+        this.resetSelected();
+    }
+    async refreshExtraSpecs(){
+        for (let i in this.items){
+            let item = this.items[i];
             if (Object.keys(this.extraSpecsMap).indexOf(item.id) > 0){
                 return;
             }
-            API.flavor.getExtraSpecs(item.id).then(resp => {
-                Vue.set(this.extraSpecsMap, item.id, resp.data.extra_specs)
-            })
-        })
+            let body = await API.flavor.getExtraSpecs(item.id);
+            Vue.set(this.extraSpecsMap, item.id, body.extra_specs);
+        }
     }
-    refresh(){
-        return super.refresh({is_public: this.isPublic}).then(resp => {
-            this.refreshExtraSpecs()
-        })
+    async refresh(){
+        await super.refresh({is_public: this.isPublic})
+        this.refreshExtraSpecs()
     }
 }
 export class KeypairDataTable extends DataTable {
     constructor() {
         super([{ text: '名字', value: 'name' },
                { text: '类型', value: 'type' },
-               { text: 'fingerprint', value: 'fingerprint' }
+               { text: '密钥指纹', value: 'fingerprint' }
               ], API.keypair, 'keypairs', '密钥对');
         // this.extendItems = [
         //     { text: '公钥', value: 'public_key' },
@@ -226,35 +231,22 @@ export class KeypairDataTable extends DataTable {
         navigator.clipboard.writeText(item.public_key);
         MESSAGE.success(`公钥内容已复制`);
     }
-    deleteSelected(){
-        let self = this;
-        if (this.selected.length == 0){return;}
-        this.selected.forEach(item => {
-            self.api.delete(item.name).then(resp => {
-                MESSAGE.success(`密钥对 ${item.name} 删除成功`)
-                this.refresh();
-            }).catch(error => {
-                MESSAGE.error(`密钥对 ${item.name} 删除失败`)
-            });
-        });
-        this.resetSelected();
+    waitDeleted(id){
+        MESSAGE.success(`${name} ${id} 删除成功`, 1)
+        return
     }
-    refresh(filters={}) {
-        let result = null
+    async refresh(filters={}) {
+        let body = null
         if (this.api.detail) {
-            result = this.api.detail(filters);
+            body = await this.api.detail(filters);
         } else {
-            result = this.api.list(filters)
+            body = await this.api.list(filters)
         }
-        result.then(resp => {
-            this.items = [];
-            resp.data.keypairs.forEach(item => {
-                let data = item.keypair;
-                // data.id = item.keypair.name;
-                this.items.push(item.keypair);
-            })
+        this.items = [];
+        body.keypairs.forEach(item => {
+            this.items.push(item.keypair);
         })
-        return result;
+        return body
     };
 
 }
@@ -273,139 +265,124 @@ export class ServerDataTable extends DataTable {
         this.imageMap = {}
     }
 
-    waitServerActive(server, expectStatus='ACTIVE'){
-        let self = this;
-        return new Promise(function(resolve, reject){
-            API.server.show(server.id).then(resp => {
-                let currentServer = resp.data.server;
-                if (currentServer['OS-EXT-STS:task_state'] != server['OS-EXT-STS:task_state']){
-                    self.updateItem(currentServer);
-                }
-                switch (currentServer.status.toUpperCase()){
-                    case expectStatus.toUpperCase():
-                        self.updateItem(currentServer);
-                        resolve(currentServer);
-                        break
-                        case 'ERROR':
-                        self.updateItem(currentServer);
-                        reject(currentServer);
-                        break;
-                    default:
-                        setTimeout(function(){
-                            self.waitServerActive(server, expectStatus).then(data => {
-                                resolve(data)
-                            }).catch(data => {
-                                reject(data)
-                            })
-                        }, 3 * 1000)
-                        break;
-                }
+    async waitServerStatus(server_id, expectStatus=['ACTIVE', 'ERROR']){
+        let expectStatusList = []
+        if (typeof expectStatus == 'string'){
+            expectStatusList.push(expectStatus.toUpperCase())
+        } else {
+            expectStatus.forEach(item => {
+                expectStatusList.push(item.toUpperCase())
             })
-        })
+        }
+        let currentServer = {};
+        let oldTaskState = ''
+        while (true){
+            let body = await API.server.get(server_id);
+            currentServer = body.server;
+            if (currentServer['OS-EXT-STS:task_state'] != oldTaskState){
+                this.updateItem(currentServer);
+                oldTaskState = currentServer['OS-EXT-STS:task_state'];
+            }
+            LOG.debug(`wait server ${server_id} to be ${expectStatusList}, now: ${currentServer.status.toUpperCase()}`)
+            if (expectStatusList.indexOf(currentServer.status.toUpperCase()) >= 0){
+                this.updateItem(currentServer);
+                break
+            }
+            await Utils.sleep(5)
+        }
+        return {
+            status: currentServer.status,
+            task_state: currentServer['OS-EXT-STS:task_state']
+        }
     }
 
-    checkServerStatusUntil(server, status = 'active', message = null) {
+    async stopSelected() {
         let self = this;
-        API.server.show(server.id).then(resp => {
-            server = resp.data.server;
-            let serverStatus = server.status;
-            if (serverStatus.toLowerCase() == status) {
-                if (message) {
-                    MESSAGE.success(`${self.name} ${server.name} ${message}`)
-                }
-                self.refresh();
-                return;
-            };
-            setTimeout(function () {
-                self.checkServerStatusUntil(server, status, message)
-            }, 5 * 1000);
-        });
-    }
-    stopSelected() {
-        let self = this;
-        this.selected.forEach(item => {
+        for (let i in this.selected){
+            let item = this.selected[i];
             if (item.status.toUpperCase() != 'ACTIVE'){
                 ALERT.warn(`虚拟机 ${item.name} 不是运行状态`)
-                return;
+                continue;
             }
-            self.api.stop(item.id).then(resp => {
-                self.waitServerActive(item, 'SHUTOFF').then(resp => {
-                    MESSAGE.success(`虚拟机 ${item.name}已关机`)
-                })
+            self.api.stop(item.id);
+            self.waitServerStatus(item.id, 'SHUTOFF').then(() => {
+                MESSAGE.success(`虚拟机 ${item.name}已关机`);
             });
-        });
+        }
     }
-    startSelected() {
+    async startSelected() {
         let self = this;
-        this.selected.forEach(item => {
+        for (let i in this.selected){
+            let item = this.selected[i];
             if (item.status.toUpperCase() != 'SHUTOFF'){
                 ALERT.warn(`虚拟机 ${item.name} 不是关机状态`)
-                return;
+                continue;
             }
-            self.api.start(item.id).then(resp => {
-                self.waitServerActive(item, 'ACTIVE').then(resp => {
-                    MESSAGE.success(`虚拟机 ${item.name}已开机`)
-                })
+            await self.api.start(item.id)
+            self.waitServerStatus(item.id, 'ACTIVE').then(() => {
+                MESSAGE.success(`虚拟机 ${item.name}已开机`);
             });
-        });
+        };
     }
-    pauseSelected(){
+    async pauseSelected(){
         let self = this;
-        this.selected.forEach(item => {
+        for (let i in this.selected){
+            let item = this.selected[i];
             if (item.status.toUpperCase() != 'ACTIVE'){
                 ALERT.warn(`虚拟机 ${item.name} 不是运行状态`)
-                return;
+                continue;
             }
-            self.api.pause(item.id).then(resp => {
-                self.waitServerActive(item, 'PAUSED').then(resp => {
-                    MESSAGE.success(`虚拟机 ${item.name}已暂停`)
-                })
+            await self.api.pause(item.id);
+            self.waitServerStatus(item.id, 'PAUSED').then(() => {
+                MESSAGE.success(`虚拟机 ${item.name}已暂停`)
             });
-        });
+        };
     }
-    unpauseSelected(){
+    async unpauseSelected(){
         let self = this;
-        this.selected.forEach(item => {
+        for (let i in this.selected){
+            let item = this.selected[i];
             if (item.status.toUpperCase() != 'PAUSED'){
                 ALERT.warn(`虚拟机 ${item.name} 不是暂停状态`)
-                return;
+                continue;
             }
-            self.api.unpause(item.id).then(resp => {
-                self.waitServerActive(item, 'ACTIVE').then(resp => {
-                    MESSAGE.success(`虚拟机 ${item.name}已开启`)
-                })
+            await self.api.unpause(item.id);
+            self.waitServerStatus(item.id, 'ACTIVE').then(() => {
+                MESSAGE.success(`虚拟机 ${item.name}已开启`);
             });
-        });
+        };
     }
-    rebootSelected(type = 'SOFT') {
-        let self = this;
-        this.selected.forEach(item => {
+    async rebootSelected(type = 'SOFT') {
+        for (let i in this.selected){
+            let item = this.selected[i];
             if (item.status.toUpperCase() != 'ACTIVE'){
-                ALERT.warn(`虚拟机 ${item.name} 不是运行状态`)
-                return;
+                ALERT.warn(`虚拟机 ${item.name} 不是运行状态`, 1)
+                continue;
             }
-            self.api.reboot(item.id, type).then(resp => {
-                self.waitServerActive(item, 'ACTIVE').then(resp => {
-                    MESSAGE.success(`虚拟机 ${item.name}已重启`)
-                })
+            await this.api.reboot(item.id, type)
+            this.waitServerStatus(item.id, 'ACTIVE').then(() => {
+                MESSAGE.success(`虚拟机 ${item.name}已重启`)
             });
-        });
+        };
         this.refresh();
         this.resetSelected();
     }
 
     getImage(server) {
+        let self = this;
         let imageId = server.image.id;
-        if (!imageId) { return }
-        if (Object.keys(this.imageMap).indexOf(imageId) < 0) {
+        if(! imageId){
+            return {}
+        } else if (Object.keys(this.imageMap).indexOf(imageId) < 0) {
             Vue.set(this.imageMap, imageId, {})
+            API.image.get(imageId).then(body => {
+                LOG.debug(`get image info for ${imageId} success`)
+                self.imageMap[imageId] = body;
+            });
+            return this.imageMap[imageId];
+        } else {
+            return this.imageMap[imageId];
         }
-        if (!this.imageMap[imageId].name) {
-            API.image.show(imageId).then(resp => {
-                this.imageMap[imageId] = resp.data;
-            })
-        }
-        return this.imageMap[imageId];
     }
 }
 export class ServiceTable extends DataTable {
@@ -418,7 +395,7 @@ export class ServiceTable extends DataTable {
                { text: '强制down', value: 'forced_down'},
               ], API.computeService, 'services')
     }
-    forceDown(service) {
+    async forceDown(service) {
         let down = service.forced_down;
         API.computeService.forceDown(service.id, down).then(resp => {
             if (down){
@@ -508,8 +485,123 @@ export class SnapshotTable extends DataTable {
                { text: '卷ID', value: 'volume_id' },
               ], API.snapshot, 'snapshots', '快照')
     }
+    async waitSnapshotCreated(snapshot_id){
+        let snapshot = {};
+        let expectStatus = ['available', 'error'];
+        let oldStatus = ''
+        while (true){
+            snapshot = (await API.snapshot.get(snapshot_id)).snapshot;
+            LOG.debug(`wait snapshot ${snapshot_id} status to be ${expectStatus}, now: ${snapshot.status}`)
+            if (snapshot.status != oldStatus){
+                this.refresh();
+            }
+            if (expectStatus.indexOf(snapshot.status) >= 0) {
+                break;
+            }
+            oldStatus = snapshot.status;
+            await Utils.sleep(3);
+        }
+        return snapshot
+    }
 }
+export class BackupTable extends DataTable {
+    constructor() {
+        super([{ text: '名字', value: 'name' },
+               { text: '状态', value: 'status' },
+               { text: '大小', value: 'size' },
+               { text: '卷ID', value: 'volume_id' },
+              ], API.backup, 'backups', '备份');
+        this.extendItems = [
+                {text: 'id', value: 'id' },
+                {text: 'fail_reason', value: 'fail_reason' },
+                {text: 'snapshot_id', value: 'metadata' },
+                {text: 'has_dependent_backups', value: 'has_dependent_backups' },
+                {text: 'created_at', value: 'created_at' },
+                {text: 'availability_zone', value: 'availability_zone' },
+                {text: 'description', value: 'description' },
+            ];
+    }
 
+    async waitDeleted(backup_id){
+        await this.waitBackupDeleted(backup_id)
+    }
+    async waitBackupCreated(backup_id){
+        let backup = {};
+        let expectStatus = ['available', 'error'];
+        let oldStatus = ''
+        while (true){
+            backup = (await API.backup.get(backup_id)).backup;
+            LOG.debug(`wait backup ${backup_id} status to be ${expectStatus}, now: ${backup.status}`)
+            if (backup.status != oldStatus){
+                this.refresh();
+            }
+            if (expectStatus.indexOf(backup.status) >= 0) {
+                break;
+            }
+            oldStatus = backup.status;
+            await Utils.sleep(3);
+        }
+        return backup
+    }
+    async waitBackupDeleted(backup_id){
+        let backup = {};
+        while (true){
+            try {
+                LOG.debug(`wait backup ${backup_id} status to be deleted`)
+                backup = (await API.backup.get(backup_id)).backup;
+                if (backup.status == 'error') {
+                    MESSAGE.error(`备份 ${backup_id} 删除失败`);
+                    break;
+                }
+            } catch (error) {
+                console.log(error);
+                MESSAGE.error(`备份 ${backup_id} 删除成功`);
+                break
+            }
+            await Utils.sleep(3);
+        }
+        this.refresh();
+        return backup
+    }
+}
+export class VolumeServiceTable extends DataTable {
+    constructor() {
+        super([{ text: '服务', value: 'binary' },
+               { text: '可用状态', value: 'status' },
+               { text: '服务状态', value: 'state' },
+               { text: '节点', value: 'host' },
+              ], API.volumeService, 'services', '卷服务');
+        this.extendItems = [
+                {text: 'updated_at', value: 'updated_at' },
+                {text: 'disabled_reason', value: 'disabled_reason' },
+                {text: 'disabled_policy', value: 'disabled_policy' },
+                {text: 'zone', value: 'zone' },
+            ];
+    }
+    async toggleEnabled(item){
+        let body = null;
+        switch(item.status){
+            case 'enabled':
+                body = await API.volumeService.disable(item.binary, item.host);
+                if (body.status == 'disabled'){
+                    MESSAGE.success(`${this.name} ${item.binary}:${item.host} 已设为不可用`)
+                    this.refresh();
+                } else {
+                    item.status == 'enabled'
+                }
+                break;
+            case 'disabled':
+                body = await API.volumeService.enable(item.binary, item.host);
+                if (body.status == 'enabled'){
+                    MESSAGE.success(`${this.name} ${item.binary}:${item.host} 已设为可用`)
+                    this.refresh();
+                } else {
+                    item.status == 'diabled'
+                }
+                break;
+        }
+    }
+}
 export class ClusterTable extends DataTable {
     constructor() {
         super([], API.cluster, 'clusters', '集群');
@@ -524,10 +616,29 @@ export class ClusterTable extends DataTable {
         })
     }
 }
+export class HypervisortTable extends DataTable{
+    constructor() {
+        super([{ text: '主机名', value: 'hypervisor_hostname', class: 'blue--text' },
+               { text: 'IP', value: 'host_ip', class: 'blue--text' },
+               { text: '状态', value: 'status', class: 'blue--text' },
+               { text: '已用内存/总内存', value: 'memory_mb', class: 'blue--text' },
+               { text: '已用CPU/总CPU', value: 'vcpus', class: 'blue--text' },
+               { text: '虚拟化版本', value: 'hypervisor_version', class: 'blue--text' },
+            ], API.hypervisor, 'hypervisors')
+        this.statistics = [];
+    }
+    async refreshStatics(){
+        this.statistics = (await API.hypervisor.statistics()).hypervisor_statistics;
+    }
+}
+export const hypervisorTable = new HypervisortTable();
 export const volumeTable = new VolumeDataTable();
 export const volumeTypeTable = new VolumeTypeTable();
 export const snapshotTable = new SnapshotTable();
 export const flavorTable = new FlavorDataTable();
+export const backupTable = new BackupTable();
+export const volumeServiceTable = new VolumeServiceTable();
+
 export const keypairTable = new KeypairDataTable();;
 export const serverTable = new ServerDataTable();
 export const usageTable = new UsageTable();

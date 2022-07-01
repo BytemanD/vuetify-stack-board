@@ -6,7 +6,8 @@
       <v-row>
         <v-col cols="12">
           <template v-for="item in serverVolumeDialog.params.attachments">
-            <v-chip :close="item.device !='/dev/vda' " @click:close="serverVolumeDialog.detach(item)" color="info" label class="mr-2">
+            <v-chip :close="item.device !='/dev/vda' " @click:close="serverVolumeDialog.detach(item)"
+                :color="item.device !='/dev/vda'? 'info' : ''" label class="mr-2">
                 [[ item.device ]]
             </v-chip>
           </template>

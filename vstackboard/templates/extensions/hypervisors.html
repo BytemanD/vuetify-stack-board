@@ -82,9 +82,21 @@
   :items-per-page="computing.hypervisorTable.itemsPerPage" :search="computing.hypervisorTable.search"
   class="elevation-1" dense>
   <template v-slot:item.status="{ item }">
-    <v-icon v-if="item.status == 'enabled'" color="success">mdi-check-circle</v-icon>
-    <v-icon v-else color="error">mdi-close-circle</v-icon>
+    <v-icon v-if="item.status == 'enabled'" color="success">mdi-emoticon-happy</v-icon>
+    <v-icon v-else color="error">mdi-emoticon-sad</v-icon>
   </template>
+
+  <template v-slot:item.memory_mb="{ item }">
+    <v-progress-linear height="20" :value="item.memory_mb_used * 100 / item.memory_mb" color="cyan">
+      [[item.memory_mb_used]]/[[item.memory_mb]]
+    </v-progress-linear>
+  </template>
+  <template v-slot:item.vcpus="{ item }">
+    <v-progress-linear height="20" :value="item.vcpus_used * 100 / item.vcpus" color="cyan">
+      [[item.vcpus_used]]/[[item.vcpus]]
+    </v-progress-linear>
+  </template>
+
 </v-data-table>
 
 

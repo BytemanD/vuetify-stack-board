@@ -81,8 +81,8 @@ class Version(cli.SubCli):
     NAME = 'version'
 
     def __call__(self, args):
-        from vstackboard.common import constants
-        print(version.VersionInfo(constants.NAME).version_string())
+        from vstackboard.common import utils
+        print(utils.get_version())
 
 
 class Upgrade(cli.SubCli):
@@ -91,8 +91,10 @@ class Upgrade(cli.SubCli):
         cli.Arg('-y', '--yes', action='store_true',
                 help='answer yes for all questions')
     ]
+
     def __call__(self, args):
         from vstackboard.common import constants                 # noqa
+        from vstackboard.common import utils                     # noqa
         try:
             releases = requests.get(constants.RELEASES_API).json()
         except Exception as e:
@@ -102,7 +104,7 @@ class Upgrade(cli.SubCli):
         if not releases:
             print('The current version is the latest.')
             return
-        current_version = version.VersionInfo(constants.NAME).version_string()
+        current_version = utils.get_version()
 
         latest = releases[0]
         if latest.get('tag_name') <= current_version:
