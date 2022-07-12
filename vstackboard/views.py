@@ -2,7 +2,7 @@ import json
 import logging
 
 from tornado import web
-from requests import delete, exceptions
+from requests import exceptions
 from vstackboard.common import conf
 from vstackboard.common import constants
 from vstackboard.common import utils

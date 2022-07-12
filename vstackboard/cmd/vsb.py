@@ -1,8 +1,6 @@
-from cgi import print_arguments
 import logging
 import os
 import sys
-from pbr import version
 
 import bs4
 import requests
@@ -98,7 +96,7 @@ class Upgrade(cli.SubCli):
         try:
             releases = requests.get(constants.RELEASES_API).json()
         except Exception as e:
-            LOG.error('Check releases failed, %s', e)
+            print('Check releases failed, %s', e)
             return
 
         if not releases:

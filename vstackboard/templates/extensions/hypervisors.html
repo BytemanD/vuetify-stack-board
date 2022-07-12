@@ -1,34 +1,15 @@
 <h3>概览</h3>
 <v-row>
   <v-col class="mx-auto" cols="6" lg="2" md="4" sm="4">
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="100" width="20"
-              :value="computing.hypervisorTable.statistics.memory_mb_used * 100 / computing.hypervisorTable.statistics.memory_mb"
-              color="teal">
-              内存
-            </v-progress-circular>
-          </template>
-          <span>
-            百分比: [[ (computing.hypervisorTable.statistics.memory_mb_used * 100 / computing.hypervisorTable.statistics.memory_mb).toFixed(2) ]]%
-            <br>
-            剩余: [[ computing.hypervisorTable.statistics.free_ram_mb ]]
-          </span>
-        </v-tooltip>
-  </v-col>
-  <v-col class="mx-auto" cols="6" lg="2" md="4" sm="4">
     <v-tooltip bottom>
       <template v-slot:activator="{ on, attrs }">
         <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="100" width="20"
-          :value="computing.hypervisorTable.statistics.vcpus_used * 100 / computing.hypervisorTable.statistics.vcpus"
-          color="teal">
-          CPU
+          :value="computing.hypervisorTable._memUsedPercent" :color="computing.hypervisorTable._memUsedPercent < 80 ? 'teal' : 'warning' ">
+          内存
         </v-progress-circular>
       </template>
       <span>
-        百分比: [[ (computing.hypervisorTable.statistics.vcpus_used * 100 / computing.hypervisorTable.statistics.vcpus).toFixed(2) ]]%
-        <br>
-        剩余: [[computing.hypervisorTable.statistics.vcpus - computing.hypervisorTable.statistics.vcpus_used ]]
+        百分比: [[ computing.hypervisorTable._memUsedPercent ]]%<br>剩余: [[ computing.hypervisorTable.statistics.free_ram_mb ]]
       </span>
     </v-tooltip>
   </v-col>
@@ -36,15 +17,24 @@
     <v-tooltip bottom>
       <template v-slot:activator="{ on, attrs }">
         <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="100" width="20"
-          :value="computing.hypervisorTable.statistics.local_gb_used * 100 / computing.hypervisorTable.statistics.local_gb"
-          color="teal">
-          磁盘
+          :value="computing.hypervisorTable._vcpuUsedPercent" :color="computing.hypervisorTable._vcpuUsedPercent < 80 ? 'teal' : 'warning' ">
+          CPU
         </v-progress-circular>
       </template>
       <span>
-        百分比: [[ (computing.hypervisorTable.statistics.local_gb_used * 100 / computing.hypervisorTable.statistics.local_gb).toFixed(2) ]]%
-        <br>
-        剩余: [[computing.hypervisorTable.statistics.local_gb - computing.hypervisorTable.statistics.local_gb_used ]]
+        百分比: [[ computing.hypervisorTable._vcpuUsedPercent ]]%<br>剩余: [[computing.hypervisorTable.statistics.vcpus - computing.hypervisorTable.statistics.vcpus_used ]]
+      </span>
+    </v-tooltip>
+  </v-col>
+  <v-col class="mx-auto" cols="6" lg="2" md="4" sm="4">
+    <v-tooltip bottom>
+      <template v-slot:activator="{ on, attrs }">
+        <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="100" width="20"
+          :value="computing.hypervisorTable._diskUsedPercent" :color="computing.hypervisorTable._diskUsedPercent < 80 ? 'teal' : 'warning' ">磁盘
+        </v-progress-circular>
+      </template>
+      <span>
+        百分比: [[ computing.hypervisorTable._diskUsedPercent ]]%<br>剩余: [[computing.hypervisorTable.statistics.local_gb - computing.hypervisorTable.statistics.local_gb_used ]]
       </span>
     </v-tooltip>
   </v-col>
@@ -88,7 +78,7 @@
 
   <template v-slot:item.memory_mb="{ item }">
     <v-progress-linear height="20" :value="item.memory_mb_used * 100 / item.memory_mb" color="cyan">
-      [[item.memory_mb_used]]/[[item.memory_mb]]
+      [[(item.memory_mb_used / 1024).toFixed(1)]]/[[(item.memory_mb / 1024).toFixed(1)]]
     </v-progress-linear>
   </template>
   <template v-slot:item.vcpus="{ item }">

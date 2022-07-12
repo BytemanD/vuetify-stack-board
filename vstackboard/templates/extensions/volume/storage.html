@@ -1,11 +1,11 @@
-<v-tabs v-model="tabs['storage']" background-color="deep-purple accent-4" class="elevation-4" dark centered>
+<v-tabs v-model="volume.tab" background-color="deep-purple accent-4" class="elevation-4" dark centered>
   <v-tabs-slider></v-tabs-slider>
   <v-tab > 卷 </v-tab>
   <v-tab > 快照 </v-tab>
   <v-tab > 备份 </v-tab>
   <v-tab > 类型 </v-tab>
   <v-tab > 服务 </v-tab>
-  <v-tabs-items v-model="tabs['storage']">
+  <v-tabs-items v-model="volume.tab">
     <v-tab-item>{% include 'volumes.html' %}</v-tab-item>
     <v-tab-item>{% include 'snapshots.html' %}</v-tab-item>
     <v-tab-item>{% include 'backups.html' %}</v-tab-item>

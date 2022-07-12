@@ -7,7 +7,6 @@
         <v-btn class="rounded-r-xl" small color="warning" v-on:click="computing.serverTable.stopSelected()" :disabled="computing.serverTable.selected.length == 0">关机</v-btn>
         <v-btn class="rounded-l-xl" small color="success" v-on:click="computing.serverTable.unpauseSelected()" :disabled="computing.serverTable.selected.length == 0">开启</v-btn>
         <v-btn class="rounded-r-xl" small color="warning" v-on:click="computing.serverTable.pauseSelected()" :disabled="computing.serverTable.selected.length == 0">暂停</v-btn>
-
         <v-menu  offset-y>
           <template v-slot:activator="{ on, attrs }">
             <v-btn small color="info" v-bind="attrs" v-on="on" :disabled="computing.serverTable.selected.length == 0"><v-icon small>mdi-menu</v-icon> 重启</v-btn>
@@ -22,12 +21,12 @@
               </v-icon>迁移</v-btn>
         <v-btn small color="error" @click="computing.serverTable.deleteSelected()" :disabled="computing.serverTable.selected.length == 0">
             <v-icon small>mdi-trash-can</v-icon>删除</v-btn>
-
+        <v-btn small color="info" @click="computing.serverTopology.open()">拓扑</v-btn>
       </v-col>
       <v-col cols="1" class="text-right">
         <v-btn fab x-small outlined color="info" v-on:click="computing.serverTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
       </v-col>
-      <v-col>
+      <v-col cols="4">
         <v-text-field small dense v-model="computing.serverTable.search" append-icon="mdi-magnify" label="搜索" single-line hide-details></v-text-field>
       </v-col>
     </v-row>
@@ -61,7 +60,7 @@
       <v-icon v-if="item['OS-EXT-STS:power_state'] == 1" color="success">mdi-power-on</v-icon>
       <v-icon v-else-if="item['OS-EXT-STS:power_state'] == 3" color="warning">mdi-pause</v-icon>
       <v-icon v-else-if="item['OS-EXT-STS:power_state'] == 4" color="error">mdi-power-off</v-icon>
-      <v-icon v-else color="warning" class="mdi-spin">mdi-loading</v-icon>
+      <v-icon v-else-if="item['OS-EXT-STS:power_state'] != 0" color="warning" class="mdi-spin">mdi-loading</v-icon>
   </template>
   <template v-slot:item.addresses="{ item }">
     <template v-for="(ports, net, i) in item.addresses">
@@ -118,3 +117,4 @@
 {% include 'dialog/resize.html' %}
 {% include 'dialog/migrate.html' %}
 {% include 'dialog/rebuild.html' %}
+{% include 'dialog/serverTopoply.html' %}

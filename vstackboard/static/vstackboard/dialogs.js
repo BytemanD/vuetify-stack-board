@@ -308,9 +308,12 @@ export class ResizeDialog extends Dialog {
         await API.server.resize(this.server.id, this.flavorRef)
         MESSAGE.info(`虚拟机 ${this.server.id} 变更中...`);
         this.hide();
-
-        await serverTable.waitServerStatus(this.server.id);
-        MESSAGE.success(`虚拟机 ${this.server.id} 变更成功`);
+        let newServer = await serverTable.waitServerStatus(this.server.id);
+        if (newServer.flavor.original_name == this.flavorRef){
+            MESSAGE.error(`虚拟机 ${this.server.id} 变更失败`);
+        } else {
+            MESSAGE.success(`虚拟机 ${this.server.id} 变更成功`);
+        }
         serverTable.refresh();
     }
 }
@@ -397,11 +400,15 @@ export class NewServerDialog extends Dialog {
         this.azs = [];
         this.hosts = [];
         this.azHosts = {};
+        this.keypairs = [];
+        this.keypair = '';
     }
     async open() {
         this.params.name = Utils.getRandomName('server');
         this.display()
-
+        if (! this.params.az) {
+            this.params.az = '自动选择';
+        }
         this.flavors = (await API.flavor.detail()).flavors;
         this.flavors.sort(function (flavor1, flavor2) { return flavor1.name.localeCompare(flavor2.name) })
 
@@ -410,9 +417,13 @@ export class NewServerDialog extends Dialog {
         this.networks = (await API.network.list()).networks;
         this.networks.splice(this.networks, 0, { name: '', id: null })
 
+        this.keypairs = (await API.keypair.list()).keypairs;
+        this.keypairs.splice(this.keypairs, 0, {keypair: {name: ''}})
+
         let body = await API.az.detail();
+
         this.azList = body.availabilityZoneInfo.filter(az => { return az.zoneName != 'internal' });
-        this.azList.splice(this.azList, 0, { zoneName: '', hosts: [] })
+        this.azList.splice(this.azList, 0, { zoneName: '自动选择', hosts: [] })
         this.azHosts = { '无': '' };
         this.azList.forEach(az => { this.azHosts[az.zoneName] = Object.keys(az.hosts); })
 
@@ -431,7 +442,7 @@ export class NewServerDialog extends Dialog {
                 minCount: this.params.nums, maxCount: this.params.nums,
                 useBdm: this.params.useBdm, volumeSize: this.params.volumeSize,
                 networks: this.params.netId ? [{ uuid: this.params.netId }] : 'none',
-                az: this.params.az,
+                az: this.params.az == '自动选择'? null : this.params.az,
                 host: this.params.host,
                 password: this.params.password,
             }
@@ -440,8 +451,12 @@ export class NewServerDialog extends Dialog {
         MESSAGE.info(`实例 ${this.params.name} 创建中...`);
         this.hide();
         serverTable.refresh();
-        await serverTable.waitServerStatus(body.server.id)
-        MESSAGE.success(`实例 ${this.params.name} 创建成功`);
+        let result = await serverTable.waitServerStatus(body.server.id);
+        if (result.status.toUpperCase() == 'ERROR'){
+            MESSAGE.error(`实例 ${this.params.name} 创建失败`);
+        } else {
+            MESSAGE.success(`实例 ${this.params.name} 创建成功`);
+        }
     }
 }
 
@@ -465,7 +480,7 @@ export class NewFlavorDialog extends Dialog {
         return labels
     }
     getRam() {
-        return this.ramValues[this.params.ram];
+        return this.params.ram * 1024;
     }
     async commit() {
         if (!this.params.id || !this.params.name) {
@@ -482,9 +497,7 @@ export class NewFlavorDialog extends Dialog {
             ram: this.getRam(), vcpus: this.params.vcpu, disk: this.params.disk,
             'os-flavor-access:is_public': this.params.isPublic
         });
-        console.log(body);
         let flavor = body.flavor;
-        console.log(extraSpcs)
         await API.flavor.updateExtras(flavor.id, extraSpcs);
         MESSAGE.success(`规格 ${this.params.name} 创建成功`);
         flavorTable.refresh();
@@ -512,6 +525,64 @@ export class NewFlavorDialog extends Dialog {
         return extras;
     }
 }
+
+export class FlavorExtraDialog extends Dialog {
+    constructor() {
+        super();
+        this.flavor = {};
+        this.extraSpecs = {};
+        this.newExtraSpecs = '';
+        this.customizeExtras = [
+            {key: 'hw:numa_nodes', value: 1}, {key: 'hw:numa_nodes', value: 2},
+            {key: 'hw:mem_page_size', value: 'large'},
+            {key: 'hw:vif_multiqueue_enabled', value: 'True'},
+            {key: 'hw:vif_queues_num', value: 4}, {key: 'hw:vif_queues_num', value: 8},
+            {key: 'hw:cpu_policy', value: 'dedicated'},
+            
+        ]
+    }
+    async deleteExtra(key) {
+        await API.flavor.deleteExtra(this.flavor.id, key);
+        MESSAGE.success(`属性 ${key} 删除成功`);
+        Vue.delete(this.extraSpecs, key);
+        flavorTable.refresh();
+    }
+    async addExtra(item){
+        if (Object.keys(this.extraSpecs).indexOf(item.key) >= 0 && this.extraSpecs[item.key] == item.value ){
+            ALERT.error(`属性 ${item.key} 已经存在`)
+            return
+        } else {
+            let extraSpecs = {}
+            extraSpecs[item.key] = item.value;
+            await API.flavor.updateExtras(this.flavor.id, extraSpecs);
+            MESSAGE.success(`属性 ${item.key} 添加成功`);
+            Vue.set(this.extraSpecs, item.key, item.value);
+            flavorTable.refresh();
+        }
+    }
+    async addNewExtraSpecs(){
+        let extraSpecs = API.flavor.parseExtras(this.newExtraSpecs);
+        if (! extraSpecs){
+            return;
+        }
+        await API.flavor.updateExtras(this.flavor.id, extraSpecs);
+        MESSAGE.success(`属性添加成功`);
+        for(let key in extraSpecs){
+            Vue.set(this.extraSpecs, key, extraSpecs[key])
+        }
+        flavorTable.refresh();
+    }
+    async open(item){
+        this.flavor = item;
+        let body = await API.flavor.getExtraSpecs(item.id);
+        super.open();
+        this.extraSpecs = body.extra_specs;
+    }
+    async commit(){
+
+    }
+}
+
 export class NewKeypairDialog extends Dialog {
     constructor() {
         super();
@@ -782,6 +853,80 @@ export class NewPortDialog extends Dialog {
         this.hide();
     }
 }
+export class ServerTopology extends Dialog {
+    constructor() {
+        super()
+    }
+    async drawServerTopoply() {
+        let ports = (await API.port.list()).ports;
+        var chartDom = document.getElementById('server');
+        var myChart = echarts.init(chartDom);
+        let data = [
+        ]
+        let links = [
+            {"source": "0","target": "2"},
+            {"source": "0","target": "3"},
+        ]
+        let servers = (await API.server.detail()).servers
+        let serverNets = {};
+        for (let i in servers){
+            let server = servers[i];
+            data.push({
+                id: server.id,
+                name: server.name,
+                symbolSize: 30,
+                category: 0
+            });
+            for (let netName in server.addresses){
+                let address = server.addresses[netName][0];
+                let macAddress = address['OS-EXT-IPS-MAC:mac_addr'];
+                let serverPort = (await API.port.list({mac_address: macAddress})).ports[0];
+                if (Object.keys(serverNets).indexOf(serverPort.network_id) < 0){
+                    let net = (await API.network.show(serverPort.network_id)).network;
+                    serverNets[net.id] = {
+                        id: net.id,
+                        name: net.name,
+                        symbolSize: 20,
+                        category: 1,
+                    }
+                }
+                links.push({source: serverPort.network_id, target: server.id})
+            }
+        }
+        data = data.concat(Object.values(serverNets));
+        let categories =  [{name: '虚拟机'}, {name: '网络'}, {name: '路由'}];
+        let option = {
+            tooltip: {},
+            legend: [
+                {
+                    data: categories.map((x)=>{return x.name})
+                }
+            ],
+            series: [
+                {
+                    // name: 'Les Miserables',
+                    type: 'graph',
+                    layout: 'force',
+                    data: data,
+                    links: links,
+                    categories: categories,
+                    roam: true,
+                    label: {
+                        position: 'right'
+                    },
+                    force: {
+                        repulsion: 100
+                    }
+                }
+            ]
+        }
+        myChart.setOption(option);
+    }
+    open() {
+        super.open();
+        this.drawServerTopoply();
+    }
+}
 
 export const newCluster = new NewClusterDialog()
 
@@ -789,6 +934,7 @@ export const newServer = new NewServerDialog()
 export const serverVolumeDialog = new ServerVolumeDialog();
 export const serverInterfaceDialog = new ServerInterfaceDialog();
 export const newFlavor = new NewFlavorDialog()
+export const flavorExtraDialog  = new FlavorExtraDialog();
 export const changePassword = new ChangePasswordDialog()
 export const changeServerName = new ChangeServerNameDialog()
 export const resizeDialog = new ResizeDialog();
@@ -805,5 +951,6 @@ export const newNetDialog = new NewNetworkDialog();
 export const newSubnetDialog = new NewSubnetDialog();
 export const routerInterfacesDialog = new RouterInterfacesDialog();
 export const newPortDialog = new NewPortDialog();
+export const serverTopology = new ServerTopology();
 
 export default Dialog;

@@ -1,4 +1,4 @@
-import { LOG, Utils, } from "./lib.js";
+import { LOG, Utils, ALERT } from "./lib.js";
 
 class Restfulclient {
     constructor(baseUrl) {
@@ -8,13 +8,13 @@ class Restfulclient {
         if (!filters) { return '' }
         let queryParams = [];
         for (var key in filters) {
-            if ( filters[key] == null || typeof(filters[key]) == 'string'){
-                queryParams.push(`${key}=${filters[key]}`)
-            } else {
-                // value is list
+            if ( Array.isArray(filters[key])){
+                LOG.debug(`filters: ${filters[key]}`)
                 filters[key].forEach(value => {
                     queryParams.push(`${key}=${value}`)
                 })
+            } else {
+                queryParams.push(`${key}=${filters[key]}`)
             }
         }
         return queryParams.join('&');
@@ -60,6 +60,31 @@ class Flavor extends ClientExt {
     async updateExtras(id, extras) {
         let resp = await axios.post(`${this.baseUrl}/${id}/os-extra_specs`, { 'extra_specs': extras })
         return resp.data;
+    }
+    async deleteExtra(id, key) {
+        return (await axios.delete(`${this.baseUrl}/${id}/os-extra_specs/${key}`)).data;
+    }
+
+    parseExtras(content) {
+        let extras = {};
+        let extraLines = content.split('\n');
+        for (var i = 0; i < extraLines.length; i++) {
+            let line = extraLines[i];
+            if (line.trim() == '') { continue; }
+            let kv = line.split('=');
+            if (kv.length != 2) {
+                ALERT.error(`输入内容有误: ${line}`)
+                return;
+            }
+            let key = kv[0].trim();
+            let value = kv[1].trim();
+            if (key == '' || value == '') {
+                ALERT.error(`输入内容有误: ${line}`)
+                return;
+            }
+            extras[key] = value;
+        }
+        return extras;
     }
 }
 

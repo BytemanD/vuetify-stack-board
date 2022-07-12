@@ -1,0 +1,16 @@
+<v-tabs v-model="computing.tab" background-color="deep-purple accent-4" class="elevation-4" dark centered>
+    <v-tabs-slider></v-tabs-slider>
+    <v-tab><v-icon>mdi-alpha-f-box</v-icon>  规格 </v-tab>
+    <v-tab><v-icon>mdi-alpha-k-box</v-icon> 密钥对 </v-tab>
+    <v-tab><v-icon>mdi-alpha-s-box</v-icon>  服务 </v-tab>
+    <v-tab><v-icon>mdi-alpha-z-box</v-icon>  AZ </v-tab>
+    <v-tab><v-icon>mdi-alpha-a-box</v-icon>  聚合 </v-tab>
+    <v-tabs-items v-model="computing.tab">
+      <v-tab-item>{% include 'flavors.html' %}</v-tab-item>
+      <v-tab-item>{% include 'keypair.html' %}</v-tab-item>
+      <v-tab-item>{% include 'service.html' %}</v-tab-item>
+      <v-tab-item>{% include 'az.html' %}</v-tab-item>
+      <v-tab-item>{% include 'agg.html' %}</v-tab-item>
+    </v-tabs-items>
+  </v-tabs>
+  

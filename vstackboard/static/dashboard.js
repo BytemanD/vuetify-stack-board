@@ -1,35 +1,43 @@
-import { Message, Utils } from "./vstackboard/lib.js";
+import { Utils } from "./vstackboard/lib.js";
 import API from "./vstackboard/api.js";
+// import * as echarts from 'echarts';
+// import { TreeChart } from 'echarts/charts';
+// echarts.use([TreeChart]);
 
 import DataTable, {
     volumeTable, serviceTable, serverTable, flavorTable, usageTable,
     backupTable, clusterTable, keypairTable, volumeServiceTable,
     routerTable, netTable, portTable, volumeTypeTable, snapshotTable,
-    hypervisorTable
+    hypervisorTable,
+    azTable
 } from "./vstackboard/tables.js";
 import {
-    newFlavor, newServer,
-    changePassword, changeServerName,
-    newVolume, serverVolumeDialog, serverInterfaceDialog,
+    newFlavor, flavorExtraDialog,
+    newServer,
+    changePassword, changeServerName, serverVolumeDialog, serverInterfaceDialog,
+    resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog,
+    newVolume, newSnapshotDialog, newBackupDialog,
     newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog,
-    newPortDialog, resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog, newSnapshotDialog, newBackupDialog,
+    newPortDialog,
+    serverTopology,
+
 } from "./vstackboard/dialogs.js";
 
 
-const MESSAGE = new Message()
 const navigationItems = [
     { title: '虚拟化资源', icon: 'mdi-alpha-h-circle' },
-    { title: '实例', icon: 'mdi-laptop-account', group: 'compute' },
-    { title: '规格', icon: 'mdi-alpha-f-circle', },
-    { title: '计算服务', icon: 'mdi-server' },
-    { title: '密钥对', icon: 'mdi-key-chain', },
+    { title: '实例', icon: 'mdi-laptop-account', group: '计算资源' },
+    { title: '计算管理', icon: 'mdi-react', },
+    // { title: '规格', icon: 'mdi-alpha-f-circle', },
+    // { title: '计算服务', icon: 'mdi-server' },
+    // { title: '密钥对', icon: 'mdi-key-chain', },
     { title: '存储', icon: 'mdi-storage-tank' },
-    { title: '镜像', icon: 'mdi-alpha-i-circle' },
+    { title: '镜像', icon: 'mdi-package-variant-closed' },
 
-    { title: '服务', icon: 'mdi-server', group: 'identity' },
+    { title: '网络', icon: 'mdi-web', group: '网络资源' },
+    { title: '服务', icon: 'mdi-server', group: '认证' },
     { title: '用户', icon: 'mdi-account-supervisor' },
 
-    { title: '网络', icon: 'mdi-network', group: 'network' },
 ]
 
 new Vue({
@@ -37,7 +45,6 @@ new Vue({
     delimiters: ['[[', ']]'],
     vuetify: new Vuetify(),
     data: {
-        tabs: {},
         UTILS: Utils,
         clusterTable: clusterTable,
         identity: {
@@ -56,28 +63,33 @@ new Vue({
             ], API.user, 'users')
         },
         computing: {
+            tab: 0,
             serverTable: serverTable,
             flavorTable: flavorTable,
             hypervisorTable: hypervisorTable,
             serviceTable: serviceTable,
             usageTable: usageTable,
             keypairTable: keypairTable,
+            azTable: azTable,
+            serverTopology: serverTopology,
         },
         image: {
             imageTable: new DataTable([{ text: 'name', value: 'name' },
-                                        { text: 'status', value: 'status' },
-                                        { text: 'size', value: 'size' },
-                                        { text: 'visibility', value: 'visibility' },
-                                        { text: 'image_state', value: 'image_state' },
-                                        { text: 'image_type', value: 'image_type' },
-                                        ], API.image, 'images'),
+            { text: 'status', value: 'status' },
+            { text: 'size', value: 'size' },
+            { text: 'visibility', value: 'visibility' },
+            { text: 'image_state', value: 'image_state' },
+            { text: 'image_type', value: 'image_type' },
+            ], API.image, 'images'),
         },
         networking: {
+            tab: 0,
             routerTable: routerTable,
             networkTable: netTable,
             portTable: portTable,
         },
         volume: {
+            tab: 0,
             volumeTable: volumeTable,
             volumeTypeTable: volumeTypeTable,
             snapshotTable: snapshotTable,
@@ -95,6 +107,7 @@ new Vue({
         newBackupDialog: newBackupDialog,
         // server dialogs
         newFlavorDialog: newFlavor,
+        flavorExtraDialog: flavorExtraDialog,
         newServerDialog: newServer,
         changePasswordDialog: changePassword,
         changeServerNameDialog: changeServerName,
@@ -134,12 +147,15 @@ new Vue({
                 case '用户':
                     this.identity.userTable.refresh();
                     break;
-                case '规格':
-                    this.computing.flavorTable.refresh();
-                    this.computing.flavorTable.refreshExtraSpecs();
-                    break;
                 case '实例':
                     this.computing.serverTable.refresh();
+                    break;
+                case '计算管理':
+                    this.computing.flavorTable.refresh();
+                    this.computing.flavorTable.refreshExtraSpecs();
+                    this.computing.keypairTable.refresh();
+                    this.computing.serviceTable.refresh();
+                    this.computing.azTable.refresh();
                     break;
                 case '虚拟化资源':
                     this.computing.hypervisorTable.refresh();
@@ -150,9 +166,9 @@ new Vue({
                     this.computing.serviceTable.refresh();
                     break;
                 case '密钥对':
-                    this.computing.keypairTable.refresh();
+
                     break;
-                    case '网络':
+                case '网络':
                     this.networking.networkTable.refresh();
                     this.networking.networkTable.refreshSubnets();
                     this.networking.portTable.refresh();
@@ -179,18 +195,24 @@ new Vue({
         getMessageTop: function (index) {
             return `top: ${50 * index}px`;
         },
-        changeCluster: function(item){
+        changeCluster: function (item) {
             $cookies.set('clusterId', item.id);
             $cookies.set('clusterName', item.name);
             window.open('/dashboard', '_self');
         },
+        drawAz() {
+            this.computing.azTable.drawTopoloy('az');
+        },
+
+    },
+    mounted: function () {
+        // this.drawAz();
     },
     created: function () {
         this.clusterTable.selected = $cookies.get('clusterName');
         this.clusterTable.refresh();
         this.refreshContainer()
         document.getElementById('loader').remove();
-
     },
     watch: {
         'navigation.item': {

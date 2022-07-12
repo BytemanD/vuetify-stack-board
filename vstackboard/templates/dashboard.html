@@ -18,8 +18,8 @@
                     <v-row hidden>
                         <v-col cols="12" :hidden="navigation.items[navigation.item].title != '服务'">{% include "extensions/identity/services.html" %}</v-col>
                         <v-col cols="12" :hidden="navigation.items[navigation.item].title != '用户'">{% include "extensions/identity/users.html" %}</v-col>
-                        <v-col cols="12" :hidden="navigation.items[navigation.item].title != '规格'">{% include "extensions/flavors.html" %}</v-col>
                         <v-col cols="12" :hidden="navigation.items[navigation.item].title != '实例'">{% include "extensions/servers.html" %}</v-col>
+                        <v-col cols="12" :hidden="navigation.items[navigation.item].title != '计算管理'">{% include "extensions/compute/manager.html" %}</v-col>
                         <v-col cols="12" :hidden="navigation.items[navigation.item].title != '虚拟化资源'">{% include "extensions/hypervisors.html" %}</v-col>
                         <v-col cols="12" :hidden="navigation.items[navigation.item].title != '计算服务'">{% include "extensions/compute/service.html" %}</v-col>
                         <v-col cols="12" :hidden="navigation.items[navigation.item].title != '密钥对'">{% include "extensions/compute/keypair.html" %}</v-col>

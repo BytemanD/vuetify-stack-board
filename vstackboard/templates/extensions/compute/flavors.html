@@ -25,7 +25,9 @@
   <template v-slot:item.extra_specs="{ item, index }">
   </template>
   <template v-slot:expanded-item="{ headers, item }">
-    <td></td><td></td>
+    <td>
+      <v-btn icon class="my-auto" @click="flavorExtraDialog.open(item)"><v-icon>mdi-pencil</v-icon></v-btn>
+    </td>
     <td :colspan="headers.length -1">属性:
       <template v-for="(value, key) in computing.flavorTable.extraSpecsMap[item.id]">
         <v-chip small class="mt-2 mb-2 mr-4">[[ key ]]=[[ value ]]</v-chip>
@@ -34,4 +36,5 @@
   </template>
 </v-data-table>
 
-{% include "dialog/newFlavor.html" %}
+{% include "../dialog/newFlavor.html" %}
+{% include "../dialog/flavorExtra.html" %}

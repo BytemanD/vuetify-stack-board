@@ -12,9 +12,9 @@ Openstack Dashboard with Vuetify
 - [ ] inerface 卸载，自动检测后刷新表
 - [ ] 创建虚拟机，允许指定keypair
 - [ ] 上传镜像
-- [ ] Flavor更新extra_specs
 - [ ] 新建port，添加 vnic_type 等可选属性
 - [ ] volume-type 管理
+- [ ] Aggregate 管理
 
 ### v0.0.3
 
@@ -31,6 +31,10 @@ Openstack Dashboard with Vuetify
 - [X] 路由端口管理
 - [X] 卷快照管理
 - [X] 卷备份管理
+- [X] Flavor更新extra_specs
+- [X] AZ管理(表格+树形结构图)
+- [X] UI优化
+- [ ] 虚拟机网络拓扑图
 
 ### v0.0.2
 
