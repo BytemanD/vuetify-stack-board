@@ -6,7 +6,6 @@ Openstack Dashboard with Vuetify
 ### TODO
 
 - [ ] 查看console log
-- [ ] 挂载网卡可指定net-id
 - [ ] 创建规格时可以从已有的复制
 - [ ] volume支持状态重置
 - [ ] inerface 卸载，自动检测后刷新表
@@ -34,7 +33,8 @@ Openstack Dashboard with Vuetify
 - [X] Flavor更新extra_specs
 - [X] AZ管理(表格+树形结构图)
 - [X] UI优化
-- [ ] 虚拟机网络拓扑图
+- [X] 虚拟机网络拓扑图
+- [X] 挂载网卡可指定net-id
 
 ### v0.0.2
 

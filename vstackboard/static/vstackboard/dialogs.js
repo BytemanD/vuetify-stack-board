@@ -157,9 +157,9 @@ export class ServerVolumeDialog extends Dialog {
         MESSAGE.success(`卷 ${attachment.volumeId} 卸载成功`);
         this.refreshAttachments();
     }
-    async waitVolumeStatus(volume_id, expectStatus=['available', 'error']) {
+    async waitVolumeStatus(volume_id, expectStatus = ['available', 'error']) {
         let body = {}
-        while (true){
+        while (true) {
             body = await API.volume.show(volume_id);
             let status = body.volume.status;
             LOG.debug(`wait volume ${volume_id} status to be ${expectStatus}, now: ${status}`)
@@ -171,7 +171,7 @@ export class ServerVolumeDialog extends Dialog {
         return body
     }
     async attachSelected() {
-        for (let i in this.params.selectedVolumes){
+        for (let i in this.params.selectedVolumes) {
             let volume_id = this.params.selectedVolumes[i];
             await API.server.attachVolume(this.params.server.id, volume_id)
             MESSAGE.info(`卷 ${volume_id} 挂载中 ...`);
@@ -188,7 +188,9 @@ export class ServerInterfaceDialog extends Dialog {
         this.server = {};
         this.attachments = [];
         this.selected = [];
+        this.netSelected = [];
         this.ports = [];
+        this.networks = [];
     }
 
     async refreshInterfaces() {
@@ -198,15 +200,17 @@ export class ServerInterfaceDialog extends Dialog {
     }
     async refreshPorts() {
         this.selected = [];
-        let body = await API.port.list({ device_id: '+' })
-        this.ports = body.ports
+        this.netSelected = [];
+        this.ports = (await API.port.list({ device_id: '+' })).ports
     }
-    open(server) {
+    async open(server) {
         this.server = server;
         this.selected = [];
         this.refreshInterfaces();
         this.refreshPorts();
         super.open();
+        this.networks = (await API.network.list()).networks;
+        console.log(this.networks)
     }
     async detach(item) {
         await API.server.interfaceDetach(this.server.id, item.port_id);
@@ -244,6 +248,17 @@ export class ServerInterfaceDialog extends Dialog {
         this.refreshPorts();
         serverTable.refresh();
     }
+    async attachSelectedNets() {
+        for (let i in this.netSelected) {
+            let item = this.netSelected[i];
+            MESSAGE.info(`网卡 ${item} 挂载中`);
+            await API.server.interfaceAttach(this.server.id, { net_id: item })
+            MESSAGE.success(`网卡 ${item} 挂载成功`);
+            this.refreshInterfaces();
+        }
+        serverTable.refresh();
+    }
+    
 }
 
 export class ChangePasswordDialog extends Dialog {
@@ -297,7 +312,7 @@ export class ResizeDialog extends Dialog {
         this.flavors = [];
         let body = await API.flavor.detail();
         super.open();
-        for (let i in body.flavors){
+        for (let i in body.flavors) {
             let item = body.flavors[i];
             if (item.name != this.server.flavor.original_name) {
                 this.flavors.push(item)
@@ -309,7 +324,7 @@ export class ResizeDialog extends Dialog {
         MESSAGE.info(`虚拟机 ${this.server.id} 变更中...`);
         this.hide();
         let newServer = await serverTable.waitServerStatus(this.server.id);
-        if (newServer.flavor.original_name == this.flavorRef){
+        if (newServer.flavor.original_name == this.flavorRef) {
             MESSAGE.error(`虚拟机 ${this.server.id} 变更失败`);
         } else {
             MESSAGE.success(`虚拟机 ${this.server.id} 变更成功`);
@@ -406,7 +421,7 @@ export class NewServerDialog extends Dialog {
     async open() {
         this.params.name = Utils.getRandomName('server');
         this.display()
-        if (! this.params.az) {
+        if (!this.params.az) {
             this.params.az = '自动选择';
         }
         this.flavors = (await API.flavor.detail()).flavors;
@@ -418,7 +433,7 @@ export class NewServerDialog extends Dialog {
         this.networks.splice(this.networks, 0, { name: '', id: null })
 
         this.keypairs = (await API.keypair.list()).keypairs;
-        this.keypairs.splice(this.keypairs, 0, {keypair: {name: ''}})
+        this.keypairs.splice(this.keypairs, 0, { keypair: { name: '' } })
 
         let body = await API.az.detail();
 
@@ -442,7 +457,7 @@ export class NewServerDialog extends Dialog {
                 minCount: this.params.nums, maxCount: this.params.nums,
                 useBdm: this.params.useBdm, volumeSize: this.params.volumeSize,
                 networks: this.params.netId ? [{ uuid: this.params.netId }] : 'none',
-                az: this.params.az == '自动选择'? null : this.params.az,
+                az: this.params.az == '自动选择' ? null : this.params.az,
                 host: this.params.host,
                 password: this.params.password,
             }
@@ -452,7 +467,7 @@ export class NewServerDialog extends Dialog {
         this.hide();
         serverTable.refresh();
         let result = await serverTable.waitServerStatus(body.server.id);
-        if (result.status.toUpperCase() == 'ERROR'){
+        if (result.status.toUpperCase() == 'ERROR') {
             MESSAGE.error(`实例 ${this.params.name} 创建失败`);
         } else {
             MESSAGE.success(`实例 ${this.params.name} 创建成功`);
@@ -533,12 +548,12 @@ export class FlavorExtraDialog extends Dialog {
         this.extraSpecs = {};
         this.newExtraSpecs = '';
         this.customizeExtras = [
-            {key: 'hw:numa_nodes', value: 1}, {key: 'hw:numa_nodes', value: 2},
-            {key: 'hw:mem_page_size', value: 'large'},
-            {key: 'hw:vif_multiqueue_enabled', value: 'True'},
-            {key: 'hw:vif_queues_num', value: 4}, {key: 'hw:vif_queues_num', value: 8},
-            {key: 'hw:cpu_policy', value: 'dedicated'},
-            
+            { key: 'hw:numa_nodes', value: 1 }, { key: 'hw:numa_nodes', value: 2 },
+            { key: 'hw:mem_page_size', value: 'large' },
+            { key: 'hw:vif_multiqueue_enabled', value: 'True' },
+            { key: 'hw:vif_queues_num', value: 4 }, { key: 'hw:vif_queues_num', value: 8 },
+            { key: 'hw:cpu_policy', value: 'dedicated' },
+
         ]
     }
     async deleteExtra(key) {
@@ -547,8 +562,8 @@ export class FlavorExtraDialog extends Dialog {
         Vue.delete(this.extraSpecs, key);
         flavorTable.refresh();
     }
-    async addExtra(item){
-        if (Object.keys(this.extraSpecs).indexOf(item.key) >= 0 && this.extraSpecs[item.key] == item.value ){
+    async addExtra(item) {
+        if (Object.keys(this.extraSpecs).indexOf(item.key) >= 0 && this.extraSpecs[item.key] == item.value) {
             ALERT.error(`属性 ${item.key} 已经存在`)
             return
         } else {
@@ -560,25 +575,25 @@ export class FlavorExtraDialog extends Dialog {
             flavorTable.refresh();
         }
     }
-    async addNewExtraSpecs(){
+    async addNewExtraSpecs() {
         let extraSpecs = API.flavor.parseExtras(this.newExtraSpecs);
-        if (! extraSpecs){
+        if (!extraSpecs) {
             return;
         }
         await API.flavor.updateExtras(this.flavor.id, extraSpecs);
         MESSAGE.success(`属性添加成功`);
-        for(let key in extraSpecs){
+        for (let key in extraSpecs) {
             Vue.set(this.extraSpecs, key, extraSpecs[key])
         }
         flavorTable.refresh();
     }
-    async open(item){
+    async open(item) {
         this.flavor = item;
         let body = await API.flavor.getExtraSpecs(item.id);
         super.open();
         this.extraSpecs = body.extra_specs;
     }
-    async commit(){
+    async commit() {
 
     }
 }
@@ -646,7 +661,7 @@ export class NewVolumeDialog extends Dialog {
             snapshots: [], images: [], types: []
         })
     }
-    async waitVOlumeCreated(volume){
+    async waitVOlumeCreated(volume) {
         await API.volume.waitVolumeStatus(volume.id);
         MESSAGE.success(`卷 ${volume.name} 创建成功`);
         volumeTable.refresh();
@@ -701,15 +716,15 @@ export class NewSnapshotDialog extends Dialog {
         return this.name = Utils.getRandomName('snapshot');
     }
     async commit() {
-        if (! this.name) { ALERT.error(`快照名不能为空`); return; }
-        if (! this.volume_id) { ALERT.error(`请选择一个卷`); return; }
+        if (!this.name) { ALERT.error(`快照名不能为空`); return; }
+        if (!this.volume_id) { ALERT.error(`请选择一个卷`); return; }
         let data = {
             name: this.name,
             volume_id: this.volume_id,
             metadata: this.metadata,
             force: this.force,
         }
-        if (this.description){
+        if (this.description) {
             data.description = this.description
         }
         let body = await API.snapshot.create(data);
@@ -740,15 +755,15 @@ export class NewBackupDialog extends Dialog {
         return this.name = Utils.getRandomName('backup');
     }
     async commit() {
-        if (! this.name) { ALERT.error(`备份名不能为空`); return; }
-        if (! this.volume_id) { ALERT.error(`请选择一个卷`); return; }
+        if (!this.name) { ALERT.error(`备份名不能为空`); return; }
+        if (!this.volume_id) { ALERT.error(`请选择一个卷`); return; }
         let data = {
             name: this.name,
             incremental: this.incremental,
             volume_id: this.volume_id,
             force: this.force,
         }
-        if (this.description){
+        if (this.description) {
             data.description = this.description
         }
         let backup = (await API.backup.create(data)).backup;
@@ -811,9 +826,9 @@ export class RouterInterfacesDialog extends Dialog {
     }
     async attachSelected() {
         MESSAGE.info(`子网添加中`);
-        for (let i in this.selected){
+        for (let i in this.selected) {
             let item = this.selected[i];
-            await  API.router.addInterface(this.router.id, item)
+            await API.router.addInterface(this.router.id, item)
             MESSAGE.success(`子网 ${item} 添加成功`);
             this.refreshInterfaces();
         }
@@ -858,18 +873,29 @@ export class ServerTopology extends Dialog {
         super()
     }
     async drawServerTopoply() {
-        let ports = (await API.port.list()).ports;
         var chartDom = document.getElementById('server');
+        while (! chartDom){
+            await Utils.sleep(0.1);
+            chartDom = document.getElementById('server');
+        }
         var myChart = echarts.init(chartDom);
-        let data = [
-        ]
-        let links = [
-            {"source": "0","target": "2"},
-            {"source": "0","target": "3"},
-        ]
-        let servers = (await API.server.detail()).servers
+        let data = []
+        let links = []
+        let categories = [{ name: '虚拟机' }, { name: '网络' }, { name: '路由' }];
+        let option = {
+            tooltip: {},
+            legend: [{ data: categories.map((x) => { return x.name }) }],
+            series: [{
+                type: 'graph', layout: 'force',
+                data: data, links: links, categories: categories,
+                roam: true, label: { position: 'right' },
+                force: { repulsion: 100 }
+            }]
+        }
+        // myChart.setOption(option);
         let serverNets = {};
-        for (let i in servers){
+        let servers = (await API.server.detail()).servers
+        for (let i in servers) {
             let server = servers[i];
             data.push({
                 id: server.id,
@@ -877,50 +903,43 @@ export class ServerTopology extends Dialog {
                 symbolSize: 30,
                 category: 0
             });
-            for (let netName in server.addresses){
+            myChart.setOption(option);
+            for (let netName in server.addresses) {
                 let address = server.addresses[netName][0];
                 let macAddress = address['OS-EXT-IPS-MAC:mac_addr'];
-                let serverPort = (await API.port.list({mac_address: macAddress})).ports[0];
-                if (Object.keys(serverNets).indexOf(serverPort.network_id) < 0){
+                let serverPort = (await API.port.list({ mac_address: macAddress })).ports[0];
+                if (Object.keys(serverNets).indexOf(serverPort.network_id) < 0) {
                     let net = (await API.network.show(serverPort.network_id)).network;
-                    serverNets[net.id] = {
-                        id: net.id,
-                        name: net.name,
-                        symbolSize: 20,
-                        category: 1,
-                    }
+                    serverNets[net.id] = net;
+                    data.push({id: net.id, name: net.name, symbolSize: 20, category: 1})
                 }
-                links.push({source: serverPort.network_id, target: server.id})
+                links.push({ source: serverPort.network_id, target: server.id })
             }
         }
-        data = data.concat(Object.values(serverNets));
-        let categories =  [{name: '虚拟机'}, {name: '网络'}, {name: '路由'}];
-        let option = {
-            tooltip: {},
-            legend: [
-                {
-                    data: categories.map((x)=>{return x.name})
-                }
-            ],
-            series: [
-                {
-                    // name: 'Les Miserables',
-                    type: 'graph',
-                    layout: 'force',
-                    data: data,
-                    links: links,
-                    categories: categories,
-                    roam: true,
-                    label: {
-                        position: 'right'
-                    },
-                    force: {
-                        repulsion: 100
-                    }
-                }
-            ]
+        let routers = (await API.router.list()).routers;
+        for (let i in routers){
+            let router = routers[i];
+            data.push({id: router.id, name: router.name, symbolSize: 35, category: 2,  })
+            let netIds = await this.getRouterNets(router.id, serverNets);
+            netIds.forEach((netId) => {
+                links.push({ source: router.id, target: netId })
+            })
         }
         myChart.setOption(option);
+    }
+    async getRouterNets(routerId, serverNets){
+        let netIds = []
+        let routerPorts = await API.router.listInterface(routerId)
+        routerPorts.forEach((port) => {
+            let subnetId = port.fixed_ips[0].subnet_id;
+            for(let netId in serverNets){
+                if (serverNets[netId].subnets[0] == subnetId){
+                    netIds.push(netId)
+                    break
+                }
+            }
+        })
+        return netIds
     }
     open() {
         super.open();
@@ -934,7 +953,7 @@ export const newServer = new NewServerDialog()
 export const serverVolumeDialog = new ServerVolumeDialog();
 export const serverInterfaceDialog = new ServerInterfaceDialog();
 export const newFlavor = new NewFlavorDialog()
-export const flavorExtraDialog  = new FlavorExtraDialog();
+export const flavorExtraDialog = new FlavorExtraDialog();
 export const changePassword = new ChangePasswordDialog()
 export const changeServerName = new ChangeServerNameDialog()
 export const resizeDialog = new ResizeDialog();

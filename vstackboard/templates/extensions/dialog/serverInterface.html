@@ -12,12 +12,20 @@
           </template>
         </v-col>
         <v-col cols="10">
-          <v-select :items="serverInterfaceDialog.ports" label="可用端口"
+          <v-select :items="serverInterfaceDialog.ports" label="可用端口" hide-details
                     item-value="id" item-text="name" multiple chips outlined v-model="serverInterfaceDialog.selected">
           </v-select>
         </v-col>
-        <v-col cols="2"><v-btn color="primary" @click="serverInterfaceDialog.attachSelected()">挂载</v-btn></v-col>
+        <v-col cols="2" class="my-auto"><v-btn color="primary" @click="serverInterfaceDialog.attachSelected()">挂载</v-btn></v-col>
+
+        <v-col cols="10">
+          <v-select :items="serverInterfaceDialog.networks" label="可用网络" hide-details
+                    item-value="id" item-text="name" multiple chips outlined v-model="serverInterfaceDialog.netSelected">
+          </v-select>
+        </v-col>
+        <v-col cols="2" class="my-auto"><v-btn color="primary" @click="serverInterfaceDialog.attachSelectedNets()">挂载</v-btn></v-col>
       </v-row>
+
     </v-card-text>
   </v-card>
 </v-dialog>

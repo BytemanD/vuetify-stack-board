@@ -306,7 +306,7 @@ class Router extends Restfulclient {
     constructor() { super('/networking/v2.0/routers'), this.portClient = new Port() };
     // interface=public
     async listInterface(id) {
-        return await this.portClient.list({ device_id: id })
+        return (await this.portClient.list({ device_id: id })).ports
     }
     async addInterface(id, subnet_id) {
         return await this.put(`${id}/add_router_interface`, { subnet_id: subnet_id })

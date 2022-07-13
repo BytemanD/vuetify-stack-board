@@ -89,12 +89,6 @@ export class RouterDataTable extends DataTable {
             }
         })
     }
-    listPorts(item) {
-        API.router.listInterface(item.id).then(resp => {
-
-        })
-
-    }
 }
 
 export class NetDataTable extends DataTable {

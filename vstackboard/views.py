@@ -54,8 +54,8 @@ class Dashboard(web.RequestHandler):
         try:
             self._update_auth_token(cluster)
         except exceptions.ConnectionError:
-            self.set_status(400)
-            self.finish({'error': 'Connect to {} failed'.format(cluster.name)})
+            LOG.error(f'Connect to {cluster.name} failed')
+            self.redirect('/welcome')
             return
         except Exception as e:
             LOG.exception(e)
