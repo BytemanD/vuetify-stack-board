@@ -18,8 +18,7 @@ import {
     resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog,
     newVolume, newSnapshotDialog, newBackupDialog,
     newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog,
-    newPortDialog,
-    serverTopology,
+    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog
 
 } from "./vstackboard/dialogs.js";
 
@@ -72,6 +71,7 @@ new Vue({
             keypairTable: keypairTable,
             azTable: azTable,
             serverTopology: serverTopology,
+            serverActions: serverActions,
         },
         image: {
             imageTable: new DataTable([{ text: 'name', value: 'name' },
@@ -105,6 +105,7 @@ new Vue({
         newVolumeDialog: newVolume,
         newSnapshotDialog: newSnapshotDialog,
         newBackupDialog: newBackupDialog,
+        newVolumeTypeDialog: newVolumeTypeDialog,
         // server dialogs
         newFlavorDialog: newFlavor,
         flavorExtraDialog: flavorExtraDialog,
@@ -200,6 +201,14 @@ new Vue({
             $cookies.set('clusterName', item.name);
             window.open('/dashboard', '_self');
         },
+        useCluster: function () {
+            let cluster = this.clusterTable.getSelectedCluster()
+            console.log(cluster);
+            $cookies.set('clusterId', cluster.id);
+            $cookies.set('clusterName', cluster.name);
+            window.open('/dashboard', '_self');
+        },
+        
         drawAz() {
             this.computing.azTable.drawTopoloy('az');
         },

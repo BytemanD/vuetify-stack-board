@@ -174,6 +174,7 @@ class Server extends ClientExt {
                 data.availability_zone += `:${options.host}`;
             }
         }
+        if (options.keyName){ data.key_name = options.keyName }
         if (options.useBdm) {
             data.block_device_mapping_v2 = [{
                 boot_index: 0, source_type: 'image', destination_type: "volume",
@@ -183,6 +184,7 @@ class Server extends ClientExt {
         } else {
             data.imageRef = imageId
         }
+        LOG.debug(`Boot server with data ${JSON.stringify(data)}`)
         if (options.useBdm) {
             return await this.volumeBoot(data);
         } else {
@@ -272,6 +274,12 @@ class Server extends ClientExt {
             }
         }
         return this.doAction(id, {rebuild: data})
+    }
+    async actionList(id) {
+        return (await this.get(`/${id}/os-instance-actions`)).instanceActions
+    }
+    async actionShow(id, reqId) {
+        return (await this.get(`/${id}/os-instance-actions/${reqId}`)).instanceAction
     }
 }
 
@@ -365,6 +373,9 @@ class VolumeService extends Restfulclient {
 }
 class VolumeType extends Restfulclient {
     constructor() { super('/volume/types') };
+    async create(data){
+        return (await this.post({volume_type: data})).volume_type;
+    }
 }
 
 class Cluster extends Restfulclient {

@@ -1,0 +1,25 @@
+<v-dialog v-model="newVolumeTypeDialog.show" width="740">
+    <v-card>
+        <v-card-title class="headline grey lighten-2" primary-title>添加卷类型</v-card-title>
+        <v-card-text>
+            <v-row>
+                <v-col cols="10">
+                    <v-text-field label="名字" placeholder="请输入卷类型名字" v-model="newVolumeTypeDialog.name"></v-text-field>
+                </v-col>
+                <v-col cols="2" class="my-auto">
+                    <v-btn text color="primary" @click="newVolumeTypeDialog.randomName()">随机名字</v-btn>
+                </v-col>
+                <v-col>
+                    <v-text-field label="后端名" placeholder="请输入卷类型对应的后端名" v-model="newVolumeTypeDialog.backendName"></v-text-field>
+                    <v-text-field label="描述" placeholder="请输入卷类型描述消息" v-model="newVolumeTypeDialog.description" hide-details></v-text-field>
+                    <v-switch hide-details v-model="newVolumeTypeDialog.private" label="私有"></v-switch>
+                </v-col>
+            </v-row>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" @click="newVolumeTypeDialog.commit()">添加</v-btn>
+        </v-card-actions>
+    </v-card>
+</v-dialog>

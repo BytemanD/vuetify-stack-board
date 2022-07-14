@@ -20,7 +20,7 @@
 </v-card>
 
 <v-data-table :headers="computing.flavorTable.headers" :items="computing.flavorTable.items"
-  :items-per-page="computing.flavorTable.itemsPerPage" :search="computing.flavorTable.search" class="elevation-1" dense
+  :items-per-page="computing.flavorTable.itemsPerPage" :search="computing.flavorTable.search" dense
   show-select v-model="computing.flavorTable.selected" show-expand single-expand>
   <template v-slot:item.extra_specs="{ item, index }">
   </template>

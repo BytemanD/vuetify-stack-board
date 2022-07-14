@@ -9,7 +9,10 @@
 <body>
     <div id="app">
         <v-app>
-            <v-navigation-drawer v-model="drawer" app permanent src dark hidden>
+            <v-app-bar color="indigo darken-2" dense dark app clipped-left hidden>
+                {% include "extensions/appBar.html" %}
+            </v-app-bar>
+            <v-navigation-drawer v-model="drawer" app permanent src dark hidden width="220" clipped>
                 {% include "extensions/navigation.html" %}
             </v-navigation-drawer>
             <v-main>

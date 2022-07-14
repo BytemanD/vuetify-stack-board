@@ -1,0 +1,8 @@
+<v-app-bar-nav-icon><v-icon>mdi-view-dashboard</v-icon></v-app-bar-nav-icon>
+<v-toolbar-title>{{ name }}</v-toolbar-title>
+<v-toolbar-title class="my-auto  ml-7">
+    <v-select :items="clusterTable.items" append-icon="mdi-domain" item-text="name" solo-inverted class="rounded-0" flat
+            v-model="clusterTable.selected" v-on:change="useCluster">
+    </v-select>
+</v-toolbar-title>
+<v-spacer></v-spacer>

@@ -3,9 +3,7 @@
     <v-card-title class="headline grey lighten-2" primary-title>
       新建实例<v-spacer></v-spacer><v-btn color="primary" @click="newServerDialog.commit()">创建</v-btn>
     </v-card-title>
-    <v-card-text>
-      <br>
-      <v-stepper>
+    <v-stepper elevation="0">
       <v-stepper-header>
           <v-stepper-step key="`1-step`" step="1" editable="editable">*基本设置</v-stepper-step><v-divider></v-divider>
           <v-stepper-step key="`1-step`" step="2" editable="editable">密码/密钥</v-stepper-step><v-divider></v-divider>
@@ -52,11 +50,11 @@
         <v-stepper-content step="2">
           <v-text-field label="密码" placeholder="请输入实例密码" v-model="newServerDialog.params.password"></v-text-field>
           <v-select :items="newServerDialog.keypairs" label="密钥对" item-text="keypair.name" item-value="keypair.name"
-                     v-model="newServerDialog.keypair"></v-select>
+                    v-model="newServerDialog.keypair"></v-select>
         </v-stepper-content>
       </v-stepper-items>
       <v-stepper-items>
-        <v-stepper-content step="3">
+        <v-stepper-content step="3" height="500" >
           <v-slider v-model="newServerDialog.params.nums" label="实例数量" class="align-center" ticks="always" max="10" min="1" >
               <template v-slot:append ><v-chip label small>[[newServerDialog.params.nums]]</v-chip></template>
           </v-slider>
@@ -75,6 +73,5 @@
         </v-stepper-content>
       </v-stepper-items>
     </v-stepper>
-    </v-card-text>
   </v-card>
 </v-dialog>

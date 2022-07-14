@@ -86,9 +86,12 @@ class Version(cli.SubCli):
 class Upgrade(cli.SubCli):
     NAME = 'upgrade'
     ARGUMENTS = [
+        cli.Arg('-d', '--debug', action='store_true',
+                 help='Show debug message'),
         cli.Arg('-y', '--yes', action='store_true',
                 help='answer yes for all questions')
     ]
+
 
     def __call__(self, args):
         from vstackboard.common import constants                 # noqa
@@ -100,33 +103,38 @@ class Upgrade(cli.SubCli):
             return
 
         if not releases:
-            print('The current version is the latest.')
+            print('No release found.')
             return
         current_version = utils.get_version()
-
+        LOG.debug('Current version is: %s', current_version)
         latest = releases[0]
-        if latest.get('tag_name') <= current_version:
-            print('The current version is the latest.')
-        else:
-            asset = latest.get('assets')[0] if latest.get('assets', []) \
-                else None
-            download_url = asset.get("browser_download_url")
-            msg = f'\nA new {constants.NAME} release is available: ' \
-                  f'{latest["tag_name"]}\n' \
-                  f'Upgrade from:\n    {download_url}\n'
-            print(msg)
-            if args.yes:
-                self.download(download_url, yes=True)
-            else:
-                while True:
-                    input_str = input(r'Upgrade now ? [y/n] ')
-                    if input_str == 'y':
-                        self.download(download_url)
-                    elif input_str == 'n':
-                        break
-                    else:
-                        print('Error, invalid input, must be y or n.')
+        LOG.debug('Latest release version: %s', latest.get('tag_name'))
 
+        v1 = utils.PackageVersion(current_version)
+        v2 = utils.PackageVersion(latest.get('tag_name'))
+
+        if v1 >= v2:
+            print('The current version is the latest.')
+            return
+        asset = latest.get('assets')[0] if latest.get('assets', []) \
+            else None
+        download_url = asset.get("browser_download_url")
+        msg = f'\nA new {constants.NAME} release is available: ' \
+                f'{latest["tag_name"]}\n' \
+                f'Upgrade from:\n    {download_url}\n'
+        print(msg)
+        if args.yes:
+            self.download(download_url, yes=True)
+        else:
+            while True:
+                input_str = input(r'Upgrade now ? [y/n] ')
+                if input_str == 'y':
+                    self.download(download_url)
+                    break
+                elif input_str == 'n':
+                    break
+                else:
+                    print('Error, invalid input, must be y or n.')
 
     def download(self, url):
         downloader = driver.Urllib3Driver(progress=True)

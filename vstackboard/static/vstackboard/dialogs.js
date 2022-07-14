@@ -7,7 +7,7 @@ import {
     flavorTable,
     keypairTable,
     netTable, portTable, routerTable,
-    serverTable, snapshotTable, volumeTable
+    serverTable, snapshotTable, volumeTable, volumeTypeTable
 } from './tables.js';
 
 
@@ -460,6 +460,7 @@ export class NewServerDialog extends Dialog {
                 az: this.params.az == '自动选择' ? null : this.params.az,
                 host: this.params.host,
                 password: this.params.password,
+                keyName: this.keypair,
             }
 
         )
@@ -782,6 +783,45 @@ export class NewBackupDialog extends Dialog {
         this.volumes = (await API.volume.list()).volumes;
     }
 }
+export class NewVolumeTypeDialog extends Dialog {
+    constructor() {
+        super();
+        this.name = '';
+        this.backendName = ''
+        this.description = '';
+        this.private = false;
+    }
+    randomName() {
+        return this.name = Utils.getRandomName('type');
+    }
+    async commit() {
+        let extraSpecs = {};
+        if (!this.name) { ALERT.error(`名字不能为空`); return; }
+        let data = {
+            name: this.name,
+            public: ! this.private,
+        }
+        if (this.description) {
+            data.description = this.description;
+        }
+        if (this.backendName){
+            extraSpecs.volume_backend_name = this.backendName;
+        }
+        if (Object.keys(extraSpecs  ).length > 0){
+            data.extra_specs = extraSpecs;
+        }
+        LOG.debug(`Create volume type ${JSON.stringify(data)}`);
+        await API.volumeType.create(data);
+        MESSAGE.success(`卷类型 ${this.name} 创建成功`);
+        this.hide();
+        volumeTypeTable.refresh();
+    }
+    async open() {
+        this.randomName();
+        super.open();
+    }
+}
+
 export class RouterInterfacesDialog extends Dialog {
     constructor() {
         super()
@@ -946,6 +986,31 @@ export class ServerTopology extends Dialog {
         this.drawServerTopoply();
     }
 }
+export class ServerActionsDialog extends Dialog {
+    constructor() {
+        super();
+        this.server = {};
+        this.actions = [];
+    }
+    async open(server) {
+        this.server = server;
+        this.actions = [];
+        super.open();
+        this.actions = (await API.server.actionList(this.server.id)).reverse();
+    }
+    getStartTime(startTime){
+        return Utils.parseUTCToLocal(startTime);
+    }
+    isActionError(action){
+        if (action.message && action.message.toLowerCase().includes('error')){
+            return true;
+        }
+        else {
+            return false;
+        }
+
+    }
+}
 
 export const newCluster = new NewClusterDialog()
 
@@ -964,6 +1029,7 @@ export const rebuildDialog = new RebuildDialog();
 export const newVolume = new NewVolumeDialog()
 export const newSnapshotDialog = new NewSnapshotDialog();
 export const newBackupDialog = new NewBackupDialog();
+export const newVolumeTypeDialog = new NewVolumeTypeDialog();
 
 export const newRouterDialog = new NewRouterkDialog();
 export const newNetDialog = new NewNetworkDialog();
@@ -971,5 +1037,6 @@ export const newSubnetDialog = new NewSubnetDialog();
 export const routerInterfacesDialog = new RouterInterfacesDialog();
 export const newPortDialog = new NewPortDialog();
 export const serverTopology = new ServerTopology();
+export const serverActions = new ServerActionsDialog();
 
 export default Dialog;

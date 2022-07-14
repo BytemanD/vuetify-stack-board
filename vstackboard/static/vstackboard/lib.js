@@ -33,8 +33,8 @@ export class Alert {
 }
 
 export class Utils {
-    static nowFormat() {
-        let date = new Date();
+    static nowFormat(dateObject=null) {
+        let date = dateObject ? dateObject : new Date();
         let month = date.getMonth() + 1;
         let day = date.getDate()
         let hours = date.getHours();
@@ -42,6 +42,12 @@ export class Utils {
         let seconds = date.getSeconds();
         return `${date.getFullYear()}${month >= 10 ? month : '0' + month}${day >= 10 ? day : '0' + day}-` +
             `${hours >= 10 ? hours : '0' + hours}:${minutes >= 0 ? minutes : '0' + minutes}:${seconds >= 0 ? seconds : '0' + seconds}`;
+    }
+    static parseUTCToLocal(utcString){
+        if (! utcString.endsWith('Z')){
+            utcString += 'Z'
+        }
+        return Utils.nowFormat(new Date(`${utcString}`))
     }
     static checkServerStatus(server_id) {
         API.server.detail({ id: server_id }).then(resp => {
@@ -57,8 +63,8 @@ export class Utils {
         });
     }
     static getRandomName(prefix = null) {
-        let name = this.nowFormat()
-        return prefix ? `${prefix}-${name}` : name;
+        let date = this.nowFormat()
+        return prefix ? `${prefix}-${date}` : date;
     }
     static checkVolumeStatus(volume_id) {
         API.volume.show(volume_id).then(resp => {
@@ -121,6 +127,7 @@ export class Utils {
             }, seconds * 1000)
         })
     }
+
 }
 
 //             error  warning info debug

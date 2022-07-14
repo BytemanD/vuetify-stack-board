@@ -261,6 +261,7 @@ export class ServerDataTable extends DataTable {
         ],
             API.server, 'servers', '实例');
         this.imageMap = {}
+        this.errorMessage = {};
     }
 
     async waitServerStatus(server_id, expectStatus = ['ACTIVE', 'ERROR']) {
@@ -379,6 +380,16 @@ export class ServerDataTable extends DataTable {
             return this.imageMap[imageId];
         }
     }
+    getErrorMesage(server){
+        if (server.fault && server.fault.message) {
+            return server.fault.message;
+        }
+        API.server.show(server.id).then(resp => {
+            Vue.set(this.errorMessage, server.id, resp.server.fault && resp.server.fault.message);
+        });
+        return this.errorMessage[server.id];
+        
+    }
 }
 export class ServiceTable extends DataTable {
     constructor() {
@@ -471,7 +482,13 @@ export class VolumeTypeTable extends DataTable {
         super([{ text: '名字', value: 'name' },
         { text: '是否公共', value: 'is_public' },
         { text: '属性', value: 'extra_specs' },
-        ], API.volumeType, 'volume_types')
+        ], API.volumeType, 'volume_types');
+        this.extendItems = [
+            { text: 'id', value: 'id' },
+            { text: 'qos_specs_id', value: 'qos_specs_id' },
+            { text: 'os-volume-type-access:is_public', value: 'avaios-volume-type-access:is_publiclability_zone' },
+            { text: 'description', value: 'description' },
+        ];
     }
 }
 
@@ -612,6 +629,16 @@ export class ClusterTable extends DataTable {
         }).catch(error => {
             MESSAGE.error(`集群 ${item.name} 删除失败`);
         })
+    }
+    getSelectedCluster(){
+        if (! this.selected){
+            return;
+        }
+        for(let i in this.items){
+            if (this.items[i].name == this.selected){
+                return this.items[i]
+            }
+        }
     }
 }
 export class HypervisortTable extends DataTable {
