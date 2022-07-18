@@ -2,7 +2,9 @@
 <v-toolbar-title>{{ name }}</v-toolbar-title>
 <v-toolbar-title class="my-auto  ml-7">
     <v-select :items="clusterTable.items" append-icon="mdi-domain" item-text="name" solo-inverted class="rounded-0" flat
-            v-model="clusterTable.selected" v-on:change="useCluster">
-    </v-select>
+    v-model="clusterTable.selected" v-on:change="useCluster">
+</v-select>
 </v-toolbar-title>
 <v-spacer></v-spacer>
+
+<v-btn text tile height="100%" @click="window.open('/welcome', '_self')">首页</v-btn>

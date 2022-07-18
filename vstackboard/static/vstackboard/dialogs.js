@@ -343,25 +343,29 @@ export class MigrateDialog extends Dialog {
         this.servers = serverTable.selected;
         super.open()
     }
+    async liveMigrateAndWait(server){
+        MESSAGE.info(`热迁移 ${item.name} ...`)
+        await API.server.liveMigrate(server.id)
+        await serverTable.waitServerStatus(server.id);
+        MESSAGE.success(`虚拟机 ${server.id} 迁移完成`);
+        serverTable.refresh();
+    }
+    async migrateAndWati(server){
+        MESSAGE.info(`冷迁移 ${server.name} ...`)
+        await API.server.migrate(server.id);
+        await serverTable.waitServerStatus(server.id, ['SHUTOFF', 'ERROR'])
+        MESSAGE.success(`虚拟机 ${server.id} 迁移完成`);
+        serverTable.refresh();
+    }
     async commit() {
         for (let i in this.servers) {
             let item = this.servers[i];
             switch (item.status.toUpperCase()) {
                 case 'ACTIVE':
-                    MESSAGE.info(`热迁移 ${item.name} ...`)
-                    await API.server.liveMigrate(item.id)
-                    await serverTable.waitServerStatus(item.id);
-                    MESSAGE.success(`虚拟机 ${item.id} 迁移完成`);
-                    // MESSAGE.error(`虚拟机 ${item.id} 迁移失败`);
-                    serverTable.refresh();
+                    this.liveMigrateAndWait(item)
                     break;
                 case 'SHUTOFF':
-                    MESSAGE.info(`冷迁移 ${item.name} ...`)
-                    await API.server.migrate(item.id);
-                    await serverTable.waitServerStatus(item.id, ['SHUTOFF', 'ERROR'])
-                    MESSAGE.success(`虚拟机 ${item.id} 迁移完成`);
-                    serverTable.refresh();
-                    serverTable.refresh()
+                    this.migrateAndWati(item)
                     break;
                 default:
                     ALERT.warn(`虚拟机 ${item.name} 状态异常，无法迁移`, 1)

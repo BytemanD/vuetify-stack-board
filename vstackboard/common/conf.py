@@ -11,11 +11,11 @@ CONF = cfg.CONF
 DEFAULT_HOST = socket.gethostname()
 
 default_options = [
-    cfg.BooleanOption('debug', default=True),
+    cfg.BooleanOption('debug', default=False),
     cfg.Option('log_file', default=None),
     cfg.IntOption('port', default=80),
     cfg.IntOption('workers', default=None),
-    cfg.BooleanOption('use_cdn', default=True),
+    cfg.BooleanOption('use_cdn', default=False),
     cfg.Option('data_path', default='/etc/vstackboard'),
 ]
 
@@ -29,7 +29,7 @@ openstack_options = [
 
 def load_configs():
     for file in ['/etc/vstackboard/vstackboard.conf',
-                 './etc/vstackboard.conf']:
+                 os.path.join('etc', 'vstackboard.conf')]:
         if not os.path.exists(file):
             continue
         CONF.load(file)

@@ -17,7 +17,7 @@ new Vue({
         useCluster: function(cluster){
             $cookies.set('clusterId', cluster.id);
             $cookies.set('clusterName', cluster.name);
-            axios.get('/dashboard').then(resp => {
+            axios.get('/identity/').then(resp => {
                 window.open('/dashboard', '_self');
             }).catch(error => {
                 MESSAGE.error(`连接 ${cluster.name} 失败`)
