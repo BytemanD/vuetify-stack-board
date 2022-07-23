@@ -1,8 +1,5 @@
 <v-dialog v-model="newServerDialog.show" width="900">
-  <v-card height="500">
-    <v-card-title class="headline grey lighten-2" primary-title>
-      新建实例<v-spacer></v-spacer><v-btn color="primary" @click="newServerDialog.commit()">创建</v-btn>
-    </v-card-title>
+  <v-card height="400" class="rounded-0">
     <v-stepper elevation="0">
       <v-stepper-header>
           <v-stepper-step key="`1-step`" step="1" editable="editable">*基本设置</v-stepper-step><v-divider></v-divider>
@@ -10,7 +7,7 @@
           <v-stepper-step key="`1-step`" step="3" editable="editable">自定义</v-stepper-step>
       </v-stepper-header>
       <v-stepper-items>
-        <v-stepper-content key="1-content`" step="1">
+        <v-stepper-content step="1">
           <v-row>
             <v-col cols="10">
               <v-text-field hide-details label="*名字" placeholder="请输入实例名" v-model="newServerDialog.params.name">
@@ -54,7 +51,7 @@
         </v-stepper-content>
       </v-stepper-items>
       <v-stepper-items>
-        <v-stepper-content step="3" height="500" >
+        <v-stepper-content step="3">
           <v-slider v-model="newServerDialog.params.nums" label="实例数量" class="align-center" ticks="always" max="10" min="1" >
               <template v-slot:append ><v-chip label small>[[newServerDialog.params.nums]]</v-chip></template>
           </v-slider>
@@ -74,4 +71,7 @@
       </v-stepper-items>
     </v-stepper>
   </v-card>
+  <v-card-title class="headline white lighten-2">
+    <v-spacer></v-spacer><v-btn color="primary" @click="newServerDialog.commit()">创建</v-btn>
+  </v-card-title>
 </v-dialog>

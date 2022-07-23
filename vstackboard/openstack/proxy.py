@@ -44,6 +44,7 @@ class OpenstackV3AuthProxy(object):
             return False
 
     def update_auth_token(self):
+        LOG.info('auth body: %s', json.dumps(self.auth_body))
         resp = requests.post('{}/v3/auth/tokens'.format(self.auth_url),
                              json=self.auth_body,
                              timeout=10)
@@ -58,6 +59,11 @@ class OpenstackV3AuthProxy(object):
         self._update_endpoints(token)
         LOG.debug('Endpoints %s', self.endpoints)
         LOG.debug('Update auth token success')
+
+        if 'compute' not in CONF.openstack.api_version and \
+               CONF.openstack.fetch_max_version:
+            CONF.openstack.api_version['compute'] = \
+                    self.get_compute_max_version()
 
     def _get_endpoint(self, service):
         return self.endpoints.get(service)
@@ -127,7 +133,17 @@ class OpenstackV3AuthProxy(object):
             self._api_version = ','.join([
                 '{} {}'.format(k, v) for k, v in \
                     CONF.openstack.api_version.items()])
+
+            LOG.info('api version: %s', self._api_version)
         return self._api_version
+
+    def get_compute_max_version(self):
+        try:
+            resp = requests.request('GET', self._get_endpoint('nova'),
+                                    headers=self.get_header())
+            return resp.json().get('version', {}).get('version')
+        except Exception:
+            raise
 
     def get_header(self):
         return {'X-Auth-Token': self.get_token(),

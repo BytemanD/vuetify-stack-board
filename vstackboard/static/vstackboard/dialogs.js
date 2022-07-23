@@ -380,6 +380,7 @@ export class NewClusterDialog extends Dialog {
             name: '', authUrl: '', authProject: '', authUser: '',
             authPassword: ''
         })
+        this.hidePassword = true;
     }
     commit() {
         if (!this.params.name) { ALERT.error(`环境名不能为空`); return; }

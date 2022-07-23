@@ -3,7 +3,7 @@ import logging
 
 from tornado import web
 from requests import exceptions
-from vstackboard.common import conf
+from vstackboard.common import conf, dbconf
 from vstackboard.common import constants
 from vstackboard.common import utils
 from vstackboard.db import api
@@ -16,6 +16,7 @@ CONF = conf.CONF
 PROXY = None
 
 PROXY_MAP = {}
+CONF_DB_API = None
 
 
 class Index(web.RequestHandler):
@@ -81,11 +82,15 @@ class Welcome(web.RequestHandler):
         self.render('welcome.html', cdn=cdn, version=utils.get_version())
 
 
-class Config(web.RequestHandler):
+class Configs(web.RequestHandler):
 
     def get(self):
+        global CONF_DB_API
+
         self.set_status(200)
-        self.finish({})
+        self.finish({'configs': [
+            item.to_dict() for item in CONF_DB_API.list()]
+        })
 
 
 class Cluster(web.RequestHandler):
@@ -115,7 +120,7 @@ class Cluster(web.RequestHandler):
             self.finish(json.dumps({}))
         except Exception as e:
             self.set_status(400)
-            self.finish({'error': e})
+            self.finish({'error': str(e)})
 
     def delete(self, cluster_id):
         deleted = api.delete_cluster_by_id(cluster_id)

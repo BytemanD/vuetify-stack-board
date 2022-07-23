@@ -4,13 +4,15 @@ import logging
 from tornado import ioloop
 from tornado import httpserver
 from tornado import web
+import tornado
 
 from vstackboard import views
 from vstackboard.db import api as db_api
-from vstackboard.common import conf
+from vstackboard.common import conf, dbconf
 
 
 LOG = logging.getLogger('tornado.application')
+
 
 CONF = conf.CONF
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -18,11 +20,13 @@ ROUTES = [
     (r'/', views.Index),
     (r'/dashboard', views.Dashboard),
     (r'/welcome', views.Welcome),
-    (r'/config', views.Config),
+    (r'/configs', views.Configs),
     (r'/cluster', views.Cluster),
     (r'/cluster/(.*)', views.Cluster),
-    (r'/[computing|image|networking|volume](.*)',
-     views.OpenstackProxy),
+    (r'/computing(.*)', views.OpenstackProxy),
+    (r'/image(.*)', views.OpenstackProxy),
+    (r'/networking(.*)', views.OpenstackProxy),
+    (r'/volume(.*)', views.OpenstackProxy),
 ]
 
 
@@ -35,6 +39,7 @@ def start(develop=False):
     LOG.info('Staring server ...')
 
     db_api.init()
+    views.CONF_DB_API = dbconf.DBApi(conf.configs_itesm_in_db)
 
     if develop:
         app.listen(CONF.port)

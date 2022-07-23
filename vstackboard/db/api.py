@@ -1,27 +1,30 @@
-
 import os
-from requests import session
+import logging
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from vstackboard.db import models
-from vstackboard.common import conf
+from vstackboard.common import conf, dbconf
 
 CONF = conf.CONF
-
+LOG = logging.getLogger(__name__)
 ENGINE = None
 SESSION = None
 
-ENGINE = create_engine('sqlite:///{}'.format(
-    os.path.join(CONF.data_path, 'vstackboard.db')))
-
-SESSION = sessionmaker(bind=ENGINE)()
-
 
 def init():
-    global ENGINE, SESSION
+    global DB_FILE, ENGINE, SESSION
 
+    DB_FILE = os.path.join(CONF.data_path, 'vstackboard.db')
+    ENGINE = create_engine('sqlite:///{}'.format(DB_FILE))
+    SESSION = sessionmaker(bind=ENGINE)()
+
+    LOG.info('database file is %s', DB_FILE)
     models.Base.metadata.create_all(ENGINE, checkfirst=True)
+
+    dbconf.init(conf.configs_itesm_in_db,
+                DB_FILE, engine=ENGINE, session=SESSION)
 
 
 def create_cluster(name, auth_url, auth_project, auth_user, auth_password):

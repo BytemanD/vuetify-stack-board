@@ -131,4 +131,8 @@ dmypy.json
 .pyre/
 
 vstackboard/static/cdn
+vstackboard/static/cdn.zip
 vstackboard/static/include
+
+etc/vstackboard.db
+etc/vstackboard.conf
