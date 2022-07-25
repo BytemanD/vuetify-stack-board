@@ -29,11 +29,22 @@
               </v-select>
             </v-col>
             <v-col cols="12">
-              <v-select :items="newServerDialog.networks" label="网络" dense item-text="name" item-value="id"
-              v-model="newServerDialog.params.netId">
-              <template v-slot:selection="{ item }"> [[ item.name ]] </template>
-            </v-select>
-                <v-switch v-model="newServerDialog.params.useBdm" label="创建卷" class="my-auto" hide-details></v-switch>
+                <v-select :items="newServerDialog.networks" label="网络" dense item-text="name" item-value="id"
+                          v-model="newServerDialog.params.netId">
+                  <template v-slot:selection="{ item }"> [[ item.name ]] </template>
+                </v-select>
+            </v-col>
+            <v-col cols="6">
+              <v-switch v-model="newServerDialog.params.useBdm" label="创建卷" class="my-auto" hide-details></v-switch>
+            </v-col>
+            <v-col cols="6">
+              <v-select :disabled="!newServerDialog.params.useBdm"
+                        :items="newServerDialog.volumeTypes" label="卷类型" dense item-text="name" item-value="id" hide-details
+                        v-model="newServerDialog.volumeType">
+                <template v-slot:selection="{ item }"> [[ item.name ]] </template>
+              </v-select>
+            </v-col>
+            <v-col cols="12">
                 <v-slider :disabled="!newServerDialog.params.useBdm" v-model="newServerDialog.params.volumeSize" ticks="always" label="系统卷大小" max="100" min="20" step="10">
                   <template v-slot:append>
                     <v-chip label small>[[newServerDialog.params.volumeSize]] GB</v-chip>

@@ -1,3 +1,4 @@
+import abc
 import json
 import logging
 
@@ -133,9 +134,9 @@ class Cluster(web.RequestHandler):
             self.finish({'error': f'cluster {cluster_id} is not found'})
 
 
-class OpenstackProxy(web.RequestHandler):
+class OpenstackProxyBase(web.RequestHandler):
 
-    def prepare(self):
+    def _get_proxy(self) -> proxy.OpenstackV3AuthProxy:
         global PROXY_MAP
         if self.get_cookie('clusterId') not in PROXY_MAP:
             cluster = api.get_cluster_by_id(self.get_cookie('clusterId'))
@@ -145,11 +146,63 @@ class OpenstackProxy(web.RequestHandler):
                                                   cluster.auth_password)
             identity.update_auth_token()
             PROXY_MAP[self.get_cookie('clusterId')] = identity
+        return PROXY_MAP[self.get_cookie('clusterId')]
 
-        cluster_proxy = PROXY_MAP[self.get_cookie('clusterId')]
-        resp = cluster_proxy.proxy_reqeust(self.request)
+    def _request_body(self):
+        return None if self.request.method.upper() in ['DELETE', 'GET'] else \
+            self.request.body
+
+    @abc.abstractmethod
+    def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
+        raise ImportError()
+
+    def do_proxy(self, method, url):
+        cluster_proxy = self._get_proxy()
+        resp = self.get_proxy_method(cluster_proxy)(
+            method=method, url=url, data=self._request_body()
+        )
         self.set_status(resp.status_code, resp.reason)
         if resp.status_code in [204]:
             self.finish()
         else:
             self.finish(resp.content)
+
+    def get(self, url):
+        self.do_proxy('GET', url)
+
+    def post(self, url):
+        self.do_proxy('POST', url)
+
+
+    def put(self, url):
+        self.do_proxy('PUT', url)
+
+
+    def delete(self, url):
+        self.do_proxy('DELETE', url)
+
+
+class KeystoneProxy(OpenstackProxyBase):
+
+    def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
+        return proxy_driver.proxy_keystone
+
+
+class NovaProxy(OpenstackProxyBase):
+    def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
+        return proxy_driver.proxy_nova
+
+
+class GlanceProxy(OpenstackProxyBase):
+    def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
+        return proxy_driver.proxy_glance
+
+
+class CinderProxy(OpenstackProxyBase):
+    def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
+        return proxy_driver.proxy_cinder
+
+
+class NeutronProxy(OpenstackProxyBase):
+    def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
+        return proxy_driver.proxy_neutron

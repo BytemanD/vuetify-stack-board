@@ -98,28 +98,6 @@ class OpenstackV3AuthProxy(object):
             }
         }
 
-    def _get_proxy_url(self, uri):
-        if uri.startswith('/identity/'):
-            proxy_uri = '{}{}'.format(self._get_endpoint('keystone'),
-                                      uri.split('/identity', 1)[1])
-        elif uri.startswith('/computing/'):
-            proxy_uri = '{}{}'.format(self._get_endpoint('nova'),
-                                      uri.split('/computing', 1)[1])
-        elif uri.startswith('/image/'):
-            proxy_uri = '{}{}'.format(self._get_endpoint('glance'),
-                                      uri.split('/image', 1)[1])
-        elif uri.startswith('/networking/'):
-            proxy_uri = '{}{}'.format(self._get_endpoint('neutron'),
-                                      uri.split('/networking', 1)[1])
-        elif uri.startswith('/volume/'):
-            service = 'cinder{}'.format(CONF.openstack.cinder_api_version)
-            proxy_uri = '{}{}'.format(self._get_endpoint(service),
-                                      uri.split('/volume', 1)[1])
-        else:
-            raise RuntimeError('Invalid uri %s' % uri)
-
-        return proxy_uri
-
     def _request_uri(self, request):
         return '{}{}'.format(
             self.proxy_to, request.uri.split(self.url_replace, 1)[1])
@@ -150,11 +128,28 @@ class OpenstackV3AuthProxy(object):
                 'Content-Type': 'application/json',
                 'OpenStack-API-Version': self._get_api_version()}
 
-    def proxy_reqeust(self,  request):
-        """
-        request: tornado Request
-        """
-        return requests.request(request.method,
-                                self._get_proxy_url(request.uri),
-                                data=self._request_body(request),
+    def proxy_keystone(self, method='GET', url=None, data=None):
+        proxy_url = '{}{}'.format(self._get_endpoint('keystone'), url or '/')
+        return requests.request(method, proxy_url, data=data,
                                 headers=self.get_header())
+
+    def proxy_nova(self, method='GET', url=None, data=None):
+        proxy_url = '{}{}'.format(self._get_endpoint('nova'), url or '/')
+        return requests.request(method, proxy_url, data=data,
+                                headers=self.get_header())
+
+    def proxy_glance(self, method='GET', url=None, data=None):
+        proxy_url = '{}{}'.format(self._get_endpoint('glance'), url or '/')
+        return requests.request(method, proxy_url, data=data,
+                                headers=self.get_header())
+
+    def proxy_neutron(self, method='GET', url=None, data=None):
+        proxy_url = '{}{}'.format(self._get_endpoint('neutron'), url or '/')
+        return requests.request(method, proxy_url, data=data,
+                                headers=self.get_header())
+
+    def proxy_cinder(self, method='GET', url=None, data=None):
+        proxy_url = '{}{}'.format(self._get_endpoint('cinderv2'), url or '/')
+        return requests.request(method, proxy_url, data=data,
+                                headers=self.get_header())
+

@@ -181,6 +181,9 @@ class Server extends ClientExt {
                 delete_on_termination: true,
                 volume_size: options.volumeSize, uuid: imageId,
             }];
+            if (options.volumeType){
+                data.block_device_mapping_v2[0].volume_type = options.volumeType;
+            }
         } else {
             data.imageRef = imageId
         }

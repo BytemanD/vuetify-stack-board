@@ -23,10 +23,11 @@ ROUTES = [
     (r'/configs', views.Configs),
     (r'/cluster', views.Cluster),
     (r'/cluster/(.*)', views.Cluster),
-    (r'/computing(.*)', views.OpenstackProxy),
-    (r'/image(.*)', views.OpenstackProxy),
-    (r'/networking(.*)', views.OpenstackProxy),
-    (r'/volume(.*)', views.OpenstackProxy),
+    (r'/identity(.*)', views.KeystoneProxy),
+    (r'/computing(.*)', views.NovaProxy),
+    (r'/image(.*)', views.GlanceProxy),
+    (r'/networking(.*)', views.NeutronProxy),
+    (r'/volume(.*)', views.CinderProxy),
 ]
 
 

@@ -344,7 +344,7 @@ export class MigrateDialog extends Dialog {
         super.open()
     }
     async liveMigrateAndWait(server){
-        MESSAGE.info(`热迁移 ${item.name} ...`)
+        MESSAGE.info(`热迁移 ${server.name} ...`)
         await API.server.liveMigrate(server.id)
         await serverTable.waitServerStatus(server.id);
         MESSAGE.success(`虚拟机 ${server.id} 迁移完成`);
@@ -360,16 +360,27 @@ export class MigrateDialog extends Dialog {
     async commit() {
         for (let i in this.servers) {
             let item = this.servers[i];
-            switch (item.status.toUpperCase()) {
-                case 'ACTIVE':
-                    this.liveMigrateAndWait(item)
-                    break;
-                case 'SHUTOFF':
-                    this.migrateAndWati(item)
-                    break;
-                default:
-                    ALERT.warn(`虚拟机 ${item.name} 状态异常，无法迁移`, 1)
-                    break;
+            if (['ACTIVE', 'SHUTOFF'].indexOf(item.status) < 0){
+                ALERT.warn(`虚拟机 ${item.name} 状态异常，无法迁移`, 1)
+                continue
+            }
+            if (this.smart){
+                switch (item.status.toUpperCase()) {
+                    case 'ACTIVE':
+                        this.liveMigrateAndWait(item); break;
+                    case 'SHUTOFF':
+                        this.migrateAndWati(item); break;
+                    default:
+                        break;
+                }
+                continue
+            }
+            if (this.liveMigrate && item.status.toUpperCase() == 'ACTIVE') {
+                this.liveMigrateAndWait(item);
+            } else if(!this.liveMigrate && item.status.toUpperCase() == 'SHUTOFF') {
+                this.migrateAndWati(item)
+            } else {
+                ALERT.warn(`虚拟机 ${item.name} 状态异常，无法迁移`, 1)
             }
         }
     }
@@ -422,6 +433,8 @@ export class NewServerDialog extends Dialog {
         this.azHosts = {};
         this.keypairs = [];
         this.keypair = '';
+        this.volumeType = '';
+        this.volumeTypes = []
     }
     async open() {
         this.params.name = Utils.getRandomName('server');
@@ -431,6 +444,8 @@ export class NewServerDialog extends Dialog {
         }
         this.flavors = (await API.flavor.detail()).flavors;
         this.flavors.sort(function (flavor1, flavor2) { return flavor1.name.localeCompare(flavor2.name) })
+
+        this.volumeTypes = (await API.volumeType.list()).volume_types;
 
         this.images = (await API.image.list()).images;
 
@@ -466,6 +481,7 @@ export class NewServerDialog extends Dialog {
                 host: this.params.host,
                 password: this.params.password,
                 keyName: this.keypair,
+                volumeType: this.volumeType,
             }
 
         )
@@ -937,9 +953,10 @@ export class ServerTopology extends Dialog {
                 force: { repulsion: 100 }
             }]
         }
-        // myChart.setOption(option);
+
         let serverNets = {};
-        let servers = (await API.server.detail()).servers
+
+        let servers = serverTable.items;
         for (let i in servers) {
             let server = servers[i];
             data.push({

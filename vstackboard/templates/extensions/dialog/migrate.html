@@ -3,8 +3,8 @@
       <v-card-title class="headline grey lighten-2" primary-title>迁移</v-card-title>
       <v-card-text>
             <v-switch v-model="migrateDialog.smart" label="智能模式"></v-switch>
-            <v-switch v-model="migrateDialog.liveMigrate" label="热迁移"></v-switch>
-            <v-alert text dense color="info" icon="mdi-information" border="left" >智能模式根据虚拟机状态选择冷迁移还是热迁移</v-alert>
+            <v-alert text dense color="info" icon="mdi-information">智能模式根据虚拟机状态选择冷迁移还是热迁移</v-alert>
+            <v-switch v-model="migrateDialog.liveMigrate" label="热迁移" :disabled="migrateDialog.smart"></v-switch>
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions>

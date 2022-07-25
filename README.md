@@ -18,9 +18,9 @@ Openstack Dashboard with Vuetify
 - [X] 优化 upgrade 命令
 - [X] 查看实例ACtions
 - [X] 创建虚拟机，允许指定keypair
+- [ ] 创建虚拟机，允许指定 volume type
 - [X] volume-type 管理
 - [ ] Aggregate 管理
-
 
 ### v0.0.3
 

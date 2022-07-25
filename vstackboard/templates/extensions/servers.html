@@ -21,7 +21,7 @@
               </v-icon>迁移</v-btn>
         <v-btn small color="error" @click="computing.serverTable.deleteSelected()" :disabled="computing.serverTable.selected.length == 0">
             <v-icon small>mdi-trash-can</v-icon>删除</v-btn>
-        <v-btn small color="info" @click="computing.serverTopology.open()">拓扑</v-btn>
+        <v-btn small color="info" @click="computing.serverTopology.open(computing.serverTable)">拓扑</v-btn>
       </v-col>
       <v-col cols="1" class="text-right">
         <v-btn fab x-small outlined color="info" v-on:click="computing.serverTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
