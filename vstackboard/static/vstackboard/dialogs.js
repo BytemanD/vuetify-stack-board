@@ -258,7 +258,14 @@ export class ServerInterfaceDialog extends Dialog {
         }
         serverTable.refresh();
     }
-    
+    parseFixedIps(item){
+        let ips = []
+        for (let i in item.fixed_ips){
+            let fixedIp = item.fixed_ips[i];
+            ips.push(fixedIp['ip_address'])
+        }
+        return ips
+    }
 }
 
 export class ChangePasswordDialog extends Dialog {
@@ -324,7 +331,7 @@ export class ResizeDialog extends Dialog {
         MESSAGE.info(`虚拟机 ${this.server.id} 变更中...`);
         this.hide();
         let newServer = await serverTable.waitServerStatus(this.server.id);
-        if (newServer.flavor.original_name == this.flavorRef) {
+        if (newServer.flavor.original_name == this.oldFlavorRef) {
             MESSAGE.error(`虚拟机 ${this.server.id} 变更失败`);
         } else {
             MESSAGE.success(`虚拟机 ${this.server.id} 变更成功`);
@@ -457,11 +464,14 @@ export class NewServerDialog extends Dialog {
 
         let body = await API.az.detail();
 
-        this.azList = body.availabilityZoneInfo.filter(az => { return az.zoneName != 'internal' });
-        this.azList.splice(this.azList, 0, { zoneName: '自动选择', hosts: [] })
         this.azHosts = { '无': '' };
-        this.azList.forEach(az => { this.azHosts[az.zoneName] = Object.keys(az.hosts); })
-
+        this.azList = body.availabilityZoneInfo.filter(az => { return az.zoneName != 'internal' });
+        if (this.azList){
+            this.azList.splice(this.azList, 0, { zoneName: '自动选择', hosts: [] })
+            this.azList.forEach(az => { this.azHosts[az.zoneName] = Object.keys(az.hosts); })
+        } else {
+            console.warn(`azList is null: ${this.azList}`)
+        }
     }
     async commit() {
         if (!this.params.name) { ALERT.error(`实例名不能为空`); return; }
@@ -1030,7 +1040,10 @@ export class ServerActionsDialog extends Dialog {
         else {
             return false;
         }
-
+    }
+    async getserverAction(reqId){
+        let action = (await API.server.actionShow(this.server.id, reqId));
+        console.log(action.events);
     }
 }
 

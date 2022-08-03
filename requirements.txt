@@ -7,3 +7,4 @@ jinja2
 bs4
 sqlalchemy
 # git+https://github.com/fjboy/easy-to-use.git@py2.7
+dataclasses>=0.6; python_version < '3.7'

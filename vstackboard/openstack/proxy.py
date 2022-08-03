@@ -13,7 +13,7 @@ CONF = conf.CONF
 class OpenstackV3AuthProxy(object):
 
     def __init__(self, auth_url, auth_project, auth_user, auth_password,
-                 domain_name=None):
+                 domain_name=None, region=None):
         self.auth_url = auth_url
         self.auth_project = auth_project
         self.auth_user = auth_user
@@ -24,6 +24,8 @@ class OpenstackV3AuthProxy(object):
         self.auth_token = {}
         self.endpoints = {}
         self._api_version = None
+        self.region = region
+        LOG.info('xxxxxxxxxxxxxxxx region=%s', self.region)
 
     def get_token(self):
         if 'token' not in self.auth_token or \
@@ -72,6 +74,8 @@ class OpenstackV3AuthProxy(object):
         for service in token.get('catalog', []):
             for endpoint in service.get('endpoints', []):
                 if endpoint.get('interface') != 'public':
+                    continue
+                if self.region and endpoint.get('region') != self.region:
                     continue
                 self.endpoints[service.get('name')] = endpoint.get('url')
                 break

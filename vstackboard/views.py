@@ -1,6 +1,8 @@
 import abc
 import json
 import logging
+from six.moves import urllib_parse
+from urllib import parse
 
 from tornado import web
 from requests import exceptions
@@ -38,10 +40,14 @@ class Dashboard(web.RequestHandler):
 
     def _update_auth_token(self, cluster):
         global PROXY_MAP
+
+        region = self.get_cookie('region')
+        LOG.info('use region %s', region)
         identity = proxy.OpenstackV3AuthProxy(cluster.auth_url,
                                               cluster.auth_project,
                                               cluster.auth_user,
-                                              cluster.auth_password)
+                                              cluster.auth_password,
+                                              region=region)
         if not identity.is_connectable():
             raise exceptions.ConnectionError()
         identity.update_auth_token()
@@ -138,6 +144,7 @@ class OpenstackProxyBase(web.RequestHandler):
 
     def _get_proxy(self) -> proxy.OpenstackV3AuthProxy:
         global PROXY_MAP
+
         if self.get_cookie('clusterId') not in PROXY_MAP:
             cluster = api.get_cluster_by_id(self.get_cookie('clusterId'))
             identity = proxy.OpenstackV3AuthProxy(cluster.auth_url,
@@ -158,9 +165,11 @@ class OpenstackProxyBase(web.RequestHandler):
 
     def do_proxy(self, method, url):
         cluster_proxy = self._get_proxy()
+        query = parse.urlparse(self.request.uri).query
+        if query:
+            url += f'?{query}'
         resp = self.get_proxy_method(cluster_proxy)(
-            method=method, url=url, data=self._request_body()
-        )
+            method=method, url=url, data=self._request_body())
         self.set_status(resp.status_code, resp.reason)
         if resp.status_code in [204]:
             self.finish()

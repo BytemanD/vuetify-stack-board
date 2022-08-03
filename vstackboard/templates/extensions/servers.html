@@ -46,7 +46,7 @@
       <v-icon color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
       [[ item['OS-EXT-STS:task_state'] ]]
     </template>
-    <v-icon v-else-if="item['OS-EXT-STS:vm_state'] == 'active'" color="success">mdi-check-circle</v-icon>
+    <v-icon v-else-if="item['OS-EXT-STS:vm_state'] == 'active'" color="success">mdi-play-circle</v-icon>
     <v-icon v-else-if="item['OS-EXT-STS:vm_state'] == 'stopped'" color="warning">mdi-stop-circle</v-icon>
     <v-icon v-else-if="item['OS-EXT-STS:vm_state'] == 'paused'" color="warning">mdi-pause-circle</v-icon>
     <v-tooltip top v-else-if="item['OS-EXT-STS:vm_state'] == 'error'" >
@@ -63,10 +63,13 @@
       <v-icon v-else-if="item['OS-EXT-STS:power_state'] != 0" color="warning" class="mdi-spin">mdi-loading</v-icon>
   </template>
   <template v-slot:item.addresses="{ item }">
+    <v-chip label x-small v-for="(addresses, j) in computing.serverTable.parseAddresses(item)" class="mr-1 mb-1">
+      [[ addresses.join(' | ') ]]
+    </v-chip>
     <template v-for="(ports, net, i) in item.addresses">
-      <template v-for="(port, j) in ports">
+      <!-- <template v-for="(port, j) in ports">
         <v-chip x-small>[[ port.addr ]]</v-chip>
-      </template>
+      </template> -->
     </template>
   </template>
   <template v-slot:item.flavor="{ item }">

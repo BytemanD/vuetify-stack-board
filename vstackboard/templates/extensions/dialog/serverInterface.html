@@ -6,8 +6,8 @@
       <v-row>
         <v-col cols="12">
           <template v-for="item in serverInterfaceDialog.attachments">
-            <v-chip close @click:close="serverInterfaceDialog.detach(item)" color="info" label class="mr-2">
-                [[ item.fixed_ips[0]['ip_address'] ]]
+            <v-chip close @click:close="serverInterfaceDialog.detach(item)" color="info" outlined label class="mr-2">
+              [[ serverInterfaceDialog.parseFixedIps(item).join(' | ') ]]
             </v-chip>
           </template>
         </v-col>

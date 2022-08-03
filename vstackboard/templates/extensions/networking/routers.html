@@ -21,13 +21,12 @@
   dense show-select v-model="networking.routerTable.selected">
 
   <template v-slot:item.name="{ item }">
-    [[item.name]]
+    [[item.name || item.id ]]
     <v-btn icon @click="routerInterfacesDialog.open(item)"><v-icon>mdi-serial-port</v-icon></v-btn>
-    
   </template>
   <template v-slot:item.status="{ item }">
-    <v-icon v-if="item.status == 'ACTIVE'" color="success">mdi-check-circle</v-icon>
-    <v-icon v-else color="error">mdi-close-circle</v-icon>
+    <v-icon v-if="item.status == 'ACTIVE'" color="success">mdi-emoticon-happy</v-icon>
+    <v-icon v-else color="error">mdi-emoticon-sad</v-icon>
   </template>
   <template v-slot:item.admin_state_up="{ item }">
     <v-switch class="my-auto" color="success" v-model="item.admin_state_up" hide-details @click="networking.routerTable.adminStateDown(item)"></v-switch>

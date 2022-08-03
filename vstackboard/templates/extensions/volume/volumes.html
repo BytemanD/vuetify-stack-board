@@ -19,6 +19,9 @@
   <v-data-table :headers="volume.volumeTable.headers" :items="volume.volumeTable.items"
     :items-per-page="volume.volumeTable.itemsPerPage" :search="volume.volumeTable.search" class="elevation-1" dense
     show-select v-model="volume.volumeTable.selected" show-expand single-expand>
+    <template v-slot:item.name="{ item }">
+      [[ item.name || item.id ]]
+    </template>
     <template v-slot:item.status="{ item }">
       <v-icon v-if="item.status == 'available'" color="success">mdi-check-circle</v-icon>
       <v-icon v-else-if="item.status == 'error'" color="error">mdi-close-circle</v-icon>

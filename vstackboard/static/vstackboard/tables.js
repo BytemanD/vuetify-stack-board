@@ -139,17 +139,18 @@ export class NetDataTable extends DataTable {
 }
 export class PortDataTable extends DataTable {
     constructor() {
-        super([{ text: 'id', value: 'id' },
-        { text: 'name', value: 'name' },
-        { text: 'status', value: 'status' },
-        { text: 'admin_state_up', value: 'admin_state_up' },
-        { text: 'device_owner', value: 'device_owner' },
-        { text: 'fixed_ips', value: 'fixed_ips' },
+        super([
+                { text: 'Name/ID', value: 'name_or_id' },
+                { text: 'vnic_type', value: 'binding:vnic_type' },
+                { text: 'vif_type', value: 'binding:vif_type' },
+                { text: 'status', value: 'status' },
+                { text: 'admin_state_up', value: 'admin_state_up' },
+                { text: 'device_owner', value: 'device_owner' },
+                { text: 'fixed_ips', value: 'fixed_ips' },
         ], API.port, 'ports');
 
         this.extendItems = [
-            { text: 'binding:vnic_type', value: 'binding:vnic_type' },
-            { text: 'binding:vif_type', value: 'binding:vif_type' },
+            { text: 'id', value: 'id' },
             { text: 'binding:vif_details', value: 'binding:vif_details' },
             { text: 'binding:profile', value: 'binding:profile' },
             { text: 'binding:host_id', value: 'binding:host_id' },
@@ -388,7 +389,19 @@ export class ServerDataTable extends DataTable {
             Vue.set(this.errorMessage, server.id, resp.server.fault && resp.server.fault.message);
         });
         return this.errorMessage[server.id];
-        
+    }
+    parseAddresses(server){
+        let addressMap = {};
+        for (let netName in server.addresses){
+            for (let i in server.addresses[netName]){
+                let address = server.addresses[netName][i]
+                if (Object.keys(addressMap).indexOf(address['OS-EXT-IPS-MAC:mac_addr']) < 0){
+                    addressMap[address['OS-EXT-IPS-MAC:mac_addr']] = []
+                }
+                addressMap[address['OS-EXT-IPS-MAC:mac_addr']].push(address.addr)
+            }
+        }
+        return Object.values(addressMap);
     }
 }
 export class ServiceTable extends DataTable {
@@ -466,7 +479,7 @@ export class UsageTable extends DataTable {
 }
 export class VolumeDataTable extends DataTable {
     constructor() {
-        super([{ text: '名字', value: 'name' },
+        super([{ text: '名字/ID', value: 'name' },
         { text: '状态', value: 'status' },
         { text: '大小', value: 'size' },
         { text: '可启动', value: 'bootable' },
@@ -621,6 +634,10 @@ export class ClusterTable extends DataTable {
     constructor() {
         super([], API.cluster, 'clusters', '集群');
         this.selected = null;
+        this.regions = [
+            'default', 'RegionOne', 'Suzhou', 'Wuxi'
+        ]
+        this.region = ''
     }
     delete(item) {
         API.cluster.delete(item.id).then(resp => {
@@ -639,6 +656,12 @@ export class ClusterTable extends DataTable {
                 return this.items[i]
             }
         }
+    }
+}
+export class RegionTable extends DataTable {
+    constructor() {
+        super([], API.region, 'regions', '地区');
+        this.selected = ''
     }
 }
 export class HypervisortTable extends DataTable {
@@ -766,6 +789,7 @@ export const netTable = new NetDataTable();
 export const portTable = new PortDataTable();
 
 export const clusterTable = new ClusterTable();
+export const regionTable = new RegionTable();
 export const azTable = new AZDataTable();
 
 export default DataTable;

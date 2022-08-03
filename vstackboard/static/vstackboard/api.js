@@ -290,6 +290,10 @@ class Endpoint extends Restfulclient {
     constructor() { super('/identity/endpoints') };
     // interface=public
 }
+class Region extends Restfulclient {
+    constructor() { super('/identity/regions') };
+}
+
 
 class Service extends Restfulclient {
     constructor() { super('/identity/services') };
@@ -396,6 +400,7 @@ export class OpenstackProxyApi {
         this.service = new Service();
         this.endpoint = new Endpoint();
         this.user = new User();
+        this.region = new Region();
         // nova
         this.hypervisor = new Hypervisor();
         this.flavor = new Flavor();

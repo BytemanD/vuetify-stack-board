@@ -1,19 +1,20 @@
-<v-dialog v-model="computing.serverActions.show" width="900">
+<v-dialog v-model="computing.serverActions.show" width="1000" scrollable>
   <v-card>
     <v-card-title class="headline grey lighten-2" primary-title>虚拟机操作记录</v-card-title>
     <v-card-text>
       <v-timeline dense>
-        <v-timeline-item v-for="item in computing.serverActions.actions" small right>
-          <v-row justify="space-between">
-            <v-col class="text-left my-auto" cols="5">
+        <v-timeline-item v-for="item in computing.serverActions.actions" small right 
+          :color="computing.serverActions.isActionError(item) == true ? 'error' : 'success'">
+          <v-row color="orange lighten-2">
+            <v-col class="text-left" cols="3">
               [[ computing.serverActions.getStartTime(item.start_time) ]]<br>
-              <code>[[item.request_id]]</code>
+            </v-col>
+            <v-col cols="3">
+              <h3>[[ item.action ]]</h3>
             </v-col>
             <v-col>
-              <v-alert dense prominent text :color="computing.serverActions.isActionError(item) == true ? 'error' : 'success'">
-                <h3>[[ item.action ]]</h3>
-                <div width="600" v-if="item.message">[[ item.message ]]</div>
-            </v-alert>
+              <a @click="computing.serverActions.getserverAction(item.request_id)">[[item.request_id]]</a>
+            </v-col>
           </v-row>
         </v-timeline-item>
       </v-timeline>

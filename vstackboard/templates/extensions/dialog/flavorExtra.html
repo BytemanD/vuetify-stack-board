@@ -6,7 +6,7 @@
             <v-col cols="6">
                 <h4>规格属性</h4>
                 <template v-for="(value, key) in flavorExtraDialog.extraSpecs">
-                    <v-chip label small class="mr-1 info" close @click:close="flavorExtraDialog.deleteExtra(key)">[[key]]=[[value]]</v-chip>
+                    <v-chip label small class="mr-1 mt-1 info" close @click:close="flavorExtraDialog.deleteExtra(key)">[[key]]=[[value]]</v-chip>
                 </template>
             </v-col>
             <v-col cols="6">

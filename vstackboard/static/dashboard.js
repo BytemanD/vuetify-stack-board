@@ -9,7 +9,8 @@ import DataTable, {
     backupTable, clusterTable, keypairTable, volumeServiceTable,
     routerTable, netTable, portTable, volumeTypeTable, snapshotTable,
     hypervisorTable,
-    azTable
+    azTable,
+    regionTable
 } from "./vstackboard/tables.js";
 import {
     newFlavor, flavorExtraDialog,
@@ -46,15 +47,18 @@ new Vue({
     data: {
         UTILS: Utils,
         clusterTable: clusterTable,
+        regionTable: regionTable,
         identity: {
             showAllService: false,
             serviceMap: {},
             users: {},
             projectMap: {},
-            endpointTable: new DataTable([{ text: 'serviceName', value: 'service_name' },
-            { text: 'serviceType', value: 'service_type' },
-            { text: 'interface', value: 'interface' },
-            { text: 'url', value: 'url' }
+            endpointTable: new DataTable([
+                { text: 'serviceName', value: 'service_name' },
+                { text: 'serviceType', value: 'service_type' },
+                { text: 'interface', value: 'interface' },
+                { text: 'url', value: 'url' },
+                { text: 'region', value: 'region' }
             ], API.endpoint, 'endpoints'),
             userTable: new DataTable([{ text: 'id', value: 'id' },
             { text: 'name', value: 'name' },
@@ -74,12 +78,13 @@ new Vue({
             serverActions: serverActions,
         },
         image: {
-            imageTable: new DataTable([{ text: 'name', value: 'name' },
-            { text: 'status', value: 'status' },
-            { text: 'size', value: 'size' },
-            { text: 'visibility', value: 'visibility' },
-            { text: 'image_state', value: 'image_state' },
-            { text: 'image_type', value: 'image_type' },
+            imageTable: new DataTable([
+                { text: 'name', value: 'name' },
+                { text: 'status', value: 'status' },
+                { text: 'size', value: 'size' },
+                { text: 'visibility', value: 'visibility' },
+                { text: 'image_state', value: 'image_state' },
+                { text: 'image_type', value: 'image_type' },
             ], API.image, 'images'),
         },
         networking: {
@@ -203,12 +208,15 @@ new Vue({
         },
         useCluster: function () {
             let cluster = this.clusterTable.getSelectedCluster()
-            console.log(cluster);
+            console.debug(cluster);
             $cookies.set('clusterId', cluster.id);
             $cookies.set('clusterName', cluster.name);
             window.open('/dashboard', '_self');
         },
-        
+        useRegion: function(){
+            $cookies.set('region', this.regionTable.selected);
+            window.open('/dashboard', '_self');
+        },
         drawAz() {
             this.computing.azTable.drawTopoloy('az');
         },
@@ -217,9 +225,13 @@ new Vue({
     mounted: function () {
         // this.drawAz();
     },
-    created: function () {
+    created: async function () {
         this.clusterTable.selected = $cookies.get('clusterName');
         this.clusterTable.refresh();
+
+        this.regionTable.selected = $cookies.get('region');
+        this.regionTable.refresh();
+
         this.refreshContainer()
         document.getElementById('loader').remove();
     },
