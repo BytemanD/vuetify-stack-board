@@ -63,9 +63,9 @@ class OpenstackV3AuthProxy(object):
         LOG.debug('Update auth token success')
 
         if 'compute' not in CONF.openstack.api_version and \
-               CONF.openstack.fetch_max_version:
+                CONF.openstack.fetch_max_version:
             CONF.openstack.api_version['compute'] = \
-                    self.get_compute_max_version()
+                self.get_compute_max_version()
 
     def _get_endpoint(self, service):
         return self.endpoints.get(service)
@@ -88,14 +88,14 @@ class OpenstackV3AuthProxy(object):
                     "password": {
                         "user": {
                             "name": self.auth_user,
-                            "domain": { "name": self.domain_name },
+                            "domain": {"name": self.domain_name},
                             "password": self.auth_password
                         }
                     }
                 },
                 "scope": {
                     "project": {
-                        "domain": { "id": "default" },
+                        "domain": {"id": "default"},
                         "name": self.auth_project
                     }
                 }
@@ -113,8 +113,8 @@ class OpenstackV3AuthProxy(object):
     def _get_api_version(self):
         if not self._api_version:
             self._api_version = ','.join([
-                '{} {}'.format(k, v) for k, v in \
-                    CONF.openstack.api_version.items()])
+                '{} {}'.format(k, v) for k, v in
+                CONF.openstack.api_version.items()])
 
             LOG.info('api version: %s', self._api_version)
         return self._api_version
@@ -156,4 +156,3 @@ class OpenstackV3AuthProxy(object):
         proxy_url = '{}{}'.format(self._get_endpoint('cinderv2'), url or '/')
         return requests.request(method, proxy_url, data=data,
                                 headers=self.get_header())
-

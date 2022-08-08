@@ -4,11 +4,11 @@ import logging
 from tornado import ioloop
 from tornado import httpserver
 from tornado import web
-import tornado
 
 from vstackboard import views
 from vstackboard.db import api as db_api
-from vstackboard.common import conf, dbconf
+from vstackboard.common import conf
+from vstackboard.common import dbconf
 
 
 LOG = logging.getLogger('tornado.application')
@@ -31,7 +31,7 @@ ROUTES = [
 ]
 
 
-def start(develop=False):
+def start(develop=False, host=None, port=None):
     template_path = os.path.join(ROOT, 'templates')
     static_path = os.path.join(ROOT, 'static')
     app = web.Application(ROUTES, debug=develop, template_path=template_path,
@@ -43,9 +43,9 @@ def start(develop=False):
     views.CONF_DB_API = dbconf.DBApi(conf.configs_itesm_in_db)
 
     if develop:
-        app.listen(CONF.port)
+        app.listen(port or CONF.port)
     else:
         server = httpserver.HTTPServer(app)
-        server.bind(CONF.port)
+        server.bind(port or CONF.port)
         server.start(num_processes=CONF.workers)
     ioloop.IOLoop.instance().start()

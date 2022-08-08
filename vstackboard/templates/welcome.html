@@ -11,10 +11,10 @@
     <div id="app">
         <v-app>
             <v-main class="indigo lighten-4">
-                <v-card class="mx-auto my-auto mt-10 blue-grey lighten-4" width="56%" elevation="4">
+                <v-card class="mx-auto mt-10 blue-grey lighten-4" width="56%" elevation="4">
                     <v-img class="white--text align-end" src="/static/welcome.svg">
                         <v-card-title>欢迎使用 VStackBoard</v-card-title>
-                        <v-card-subtitle>版本：{{ version }} </v-card-subtitle>
+                        <v-card-subtitle>版本：{{ version }}</v-card-subtitle>
                         <v-card-subtitle>VStackBoard ( Vuetify Stack Board ) 是一个基于Vuetify实现的 Openstack 管理服务。</v-card-subtitle>
                     </v-img>
                     <v-card-text class="text--primary">
@@ -29,6 +29,8 @@
                     </v-card-text>
                     <v-card-actions>
                         <v-btn color="orange" text @click="newCluster.display()"><v-icon>mdi-plus</v-icon> 添加集群</v-btn>
+                        <v-spacer></v-spacer>
+                        <v-btn icon href="https://github.com/fjboy/vuetify-stack-board" target="_new"><v-icon>mdi-github</v-icon></v-btn>
                     </v-card-actions>
                 </v-card>
                 {% include 'extensions/dialog/newCluster.html' %}

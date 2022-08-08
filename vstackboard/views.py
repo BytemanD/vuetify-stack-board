@@ -1,12 +1,12 @@
 import abc
 import json
 import logging
-from six.moves import urllib_parse
 from urllib import parse
 
-from tornado import web
 from requests import exceptions
-from vstackboard.common import conf, dbconf
+from tornado import web
+
+from vstackboard.common import conf
 from vstackboard.common import constants
 from vstackboard.common import utils
 from vstackboard.db import api
@@ -182,10 +182,8 @@ class OpenstackProxyBase(web.RequestHandler):
     def post(self, url):
         self.do_proxy('POST', url)
 
-
     def put(self, url):
         self.do_proxy('PUT', url)
-
 
     def delete(self, url):
         self.do_proxy('DELETE', url)

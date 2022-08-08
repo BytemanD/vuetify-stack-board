@@ -9,7 +9,7 @@ def get_version():
 
 
 class PackageVersion(object):
-    
+
     def __init__(self, version):
         self.version = isinstance(version, list) and version or \
             version.split('.')

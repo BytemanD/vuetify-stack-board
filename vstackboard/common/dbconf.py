@@ -101,7 +101,7 @@ class DBApi(object):
                 if isinstance(value, str):
                     value = value.lower() in ['true', '1', 'yes', 'on']
                 else:
-                    value =  boolean(value)
+                    value = boolean(value)
 
         config.update({'value': value})
         SESSION.commit()

@@ -29,10 +29,9 @@ def init():
 
 def create_cluster(name, auth_url, auth_project, auth_user, auth_password):
     SESSION.add(
-        models.Cluster(name=name, auth_url = auth_url,
+        models.Cluster(name=name, auth_url=auth_url,
                        auth_project=auth_project, auth_user=auth_user,
-                       auth_password=auth_password,
-        )
+                       auth_password=auth_password)
     )
     SESSION.commit()
 

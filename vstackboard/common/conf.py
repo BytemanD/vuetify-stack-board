@@ -1,4 +1,3 @@
-from cmath import log
 import os
 import socket
 import logging
@@ -34,6 +33,7 @@ configs_itesm_in_db = [
     BoolItem(name='fetch_max_version', default=True),
     Item(name='cinder_api_version', default='v2'),
 ]
+
 
 def load_configs():
     for file in ['/etc/vstackboard/vstackboard.conf',

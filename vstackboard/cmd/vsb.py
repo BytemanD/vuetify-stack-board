@@ -26,7 +26,7 @@ def download_statics_for_cdn():
     template = env.get_template('requires.html')
     html = template.render(cdn=constants.CDN)
     links = []
-    bs_html = bs4.BeautifulSoup(html,features="html.parser")
+    bs_html = bs4.BeautifulSoup(html, features="html.parser")
     for script in bs_html.find_all(name='script'):
         src = script.get('src')
         if not src or not src.startswith('http') or not src.endswith('.js'):
@@ -87,11 +87,10 @@ class Upgrade(cli.SubCli):
     NAME = 'upgrade'
     ARGUMENTS = [
         cli.Arg('-d', '--debug', action='store_true',
-                 help='Show debug message'),
+                help='Show debug message'),
         cli.Arg('-y', '--yes', action='store_true',
                 help='answer yes for all questions')
     ]
-
 
     def __call__(self, args):
         from vstackboard.common import constants                 # noqa
@@ -120,8 +119,8 @@ class Upgrade(cli.SubCli):
             else None
         download_url = asset.get("browser_download_url")
         msg = f'\nA new {constants.NAME} release is available: ' \
-                f'{latest["tag_name"]}\n' \
-                f'Upgrade from:\n    {download_url}\n'
+            f'{latest["tag_name"]}\n' \
+            f'Upgrade from:\n    {download_url}\n'
         print(msg)
         if args.yes:
             self.download(download_url, yes=True)
@@ -144,6 +143,8 @@ class Upgrade(cli.SubCli):
 class Serve(cli.SubCli):
     NAME = 'serve'
     ARGUMENTS = log.get_args() + [
+        cli.Arg('-p', '--port', type=int,
+                help="Run serve with specified port"),
         cli.Arg('--develop', action='store_true',
                 help="Run serve with develop mode"),
     ]
@@ -156,7 +157,7 @@ class Serve(cli.SubCli):
 
         # from gevent import monkey
         # monkey.patch_all()
-        server.start(develop=args.develop)
+        server.start(develop=args.develop, port=args.port)
 
 
 def main():
