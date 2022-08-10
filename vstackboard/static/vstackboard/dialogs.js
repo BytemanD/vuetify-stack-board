@@ -30,11 +30,11 @@ class Dialog {
 export class NewNetworkDialog extends Dialog {
     constructor() {
         super({
-            name: '', shared: false, networkType: '', qosPolicy: '',
+            name: '', shared: false, networkType: null, qosPolicy: '',
             segId: '', dnsDomain: '', azHint: ''
         })
-        this.netTypes = ['', 'vlan', 'vxlan', 'flat', 'geneve'];
-        this.qosPolices = [''];
+        this.netTypes = ['vlan', 'vxlan', 'flat', 'geneve'];
+        this.qosPolices = [];
     }
     open() {
         this.params.name = Utils.getRandomName('net');
@@ -45,7 +45,7 @@ export class NewNetworkDialog extends Dialog {
             name: this.params.name,
             shared: this.params.shared,
         }
-        if (this.params.networkType != '') { data['provider:network_type'] = this.params.networkType };
+        if (this.params.networkType) { data['provider:network_type'] = this.params.networkType };
         if (this.params.segId != '') { data['provider:segmentation_id'] = this.params.segId };
         if (this.params.qosPolicy != '') { data.qos_policy = this.params.qosPolicy };
         if (this.params.dnsDomain != '') { data.dns_domain = this.params.dnsDomain };
@@ -451,23 +451,17 @@ export class NewServerDialog extends Dialog {
         }
         this.flavors = (await API.flavor.detail()).flavors;
         this.flavors.sort(function (flavor1, flavor2) { return flavor1.name.localeCompare(flavor2.name) })
-
         this.volumeTypes = (await API.volumeType.list()).volume_types;
-
         this.images = (await API.image.list()).images;
-
         this.networks = (await API.network.list()).networks;
-        this.networks.splice(this.networks, 0, { name: '', id: null })
-
         this.keypairs = (await API.keypair.list()).keypairs;
-        this.keypairs.splice(this.keypairs, 0, { keypair: { name: '' } })
 
         let body = await API.az.detail();
 
         this.azHosts = { '无': '' };
         this.azList = body.availabilityZoneInfo.filter(az => { return az.zoneName != 'internal' });
         if (this.azList){
-            this.azList.splice(this.azList, 0, { zoneName: '自动选择', hosts: [] })
+            // this.azList.splice(this.azList, 0, { zoneName: '自动选择', hosts: [] })
             this.azList.forEach(az => { this.azHosts[az.zoneName] = Object.keys(az.hosts); })
         } else {
             console.warn(`azList is null: ${this.azList}`)
@@ -689,7 +683,7 @@ export class RebuildDialog extends Dialog {
 export class NewVolumeDialog extends Dialog {
     constructor() {
         super({
-            name: '', size: 10, nums: 1, image: '', type: '', snapshot: '',
+            name: '', size: 10, nums: 1, image: null, type: null, snapshot: null,
             snapshots: [], images: [], types: []
         })
     }
@@ -704,8 +698,8 @@ export class NewVolumeDialog extends Dialog {
                 name: this.params.nums > 1 ? `${this.params.name}-${i}` : this.params.name,
                 size: parseInt(this.params.size)
             };
-            if (this.params.image != '') { data.imageRef = this.params.image; }
-            if (this.params.snapshot != '') { data.snapshot_id = this.params.snapshot; }
+            if (this.params.image) { data.imageRef = this.params.image; }
+            if (this.params.snapshot) { data.snapshot_id = this.params.snapshot; }
             if (this.params.type != '') { data.volume_type = this.params.type; }
             let body = await API.volume.create(data)
             this.waitVOlumeCreated(body.volume)
@@ -718,19 +712,12 @@ export class NewVolumeDialog extends Dialog {
         super.open();
         let body = await API.snapshot.detail();
         this.params.snapshots = body.snapshots;
-        this.params.snapshots.splice(this.params.snapshots, 0, { name: '无', id: '' })
-
-        body = await API.image.list();
-        this.params.images = body.images;
-        this.params.images.splice(this.params.images, 0, { name: '无', id: '' })
-        body = await API.volumeType.list();
-        this.params.types = body.volume_types;
-        this.params.types.splice(this.params.types, 0, { name: '无', id: '' })
-
+        this.params.images = (await API.image.list()).images;
+        this.params.types = (await API.volumeType.list()).volume_types;
     }
     cleanUpImageShapshot() {
-        this.params.image = '';
-        this.params.snapshot = '';
+        this.params.image = null;
+        this.params.snapshot = null;
     }
 }
 

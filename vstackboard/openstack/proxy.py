@@ -1,13 +1,17 @@
 import logging
 import time
 import json
-
 import requests
 
 from vstackboard.common import conf
+from vstackboard.common import context
+from vstackboard.common import exceptions
+from vstackboard.db import api
 
 LOG = logging.getLogger(__name__)
 CONF = conf.CONF
+
+PROXY_MAP = {}
 
 
 class OpenstackV3AuthProxy(object):
@@ -25,7 +29,6 @@ class OpenstackV3AuthProxy(object):
         self.endpoints = {}
         self._api_version = None
         self.region = region
-        LOG.info('xxxxxxxxxxxxxxxx region=%s', self.region)
 
     def get_token(self):
         if 'token' not in self.auth_token or \
@@ -68,7 +71,11 @@ class OpenstackV3AuthProxy(object):
                 self.get_compute_max_version()
 
     def _get_endpoint(self, service):
-        return self.endpoints.get(service)
+        endpoint = self.endpoints.get(service)
+        if not endpoint:
+            raise exceptions.EndpointNotFound(service=service,
+                                              region=self.region)
+        return endpoint
 
     def _update_endpoints(self, token):
         for service in token.get('catalog', []):
@@ -156,3 +163,22 @@ class OpenstackV3AuthProxy(object):
         proxy_url = '{}{}'.format(self._get_endpoint('cinderv2'), url or '/')
         return requests.request(method, proxy_url, data=data,
                                 headers=self.get_header())
+
+
+def get_proxy(ctxt: context.ClusterContext) -> OpenstackV3AuthProxy:
+    global PROXY_MAP
+
+    if ctxt.cluster_id not in PROXY_MAP or \
+       not PROXY_MAP[ctxt.cluster_id].get(ctxt.region):
+
+        cluster = api.get_cluster_by_id(ctxt.cluster_id)
+        cluster_proxy = OpenstackV3AuthProxy(cluster.auth_url,
+                                             cluster.auth_project,
+                                             cluster.auth_user,
+                                             cluster.auth_password,
+                                             region=ctxt.region)
+        cluster_proxy.update_auth_token()
+        PROXY_MAP.setdefault(ctxt.cluster_id, {})
+        PROXY_MAP[ctxt.cluster_id][ctxt.region] = cluster_proxy
+
+    return PROXY_MAP[ctxt.cluster_id][ctxt.region]

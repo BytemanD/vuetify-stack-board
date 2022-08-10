@@ -1,4 +1,4 @@
-import { Utils } from "./vstackboard/lib.js";
+import { ALERT, Alert, Utils } from "./vstackboard/lib.js";
 import API from "./vstackboard/api.js";
 // import * as echarts from 'echarts';
 // import { TreeChart } from 'echarts/charts';
@@ -198,23 +198,20 @@ new Vue({
                     break;
             }
         },
-        getMessageTop: function (index) {
-            return `top: ${50 * index}px`;
-        },
-        changeCluster: function (item) {
-            $cookies.set('clusterId', item.id);
-            $cookies.set('clusterName', item.name);
-            window.open('/dashboard', '_self');
-        },
         useCluster: function () {
             let cluster = this.clusterTable.getSelectedCluster()
-            console.debug(cluster);
-            $cookies.set('clusterId', cluster.id);
-            $cookies.set('clusterName', cluster.name);
-            window.open('/dashboard', '_self');
+            if (cluster){
+                $cookies.set('clusterId', cluster.id);
+                $cookies.set('clusterName', cluster.name);
+                window.open('/dashboard', '_self');
+            }
         },
         useRegion: function(){
-            $cookies.set('region', this.regionTable.selected);
+            if (! this.regionTable.selected){
+                $cookies.remove('region');
+            } else {
+                $cookies.set('region', this.regionTable.selected);
+            }
             window.open('/dashboard', '_self');
         },
         drawAz() {
@@ -226,14 +223,24 @@ new Vue({
         // this.drawAz();
     },
     created: async function () {
-        this.clusterTable.selected = $cookies.get('clusterName');
-        this.clusterTable.refresh();
+        await this.clusterTable.refresh();
+        this.clusterTable.setSelected($cookies.get('clusterId'));
 
-        this.regionTable.selected = $cookies.get('region');
-        this.regionTable.refresh();
+        console.log($cookies.get('region'));
+        try {
+            await this.regionTable.refresh();
+            this.regionTable.setSelected($cookies.get('region'));
+            this.refreshContainer()
+        } catch(e) {
+            if (e.message == 'Request failed with status code 404'){
+                ALERT.error(`Region ${$cookies.get('region')} 异常，切换到默认Region`)
+                $cookies.remove('region');
+                window.open('/dashboard', '_self')
+            }
+        } finally {
+            document.getElementById('loader').remove();
+        }
 
-        this.refreshContainer()
-        document.getElementById('loader').remove();
     },
     watch: {
         'navigation.item': {

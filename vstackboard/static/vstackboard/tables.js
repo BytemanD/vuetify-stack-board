@@ -657,11 +657,25 @@ export class ClusterTable extends DataTable {
             }
         }
     }
+    setSelected(clusterId){
+        for(let i in this.items){
+            let cluster = this.items[i];
+            if (cluster.id == clusterId){
+                this.selected = cluster.name
+                break
+            }
+        }
+    }
 }
 export class RegionTable extends DataTable {
     constructor() {
         super([], API.region, 'regions', '地区');
         this.selected = ''
+    }
+    setSelected(region){
+        if (region){
+            this.selected = region
+        }
     }
 }
 export class HypervisortTable extends DataTable {

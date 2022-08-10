@@ -12,7 +12,7 @@
         </v-row>
         <v-row>
             <v-col cols="6">
-                <v-select :items="newNetDialog.netTypes" label="网络类型" dense outlined hide-details
+                <v-select :items="newNetDialog.netTypes" clearable label="网络类型" dense outlined hide-details
                           v-model="newNetDialog.params.networkType">
                 </v-select>
             </v-col>
@@ -29,7 +29,7 @@
                 <v-text-field hide-details label="azHint" placeholder="请输入azHint" v-model="newNetDialog.params.azHint" dense  outlined> </v-text-field>
             </v-col>
             <v-col cols="6">
-                <v-select :items="newNetDialog.qosPolices" label="QoS规则" dense outlined 
+                <v-select :items="newNetDialog.qosPolices" clearable label="QoS规则" dense outlined 
                             v-model="newNetDialog.params.qosPolicy">
                 </v-select>
             </v-col>

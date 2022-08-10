@@ -29,7 +29,7 @@
               </v-select>
             </v-col>
             <v-col cols="12">
-                <v-select :items="newServerDialog.networks" label="网络" dense item-text="name" item-value="id"
+                <v-select :items="newServerDialog.networks" clearable label="网络" dense item-text="name" item-value="id" 
                           v-model="newServerDialog.params.netId">
                   <template v-slot:selection="{ item }"> [[ item.name ]] </template>
                 </v-select>
@@ -39,7 +39,7 @@
             </v-col>
             <v-col cols="6">
               <v-select :disabled="!newServerDialog.params.useBdm"
-                        :items="newServerDialog.volumeTypes" label="卷类型" dense item-text="name" item-value="id" hide-details
+                        :items="newServerDialog.volumeTypes" clearable label="卷类型" dense item-text="name" item-value="id" hide-details
                         v-model="newServerDialog.volumeType">
                 <template v-slot:selection="{ item }"> [[ item.name ]] </template>
               </v-select>
@@ -57,7 +57,7 @@
       <v-stepper-items>
         <v-stepper-content step="2">
           <v-text-field label="密码" placeholder="请输入实例密码" v-model="newServerDialog.params.password"></v-text-field>
-          <v-select :items="newServerDialog.keypairs" label="密钥对" item-text="keypair.name" item-value="keypair.name"
+          <v-select :items="newServerDialog.keypairs" clearable label="密钥对" item-text="keypair.name" item-value="keypair.name"
                     v-model="newServerDialog.keypair"></v-select>
         </v-stepper-content>
       </v-stepper-items>
@@ -68,7 +68,7 @@
           </v-slider>
           <v-row>
             <v-col>
-              <v-select :items="newServerDialog.azList" label="选择AZ" item-text="zoneName" v-model="newServerDialog.params.az">
+              <v-select :items="newServerDialog.azList" clearable label="选择AZ" item-text="zoneName" v-model="newServerDialog.params.az">
                   <template v-slot:selection="{ item }"> [[ item.zoneName ]] </template>
               </v-select>
             </v-col>
