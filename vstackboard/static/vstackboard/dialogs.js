@@ -896,9 +896,18 @@ export class NewPortDialog extends Dialog {
     constructor() {
         super()
         this.name = '';
-        this.networkId = '';
+        this.networkId = null;
         this.nums = 1;
         this.networks = [];
+        this.vnicTypes = ['normal', 'macvtap', 'direct', 'direct-physical',
+                          'baremetal', 'virtio-forwarder', 'vdpa']
+        this.vnicType = null;
+        this.macAddress = null;
+        this.qosPolicies = [];
+        this.qosPolicyId = null;
+        this.portSecurityEnabled = true;
+        this.securityGroups = [];
+        this.portSecurityGroups = [];
     }
     randomName() {
         this.name = Utils.getRandomName('port');
@@ -912,16 +921,24 @@ export class NewPortDialog extends Dialog {
         this.networks = (await API.network.list()).networks;
     }
     async commit() {
+        if (!this.networkId){
+            ALERT.error(`请选择网络`);
+            return;
+        }
         MESSAGE.info(`端口 ${this.name} 创建中`);
         for (var i = 1; i <= this.nums; i++) {
             let data = {
                 name: this.nums > 1 ? `${this.name}-${i}` : this.name,
                 network_id: this.networkId
             };
+            if (this.vnicType){ data['binding:vnic_type'] = this.vnicType }
+            if (this.macAddress){ data.mac_address = this.macAddress; }
+            if (this.qosPolicyId){ data.qos_policy_id = this.qosPolicyId; }
+            if (this.portSecurityEnabled){ data.port_security_enabled = this.portSecurityEnabled; }
+            if (this.portSecurityGroups) {data.security_groups = this.portSecurityGroups; }
             await API.port.post({ port: data })
             MESSAGE.success(`端口 ${this.name} 创建成功`);
             portTable.refresh();
-            // MESSAGE.error(`端口 ${this.name} 创建失败, ${error.response.data.NeutronError.message}`)
         }
         this.hide();
     }
@@ -1018,6 +1035,9 @@ export class ServerActionsDialog extends Dialog {
         this.actions = (await API.server.actionList(this.server.id)).reverse();
     }
     getStartTime(startTime){
+        if (! startTime){
+            return ''
+        }
         return Utils.parseUTCToLocal(startTime);
     }
     isActionError(action){
@@ -1031,6 +1051,31 @@ export class ServerActionsDialog extends Dialog {
     async getserverAction(reqId){
         let action = (await API.server.actionShow(this.server.id, reqId));
         console.log(action.events);
+    }
+}
+export class ServerActionEventsDialog extends Dialog {
+    constructor() {
+        super();
+        this.server = {};
+        this.requestId = null;
+        this.instanceAction = {};
+    }
+    async open(server, requestId) {
+        this.server = server;
+        this.requestId = requestId;
+        super.open();
+        this.instanceAction = await API.server.actionShow(this.server.id, this.requestId);
+    }
+    getStartTime(startTime){
+        return Utils.parseUTCToLocal(startTime);
+    }
+    isEventError(event){
+        if (event.result && event.result.toLowerCase().includes('error')){
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }
 
@@ -1060,5 +1105,5 @@ export const routerInterfacesDialog = new RouterInterfacesDialog();
 export const newPortDialog = new NewPortDialog();
 export const serverTopology = new ServerTopology();
 export const serverActions = new ServerActionsDialog();
-
+export const serverActionEvents = new ServerActionEventsDialog();
 export default Dialog;

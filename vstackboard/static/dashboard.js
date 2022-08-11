@@ -19,7 +19,7 @@ import {
     resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog,
     newVolume, newSnapshotDialog, newBackupDialog,
     newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog,
-    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog
+    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents
 
 } from "./vstackboard/dialogs.js";
 
@@ -76,6 +76,7 @@ new Vue({
             azTable: azTable,
             serverTopology: serverTopology,
             serverActions: serverActions,
+            serverActionEvents: serverActionEvents,
         },
         image: {
             imageTable: new DataTable([

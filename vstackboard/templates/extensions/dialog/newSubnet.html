@@ -12,21 +12,15 @@
         </v-row>
         <v-row>
           <v-col cols="6">
-            <v-select :items="newSubnetDialog.networks" label="选择网络" dense outlined hide-details
-                      v-model="newSubnetDialog.params.network" item-text="name" item-value="id">
+            <v-select :items="newSubnetDialog.networks" label="选择网络" dense outlined v-model="newSubnetDialog.params.network" item-text="name" item-value="id">
             </v-select>
+            <v-text-field label="CIDR" placeholder="请输入CIDR" v-model="newSubnetDialog.params.cidr" dense outlined></v-text-field>
           </v-col>
           <v-col cols="6">
-              <v-text-field hide-details label="CIDR" placeholder="请输入 CIDR" v-model="newSubnetDialog.params.cidr" dense outlined></v-text-field>
-          </v-col>
-            <v-col cols="6">
-                <v-select :items="newSubnetDialog.ipVersions" label="IP版本" dense outlined hide-details
-                          v-model="newSubnetDialog.params.ipVersion">
+                <v-select :items="newSubnetDialog.ipVersions" dense outlined label="IP版本" v-model="newSubnetDialog.params.ipVersion">
                 </v-select>
-            </v-col>
-            <v-col cols="6">
-                <v-switch v-model="newSubnetDialog.params.enableDhcp" label="启用DHCP" hidde-details class="my-auto"></v-switch>
-            </v-col>
+                <v-switch v-model="newSubnetDialog.params.enableDhcp" dense label="启用DHCP" class="my-auto"></v-switch>
+          </v-col>
         </v-row>
       </v-card-text>
       <v-divider></v-divider>

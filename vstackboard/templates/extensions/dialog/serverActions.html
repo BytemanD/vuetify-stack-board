@@ -5,15 +5,13 @@
       <v-timeline dense>
         <v-timeline-item v-for="item in computing.serverActions.actions" small right 
           :color="computing.serverActions.isActionError(item) == true ? 'error' : 'success'">
-          <v-row color="orange lighten-2">
-            <v-col class="text-left" cols="3">
-              [[ computing.serverActions.getStartTime(item.start_time) ]]<br>
-            </v-col>
+          <v-row>
+            <v-col class="text-left" cols="3">[[ computing.serverActions.getStartTime(item.start_time) ]]</v-col>
             <v-col cols="3">
               <h3>[[ item.action ]]</h3>
             </v-col>
             <v-col>
-              <a @click="computing.serverActions.getserverAction(item.request_id)">[[item.request_id]]</a>
+                <a @click="computing.serverActionEvents.open(computing.serverActions.server, item.request_id)">[[item.request_id]]</a>
             </v-col>
           </v-row>
         </v-timeline-item>

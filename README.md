@@ -10,18 +10,19 @@ Openstack Dashboard with Vuetify
 - [ ] volume支持状态重置
 - [ ] inerface 卸载，自动检测后刷新表
 - [ ] 上传镜像
-- [ ] 新建port，添加 vnic_type 等可选属性
 
 ### v0.0.4
 
 - [X] UI调整(添加app-bar、 ...)
 - [X] 优化 upgrade 命令
-- [X] 查看实例ACtions
+- [X] 查看实例Actions
+- [X] 查看操作events，以及错误堆栈
 - [X] 创建虚拟机，允许指定keypair
 - [X] 创建虚拟机，允许指定 volume type
 - [X] volume-type 管理
 - [X] 指定 Region
 - [X] Aggregate 显示
+- [X] 新建port，添加 vnic_type 等可选属性
 
 ### v0.0.3
 
