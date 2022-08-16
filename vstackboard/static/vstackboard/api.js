@@ -317,6 +317,9 @@ class Subnet extends Restfulclient {
 class Port extends Restfulclient {
     constructor() { super('/networking/v2.0/ports') };
 }
+class QosPolicy extends Restfulclient {
+    constructor() { super('/networking/v2.0/qos/policies') };
+}
 class Router extends Restfulclient {
     constructor() { super('/networking/v2.0/routers'), this.portClient = new Port() };
     // interface=public
@@ -416,6 +419,7 @@ export class OpenstackProxyApi {
         this.network = new Network();
         this.subnet = new Subnet();
         this.port = new Port();
+        this.qosPolicy = new QosPolicy();
         // cinder
         this.volume = new Volume();
         this.volumeType = new VolumeType();

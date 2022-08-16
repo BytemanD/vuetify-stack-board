@@ -1,4 +1,4 @@
-import { ALERT, Alert, Utils } from "./vstackboard/lib.js";
+import { ALERT, Alert, ServerTasks, Utils } from "./vstackboard/lib.js";
 import API from "./vstackboard/api.js";
 // import * as echarts from 'echarts';
 // import { TreeChart } from 'echarts/charts';
@@ -10,7 +10,8 @@ import DataTable, {
     routerTable, netTable, portTable, volumeTypeTable, snapshotTable,
     hypervisorTable,
     azTable,
-    regionTable
+    regionTable,
+    qosPolicyTable
 } from "./vstackboard/tables.js";
 import {
     newFlavor, flavorExtraDialog,
@@ -19,9 +20,10 @@ import {
     resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog,
     newVolume, newSnapshotDialog, newBackupDialog,
     newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog,
-    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents
+    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents, newQosPolicyDialog
 
 } from "./vstackboard/dialogs.js";
+import { init } from "./vstackboard/context.js";
 
 
 const navigationItems = [
@@ -93,6 +95,7 @@ new Vue({
             routerTable: routerTable,
             networkTable: netTable,
             portTable: portTable,
+            qosPolicyTable: qosPolicyTable,
         },
         volume: {
             tab: 0,
@@ -130,6 +133,7 @@ new Vue({
         newSubnetDialog: newSubnetDialog,
         routerInterfacesDialog: routerInterfacesDialog,
         newPortDialog: newPortDialog,
+        newQosPolicyDialog: newQosPolicyDialog,
     },
     methods: {
         getServices: async function () {
@@ -156,6 +160,7 @@ new Vue({
                     break;
                 case '实例':
                     this.computing.serverTable.refresh();
+                    this.computing.serverTable.recheckSavedTasks();
                     break;
                 case '计算管理':
                     this.computing.flavorTable.refresh();
@@ -169,22 +174,12 @@ new Vue({
                     this.computing.hypervisorTable.refreshStatics();
                     this.computing.usageTable.refresh();
                     break;
-                case '计算服务':
-                    this.computing.serviceTable.refresh();
-                    break;
-                case '密钥对':
-
-                    break;
                 case '网络':
                     this.networking.networkTable.refresh();
                     this.networking.networkTable.refreshSubnets();
                     this.networking.portTable.refresh();
                     this.networking.routerTable.refresh();
-                case '端口':
-                    this.networking.portTable.refresh();
-                    break;
-                case '路由':
-                    this.networking.routerTable.refresh();
+                    this.networking.qosPolicyTable.refresh();
                     break;
                 case '镜像':
                     this.image.imageTable.refresh();
@@ -226,12 +221,12 @@ new Vue({
     created: async function () {
         await this.clusterTable.refresh();
         this.clusterTable.setSelected($cookies.get('clusterId'));
-
-        console.log($cookies.get('region'));
+        init($cookies);
         try {
             await this.regionTable.refresh();
             this.regionTable.setSelected($cookies.get('region'));
-            this.refreshContainer()
+
+            this.refreshContainer();
         } catch(e) {
             if (e.message == 'Request failed with status code 404'){
                 ALERT.error(`Region ${$cookies.get('region')} 异常，切换到默认Region`)
@@ -239,9 +234,11 @@ new Vue({
                 window.open('/dashboard', '_self')
             }
         } finally {
-            document.getElementById('loader').remove();
+            let loader = document.getElementById('loader');
+            if (loader){
+                loader.remove()
+            }
         }
-
     },
     watch: {
         'navigation.item': {

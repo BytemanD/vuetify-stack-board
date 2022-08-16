@@ -7,12 +7,13 @@
         <v-row>
           <v-col cols="6"><v-text-field hide-details label="ID" placeholder="请输入规格ID" v-model="newFlavorDialog.params.id"></v-text-field></v-col>
           <v-col cols="6"><v-text-field hide-details label="名字" placeholder="请输入规格名" v-model="newFlavorDialog.params.name"></v-text-field></v-col>
-          <v-col cols="12">
+          <v-col cols="12" class="mb-0">
             <v-slider v-model="newFlavorDialog.params.ram" hidde-details dense label="内存大小" :max="newFlavorDialog.ramValues.length - 1" ticks="always" track-color="grey"
                       max="100" min="1" step="1">
                 <template v-slot:append>
-                  <v-text-field v-model="newFlavorDialog.params.ram" class="mt-0 pt-0" hide-details single-line type="number" style="width: 60px"></v-text-field>
+                  <v-text-field v-model="newFlavorDialog.params.ram" class="mt-0 pt-0" hide-details type="number" style="width: 60px"></v-text-field>
                   <v-chip label small>G</v-chip>
+
                 </template>
             </v-slider>
               <v-slider v-model="newFlavorDialog.params.vcpu" hidde-details dense label="CPU个数" max="128" min="1" track-color="grey">

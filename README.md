@@ -23,6 +23,8 @@ Openstack Dashboard with Vuetify
 - [X] 指定 Region
 - [X] Aggregate 显示
 - [X] 新建port，添加 vnic_type 等可选属性
+- [X] QoS policy管理
+- [X] QoS policy rule 管理
 
 ### v0.0.3
 

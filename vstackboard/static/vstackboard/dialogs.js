@@ -1,4 +1,4 @@
-import { Utils, MESSAGE, ALERT, LOG } from './lib.js';
+import { Utils, MESSAGE, ALERT, LOG, ServerTasks } from './lib.js';
 import API from './api.js';
 
 import {
@@ -6,7 +6,7 @@ import {
     clusterTable,
     flavorTable,
     keypairTable,
-    netTable, portTable, routerTable,
+    netTable, portTable, qosPolicyTable, routerTable,
     serverTable, snapshotTable, volumeTable, volumeTypeTable
 } from './tables.js';
 
@@ -462,7 +462,7 @@ export class NewServerDialog extends Dialog {
         this.azList = body.availabilityZoneInfo.filter(az => { return az.zoneName != 'internal' });
         if (this.azList){
             // this.azList.splice(this.azList, 0, { zoneName: '自动选择', hosts: [] })
-            this.azList.forEach(az => { this.azHosts[az.zoneName] = Object.keys(az.hosts); })
+            this.azList.forEach(az => { this.azHosts[az.zoneName] = Object.keys(az.hosts || {}); })
         } else {
             console.warn(`azList is null: ${this.azList}`)
         }
@@ -487,12 +487,14 @@ export class NewServerDialog extends Dialog {
                 keyName: this.keypair,
                 volumeType: this.volumeType,
             }
-
         )
         MESSAGE.info(`实例 ${this.params.name} 创建中...`);
+        let serverTasks = new ServerTasks();
+        serverTasks.add(body.server.id, 'building')
         this.hide();
         serverTable.refresh();
         let result = await serverTable.waitServerStatus(body.server.id);
+        serverTasks.delete(body.server.id)
         if (result.status.toUpperCase() == 'ERROR') {
             MESSAGE.error(`实例 ${this.params.name} 创建失败`);
         } else {
@@ -943,6 +945,41 @@ export class NewPortDialog extends Dialog {
         this.hide();
     }
 }
+export class NewQosPolicyDialog extends Dialog {
+    constructor() {
+        super()
+        this.name = null;
+        this.isDefault = false;
+        this.shared = false;
+        this.description = null;
+    }
+    randomName() {
+        this.name = Utils.getRandomName('qosPolicy');
+    }
+    open() {
+        this.randomName();
+        super.open();
+    }
+    async commit() {
+        if (!this.name){
+            ALERT.error(`请输入名字`);
+            return;
+        }
+
+        let data = {
+            name: this.name,
+            is_default: this.isDefault,
+            shared: this.shared
+        }
+        if (this.description){
+            data.description = this.description;
+        }
+        await API.qosPolicy.post({ policy: data })
+        MESSAGE.success(`限速策略 ${this.name} 创建成功`);
+        qosPolicyTable.refresh();
+        this.hide();
+    }
+}
 export class ServerTopology extends Dialog {
     constructor() {
         super()
@@ -1103,6 +1140,8 @@ export const newNetDialog = new NewNetworkDialog();
 export const newSubnetDialog = new NewSubnetDialog();
 export const routerInterfacesDialog = new RouterInterfacesDialog();
 export const newPortDialog = new NewPortDialog();
+export const newQosPolicyDialog = new NewQosPolicyDialog();
+
 export const serverTopology = new ServerTopology();
 export const serverActions = new ServerActionsDialog();
 export const serverActionEvents = new ServerActionEventsDialog();

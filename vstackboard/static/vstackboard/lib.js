@@ -1,5 +1,9 @@
 import API from "./api.js";
+import { CookieContext } from "./context.js";
 import { volumeTable } from "./tables.js";
+
+// import VueCookies from 'vue-cookies'
+
 
 export class Message {
     constructor() {
@@ -165,6 +169,55 @@ export class Logger {
         console.error(`${new Date().toISOString()} ERROR ${msg}`)
         VuetifyMessageSnackbar.Notify.top().timeout(timeout * 1000).error(msg)
     };
+}
+
+export class ContextLocalStorage {
+    constructor(){
+        this.context = new CookieContext();
+    }
+    domain(){
+        return `${this.context.getClusterId()}_${this.context.getRegion() || ''}`;
+    }
+    getAll(name){
+        let itemName = `${this.domain()}_${name}`
+        LOG.debug(`localStroage get Item ${itemName}`)
+        let data = localStorage.getItem(itemName)
+        return data ? JSON.parse(data): {};
+    }
+    get(name, key){
+        let itemName = `${this.domain()}_${name}`
+        return this.getAll(itemName)[key]
+    }
+    set(name, key, value) {
+        let data = this.getAll(name)
+        data[key] = value;
+        let itemName = `${this.domain()}_${name}`
+        LOG.debug(`localStroage save item: ${itemName} -> ${key} (${JSON.stringify(data)})`)
+        localStorage.setItem(itemName, JSON.stringify(data));
+    }
+    delete(name, key) {
+        let itemName = `${this.domain()}_${name}`
+        let data = this.getAll(name)
+        LOG.debug(`localStroage delete Item: ${itemName} -> ${key}`)
+        delete data[key];
+        localStorage.setItem(itemName, JSON.stringify(data));
+    }
+}
+
+export class ServerTasks extends ContextLocalStorage {
+
+    getAll(){
+        return super.getAll('tasks');
+    }
+    add(serverId, task) {
+        LOG.debug(`save task ${serverId} ${task}`);
+        super.set('tasks', serverId, 'building');
+    }
+    delete(serverId) {
+        super.delete('tasks', serverId);
+        LOG.debug(`delete task ${serverId}`);
+        localStorage.removeItem(serverId);
+    }
 }
 
 export const MESSAGE = new Message();

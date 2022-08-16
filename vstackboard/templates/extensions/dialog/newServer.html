@@ -1,5 +1,5 @@
 <v-dialog v-model="newServerDialog.show" width="900">
-  <v-card height="400" class="rounded-0">
+  <v-card height="420" class="rounded-0">
     <v-stepper elevation="0">
       <v-stepper-header>
           <v-stepper-step key="`1-step`" step="1" editable="editable">*基本设置</v-stepper-step><v-divider></v-divider>
@@ -45,7 +45,7 @@
               </v-select>
             </v-col>
             <v-col cols="12">
-                <v-slider :disabled="!newServerDialog.params.useBdm" v-model="newServerDialog.params.volumeSize" ticks="always" label="系统卷大小" max="100" min="20" step="10">
+                <v-slider :disabled="!newServerDialog.params.useBdm" hide-details v-model="newServerDialog.params.volumeSize" ticks="always" label="系统卷大小" max="100" min="20" step="10">
                   <template v-slot:append>
                     <v-chip label small>[[newServerDialog.params.volumeSize]] GB</v-chip>
                   </template>

@@ -1,7 +1,6 @@
 import API from './api.js'
-import { ALERT, Level, LOG, MESSAGE, Utils } from './lib.js'
+import { ALERT, Level, LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
 
-// LOG.level = Level.DEBUG;
 
 class DataTable {
     constructor(headers, api, bodyKey = null, name = '') {
@@ -174,6 +173,34 @@ export class PortDataTable extends DataTable {
         })
     }
 }
+export class QosPolicyDataTable extends DataTable {
+    constructor() {
+        super([
+                { text: '名字', value: 'name' },
+                { text: '标签', value: 'tags' },
+                { text: 'revision_number', value: 'revision_number' },
+                { text: '是否默认', value: 'is_default' },
+                { text: '是否共享', value: 'shared' },
+        ], API.qosPolicy, 'policies');
+        this.extendItems = [
+            { text: 'id', value: 'id' },
+            { text: 'rules', value: 'rules' },
+            { text: 'created_at', value: 'created_at' },
+            { text: 'updated_at', value: 'updated_at' },
+            { text: 'description', value: 'description' },
+        ];
+    }
+    async updateDefault(item){
+        let data = {is_default: item.is_default}
+        await API.qosPolicy.put(item.id, {policy: data});
+        MESSAGE.success(`限速规则 ${item.name || item.id } 更新成功`)
+    }
+    async updateShared(item){
+        let data = {shared: item.shared}
+        await API.qosPolicy.put(item.id, {policy: data});
+        MESSAGE.success(`限速规则 ${item.name || item.id } 更新成功`)
+    }
+}
 export class FlavorDataTable extends DataTable {
     constructor() {
         super([{ text: 'ID', value: 'id' },
@@ -249,20 +276,35 @@ export class KeypairDataTable extends DataTable {
     };
 
 }
+
 export class ServerDataTable extends DataTable {
     constructor() {
         super([{ text: '实例名字', value: 'name' },
-        { text: '宿主机', value: 'OS-EXT-SRV-ATTR:host' },
-        { text: '规格', value: 'flavor' },
-        { text: '镜像', value: 'image' },
-        { text: 'IP地址', value: 'addresses' },
-        { text: '状态/任务', value: 'status' },
-        { text: '电源状态', value: 'power_state' },
-        { text: '操作', value: 'action' },
-        ],
-            API.server, 'servers', '实例');
+                { text: '宿主机', value: 'OS-EXT-SRV-ATTR:host' },
+                { text: '规格', value: 'flavor' },
+                { text: '镜像', value: 'image' },
+                { text: 'IP地址', value: 'addresses' },
+                { text: '状态/任务', value: 'status' },
+                { text: '电源状态', value: 'power_state' },
+                { text: '操作', value: 'action' },
+              ], API.server, 'servers', '实例');
         this.imageMap = {}
         this.errorMessage = {};
+    }
+
+    async recheckSavedTasks(clusterId, region){
+        let serverTasks = new ServerTasks();
+        for (let serverId in serverTasks.getAll()){
+            let servers = (await API.server.list({uuid: serverId})).servers;
+            if (! servers || servers.length == 0 ){
+                serverTasks.delete(serverId)
+                continue;
+            }
+            console.log('waitServerStatus ' + serverId)
+            this.waitServerStatus(serverId).then(resp => {
+                serverTasks.delete(serverId);
+            });
+        }
     }
 
     async waitServerStatus(server_id, expectStatus = ['ACTIVE', 'ERROR']) {
@@ -801,7 +843,7 @@ export const serviceTable = new ServiceTable();
 export const routerTable = new RouterDataTable();
 export const netTable = new NetDataTable();
 export const portTable = new PortDataTable();
-
+export const qosPolicyTable = new QosPolicyDataTable();
 export const clusterTable = new ClusterTable();
 export const regionTable = new RegionTable();
 export const azTable = new AZDataTable();
