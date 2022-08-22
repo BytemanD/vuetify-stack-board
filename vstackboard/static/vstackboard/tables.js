@@ -26,7 +26,7 @@ class DataTable {
                 await this.api.delete(item.id || item.name);
                 this.waitDeleted(item.id || item.name);
             } catch {
-                console.error(`failed to delete ${item.id} `)
+                MESSAGE.error(`删除 ${this.name} ${item.id} 失败`)
             }
         }
         this.refresh();
@@ -592,16 +592,16 @@ export class BackupTable extends DataTable {
         ];
     }
 
-    async waitDeleted(backup_id) {
-        await this.waitBackupDeleted(backup_id)
+    async waitDeleted(backupId) {
+        await this.waitBackupDeleted(backupId)
     }
-    async waitBackupCreated(backup_id) {
+    async waitBackupCreated(backupId) {
         let backup = {};
         let expectStatus = ['available', 'error'];
         let oldStatus = ''
         while (true) {
-            backup = (await API.backup.get(backup_id)).backup;
-            LOG.debug(`wait backup ${backup_id} status to be ${expectStatus}, now: ${backup.status}`)
+            backup = (await API.backup.get(backupId)).backup;
+            LOG.debug(`wait backup ${backupId} status to be ${expectStatus}, now: ${backup.status}`)
             if (backup.status != oldStatus) {
                 this.refresh();
             }
@@ -613,19 +613,19 @@ export class BackupTable extends DataTable {
         }
         return backup
     }
-    async waitBackupDeleted(backup_id) {
+    async waitBackupDeleted(backupId) {
         let backup = {};
         while (true) {
             try {
-                LOG.debug(`wait backup ${backup_id} status to be deleted`)
-                backup = (await API.backup.get(backup_id)).backup;
+                LOG.debug(`wait backup ${backupId} to be deleted`)
+                backup = (await API.backup.get(backupId)).backup;
                 if (backup.status == 'error') {
-                    MESSAGE.error(`备份 ${backup_id} 删除失败`);
+                    MESSAGE.error(`备份 ${backupId} 删除失败`);
                     break;
                 }
             } catch (error) {
                 console.log(error);
-                MESSAGE.success(`备份 ${backup_id} 删除成功`);
+                MESSAGE.success(`备份 ${backupId} 删除成功`);
                 break
             }
             await Utils.sleep(3);
@@ -633,13 +633,36 @@ export class BackupTable extends DataTable {
         this.refresh();
         return backup
     }
+    async waitBackupStatus(backupId, status){
+        let backup = {};
+        while (true) {
+            try {
+                LOG.debug(`wait backup ${backupId} status to be ${status}`)
+                backup = (await API.backup.get(backupId)).backup;
+                if (backup.status == status) {
+                    break;
+                }
+            } catch (error) {
+                console.error(error);
+                break
+            }
+            await Utils.sleep(3);
+        }
+        this.refresh();
+        return backup
+    }
+    async resetState(backupId){
+        console.info('TODO resetState')
+        // API.backup.resetState(backupId, status =)
+    }
 }
 export class VolumeServiceTable extends DataTable {
     constructor() {
-        super([{ text: '服务', value: 'binary' },
-        { text: '可用状态', value: 'status' },
-        { text: '服务状态', value: 'state' },
-        { text: '节点', value: 'host' },
+        super([
+            { text: '服务', value: 'binary' },
+            { text: '可用状态', value: 'status' },
+            { text: '服务状态', value: 'state' },
+            { text: '节点', value: 'host' },
         ], API.volumeService, 'services', '卷服务');
         this.extendItems = [
             { text: 'updated_at', value: 'updated_at' },
@@ -827,6 +850,29 @@ export class AZDataTable extends DataTable {
     }
 }
 
+export class ImageDataTable extends DataTable{
+    constructor() {
+        super([
+            { text: 'name', value: 'name' },
+            { text: 'status', value: 'status' },
+            { text: 'size', value: 'size' },
+            { text: 'visibility', value: 'visibility' },
+            { text: 'image_state', value: 'image_state' },
+            { text: 'image_type', value: 'image_type' },
+        ], API.image, 'images')
+        this.extendItems = [
+            { text: 'id', value: 'id' },
+            { text: 'protected', value: 'protected' },
+            { text: 'direct_url', value: 'direct_url' },
+            { text: 'container_format', value: 'container_format' },
+            { text: 'disk_format', value: 'disk_format' },
+            { text: 'created_at', value: 'created_at' },
+            { text: 'checksum', value: 'checksum' },
+            { text: 'block_device_mapping', value: 'block_device_mapping' },
+        ]
+    }
+}
+
 export const hypervisorTable = new HypervisortTable();
 export const volumeTable = new VolumeDataTable();
 export const volumeTypeTable = new VolumeTypeTable();
@@ -848,4 +894,5 @@ export const clusterTable = new ClusterTable();
 export const regionTable = new RegionTable();
 export const azTable = new AZDataTable();
 
+export const imageTable = new ImageDataTable();
 export default DataTable;

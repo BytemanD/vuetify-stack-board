@@ -3,7 +3,7 @@
     <v-row>
       <v-col>
         <v-btn small color="primary">创建</v-btn>
-        <v-btn small color="error"  @click="image.imageTable.deleteSelected(image.imageTable)"
+        <v-btn small color="error"  @click="imageDeleteSmartDialog.open()"
                :disabled="image.imageTable.selected.length == 0"><v-icon small>mdi-trash-can</v-icon>删除
         </v-btn>
       </v-col>
@@ -24,22 +24,16 @@
   show-select v-model="image.imageTable.selected" show-expand single-expand>
   <template v-slot:expanded-item="{ headers, item }">
     <td></td><td></td>
-    <td :colspan="headers.length -1">
-      <table class="text-left">
-        <!-- <template v-for="(value, key, index) in item">
-          <tr><th>[key]</th><td>[[ item[key] ]]</td></tr>
-        </template> -->
-        <tr><th>protected </th><td>[[ item.protected ]]</td></tr>
-        <tr><th>direct_url </th><td>[[ item.direct_url ]]</td></tr>
-        <tr><th>container_format </th><td>[[ item.container_format ]]</td></tr>
-        <tr><th>disk_format </th><td>[[ item.disk_format ]]</td></tr>
-        <tr><th>created_at </th><td>[[ item.created_at ]]</td></tr>
-        <tr><th>checksum </th><td>[[ item.checksum ]]</td></tr>
+    <td :colspan="headers.length -1" >
+      <table>
+        <template v-for="extendItem in image.imageTable.extendItems">
+          <tr><td><strong>[[extendItem.text ]]:</strong> </td><td>[[ item[extendItem.value] ]]</td></tr>
+        </template>
         <tr>
-          <th>Properties </th>
+          <td><strong>Properties</strong></td>
           <td>
             <template v-for="(value, key, index) in item">
-                <v-chip x-small label v-if="key.startsWith('hw')" class="mr-4">[[key]] = [[value]] </v-chip> 
+                <v-chip x-small label v-if="key.startsWith('hw')" class="mr-2">[[key]] = [[value]] </v-chip> 
               </template>
           </td>
         </tr>
@@ -47,3 +41,5 @@
     </td>
   </template>
 </v-data-table>
+
+{% include './dialog/imageDeleteSmart.html' %}

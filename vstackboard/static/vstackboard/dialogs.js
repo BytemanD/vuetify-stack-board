@@ -5,6 +5,7 @@ import {
     backupTable,
     clusterTable,
     flavorTable,
+    imageTable,
     keypairTable,
     netTable, portTable, qosPolicyTable, routerTable,
     serverTable, snapshotTable, volumeTable, volumeTypeTable
@@ -803,6 +804,26 @@ export class NewBackupDialog extends Dialog {
         this.volumes = (await API.volume.list()).volumes;
     }
 }
+export class BackupResetStateDialog extends Dialog {
+    constructor() {
+        super();
+        this.status = 'available';
+        this.statusList = ['available', 'error']
+    }
+    waitBackupStatues(backupId, status) {
+
+    }
+    async commit() {
+        for (let i in backupTable.selected){
+            let backup = backupTable.selected[i];
+            await API.backup.resetState(backup.id, this.status);
+            await backupTable.waitBackupStatus(backup.id, this.status);
+            MESSAGE.success(`备份 ${backup.name || backup.id } 状态重置成功`);
+            // backupTable.refresh();
+        }
+    }
+}
+
 export class NewVolumeTypeDialog extends Dialog {
     constructor() {
         super();
@@ -1116,6 +1137,77 @@ export class ServerActionEventsDialog extends Dialog {
     }
 }
 
+export class ImageDeleteSmartDialog extends Dialog {
+    constructor(){
+        super();
+        this.smart = false;
+    }
+
+    async resetBackupState(backupId){
+        let deletableStatus = ['error', 'available'];
+        let backup = (await API.backup.show(backupId)).backup
+        if (deletableStatus.indexOf(backup.status) >= 0){
+            return true;
+        }
+        for (let i = 0; i < 10; i++){
+            await API.backup.resetState(backupId, 'error');
+            Utils.sleep(3)
+            backup = (await API.backup.show(backupId)).backup
+            if (backup.status == 'error'){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    async deleteInstanceBackup(image){
+        if (image.block_device_mapping && image.block_device_mapping.length > 0) {
+            let bdm = JSON.parse(image.block_device_mapping)[0];
+            console.log(bdm)
+            let backupId = bdm.backup_id;
+            let resetSuccess = (await this.resetBackupState(backupId))
+            if (resetSuccess) {
+                await API.image.delete(image.id);
+                await imageTable.waitDeleted(image.id);
+                imageTable.refresh();
+            } else {
+                MESSAGE.error(`删除镜像 ${image.id} 失败 `)
+            }
+        } else {
+            console.warn(`image ${image.id} is instance backup, but bdm is null`)
+        }
+    }
+    async deleteSnapshot(image) {
+        await this.deleteInstanceBackup(image);
+    }
+
+    async commit(){
+        if (! this.smart) {
+            await imageTable.deleteSelected();
+            this.hide();
+            return;
+        }
+        for (let i in imageTable.selected){
+            let item = imageTable.selected[i];
+            if (!item.image_type) {
+                await API.image.delete(item.id);
+                await imageTable.waitDeleted(item.id);
+                imageTable.refresh();
+                continue;
+            }
+            if (item.image_type == 'instance_backup'){
+                await this.deleteInstanceBackup(item);
+                await imageTable.waitDeleted(item.id);
+            } else if (item.image_type == 'snapshot') {
+                await this.deleteSnapshot(item);
+                await imageTable.waitDeleted(item.id);
+            } else {
+                console.warn(`TODO: image type ${item.image_type} is not supported.`)
+            }
+        }
+        imageTable.resetSelected();
+    }
+}
 export const newCluster = new NewClusterDialog()
 
 export const newServer = new NewServerDialog()
@@ -1131,9 +1223,11 @@ export const newKeypairDialog = new NewKeypairDialog();
 export const rebuildDialog = new RebuildDialog();
 
 export const newVolume = new NewVolumeDialog()
+export const newVolumeTypeDialog = new NewVolumeTypeDialog();
 export const newSnapshotDialog = new NewSnapshotDialog();
 export const newBackupDialog = new NewBackupDialog();
-export const newVolumeTypeDialog = new NewVolumeTypeDialog();
+export const backupResetStateDialog = new BackupResetStateDialog();
+export const imageDeleteSmartDialog = new ImageDeleteSmartDialog();
 
 export const newRouterDialog = new NewRouterkDialog();
 export const newNetDialog = new NewNetworkDialog();

@@ -117,7 +117,7 @@ class Usage extends Restfulclient {
 
 class Server extends ClientExt {
     constructor() { super('/computing/servers') };
-    async  detail(filters = {}) {
+    async detail(filters = {}) {
         filters.all_tenants = 1
         return await super.detail(filters)
     }
@@ -370,15 +370,30 @@ class Snapshot extends ClientExt {
 }
 class Backup extends ClientExt {
     constructor() { super('/volume/backups') };
-    async create(data) { return this.post({ backup: data }) }
+    async detail(filters = {}) {
+        filters.all_tenants = 1
+        return await super.detail(filters)
+    }
+    async list(filters = {}) {
+        filters.all_tenants = 1
+        return await super.list(filters)
+    }
+
+    async create(data) { return (await this.post({ backup: data })) }
+    async doAction(id, data) {
+        return (await axios.post(`${this.baseUrl}/${id}/action`, data)).data;
+    }
+    async resetState(id, status) {
+        return await this.doAction(id, {'os-reset_status': {status: status}})
+    }
 }
 class VolumeService extends Restfulclient {
     constructor() { super('/volume/os-services') };
     async enable(binary, host){
-        return this.put(`/enable`, {binary: binary, host: host })
+        return await this.put(`/enable`, {binary: binary, host: host })
     }
     async disable(binary, host){
-        return this.put(`/disable`, {binary: binary, host: host })
+        return await this.put(`/disable`, {binary: binary, host: host })
     }
 }
 class VolumeType extends Restfulclient {

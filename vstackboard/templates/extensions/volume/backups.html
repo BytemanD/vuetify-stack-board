@@ -3,7 +3,8 @@
       <v-row>
         <v-col>
           <v-btn small color="primary" @click="newBackupDialog.open()"><v-icon small>mdi-plus</v-icon>新建</v-btn>
-          <v-btn small color="error" @click="volume.backupTable.deleteSelected()"><v-icon small>mdi-trash-can</v-icon> 删除</v-btn>
+          <v-btn small color="error" @click="volume.backupTable.deleteSelected()" :disabled="volume.backupTable.selected.length == 0"><v-icon small>mdi-trash-can</v-icon> 删除</v-btn>
+          <v-btn small color="warning" @click="backupResetStateDialog.open()" :disabled="volume.backupTable.selected.length == 0">状态重置</v-btn>
         </v-col>
         <v-col class="text-right">
           <v-btn fab x-small outlined color="info" v-on:click="volume.backupTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
@@ -41,3 +42,4 @@
 </v-data-table>
 
 {% include '../dialog/newBackup.html' %}
+{% include '../dialog/backupResetState.html' %}

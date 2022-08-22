@@ -11,16 +11,17 @@ import DataTable, {
     hypervisorTable,
     azTable,
     regionTable,
-    qosPolicyTable
+    qosPolicyTable,
+    imageTable
 } from "./vstackboard/tables.js";
 import {
     newFlavor, flavorExtraDialog,
     newServer,
     changePassword, changeServerName, serverVolumeDialog, serverInterfaceDialog,
     resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog,
-    newVolume, newSnapshotDialog, newBackupDialog,
+    newVolume, newSnapshotDialog, newBackupDialog, backupResetStateDialog,
     newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog,
-    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents, newQosPolicyDialog
+    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents, newQosPolicyDialog, imageDeleteSmartDialog
 
 } from "./vstackboard/dialogs.js";
 import { init } from "./vstackboard/context.js";
@@ -81,14 +82,7 @@ new Vue({
             serverActionEvents: serverActionEvents,
         },
         image: {
-            imageTable: new DataTable([
-                { text: 'name', value: 'name' },
-                { text: 'status', value: 'status' },
-                { text: 'size', value: 'size' },
-                { text: 'visibility', value: 'visibility' },
-                { text: 'image_state', value: 'image_state' },
-                { text: 'image_type', value: 'image_type' },
-            ], API.image, 'images'),
+            imageTable: imageTable,
         },
         networking: {
             tab: 0,
@@ -113,8 +107,10 @@ new Vue({
         miniVariant: false,
         newVolumeDialog: newVolume,
         newSnapshotDialog: newSnapshotDialog,
-        newBackupDialog: newBackupDialog,
         newVolumeTypeDialog: newVolumeTypeDialog,
+        newBackupDialog: newBackupDialog,
+        backupResetStateDialog: backupResetStateDialog,
+        imageDeleteSmartDialog: imageDeleteSmartDialog,
         // server dialogs
         newFlavorDialog: newFlavor,
         flavorExtraDialog: flavorExtraDialog,

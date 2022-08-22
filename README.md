@@ -10,6 +10,8 @@ Openstack Dashboard with Vuetify
 - [ ] volume支持状态重置
 - [ ] inerface 卸载，自动检测后刷新表
 - [ ] 上传镜像
+- [ ] 修复 Volume 服务 expanded-item 显示问题
+- [ ] backup reset state 有时需执行多次才能成功, why?
 
 ### v0.0.4
 
@@ -24,7 +26,12 @@ Openstack Dashboard with Vuetify
 - [X] Aggregate 显示
 - [X] 新建port，添加 vnic_type 等可选属性
 - [X] QoS policy管理
-- [X] QoS policy rule 管理
+- [ ] QoS policy rule 管理
+- [X] Image 显示更多信息（id, block_device_mapping等）
+- [X] backup支持状态重置
+- [ ] Image 智能删除
+- [ ] 安全组管理
+- [ ] volume、、snapshot支持状态重置
 
 ### v0.0.3
 
