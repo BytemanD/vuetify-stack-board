@@ -44,6 +44,9 @@ class ClientExt extends Restfulclient {
         let resp = await axios.get(url);
         return resp.data;
     };
+    async doAction(id, data) {
+        return (await axios.post(`${this.baseUrl}/${id}/action`, data)).data;
+    }
 }
 
 class Hypervisor extends ClientExt {
@@ -317,6 +320,9 @@ class Subnet extends Restfulclient {
 class Port extends Restfulclient {
     constructor() { super('/networking/v2.0/ports') };
 }
+class SecurityGroup extends Restfulclient {
+    constructor() { super('/networking/v2.0/security_groups') };
+}
 class QosPolicy extends Restfulclient {
     constructor() { super('/networking/v2.0/qos/policies') };
 }
@@ -350,6 +356,9 @@ class Volume extends ClientExt {
         }
         return body
     }
+    async resetState(id, status){
+        return await this.doAction(id, {'os-reset_status': {status: status}})
+    }
 }
 class Snapshot extends ClientExt {
     constructor() { super('/volume/snapshots') };
@@ -367,6 +376,9 @@ class Snapshot extends ClientExt {
         }
         return snapshot
     }
+    async resetState(id, status) {
+        return await this.doAction(id, {'os-reset_status': {status: status}})
+    }
 }
 class Backup extends ClientExt {
     constructor() { super('/volume/backups') };
@@ -378,11 +390,7 @@ class Backup extends ClientExt {
         filters.all_tenants = 1
         return await super.list(filters)
     }
-
     async create(data) { return (await this.post({ backup: data })) }
-    async doAction(id, data) {
-        return (await axios.post(`${this.baseUrl}/${id}/action`, data)).data;
-    }
     async resetState(id, status) {
         return await this.doAction(id, {'os-reset_status': {status: status}})
     }
@@ -434,6 +442,7 @@ export class OpenstackProxyApi {
         this.network = new Network();
         this.subnet = new Subnet();
         this.port = new Port();
+        this.sg = new SecurityGroup();
         this.qosPolicy = new QosPolicy();
         // cinder
         this.volume = new Volume();

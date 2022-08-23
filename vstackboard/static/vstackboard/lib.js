@@ -180,7 +180,7 @@ export class ContextLocalStorage {
     }
     getAll(name){
         let itemName = `${this.domain()}_${name}`
-        LOG.debug(`localStroage get Item ${itemName}`)
+        LOG.debug(`localStorage get Item ${itemName}`)
         let data = localStorage.getItem(itemName)
         return data ? JSON.parse(data): {};
     }
@@ -192,13 +192,13 @@ export class ContextLocalStorage {
         let data = this.getAll(name)
         data[key] = value;
         let itemName = `${this.domain()}_${name}`
-        LOG.debug(`localStroage save item: ${itemName} -> ${key} (${JSON.stringify(data)})`)
+        LOG.debug(`localStorage save item: ${itemName} -> ${key} (${JSON.stringify(data)})`)
         localStorage.setItem(itemName, JSON.stringify(data));
     }
     delete(name, key) {
         let itemName = `${this.domain()}_${name}`
         let data = this.getAll(name)
-        LOG.debug(`localStroage delete Item: ${itemName} -> ${key}`)
+        LOG.debug(`localStorage delete Item: ${itemName} -> ${key}`)
         delete data[key];
         localStorage.setItem(itemName, JSON.stringify(data));
     }

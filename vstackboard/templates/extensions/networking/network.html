@@ -3,11 +3,13 @@
     <v-tab><v-icon>mdi-network</v-icon>网络</v-tab>
     <v-tab><v-icon>mdi-router</v-icon> 路由</v-tab>
     <v-tab><v-icon>mdi-ethernet</v-icon>端口</v-tab>
+    <v-tab><v-icon>mdi-security</v-icon>安全组</v-tab>
     <v-tab><v-icon>mdi-arrow-left-right-bold</v-icon>QoS策略</v-tab>
     <v-tabs-items v-model="networking.tab">
       <v-tab-item>{% include 'networks.html' %}</v-tab-item>
       <v-tab-item>{% include 'routers.html' %}</v-tab-item>
       <v-tab-item>{% include 'ports.html' %}</v-tab-item>
+      <v-tab-item>{% include 'sgs.html' %}</v-tab-item>
       <v-tab-item>{% include 'qosPolicies.html' %}</v-tab-item>
     </v-tabs-items>
   </v-tabs>

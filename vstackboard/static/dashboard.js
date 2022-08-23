@@ -8,11 +8,8 @@ import DataTable, {
     volumeTable, serviceTable, serverTable, flavorTable, usageTable,
     backupTable, clusterTable, keypairTable, volumeServiceTable,
     routerTable, netTable, portTable, volumeTypeTable, snapshotTable,
-    hypervisorTable,
-    azTable,
-    regionTable,
-    qosPolicyTable,
-    imageTable
+    hypervisorTable, azTable, regionTable, qosPolicyTable,
+    imageTable, sgTable
 } from "./vstackboard/tables.js";
 import {
     newFlavor, flavorExtraDialog,
@@ -21,7 +18,7 @@ import {
     resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog,
     newVolume, newSnapshotDialog, newBackupDialog, backupResetStateDialog,
     newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog,
-    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents, newQosPolicyDialog, imageDeleteSmartDialog
+    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents, newQosPolicyDialog, imageDeleteSmartDialog, volumeResetStateDialog, snapshotResetStateDialog, sgRulesDialog
 
 } from "./vstackboard/dialogs.js";
 import { init } from "./vstackboard/context.js";
@@ -89,7 +86,9 @@ new Vue({
             routerTable: routerTable,
             networkTable: netTable,
             portTable: portTable,
+            sgTable: sgTable,
             qosPolicyTable: qosPolicyTable,
+            sgRulesDialog: sgRulesDialog,
         },
         volume: {
             tab: 0,
@@ -105,11 +104,15 @@ new Vue({
         },
         drawer: '',
         miniVariant: false,
+        // storage dialogs
         newVolumeDialog: newVolume,
         newSnapshotDialog: newSnapshotDialog,
         newVolumeTypeDialog: newVolumeTypeDialog,
         newBackupDialog: newBackupDialog,
+        volumeResetStateDialog: volumeResetStateDialog,
         backupResetStateDialog: backupResetStateDialog,
+        snapshotResetStateDialog: snapshotResetStateDialog,
+        // image dialogs
         imageDeleteSmartDialog: imageDeleteSmartDialog,
         // server dialogs
         newFlavorDialog: newFlavor,
@@ -175,6 +178,7 @@ new Vue({
                     this.networking.networkTable.refreshSubnets();
                     this.networking.portTable.refresh();
                     this.networking.routerTable.refresh();
+                    this.networking.sgTable.refresh();
                     this.networking.qosPolicyTable.refresh();
                     break;
                 case '镜像':

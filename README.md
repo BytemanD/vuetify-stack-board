@@ -28,10 +28,9 @@ Openstack Dashboard with Vuetify
 - [X] QoS policy管理
 - [ ] QoS policy rule 管理
 - [X] Image 显示更多信息（id, block_device_mapping等）
-- [X] backup支持状态重置
-- [ ] Image 智能删除
+- [X] backup、volume、snapshot支持状态重置
+- [X] Image 智能删除
 - [ ] 安全组管理
-- [ ] volume、、snapshot支持状态重置
 
 ### v0.0.3
 

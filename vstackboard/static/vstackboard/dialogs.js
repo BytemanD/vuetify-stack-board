@@ -804,14 +804,28 @@ export class NewBackupDialog extends Dialog {
         this.volumes = (await API.volume.list()).volumes;
     }
 }
+export class VolumeResetStateDialog extends Dialog {
+    constructor(){
+        super();
+        this.status = null;
+        this.statusList = [
+            "available", "error", "creating", "deleting", "in-use", "attaching", "detaching", "error_deleting", "maintenance"
+        ]
+    }
+    async commit() {
+        for (let i in volumeTable.selected){
+            let volume = volumeTable.selected[i];
+            await API.volume.resetState(volume.id, this.status);
+            MESSAGE.success(`卷 ${volume.name || volume.id } 状态重置成功`);
+            volumeTable.refresh();
+        }
+    }
+}
 export class BackupResetStateDialog extends Dialog {
     constructor() {
         super();
         this.status = 'available';
         this.statusList = ['available', 'error']
-    }
-    waitBackupStatues(backupId, status) {
-
     }
     async commit() {
         for (let i in backupTable.selected){
@@ -819,7 +833,22 @@ export class BackupResetStateDialog extends Dialog {
             await API.backup.resetState(backup.id, this.status);
             await backupTable.waitBackupStatus(backup.id, this.status);
             MESSAGE.success(`备份 ${backup.name || backup.id } 状态重置成功`);
-            // backupTable.refresh();
+            snapshotTable.refresh();
+        }
+    }
+}
+export class SnapshotResetStateDialog extends Dialog {
+    constructor() {
+        super();
+        this.status = 'available';
+        this.statusList = ["available", "error", "creating", "deleting", "error_deleting"]
+    }
+    async commit() {
+        for (let i in snapshotTable.selected){
+            let snapshot = snapshotTable.selected[i];
+            await API.snapshot.resetState(snapshot.id, this.status);
+            MESSAGE.success(`快照 ${snapshot.name || snapshot.id } 状态重置成功`);
+            snapshotTable.refresh();
         }
     }
 }
@@ -1001,6 +1030,41 @@ export class NewQosPolicyDialog extends Dialog {
         this.hide();
     }
 }
+export class SGRulesDialog extends Dialog {
+    constructor() {
+        super()
+        this.securityGroup = {};
+        this.selected = [];
+        this.itemsPerPage = 10;
+        this.search = '';
+        this.headers = [
+            { text: 'direction', value: 'direction' },
+            { text: 'protocol', value: 'protocol' },
+            { text: 'ethertype', value: 'ethertype' },
+            { text: 'port_range', value: 'port_range' },
+            { text: 'remote_ip_prefix', value: 'remote_ip_prefix' },
+        ];
+        this.extendItems = [
+            { text: 'id', value: 'id' },
+            { text: 'description', value: 'description' },
+            { text: 'revision_number', value: 'revision_number' },
+            { text: 'tags', value: 'tags' },
+            { text: 'created_at', value: 'created_at' },
+            
+        ]
+    }
+    open(securityGroup) {
+        this.securityGroup = securityGroup
+        super.open();
+    }
+    async addRule() {
+
+    }
+    async deleteRule() {
+
+    }
+}
+
 export class ServerTopology extends Dialog {
     constructor() {
         super()
@@ -1226,7 +1290,9 @@ export const newVolume = new NewVolumeDialog()
 export const newVolumeTypeDialog = new NewVolumeTypeDialog();
 export const newSnapshotDialog = new NewSnapshotDialog();
 export const newBackupDialog = new NewBackupDialog();
+export const volumeResetStateDialog = new VolumeResetStateDialog();
 export const backupResetStateDialog = new BackupResetStateDialog();
+export const snapshotResetStateDialog = new SnapshotResetStateDialog();
 export const imageDeleteSmartDialog = new ImageDeleteSmartDialog();
 
 export const newRouterDialog = new NewRouterkDialog();
@@ -1235,6 +1301,7 @@ export const newSubnetDialog = new NewSubnetDialog();
 export const routerInterfacesDialog = new RouterInterfacesDialog();
 export const newPortDialog = new NewPortDialog();
 export const newQosPolicyDialog = new NewQosPolicyDialog();
+export const sgRulesDialog = new SGRulesDialog();
 
 export const serverTopology = new ServerTopology();
 export const serverActions = new ServerActionsDialog();

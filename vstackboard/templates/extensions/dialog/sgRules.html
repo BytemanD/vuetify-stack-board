@@ -1,0 +1,27 @@
+<v-dialog v-model="networking.sgRulesDialog.show" width="1000" scrollable>
+    <v-card>
+        <v-card-title class="headline grey lighten-2" primary-title>
+            安全组规则: [[ networking.sgRulesDialog.securityGroup.name || networking.sgRulesDialog.securityGroup.id ]]
+        </v-card-title>
+        <v-card-text>
+            <v-data-table :headers="networking.sgRulesDialog.headers" :items="networking.sgRulesDialog.securityGroup.security_group_rules"
+                :items-per-page="networking.sgRulesDialog.itemsPerPage" :search="networking.sgRulesDialog.search"
+                dense show-select v-model="networking.sgRulesDialog.selected" show-expand single-expand>
+                <template v-slot:item.port_range="{ item }">
+                    [[ item.port_range_min ]]:[[ item.port_range_max ]]
+                </template>
+                <template v-slot:expanded-item="{ headers, item }">
+                    <td></td><td></td>
+                    <td :colspan="headers.length -1" >
+                      <table>
+                        <template v-for="extendItem in networking.sgRulesDialog.extendItems">
+                          <tr><td><strong>[[extendItem.text ]]:</strong> </td><td>[[ item[extendItem.value] ]]</td></tr>
+                        </template>
+                      </table>
+                    </td>
+                  </template>
+            
+            </v-data-table>
+      </v-card-text>
+    </v-card>
+</v-dialog>

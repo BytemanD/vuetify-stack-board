@@ -173,6 +173,22 @@ export class PortDataTable extends DataTable {
         })
     }
 }
+export class SecurityGroupDataTable extends DataTable {
+    constructor() {
+        super([
+                { text: '名字/ID', value: 'name' },
+                { text: 'revision_number', value: 'revision_number' },
+                { text: '租户ID', value: 'tenant_id' },
+                { text: '操作', value: 'actions' },
+        ], API.sg, 'security_groups');
+        this.extendItems = [
+            { text: 'id', value: 'id' },
+            { text: 'description', value: 'description' },
+            { text: 'created_at', value: 'created_at' },
+            { text: 'updated_at', value: 'updated_at' },
+        ];
+    }
+}
 export class QosPolicyDataTable extends DataTable {
     constructor() {
         super([
@@ -889,6 +905,8 @@ export const serviceTable = new ServiceTable();
 export const routerTable = new RouterDataTable();
 export const netTable = new NetDataTable();
 export const portTable = new PortDataTable();
+export const sgTable = new SecurityGroupDataTable();
+
 export const qosPolicyTable = new QosPolicyDataTable();
 export const clusterTable = new ClusterTable();
 export const regionTable = new RegionTable();

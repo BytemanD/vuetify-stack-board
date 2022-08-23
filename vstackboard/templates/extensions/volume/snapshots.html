@@ -3,7 +3,9 @@
       <v-row>
         <v-col>
           <v-btn small color="primary" @click="newSnapshotDialog.open()"><v-icon small>mdi-plus</v-icon>新建</v-btn>
-          <v-btn small color="error" @click="volume.snapshotTable.deleteSelected()"><v-icon small>mdi-trash-can</v-icon> 删除</v-btn>
+          <v-btn small color="error" @click="volume.snapshotTable.deleteSelected()" :disabled="volume.snapshotTable.selected.length == 0"><v-icon small>mdi-trash-can</v-icon> 删除</v-btn>
+          <v-btn small color="warning" @click="snapshotResetStateDialog.open()" :disabled="volume.snapshotTable.selected.length == 0">状态重置</v-btn>
+
         </v-col>
         <v-col class="text-right">
           <v-btn fab x-small outlined color="info" v-on:click="volume.snapshotTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
@@ -22,7 +24,9 @@
     <template v-slot:item.status="{ item }">
       <v-icon v-if="item.status == 'available'" color="success">mdi-check-circle</v-icon>
       <v-icon v-else-if="item.status == 'error'" color="error">mdi-close-circle</v-icon>
-      <v-icon v-else-if="['creating', 'deleting'].indexOf(item.status) >=0 " color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
+      <v-template v-else-if="['creating', 'deleting'].indexOf(item.status) >=0 ">
+        <v-icon color="warning" class="mdi-spin">mdi-rotate-right</v-icon>[[item.status]]
+      </v-template>
       <p v-else>[[item.status]]</p>
     </template>
   
@@ -30,5 +34,7 @@
       <v-icon v-if="item.bootable == 'true'" color="success">mdi-check</v-icon>
       <v-icon v-else color="error">mdi-close</v-icon>
     </template>
-  </v-data-table>
+</v-data-table>
+
 {% include '../dialog/newSnapshot.html' %}
+{% include '../dialog/snapshotResetState.html' %}

@@ -14,7 +14,7 @@
                         item-value="id" dense outlined v-model="newSnapshotDialog.volume_id">
                         <!-- <template v-slot:selection="{ item }"> [[ item.name || item.id ]] </template> -->
                     </v-select>
-                    <v-switch hide-details v-model="newSnapshotDialog.force" label="强制"></v-switch>
+                    <v-switch v-model="newSnapshotDialog.force" label="强制" hint="非强制模式下，只能对可用状态的卷创建快照。" persistent-hint></v-switch>
                 </v-col>
             </v-row>
         </v-card-text>
