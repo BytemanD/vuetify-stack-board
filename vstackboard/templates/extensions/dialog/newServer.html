@@ -68,12 +68,12 @@
           </v-slider>
           <v-row>
             <v-col>
-              <v-select :items="newServerDialog.azList" clearable label="选择AZ" item-text="zoneName" v-model="newServerDialog.params.az">
+              <v-select :items="newServerDialog.azList" clearable label="AZ" placeholder="请选择AZ" item-text="zoneName" v-model="newServerDialog.params.az">
                   <template v-slot:selection="{ item }"> [[ item.zoneName ]] </template>
               </v-select>
             </v-col>
             <v-col>
-              <v-select :items="newServerDialog.azHosts[newServerDialog.params.az]" label="选择节点" v-model="newServerDialog.params.host">
+              <v-select :items="newServerDialog.azHosts[newServerDialog.params.az]" label="节点" placeholder="请选择节点" v-model="newServerDialog.params.host">
                   <template v-slot:selection="{ item }"> [[ item ]] </template>
               </v-select>
             </v-col>

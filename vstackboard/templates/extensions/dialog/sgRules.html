@@ -1,9 +1,14 @@
 <v-dialog v-model="networking.sgRulesDialog.show" width="1000" scrollable>
     <v-card>
         <v-card-title class="headline grey lighten-2" primary-title>
-            安全组规则: [[ networking.sgRulesDialog.securityGroup.name || networking.sgRulesDialog.securityGroup.id ]]
+            安全组: [[ networking.sgRulesDialog.securityGroup.name || networking.sgRulesDialog.securityGroup.id ]]
         </v-card-title>
         <v-card-text>
+          <br>
+          <v-btn small color="primary" @click="networking.newSGRuleDialog.open(networking.sgRulesDialog)"><v-icon>mdi-plus</v-icon>添加</v-btn>
+          <v-btn small color="error" @click="networking.sgRulesDialog.deleteSelected()" :disabled="networking.sgRulesDialog.selected.length == 0" >删除</v-btn>
+          <br>
+
             <v-data-table :headers="networking.sgRulesDialog.headers" :items="networking.sgRulesDialog.securityGroup.security_group_rules"
                 :items-per-page="networking.sgRulesDialog.itemsPerPage" :search="networking.sgRulesDialog.search"
                 dense show-select v-model="networking.sgRulesDialog.selected" show-expand single-expand>
@@ -25,3 +30,5 @@
       </v-card-text>
     </v-card>
 </v-dialog>
+
+{% include '../dialog/newSgRule.html' %}

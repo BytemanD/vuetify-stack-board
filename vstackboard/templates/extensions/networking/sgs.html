@@ -2,7 +2,7 @@
     <v-card-text>
       <v-row>
         <v-col>
-          <v-btn small color="primary" @click="newPortDialog.open()"><v-icon>mdi-plus</v-icon>新建</v-btn>
+          <v-btn small color="primary" @click="networking.newSGDialog.open()"><v-icon>mdi-plus</v-icon>新建</v-btn>
           <v-btn small color="error" @click="networking.sgTable.deleteSelected()">删除</v-btn>
         </v-col>
         <v-col class="text-right">
@@ -21,7 +21,7 @@
   dense show-select v-model="networking.sgTable.selected" show-expand single-expand>
   <template v-slot:item.name="{ item }">[[ item.name || item.id ]]</template>
   <template v-slot:item.actions="{ item }">
-    <v-btn text small color="info" @click="networking.sgRulesDialog.open(item)">查看规则</v-btn>
+    <v-btn text small color="info" @click="networking.sgRulesDialog.open(item)">规则</v-btn>
   </template>
   <template v-slot:expanded-item="{ headers, item }">
     <td></td><td></td>
@@ -34,5 +34,6 @@
     </td>
   </template>
 </v-data-table>
-  
-  {% include '../dialog/sgRules.html' %}
+
+{% include '../dialog/sgRules.html' %}
+{% include '../dialog/newSG.html' %}

@@ -1,4 +1,4 @@
-import { Utils, MESSAGE, ALERT, LOG, ServerTasks } from './lib.js';
+import { Utils, MESSAGE, ALERT, LOG, ServerTasks, Alert } from './lib.js';
 import API from './api.js';
 
 import {
@@ -8,7 +8,7 @@ import {
     imageTable,
     keypairTable,
     netTable, portTable, qosPolicyTable, routerTable,
-    serverTable, snapshotTable, volumeTable, volumeTypeTable
+    serverTable, sgTable, snapshotTable, volumeTable, volumeTypeTable
 } from './tables.js';
 
 
@@ -808,14 +808,25 @@ export class VolumeResetStateDialog extends Dialog {
     constructor(){
         super();
         this.status = null;
+        this.attachStatus = null;
+        this.resetMigrateStatus = false;
         this.statusList = [
             "available", "error", "creating", "deleting", "in-use", "attaching", "detaching", "error_deleting", "maintenance"
         ]
+        this.attachStatusList = ['attached', 'detached']
     }
     async commit() {
+        let data = {};
+        if (this.status) {data.status = this.status};
+        if (this.attachStatus) {data.attach_status = this.attachStatus};
+        if (this.resetMigrateStatus) {data.migration_status = null};
+        if (Object.keys(data).length == 0 ){
+            ALERT.warn(`请至少指定一个要重置的属性。`)
+            return;
+        }
         for (let i in volumeTable.selected){
             let volume = volumeTable.selected[i];
-            await API.volume.resetState(volume.id, this.status);
+            await API.volume.resetState(volume.id, data);
             MESSAGE.success(`卷 ${volume.name || volume.id } 状态重置成功`);
             volumeTable.refresh();
         }
@@ -1030,6 +1041,91 @@ export class NewQosPolicyDialog extends Dialog {
         this.hide();
     }
 }
+export class NewSGDialog extends Dialog {
+    constructor() {
+        super();
+        this.name = null;
+        this.description = null;
+    }
+    randomName() {
+        this.name = Utils.getRandomName('security-group');
+    }
+    open() {
+        this.randomName();
+        super.open();
+    }
+    async commit() {
+        if (!this.name) {
+            ALERT.error(`请输入安全组名`);
+            return;
+        }
+        let data = {name: this.name};
+        if (this.description){ data['description'] = this.description }
+        await API.sg.post({ security_group: data });
+        MESSAGE.success(`安全组 ${this.name} 创建成功`);
+        sgTable.refresh();
+        this.hide();
+    }
+}
+export class NewSGRuleDialog extends Dialog {
+    constructor() {
+        super();
+        this.remoteIp = null;
+        this.remoteGroup = null;
+        this.description = null;
+        this.dstPortMin = null;
+        this.dstPortMax = null;
+        this.direction = 'ingress';
+        this.directionList = ['ingress', 'egress'];
+        this.ethertype = 'IPv4';
+        this.ethertypeList = ['IPv4', 'IPv6'];
+        // this.icmpType = null;
+        // this.icmpCode = null;
+        this.protocol = 'tcp';
+        this.protocolList = [
+            'tcp', 'ah', 'dccp', 'egp', 'esp', 'gre', 'icmp', 'igmp',
+            'ipv6-encap', 'ipv6-frag', 'ipv6-icmp', 'ipv6-nonxt',
+            'ipv6-opts', 'ipv6-route', 'ospf', 'pgm', 'rsvp', 'sctp',
+            'udp', 'udplite', 'vrrp'
+        ]
+        // and integer representations [0-255];
+
+    }
+    open(sgRulesDialog) {
+        this.sgRulesDialog = sgRulesDialog;
+        super.open();
+    }
+    async commit() {
+        console.log(this.sgRulesDialog.securityGroup);
+        if (! this.sgRulesDialog.securityGroup){
+            MESSAGE.error(`规格添加失败`)
+            return
+        }
+        let data = {
+            security_group_id: this.sgRulesDialog.securityGroup.id,
+            protocol: this.protocol,
+            direction: this.direction,
+            ethertype: this.ethertype,
+        };
+        if (this.remoteIp && this.remoteGroup) {
+            ALERT.warn(`对端IP和对端安全组不能同时设置`);
+            return;
+        }
+        if (this.remoteIp){ data['remote_ip_prefix'] = this.remoteIp }
+        if (this.remoteGroup){ data['remote_group_id'] = this.remoteGroup }
+        if (this.dstPortMin){ data['port_range_min'] = this.dstPortMin; }
+        if (this.dstPortMax){ data['port_range_max'] = this.dstPortMax; }
+        if (this.dstPortMin && this.dstPortMax && this.dstPortMin > this.dstPortMax){
+            ALERT.error(`开始端口必须小于结束端口，请输入正确的端口范围。`);
+            return;
+        }
+        await API.sgRule.create(data);
+        MESSAGE.success(`规则创建成功`);
+        let newSG = (await API.sg.show(this.sgRulesDialog.securityGroup.id)).security_group;
+        this.sgRulesDialog.securityGroup = newSG;
+        this.hide();
+    }
+}
 export class SGRulesDialog extends Dialog {
     constructor() {
         super()
@@ -1053,15 +1149,23 @@ export class SGRulesDialog extends Dialog {
             
         ]
     }
-    open(securityGroup) {
-        this.securityGroup = securityGroup
+    async open(securityGroup) {
+        this.securityGroup = securityGroup;
+        this.selected = [];
         super.open();
+        this.securityGroup = await this.getSecurityGroup(this.securityGroup.id);
     }
-    async addRule() {
-
+    async getSecurityGroup(sgId){
+        return (await API.sg.show(sgId)).security_group;
     }
-    async deleteRule() {
-
+    async deleteSelected() {
+        for(let i in this.selected){
+            let sgRule = this.selected[i];
+            await API.sgRule.delete(sgRule.id);
+        }
+        this.selected = [];
+        MESSAGE.success(`规则删除成功`);
+        this.securityGroup = await this.getSecurityGroup(this.securityGroup.id);
     }
 }
 
@@ -1301,6 +1405,8 @@ export const newSubnetDialog = new NewSubnetDialog();
 export const routerInterfacesDialog = new RouterInterfacesDialog();
 export const newPortDialog = new NewPortDialog();
 export const newQosPolicyDialog = new NewQosPolicyDialog();
+export const newSGDialog = new NewSGDialog();
+export const newSGRuleDialog = new NewSGRuleDialog();
 export const sgRulesDialog = new SGRulesDialog();
 
 export const serverTopology = new ServerTopology();

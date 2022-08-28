@@ -44,7 +44,7 @@ def load_configs():
         CONF.load(file)
         break
     else:
-        raise RuntimeError('config file not found')
+        LOG.warning('config file not found')
 
 
 CONF.register_opts(default_options)

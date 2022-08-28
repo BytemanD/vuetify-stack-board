@@ -323,6 +323,12 @@ class Port extends Restfulclient {
 class SecurityGroup extends Restfulclient {
     constructor() { super('/networking/v2.0/security_groups') };
 }
+class SecurityGroupRule extends Restfulclient {
+    constructor() { super('/networking/v2.0/security_group_rules') };
+    async create (data) {
+        return (await this.post({security_group_rule: data})).security_group_rule
+    }
+}
 class QosPolicy extends Restfulclient {
     constructor() { super('/networking/v2.0/qos/policies') };
 }
@@ -356,8 +362,8 @@ class Volume extends ClientExt {
         }
         return body
     }
-    async resetState(id, status){
-        return await this.doAction(id, {'os-reset_status': {status: status}})
+    async resetState(id, data){
+        return await this.doAction(id, {'os-reset_status': data})
     }
 }
 class Snapshot extends ClientExt {
@@ -443,6 +449,7 @@ export class OpenstackProxyApi {
         this.subnet = new Subnet();
         this.port = new Port();
         this.sg = new SecurityGroup();
+        this.sgRule = new SecurityGroupRule();
         this.qosPolicy = new QosPolicy();
         // cinder
         this.volume = new Volume();

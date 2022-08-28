@@ -7,7 +7,6 @@ Openstack Dashboard with Vuetify
 
 - [ ] 查看console log
 - [ ] 创建规格时可以从已有的复制
-- [ ] volume支持状态重置
 - [ ] inerface 卸载，自动检测后刷新表
 - [ ] 上传镜像
 - [ ] 修复 Volume 服务 expanded-item 显示问题
@@ -30,7 +29,7 @@ Openstack Dashboard with Vuetify
 - [X] Image 显示更多信息（id, block_device_mapping等）
 - [X] backup、volume、snapshot支持状态重置
 - [X] Image 智能删除
-- [ ] 安全组管理
+- [X] 安全组基本管理
 
 ### v0.0.3
 
