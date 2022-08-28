@@ -11,6 +11,10 @@ Openstack Dashboard with Vuetify
 - [ ] 上传镜像
 - [ ] 修复 Volume 服务 expanded-item 显示问题
 - [ ] backup reset state 有时需执行多次才能成功, why?
+- [ ] 端口安全组更新操作
+- [ ] 虚拟机安全组更新操作
+- [ ] 用户管理
+- [ ] image属性
 
 ### v0.0.4
 
