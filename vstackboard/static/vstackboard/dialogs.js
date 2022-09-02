@@ -442,7 +442,9 @@ export class NewServerDialog extends Dialog {
         this.keypairs = [];
         this.keypair = '';
         this.volumeType = '';
-        this.volumeTypes = []
+        this.securityGroup = null;
+        this.volumeTypes = [];
+        this.securityGroups = [];
     }
     async open() {
         this.params.name = Utils.getRandomName('server');
@@ -456,6 +458,9 @@ export class NewServerDialog extends Dialog {
         this.images = (await API.image.list()).images;
         this.networks = (await API.network.list()).networks;
         this.keypairs = (await API.keypair.list()).keypairs;
+
+        let authInfo = await API.authInfo.get();
+        this.securityGroups = (await API.sg.list({tenant_id: authInfo.project.id})).security_groups;
 
         let body = await API.az.detail();
 
@@ -487,6 +492,7 @@ export class NewServerDialog extends Dialog {
                 password: this.params.password,
                 keyName: this.keypair,
                 volumeType: this.volumeType,
+                securityGroup: [{name: this.securityGroup}],
             }
         )
         MESSAGE.info(`实例 ${this.params.name} 创建中...`);

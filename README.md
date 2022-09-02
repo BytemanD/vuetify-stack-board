@@ -14,7 +14,8 @@ Openstack Dashboard with Vuetify
 - [ ] 端口安全组更新操作
 - [ ] 虚拟机安全组更新操作
 - [ ] 用户管理
-- [ ] image属性
+- [ ] image属性管理
+- [ ] 删除agg后，AZ 列表残留
 
 ### v0.0.4
 
@@ -34,6 +35,7 @@ Openstack Dashboard with Vuetify
 - [X] backup、volume、snapshot支持状态重置
 - [X] Image 智能删除
 - [X] 安全组基本管理
+- [X] 创建虚拟机指定安全组
 
 ### v0.0.3
 

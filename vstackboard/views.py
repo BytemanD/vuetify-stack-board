@@ -125,8 +125,29 @@ class Cluster(web.RequestHandler):
             self.finish({'error': f'cluster {cluster_id} is not found'})
         return
 
+class GetContext(object):
 
-class OpenstackProxyBase(web.RequestHandler):
+    def _get_context(self):
+        return context.ClusterContext(self.get_cookie('clusterId'),
+                                      region=self.get_cookie('region'))
+
+
+class AuthInfo(web.RequestHandler, GetContext):
+
+    def get(self):
+        context = self._get_context()
+        cluster_proxy = proxy.get_proxy(context)
+        cluster_proxy.get_project_id()
+        self.set_status(200)
+        self.finish({
+            'auth_info': {
+                'project': cluster_proxy.get_project(),
+                'user': cluster_proxy.get_user(),
+            }
+        })
+
+
+class OpenstackProxyBase(web.RequestHandler, GetContext):
 
     def _request_body(self):
         return None if self.request.method.upper() in ['DELETE', 'GET'] else \
@@ -135,10 +156,6 @@ class OpenstackProxyBase(web.RequestHandler):
     @abc.abstractmethod
     def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
         raise ImportError()
-
-    def _get_context(self):
-        return context.ClusterContext(self.get_cookie('clusterId'),
-                                      region=self.get_cookie('region'))
 
     def do_proxy(self, method, url):
         context = self._get_context()

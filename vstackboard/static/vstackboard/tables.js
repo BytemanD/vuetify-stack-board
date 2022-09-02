@@ -155,9 +155,11 @@ export class PortDataTable extends DataTable {
             { text: 'binding:host_id', value: 'binding:host_id' },
             { text: 'network_id', value: 'network_id' },
             { text: 'device_id', value: 'device_id' },
+            { text: 'security_groups', value: 'security_groups' },
             { text: 'mac_address', value: 'mac_address' },
             { text: 'qos_policy_id', value: 'qos_policy_id' },
             { text: 'description', value: 'description' },
+
         ];
     }
     adminStateDown(item) {
@@ -186,6 +188,7 @@ export class SecurityGroupDataTable extends DataTable {
             { text: 'description', value: 'description' },
             { text: 'created_at', value: 'created_at' },
             { text: 'updated_at', value: 'updated_at' },
+            
         ];
     }
 }

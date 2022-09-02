@@ -28,6 +28,7 @@ ROUTES = [
     (r'/image(.*)', views.GlanceProxy),
     (r'/networking(.*)', views.NeutronProxy),
     (r'/volume(.*)', views.CinderProxy),
+    (r'/auth_info', views.AuthInfo),
 ]
 
 

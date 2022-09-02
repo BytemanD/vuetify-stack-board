@@ -28,11 +28,17 @@
                 <template v-slot:selection="{ item }"> [[ item.name ]] </template>
               </v-select>
             </v-col>
-            <v-col cols="12">
+            <v-col cols="6">
                 <v-select :items="newServerDialog.networks" clearable label="网络" dense item-text="name" item-value="id" 
                           v-model="newServerDialog.params.netId">
                   <template v-slot:selection="{ item }"> [[ item.name ]] </template>
                 </v-select>
+              </v-col>
+              <v-col cols="6">
+              <v-select :items="newServerDialog.securityGroups" clearable label="安全组" dense item-text="name" item-value="id" 
+                        v-model="newServerDialog.securityGroup" persistent-hint hint="只能选择当前租户的安全组">
+                <template v-slot:selection="{ item }"> [[ item.name ]] </template>
+              </v-select>
             </v-col>
             <v-col cols="6">
               <v-switch v-model="newServerDialog.params.useBdm" label="创建卷" class="my-auto" hide-details></v-switch>

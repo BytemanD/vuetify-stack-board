@@ -41,6 +41,17 @@ class OpenstackV3AuthProxy(object):
             self.update_auth_token()
         return self.auth_token.get('project', {}).get('id')
 
+
+    def get_project(self):
+        if 'project' not in self.auth_token:
+            self.update_auth_token()
+        return self.auth_token.get('project', {})
+
+    def get_user(self):
+        if 'user' not in self.auth_token:
+            self.update_auth_token()
+        return self.auth_token.get('user', {})
+
     def is_connectable(self):
         try:
             requests.get(self.auth_url, timeout=5)

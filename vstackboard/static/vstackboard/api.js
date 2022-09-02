@@ -190,6 +190,9 @@ class Server extends ClientExt {
         } else {
             data.imageRef = imageId
         }
+        if (options.securityGroup) {
+            data.security_groups = options.securityGroup;
+        }
         LOG.debug(`Boot server with data ${JSON.stringify(data)}`)
         if (options.useBdm) {
             return await this.volumeBoot(data);
@@ -424,7 +427,12 @@ class Cluster extends Restfulclient {
         return this.post({ cluster: data })
     }
 }
-
+class AuthInfo extends Restfulclient {
+    constructor() { super('/auth_info') };
+    async get(){
+        return (await this.list()).auth_info
+    }
+}
 
 export class OpenstackProxyApi {
     constructor() {
@@ -459,6 +467,7 @@ export class OpenstackProxyApi {
         this.volumeService = new VolumeService();
 
         this.cluster = new Cluster();
+        this.authInfo = new AuthInfo();
     }
 }
 
