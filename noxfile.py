@@ -7,7 +7,7 @@ def flake8(session):
     session.run("flake8", "vstackboard", "tests", 'noxfile.py')
 
 
-@nox.session(name='ut')
+@nox.session(name='pytest')
 def test(session):
     session.install('pytest')
     session.install('-r', 'requirements.txt', '-r', 'test-requirements.txt')

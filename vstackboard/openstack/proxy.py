@@ -41,7 +41,6 @@ class OpenstackV3AuthProxy(object):
             self.update_auth_token()
         return self.auth_token.get('project', {}).get('id')
 
-
     def get_project(self):
         if 'project' not in self.auth_token:
             self.update_auth_token()
@@ -150,30 +149,45 @@ class OpenstackV3AuthProxy(object):
                 'Content-Type': 'application/json',
                 'OpenStack-API-Version': self._get_api_version()}
 
-    def proxy_keystone(self, method='GET', url=None, data=None):
+    def proxy_keystone(self, method='GET', url=None, data=None, headers=None):
         proxy_url = '{}{}'.format(self._get_endpoint('keystone'), url or '/')
+        proxy_headers = self.get_header()
+        if headers:
+            proxy_headers.update(headers)
         return requests.request(method, proxy_url, data=data,
-                                headers=self.get_header())
+                                headers=proxy_headers)
 
-    def proxy_nova(self, method='GET', url=None, data=None):
+    def proxy_nova(self, method='GET', url=None, data=None, headers=None):
         proxy_url = '{}{}'.format(self._get_endpoint('nova'), url or '/')
+        proxy_headers = self.get_header()
+        if headers:
+            proxy_headers.update(headers)
         return requests.request(method, proxy_url, data=data,
-                                headers=self.get_header())
+                                headers=proxy_headers)
 
-    def proxy_glance(self, method='GET', url=None, data=None):
+    def proxy_glance(self, method='GET', url=None, data=None, headers=None):
         proxy_url = '{}{}'.format(self._get_endpoint('glance'), url or '/')
+        proxy_headers = self.get_header()
+        if headers:
+            proxy_headers.update(headers)
         return requests.request(method, proxy_url, data=data,
-                                headers=self.get_header())
+                                headers=proxy_headers)
 
-    def proxy_neutron(self, method='GET', url=None, data=None):
+    def proxy_neutron(self, method='GET', url=None, data=None, headers=None):
         proxy_url = '{}{}'.format(self._get_endpoint('neutron'), url or '/')
+        proxy_headers = self.get_header()
+        if headers:
+            proxy_headers.update(headers)
         return requests.request(method, proxy_url, data=data,
-                                headers=self.get_header())
+                                headers=proxy_headers)
 
-    def proxy_cinder(self, method='GET', url=None, data=None):
+    def proxy_cinder(self, method='GET', url=None, data=None, headers=None):
         proxy_url = '{}{}'.format(self._get_endpoint('cinderv2'), url or '/')
+        proxy_headers = self.get_header()
+        if headers:
+            proxy_headers.update(headers)
         return requests.request(method, proxy_url, data=data,
-                                headers=self.get_header())
+                                headers=proxy_headers)
 
 
 def get_proxy(ctxt: context.ClusterContext) -> OpenstackV3AuthProxy:

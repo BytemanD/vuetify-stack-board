@@ -463,11 +463,9 @@ export class NewServerDialog extends Dialog {
         this.securityGroups = (await API.sg.list({tenant_id: authInfo.project.id})).security_groups;
 
         let body = await API.az.detail();
-
-        this.azHosts = { '无': '' };
         this.azList = body.availabilityZoneInfo.filter(az => { return az.zoneName != 'internal' });
+        this.azHosts = {};
         if (this.azList){
-            // this.azList.splice(this.azList, 0, { zoneName: '自动选择', hosts: [] })
             this.azList.forEach(az => { this.azHosts[az.zoneName] = Object.keys(az.hosts || {}); })
         } else {
             console.warn(`azList is null: ${this.azList}`)
@@ -1382,6 +1380,59 @@ export class ImageDeleteSmartDialog extends Dialog {
         imageTable.resetSelected();
     }
 }
+export class ImagePropertiesDialog extends Dialog {
+    constructor(){
+        super();
+        this.image = {};
+        this.properties = {};
+        this.propertyContent = null;
+    }
+    async open(image) {
+        this.image = image;
+        let imageData = await API.image.show(this.image.id)
+        this.properties = {};
+        for (let key in imageData) {
+            if (key.startsWith('hw_')) {
+                this.properties[key] = imageData[key];
+            }
+        }
+        super.open();
+    }
+    async removeProperty(key){
+        await API.image.removeProperties(this.image.id, [key]);
+        Vue.delete(this.properties, key);
+    }
+    async addProperties(){
+        console.log(this.propertyContent)
+        if (! this.propertyContent){
+            return;
+        }
+        let propertyLines = this.propertyContent.split('\n');
+        let properties = {};
+        for (var i = 0; i < propertyLines.length; i++) {
+            let line = propertyLines[i];
+            if (line.trim() == '') { continue; }
+            let kv = line.split('=');
+            if (kv.length != 2) {
+                ALERT.error(`输入内容有误: ${line}`)
+                return;
+            }
+            let key = kv[0].trim();
+            let value = kv[1].trim();
+            if (key == '' || ! key.startsWith('hw_') || value == '') {
+                ALERT.error(`输入内容有误: ${line}`)
+                return;
+            }
+            properties[key] = value;
+        }
+
+        await API.image.addProperties(this.image.id, properties)
+        MESSAGE.success(`属性添加成功`);
+        for (let key in properties) {
+            Vue.set(this.properties, key, properties[key])
+        }
+    }
+}
 export const newCluster = new NewClusterDialog()
 
 export const newServer = new NewServerDialog()
@@ -1404,6 +1455,7 @@ export const volumeResetStateDialog = new VolumeResetStateDialog();
 export const backupResetStateDialog = new BackupResetStateDialog();
 export const snapshotResetStateDialog = new SnapshotResetStateDialog();
 export const imageDeleteSmartDialog = new ImageDeleteSmartDialog();
+export const imagePropertiesDialog = new ImagePropertiesDialog();
 
 export const newRouterDialog = new NewRouterkDialog();
 export const newNetDialog = new NewNetworkDialog();

@@ -31,6 +31,12 @@ class Restfulclient {
         let resp = await axios.get(`${url}`);
         return resp.data;
     };
+    async patch(id, body, headers={}){
+        let config = {};
+        if (headers) { config.headers = headers; }
+        let resp = await axios.patch(`${this.baseUrl}/${id}`, body, config);
+        return resp.data
+    }
 }
 class ClientExt extends Restfulclient {
     constructor(baseUrl) { super(baseUrl); }
@@ -312,6 +318,20 @@ class User extends Restfulclient {
 
 class Image extends Restfulclient {
     constructor() { super('/image/v2/images') };
+    async removeProperties(id, properties) {
+        let data = [];
+        for (let i in properties) {
+            data.push({path: `/${properties[i]}`, op: 'remove' });
+        }
+        return await this.patch(id, data, {'Content-Type': 'application/openstack-images-v2.1-json-patch'})
+    }
+    async addProperties(id, properties) {
+        let data = [];
+        for (let key in properties) {
+            data.push({path: `/${key}`, value: properties[key],  op: 'add' });
+        }
+        return await this.patch(id, data, {'Content-Type': 'application/openstack-images-v2.1-json-patch'})
+    }
 }
 
 class Network extends Restfulclient {

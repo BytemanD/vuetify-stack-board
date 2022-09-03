@@ -125,11 +125,17 @@ class Cluster(web.RequestHandler):
             self.finish({'error': f'cluster {cluster_id} is not found'})
         return
 
+
 class GetContext(object):
 
     def _get_context(self):
         return context.ClusterContext(self.get_cookie('clusterId'),
                                       region=self.get_cookie('region'))
+
+    def _get_header_value(self, header):
+        for h, v in self.request.headers.get_all():
+            if h == header:
+                return v
 
 
 class AuthInfo(web.RequestHandler, GetContext):
@@ -158,14 +164,22 @@ class OpenstackProxyBase(web.RequestHandler, GetContext):
         raise ImportError()
 
     def do_proxy(self, method, url):
+        LOG.debug('do proxy  %s %s', method, url)
         context = self._get_context()
         try:
             cluster_proxy = proxy.get_proxy(context)
             query = parse.urlparse(self.request.uri).query
             if query:
                 url += f'?{query}'
+            proxy_headers = {}
+            for header in ['Content-Type']:
+                header_value = self._get_header_value(header)
+                if header_value:
+                    proxy_headers[header] = header_value
+
             resp = self.get_proxy_method(cluster_proxy)(
-                method=method, url=url, data=self._request_body())
+                method=method, url=url, data=self._request_body(),
+                headers=proxy_headers)
             self.set_status(resp.status_code, resp.reason)
             if resp.status_code in [204]:
                 self.finish()
@@ -176,6 +190,7 @@ class OpenstackProxyBase(web.RequestHandler, GetContext):
             self.finish({'error': str(e)})
             return
         except Exception as e:
+            LOG.exception(e)
             self.set_status(500)
             self.finish({'error': str(e)})
             return
@@ -191,6 +206,9 @@ class OpenstackProxyBase(web.RequestHandler, GetContext):
 
     def delete(self, url):
         self.do_proxy('DELETE', url)
+
+    def patch(self, url):
+        self.do_proxy('PATCH', url)
 
 
 class KeystoneProxy(OpenstackProxyBase):

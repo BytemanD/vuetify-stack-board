@@ -872,12 +872,13 @@ export class AZDataTable extends DataTable {
 export class ImageDataTable extends DataTable{
     constructor() {
         super([
-            { text: 'name', value: 'name' },
-            { text: 'status', value: 'status' },
-            { text: 'size', value: 'size' },
+            { text: '名字', value: 'name' },
+            { text: '状态', value: 'status' },
+            { text: '大小', value: 'size' },
             { text: 'visibility', value: 'visibility' },
-            { text: 'image_state', value: 'image_state' },
-            { text: 'image_type', value: 'image_type' },
+            { text: 'container_format', value: 'container_format' },
+            { text: 'disk_format', value: 'disk_format' },
+            { text: '操作', value: 'actions' },
         ], API.image, 'images')
         this.extendItems = [
             { text: 'id', value: 'id' },
@@ -889,6 +890,20 @@ export class ImageDataTable extends DataTable{
             { text: 'checksum', value: 'checksum' },
             { text: 'block_device_mapping', value: 'block_device_mapping' },
         ]
+        this.KB = 1024;
+        this.MB = this.KB * 1024;
+        this.GB = this.MB * 1024;
+    }
+    humanSize(image) {
+        if (image.size >= this.GB) {
+            return `${(image.size / this.GB).toFixed(2)} GB` ;
+        } else if(image.size >= this.MB) {
+            return `${(image.size / this.MB).toFixed(2)} MB`;
+        } else if(image.size >= this.KB) {
+            return `${(image.size / this.KB).toFixed(2)} KB`;
+        } else {
+            return `${image.size} B`
+        }
     }
 }
 

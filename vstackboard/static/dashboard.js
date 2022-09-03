@@ -18,7 +18,7 @@ import {
     resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog,
     newVolume, newSnapshotDialog, newBackupDialog, backupResetStateDialog,
     newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog,
-    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents, newQosPolicyDialog, imageDeleteSmartDialog, volumeResetStateDialog, snapshotResetStateDialog, sgRulesDialog, newSGDialog, newSGRuleDialog
+    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents, newQosPolicyDialog, imageDeleteSmartDialog, volumeResetStateDialog, snapshotResetStateDialog, sgRulesDialog, newSGDialog, newSGRuleDialog, imagePropertiesDialog
 
 } from "./vstackboard/dialogs.js";
 import { init } from "./vstackboard/context.js";
@@ -116,6 +116,7 @@ new Vue({
         snapshotResetStateDialog: snapshotResetStateDialog,
         // image dialogs
         imageDeleteSmartDialog: imageDeleteSmartDialog,
+        imagePropertiesDialog: imagePropertiesDialog,
         // server dialogs
         newFlavorDialog: newFlavor,
         flavorExtraDialog: flavorExtraDialog,

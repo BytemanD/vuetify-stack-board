@@ -118,10 +118,10 @@ export class Utils {
         });
     }
     static humanRam(size) {
-        if (size < 1024) {
-            return `${size}MB`
+        if (size <= 1024) {
+            return `${size} MB`
         }
-        return `${(size / 1024).toFixed(0)}GB`
+        return `${(size / 1024).toFixed(0)} GB`
     }
     static sleep(seconds) {
         seconds = (seconds || 0);
