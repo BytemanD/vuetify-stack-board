@@ -21,7 +21,7 @@
   dense show-select v-model="networking.sgTable.selected" show-expand single-expand>
   <template v-slot:item.name="{ item }">[[ item.name || item.id ]]</template>
   <template v-slot:item.actions="{ item }">
-    <v-btn text small color="info" @click="networking.sgRulesDialog.open(item)">规则</v-btn>
+    <v-btn text small color="purple" @click="networking.sgRulesDialog.open(item)">规则管理</v-btn>
   </template>
   <template v-slot:expanded-item="{ headers, item }">
     <td></td><td></td>

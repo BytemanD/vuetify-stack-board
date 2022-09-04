@@ -11,10 +11,13 @@ Openstack Dashboard with Vuetify
 - [ ] 上传镜像
 - [ ] 修复 Volume 服务 expanded-item 显示问题
 - [ ] backup reset state 有时需执行多次才能成功, why?
-- [ ] 端口安全组更新操作
-- [ ] 虚拟机安全组更新操作
-- [ ] 用户管理
 - [ ] 修复删除agg后，AZ 列表残留的问题
+
+### v0.0.5
+- [X] 虚拟机安全组更新操作
+- [ ] 用户管理
+- [ ] 端口安全组更新操作
+
 
 ### v0.0.4
 
@@ -37,7 +40,6 @@ Openstack Dashboard with Vuetify
 - [X] 创建虚拟机指定安全组
 - [X] image大小显示人性化
 - [X] image属性管理
-
 
 ### v0.0.3
 

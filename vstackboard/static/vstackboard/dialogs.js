@@ -673,7 +673,7 @@ export class RebuildDialog extends Dialog {
     }
     async open(server) {
         this.server = server;
-        this.images = [{ id: '', name: '' }];
+        this.images = [];
         this.data.imageRef = ''
         let body = await API.image.list();
         this.images = this.images.concat(body.images);
@@ -685,6 +685,49 @@ export class RebuildDialog extends Dialog {
         super.hide();
         await serverTable.waitServerStatus(this.server.id)
         MESSAGE.success(`虚拟机${this.server.name}重建成功`)
+    }
+}
+export class UpdateServerSG extends Dialog {
+    constructor() {
+        super();
+        this.interfaceHeaders = [
+            {text: 'name', value: 'name'},
+            {text: 'mac_address', value: 'mac_address'},
+            {text: 'fixed_ips', value: 'fixed_ips'},
+            {text: 'security_groups', value: 'security_groups'},
+        ]
+        this.itemsPerPage = 10;
+        this.server = {};
+        this.interfaces = [];
+        this.securityGroups = [];
+        this.securityGroup = [];
+        this.selectedInterfaces = [];
+        this._authInfo = null;
+    }
+    randomName() {
+        return Utils.getRandomName('keypair').replace(/:/g, '');
+    }
+    async open(server) {
+        this.server = server;
+        super.open();
+        this.interfaces = (await API.port.list({device_id: this.server.id})).ports;
+        if (! this._authInfo){
+            this._authInfo = await API.authInfo.get();
+        }
+        this.securityGroups = (await API.sg.list({tenant_id: this._authInfo.project.id})).security_groups;
+    }
+    async commit() {
+        for(let i in this.selectedInterfaces) {
+            let port = this.interfaces[i];
+            try {
+                await API.port.put(port.id, {port: {security_groups: this.securityGroup}});
+                MESSAGE.success(`端口${port.name || port.id}更新成功.`);
+            } catch {
+                MESSAGE.error(`端口${port.name || port.id}更新失败.`);
+                return
+            }
+        }
+        this.interfaces = (await API.port.list({device_id: this.server.id})).ports;
     }
 }
 export class NewVolumeDialog extends Dialog {
@@ -1516,6 +1559,7 @@ export const resizeDialog = new ResizeDialog();
 export const migrateDialog = new MigrateDialog();
 export const newKeypairDialog = new NewKeypairDialog();
 export const rebuildDialog = new RebuildDialog();
+export const updateServerSG = new UpdateServerSG();
 
 export const newVolume = new NewVolumeDialog()
 export const newVolumeTypeDialog = new NewVolumeTypeDialog();
