@@ -200,6 +200,7 @@ export class QosPolicyDataTable extends DataTable {
                 { text: 'revision_number', value: 'revision_number' },
                 { text: '是否默认', value: 'is_default' },
                 { text: '是否共享', value: 'shared' },
+                { text: '操作', value: 'actions' },
         ], API.qosPolicy, 'policies');
         this.extendItems = [
             { text: 'id', value: 'id' },

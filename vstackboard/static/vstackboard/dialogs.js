@@ -1045,6 +1045,76 @@ export class NewQosPolicyDialog extends Dialog {
         this.hide();
     }
 }
+export class QosPolicyRules extends Dialog {
+    constructor() {
+        super();
+        this.description = null;
+        this.qosPolicy = {};
+        this.selected = [];
+        this.headers = [
+            { text: 'id', value: 'id' },
+            { text: 'direction', value: 'direction' },
+            { text: 'max_kbps', value: 'max_kbps' },
+            { text: 'max_burst_kbps', value: 'max_burst_kbps' },
+        ];
+        this.extendItems = []
+    }
+    async deleteSelected(){
+        for (let i in this.selected){
+            let rule = this.selected[i];
+            try {
+                await API.qosPolicy.deleteRule(this.qosPolicy.id, rule.id);
+                MESSAGE.success(`规则 ${rule.id} 删除成功`);
+                this.qosPolicy = (await API.qosPolicy.show(this.qosPolicy.id)).policy;
+            } catch (e) {
+                MESSAGE.error(`规则 ${rule.id} 删除失败`);
+            }
+            this.selected = [];
+        }
+    }
+    async open(qosPolicy) {
+        this.qosPolicy = qosPolicy;
+        super.open();
+        this.qosPolicy = (await API.qosPolicy.show(this.qosPolicy.id)).policy;
+    }
+}
+export class NewQosPolicyRule extends Dialog {
+    constructor() {
+        super();
+        this.qosPolicyRulesDialog = {};
+        this.directionList = ['ingress', 'egress'];
+        this.direction = 'ingress'
+        this.maxKbps = null;
+        this.maxBurstKbps = null;
+    }
+    async commit(){
+        let data = {direction: this.direction};
+        try {
+            if (this.maxKbps) { data.max_kbps = parseInt(this.maxKbps); }
+            if (this.maxBurstKbps) { data.max_burst_kbps = parseInt(this.maxBurstKbps); }
+        } catch {
+            ALERT.error(`非法数值`);
+            return;
+        }
+        if (Object.keys(data).length <= 1){
+            return;
+        }
+        let qosPolicy = this.qosPolicyRulesDialog.qosPolicy;
+        try {
+            await API.qosPolicy.addRule(qosPolicy.id, data);
+            MESSAGE.success(`规则创建成功`);
+        } catch (e) {
+            console.error(e);
+            MESSAGE.error(`规则创建失败: ${e}`);
+            return;
+        }
+        this.qosPolicyRulesDialog.qosPolicy = (await API.qosPolicy.show(qosPolicy.id)).policy;
+    }
+    async open(qosPolicyRulesDialog) {
+        this.qosPolicyRulesDialog = qosPolicyRulesDialog;
+        super.open();
+    }
+}
 export class NewSGDialog extends Dialog {
     constructor() {
         super();
@@ -1463,6 +1533,8 @@ export const newSubnetDialog = new NewSubnetDialog();
 export const routerInterfacesDialog = new RouterInterfacesDialog();
 export const newPortDialog = new NewPortDialog();
 export const newQosPolicyDialog = new NewQosPolicyDialog();
+export const qosPolicyRulesDialog = new QosPolicyRules();
+export const newQosPolicyRule = new NewQosPolicyRule();
 export const newSGDialog = new NewSGDialog();
 export const newSGRuleDialog = new NewSGRuleDialog();
 export const sgRulesDialog = new SGRulesDialog();

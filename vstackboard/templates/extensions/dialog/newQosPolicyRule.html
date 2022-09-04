@@ -1,0 +1,24 @@
+<v-dialog v-model="networking.newQosPolicyRuleDialog.show" width="600" scrollable>
+    <v-card>
+      <v-card-title class="headline grey lighten-2" primary-title>添加规则</v-card-title>
+      <v-card-text>
+        <br>
+        <v-row>
+            <v-col cols="12">
+                <v-select hide-details :items="networking.newQosPolicyRuleDialog.directionList" label="方向" v-model="networking.newQosPolicyRuleDialog.direction"></v-select>
+            </v-col>
+            <v-col cols="6">
+                <v-text-field hide-details label="最大kbps" placeholder="请输入最大kbps" v-model="networking.newQosPolicyRuleDialog.maxKbps"></v-text-field>
+            </v-col>
+            <v-col cols="6">
+                <v-text-field hide-details label="最大峰值kbps" placeholder="请输入最大峰值kbps" v-model="networking.newQosPolicyRuleDialog.maxBurstKbps"></v-text-field>
+            </v-col>
+        </v-row>
+      </v-card-text>
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="networking.newQosPolicyRuleDialog.commit()">创建</v-btn>
+      </v-card-actions>
+    </v-card>
+</v-dialog>

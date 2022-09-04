@@ -23,6 +23,9 @@
   <template v-slot:item.name_or_id="{ item }">
     [[ item.name || item.id ]]
   </template>
+  <template v-slot:item.actions="{ item }">
+    <v-btn small text color="purple" @click="networking.qosPolicyRulesDialog.open(item)">规则管理</v-btn>
+  </template>
   <template v-slot:item.is_default="{ item }">
     <v-switch class="my-auto" v-model="item.is_default" hide-details @click="networking.qosPolicyTable.updateDefault(item)"></v-switch>
   </template>
@@ -42,3 +45,4 @@
 </v-data-table>
 
 {% include '../dialog/newQosPolicy.html' %}
+{% include '../dialog/qosPolicyRules.html' %}

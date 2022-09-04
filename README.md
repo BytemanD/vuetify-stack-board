@@ -29,7 +29,7 @@ Openstack Dashboard with Vuetify
 - [X] Aggregate 显示
 - [X] 新建port，添加 vnic_type 等可选属性
 - [X] QoS policy管理
-- [ ] QoS policy rule 管理
+- [X] QoS policy rule 管理
 - [X] Image 显示更多信息（id, block_device_mapping等）
 - [X] backup、volume、snapshot支持状态重置
 - [X] Image 智能删除

@@ -354,6 +354,16 @@ class SecurityGroupRule extends Restfulclient {
 }
 class QosPolicy extends Restfulclient {
     constructor() { super('/networking/v2.0/qos/policies') };
+    async deleteRule(id, ruleId){
+        return await this.delete(`${id}/bandwidth_limit_rules/${ruleId}`)
+    }
+    async addRule(id, data){
+        let resp = await axios.post(
+            `${this.baseUrl}/${id}/bandwidth_limit_rules`,
+            {bandwidth_limit_rule: data});
+        return resp.data;
+    }
+    
 }
 class Router extends Restfulclient {
     constructor() { super('/networking/v2.0/routers'), this.portClient = new Port() };
