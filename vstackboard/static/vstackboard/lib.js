@@ -45,7 +45,7 @@ export class Utils {
         let minutes = date.getMinutes();
         let seconds = date.getSeconds();
         return `${date.getFullYear()}${month >= 10 ? month : '0' + month}${day >= 10 ? day : '0' + day}-` +
-            `${hours >= 10 ? hours : '0' + hours}:${minutes >= 0 ? minutes : '0' + minutes}:${seconds >= 0 ? seconds : '0' + seconds}`;
+            `${hours >= 10 ? hours : '0' + hours}:${minutes >= 10 ? minutes : '0' + minutes}:${seconds >= 10 ? seconds : '0' + seconds}`;
     }
     static parseUTCToLocal(utcString){
         if (! utcString.endsWith('Z')){

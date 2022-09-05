@@ -196,7 +196,7 @@ class Server extends ClientExt {
         } else {
             data.imageRef = imageId
         }
-        if (options.securityGroup) {
+        if (options.securityGroup && options.securityGroup != '') {
             data.security_groups = options.securityGroup;
         }
         LOG.debug(`Boot server with data ${JSON.stringify(data)}`)

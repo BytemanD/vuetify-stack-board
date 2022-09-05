@@ -480,19 +480,20 @@ export class NewServerDialog extends Dialog {
             MESSAGE.error(`实例名字不能为空`);
             return;
         }
-        let body = await API.server.boot(this.params.name, this.params.flavor, this.params.image,
-            {
-                minCount: this.params.nums, maxCount: this.params.nums,
-                useBdm: this.params.useBdm, volumeSize: this.params.volumeSize,
-                networks: this.params.netId ? [{ uuid: this.params.netId }] : 'none',
-                az: this.params.az == '自动选择' ? null : this.params.az,
-                host: this.params.host,
-                password: this.params.password,
-                keyName: this.keypair,
-                volumeType: this.volumeType,
-                securityGroup: [{name: this.securityGroup}],
-            }
-        )
+        let data = {
+            minCount: this.params.nums, maxCount: this.params.nums,
+            useBdm: this.params.useBdm, volumeSize: this.params.volumeSize,
+            networks: this.params.netId ? [{ uuid: this.params.netId }] : 'none',
+            az: this.params.az == '自动选择' ? null : this.params.az,
+            host: this.params.host,
+            password: this.params.password,
+            keyName: this.keypair,
+            volumeType: this.volumeType,
+        }
+        if (this.securityGroup) {
+            data.securityGroup = [{name: this.securityGroup}];
+        }
+        let body = await API.server.boot(this.params.name, this.params.flavor, this.params.image, data)
         MESSAGE.info(`实例 ${this.params.name} 创建中...`);
         let serverTasks = new ServerTasks();
         serverTasks.add(body.server.id, 'building')
