@@ -5,7 +5,6 @@ Openstack Dashboard with Vuetify
 
 ### TODO
 
-- [ ] 查看console log
 - [ ] 创建规格时可以从已有的复制
 - [ ] inerface 卸载，自动检测后刷新表
 - [ ] 上传镜像
@@ -15,7 +14,9 @@ Openstack Dashboard with Vuetify
 
 ### v0.0.5
 - [X] 虚拟机安全组更新操作
+- [X] 查看console log
 - [ ] 用户管理
+- [ ] 角色管理
 - [ ] 端口安全组更新操作
 
 

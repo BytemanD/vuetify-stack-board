@@ -296,6 +296,9 @@ class Server extends ClientExt {
     async actionShow(id, reqId) {
         return (await this.get(`/${id}/os-instance-actions/${reqId}`)).instanceAction
     }
+    async getConsoleLog(id, length=null) {
+        return (await this.doAction(id, {'os-getConsoleOutput': {length: length}})).output
+    }
 }
 
 class Endpoint extends Restfulclient {

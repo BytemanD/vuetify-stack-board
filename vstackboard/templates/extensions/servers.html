@@ -21,10 +21,10 @@
               </v-icon>迁移</v-btn>
         <v-btn small color="error" @click="computing.serverTable.deleteSelected()" :disabled="computing.serverTable.selected.length == 0">
             <v-icon small>mdi-trash-can</v-icon>删除</v-btn>
-        <v-btn small color="info" @click="computing.serverTopology.open(computing.serverTable)">拓扑</v-btn>
       </v-col>
-      <v-col cols="1" class="text-right">
-        <v-btn fab x-small outlined color="info" v-on:click="computing.serverTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
+      <v-col cols="2" class="text-right">
+        <v-btn small color="info" @click="computing.serverTopology.open(computing.serverTable)">拓扑</v-btn>
+        <v-btn fab x-small outlined color="purple" v-on:click="computing.serverTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
       </v-col>
       <v-col cols="4">
         <v-text-field small dense v-model="computing.serverTable.search" append-icon="mdi-magnify" label="搜索" single-line hide-details></v-text-field>
@@ -81,16 +81,17 @@
   <template v-slot:item.action="{ item }">
     <v-menu  offset-y>
       <template v-slot:activator="{ on, attrs }">
-        <v-btn icon color="primary" v-bind="attrs" v-on="on"><v-icon small>mdi-menu</v-icon></v-btn>
+        <v-btn icon color="purple" v-bind="attrs" v-on="on"><v-icon small>mdi-menu</v-icon></v-btn>
       </template>
       <v-list dense>
         <v-list-item @click="computing.serverActions.open(item)"><v-list-item-title>操作记录</v-list-item-title></v-list-item>
+        <v-list-item @click="computing.serverConsoleLog.open(item)"><v-list-item-title>控制台日志</v-list-item-title></v-list-item>
         <v-list-item @click="changePasswordDialog.open(item)"><v-list-item-title>修改密码</v-list-item-title></v-list-item>
         <v-list-item @click="serverVolumeDialog.open(item)"><v-list-item-title>卷管理</v-list-item-title></v-list-item>
         <v-list-item @click="serverInterfaceDialog.open(item)"><v-list-item-title>网卡管理</v-list-item-title></v-list-item>
-        <v-list-item small @click="resizeDialog.open(item)"><v-list-item-title>规格变更</v-list-item-title></v-list-item>
-        <v-list-item small @click="rebuildDialog.open(item)"><v-list-item-title>重建</v-list-item-title></v-list-item>
         <v-list-item small @click="computing.updateServerSG.open(item)"><v-list-item-title>更新安全组</v-list-item-title></v-list-item>
+        <v-list-item small @click="resizeDialog.open(item)"><v-list-item-title><span class="orange--text">规格变更</span></v-list-item-title></v-list-item>
+        <v-list-item small @click="rebuildDialog.open(item)"><v-list-item-title><span class="orange--text">重建</span></v-list-item-title></v-list-item>
       </v-list>
     </v-menu>
   </template>
@@ -126,3 +127,4 @@
 {% include 'dialog/serverTopoply.html' %}
 {% include 'dialog/serverActions.html' %}
 {% include 'dialog/serverActionEvents.html' %}
+{% include 'dialog/serverConsoleLog.html' %}

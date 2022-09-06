@@ -16,7 +16,7 @@
                 <v-btn color="primary" @click="newKeypairDialog.commit()">创建</v-btn>
             </v-col>
             <v-col cols="12">
-                <v-textarea hide-details filled label="私钥内容" v-model="newKeypairDialog.privateKey"></v-textarea>
+                <v-textarea hide-details filled readonly label="私钥内容" v-model="newKeypairDialog.privateKey"></v-textarea>
             </v-col>
           </v-row>
       </v-card-text>

@@ -1422,7 +1422,37 @@ export class ServerActionEventsDialog extends Dialog {
         }
     }
 }
-
+export class ServerConsoleLogDialog extends Dialog {
+    constructor() {
+        super();
+        this.server = {};
+        this.length = 10;
+        this.content = '';
+        this.refreshing = false;
+    }
+    async open(server) {
+        this.server = server;
+        super.open();
+        this.refreshConsoleLog(this.length);
+    }
+    async refreshConsoleLog(length){
+        this.refreshing = true;
+        this.content = (await API.server.getConsoleLog(this.server.id, length));
+        this.refreshing = false;
+    }
+    async more() {
+        if (this.length == null) {
+            this.length = 10;
+        }
+        let length = this.length + 10;
+        await this.refreshConsoleLog(length);
+        this.length = length;
+    }
+    async all() {
+        await this.refreshConsoleLog(null);
+        this.length = null;
+    }
+}
 export class ImageDeleteSmartDialog extends Dialog {
     constructor(){
         super();
@@ -1587,4 +1617,5 @@ export const sgRulesDialog = new SGRulesDialog();
 export const serverTopology = new ServerTopology();
 export const serverActions = new ServerActionsDialog();
 export const serverActionEvents = new ServerActionEventsDialog();
+export const serverConsoleLog = new ServerConsoleLogDialog();
 export default Dialog;
