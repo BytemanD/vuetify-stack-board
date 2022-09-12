@@ -1,0 +1,21 @@
+
+
+<v-dialog v-model="identity.projectUserDialog.show" width="800" scrollable>
+  <v-card>
+      <v-card-title class="headline grey lighten-2" primary-title>
+          用户列表
+      </v-card-title>
+      <v-card-text>
+        <br>
+        <v-btn small color="primary" @click="identity.newUserDialog.open(identity.projectUserDialog.project)"><v-icon>mdi-plus</v-icon>添加</v-btn>
+        <v-btn small color="error" @click="identity.projectUserDialog.deleteSelected()" :disabled="identity.projectUserDialog.userTable.selected.length == 0" >删除</v-btn>
+        <br>
+        <v-data-table :headers="identity.projectUserDialog.userTable.headers" :items="identity.projectUserDialog.userTable.items"
+          :items-per-page="identity.projectUserDialog.userTable.itemsPerPage" :search="identity.projectUserDialog.userTable.search"
+          dense show-select v-model="identity.projectUserDialog.userTable.selected">
+      </v-data-table>
+    </v-card-text>
+  </v-card>
+</v-dialog>
+
+{% include '../dialog/newUser.html' %}

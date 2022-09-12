@@ -8,7 +8,7 @@ import {
     imageTable,
     keypairTable,
     netTable, portTable, qosPolicyTable, routerTable,
-    serverTable, sgTable, snapshotTable, volumeTable, volumeTypeTable
+    serverTable, sgTable, snapshotTable, UserTable, volumeTable, volumeTypeTable
 } from './tables.js';
 
 
@@ -28,6 +28,84 @@ class Dialog {
     }
 }
 
+export class ProjectUserDialog extends Dialog {
+    constructor() {
+        super();
+        this.project = {};
+        this.selected = [];
+
+        this.userTable = new UserTable();
+        this.netTypes = ['vlan', 'vxlan', 'flat', 'geneve'];
+        this.qosPolices = [];
+
+        this.newUserDialog = new NewUserDialog();
+    }
+    async refresh(){
+        let roleAssignments = await API.roleAssignments.listByProject(this.project.id);
+        let users = [];
+        for (let i in roleAssignments) {
+            let userId = roleAssignments[i].user.id;
+            users.push((await API.user.show(userId)).user)
+        }
+        this.userTable.items = users;
+    }
+    async open(project) {
+        this.project = project;
+        this.userTable.items = [];
+        this.refresh();
+        super.open();
+    }
+     async deleteSelected() {
+        for(let i in this.userTable.selected){
+            let user = this.userTable.selected[i];
+            await API.user.delete(user.id);
+        }
+        this.selected = [];
+        MESSAGE.success(`用户删除成功`);
+        this.refresh(false);
+    }
+
+}
+export class NewUserDialog extends Dialog {
+    constructor() {
+        super();
+        this.name = '';
+        this.password = null;
+        this.userRole = null;
+        this.roles = [];
+    }
+    randomName() {
+        this.name = Utils.getRandomName('user');
+    }
+    async open(project) {
+        this.randomName();
+        this.project = project;
+        super.open();
+        this.roles = (await API.role.list()).roles;
+    }
+    async commit() {
+        if (! this.name) {
+            ALERT.warn(`用户名必须指定`)
+            return;
+        }
+        let data = {
+            name: this.name,
+            project_id: this.project.id,
+        }
+        if (this.password) { data.password = this.password };
+        try {
+            let user = (await API.user.post({ user: data })).user
+            if (this.userRole) {
+                API.project.addUser(this.project.id, user.id, this.userRole);
+            };
+            MESSAGE.success(`用户 ${this.params.name} 创建成功`)
+            projectUserDialog.refresh();
+            super.hide();
+        } catch {
+            MESSAGE.error(`用户 ${this.name} 创建失败`)
+        }
+    }
+}
 export class NewNetworkDialog extends Dialog {
     constructor() {
         super({
@@ -1054,6 +1132,40 @@ export class NewPortDialog extends Dialog {
         this.hide();
     }
 }
+export class UpdatePort extends Dialog {
+    constructor() {
+        super()
+        this.securityGroups = [];
+        this.qosPolicies = [];
+
+        this.port = {};
+        this.portSGs = [];
+        this.portQosPolicy = null;
+    }
+    async open(port) {
+        this.port = port;
+        this.portSGs = this.port.security_groups;
+        this.portQosPolicy = this.port.qos_policy_id;
+
+        super.open();
+        let authInfo = await API.authInfo.get();
+        this.securityGroups = (await API.sg.list({tenant_id: authInfo.project.id})).security_groups;
+        this.qosPolicies = (await API.qosPolicy.list()).policies;
+    }
+    async commit(){
+        let data = {};
+        if (this.portSGs != this.port.security_groups) { data.security_groups = this.portSGs; }
+        if (this.portQosPolicy != this.port.qos_policy_id) { data.qos_policy_id = this.portQosPolicy; }
+        if (! data) {
+            ALERT.warn(`端口属性没有变化`)
+            return;
+        }
+        await API.port.put(this.port.id, {port: data});
+        MESSAGE.success(`端口 ${this.port.name || this.port.name } 更新成功`)
+        portTable.refresh();
+    }
+
+}
 export class NewQosPolicyDialog extends Dialog {
     constructor() {
         super()
@@ -1436,8 +1548,17 @@ export class ServerConsoleLogDialog extends Dialog {
         this.refreshConsoleLog(this.length);
     }
     async refreshConsoleLog(length){
+        if (this.server['OS-EXT-SRV-ATTR:host'] == null) {
+            ALERT.error(`虚拟机 ${this.server.name || this.server.id} 未创建`);
+            return
+        }
         this.refreshing = true;
-        this.content = (await API.server.getConsoleLog(this.server.id, length));
+        try {
+            this.content = (await API.server.getConsoleLog(this.server.id, length));
+        } catch (e) {
+            MESSAGE.error(`获取日志失败!`);
+            console.error(e)
+        }
         this.refreshing = false;
     }
     async more() {
@@ -1579,6 +1700,9 @@ export class ImagePropertiesDialog extends Dialog {
 }
 export const newCluster = new NewClusterDialog()
 
+export const projectUserDialog = new ProjectUserDialog();
+export const newUserDialog = new NewUserDialog();
+
 export const newServer = new NewServerDialog()
 export const serverVolumeDialog = new ServerVolumeDialog();
 export const serverInterfaceDialog = new ServerInterfaceDialog();
@@ -1607,6 +1731,8 @@ export const newNetDialog = new NewNetworkDialog();
 export const newSubnetDialog = new NewSubnetDialog();
 export const routerInterfacesDialog = new RouterInterfacesDialog();
 export const newPortDialog = new NewPortDialog();
+export const updatePortDialog = new UpdatePort();
+
 export const newQosPolicyDialog = new NewQosPolicyDialog();
 export const qosPolicyRulesDialog = new QosPolicyRules();
 export const newQosPolicyRule = new NewQosPolicyRule();

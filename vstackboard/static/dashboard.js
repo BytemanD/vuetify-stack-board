@@ -9,7 +9,7 @@ import DataTable, {
     backupTable, clusterTable, keypairTable, volumeServiceTable,
     routerTable, netTable, portTable, volumeTypeTable, snapshotTable,
     hypervisorTable, azTable, regionTable, qosPolicyTable,
-    imageTable, sgTable
+    imageTable, sgTable, userTable, projectTable
 } from "./vstackboard/tables.js";
 import {
     newFlavor, flavorExtraDialog,
@@ -18,7 +18,7 @@ import {
     resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog,
     newVolume, newSnapshotDialog, newBackupDialog, backupResetStateDialog,
     newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog,
-    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents, newQosPolicyDialog, imageDeleteSmartDialog, volumeResetStateDialog, snapshotResetStateDialog, sgRulesDialog, newSGDialog, newSGRuleDialog, imagePropertiesDialog, qosPolicyRulesDialog, newQosPolicyRule, updateServerSG, serverConsoleLog
+    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents, newQosPolicyDialog, imageDeleteSmartDialog, volumeResetStateDialog, snapshotResetStateDialog, sgRulesDialog, newSGDialog, newSGRuleDialog, imagePropertiesDialog, qosPolicyRulesDialog, newQosPolicyRule, updateServerSG, serverConsoleLog, updatePortDialog, projectUserDialog, newUserDialog
 
 } from "./vstackboard/dialogs.js";
 import { init } from "./vstackboard/context.js";
@@ -28,15 +28,12 @@ const navigationItems = [
     { title: '虚拟化资源', icon: 'mdi-alpha-h-circle' },
     { title: '实例', icon: 'mdi-laptop-account', group: '计算资源' },
     { title: '计算管理', icon: 'mdi-react', },
-    // { title: '规格', icon: 'mdi-alpha-f-circle', },
-    // { title: '计算服务', icon: 'mdi-server' },
-    // { title: '密钥对', icon: 'mdi-key-chain', },
     { title: '存储', icon: 'mdi-storage-tank' },
     { title: '镜像', icon: 'mdi-package-variant-closed' },
 
     { title: '网络', icon: 'mdi-web', group: '网络资源' },
-    { title: '服务', icon: 'mdi-server', group: '认证' },
-    { title: '用户', icon: 'mdi-account-supervisor' },
+    { title: '服务地址', icon: 'mdi-server', group: '认证' },
+    { title: '租户', icon: 'mdi-account-supervisor' },
 
 ]
 
@@ -60,10 +57,10 @@ new Vue({
                 { text: 'url', value: 'url' },
                 { text: 'region', value: 'region' }
             ], API.endpoint, 'endpoints'),
-            userTable: new DataTable([{ text: 'id', value: 'id' },
-            { text: 'name', value: 'name' },
-            { text: 'project_id', value: 'project_id' }
-            ], API.user, 'users')
+            userTable: userTable,
+            projectTable: projectTable,
+            projectUserDialog: projectUserDialog,
+            newUserDialog: newUserDialog,
         },
         computing: {
             tab: 0,
@@ -95,6 +92,7 @@ new Vue({
             newSGRuleDialog: newSGRuleDialog,
             qosPolicyRulesDialog: qosPolicyRulesDialog,
             newQosPolicyRuleDialog: newQosPolicyRule,
+            updatePortDialog: updatePortDialog,
         },
         volume: {
             tab: 0,
@@ -157,11 +155,12 @@ new Vue({
                 this.navigation.item = 0;
             }
             switch (this.navigation.items[this.navigation.item].title) {
-                case '服务':
+                case '服务地址':
                     this.getServices();
                     this.identity.endpointTable.refresh();
                     break;
-                case '用户':
+                case '租户':
+                    this.identity.projectTable.refresh();
                     this.identity.userTable.refresh();
                     break;
                 case '实例':

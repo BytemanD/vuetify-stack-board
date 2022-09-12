@@ -15,9 +15,9 @@ Openstack Dashboard with Vuetify
 ### v0.0.5
 - [X] 虚拟机安全组更新操作
 - [X] 查看console log
-- [ ] 用户管理
+- [X] 用户管理
 - [ ] 角色管理
-- [ ] 端口安全组更新操作
+- [X] 端口安全组更新操作
 
 
 ### v0.0.4

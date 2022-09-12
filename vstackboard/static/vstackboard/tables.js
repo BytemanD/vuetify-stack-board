@@ -29,6 +29,7 @@ class DataTable {
                 MESSAGE.error(`删除 ${this.name} ${item.id} 失败`)
             }
         }
+        MESSAGE.success(`${this.name} 删除成功`)
         this.refresh();
         this.resetSelected();
     }
@@ -146,6 +147,7 @@ export class PortDataTable extends DataTable {
                 { text: 'admin_state_up', value: 'admin_state_up' },
                 { text: 'device_owner', value: 'device_owner' },
                 { text: 'fixed_ips', value: 'fixed_ips' },
+                { text: '操作', value: 'actions' },
         ], API.port, 'ports');
 
         this.extendItems = [
@@ -755,13 +757,37 @@ export class ClusterTable extends DataTable {
 export class RegionTable extends DataTable {
     constructor() {
         super([], API.region, 'regions', '地区');
-        this.selected = ''
+        this.selected = []
     }
     setSelected(region){
         if (region){
             this.selected = region
         }
     }
+}
+export class UserTable extends DataTable {
+    constructor() {
+        super([
+            { text: 'name', value: 'name' },
+            { text: 'domain_id', value: 'domain_id' },
+            { text: 'enabled', value: 'enabled' },
+        ], API.user, 'users', '用户');
+    }
+}
+export class ProjectTable extends DataTable {
+    constructor() {
+        super([
+            { text: '名字', value: 'name' },
+            { text: 'domain_id', value: 'domain_id' },
+            { text: 'enabled', value: 'enabled' },
+            { text: '操作', value: 'actions' },
+        ], API.project, 'projects', '租户');
+        this.extendItems = [
+            {text: 'id', value: 'id'},
+            {text: 'description', value: 'description'},
+        ]
+    }
+    async waitDeleted(id){ }
 }
 export class HypervisortTable extends DataTable {
     constructor() {
@@ -907,6 +933,9 @@ export class ImageDataTable extends DataTable{
         }
     }
 }
+
+export const userTable = new UserTable();
+export const projectTable = new ProjectTable();
 
 export const hypervisorTable = new HypervisortTable();
 export const volumeTable = new VolumeDataTable();

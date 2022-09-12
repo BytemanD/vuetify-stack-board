@@ -1,0 +1,28 @@
+<v-dialog v-model="identity.newUserDialog.show" width="600">
+    <v-card>
+      <v-card-title class="headline grey lighten-2" primary-title>添加用户</v-card-title>
+      <v-card-text>
+        <v-row>
+          <v-col cols="10">
+            <v-text-field hide-details label="*名字" placeholder="请输入端口名" v-model="identity.newUserDialog.name"></v-text-field>
+          </v-col>
+          <v-col cols="2" class="my-auto">
+            <v-btn text color="primary" @click="identity.newUserDialog.randomName()">随机名字</v-btn>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field label="密码" placeholder="请输入密码" v-model="identity.newUserDialog.password"></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-select :items="identity.newUserDialog.roles" label="角色" item-text="name" item-value="id" dense outlined
+                      v-model="identity.newUserDialog.userRole">
+            </v-select>
+          </v-col>
+        </v-row>
+      </v-card-text>
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="identity.newUserDialog.commit()">创建</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>

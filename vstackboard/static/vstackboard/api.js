@@ -318,6 +318,21 @@ class Service extends Restfulclient {
 class User extends Restfulclient {
     constructor() { super('/identity/users') };
 }
+class Project extends Restfulclient {
+    constructor() { super('/identity/projects') };
+    async addUser(id, user, role) {
+        return await this.put(`${id}/users/${user}/roles/${role}`, {})
+    }
+}
+class Role extends Restfulclient {
+    constructor() { super('/identity/roles') };
+}
+class RoleAssignments extends Restfulclient {
+    constructor() { super('/identity/role_assignments') };
+    async listByProject(projectId) {
+        return (await this.list({'scope.project.id': projectId})).role_assignments;
+    }
+}
 
 class Image extends Restfulclient {
     constructor() { super('/image/v2/images') };
@@ -473,6 +488,10 @@ export class OpenstackProxyApi {
         this.service = new Service();
         this.endpoint = new Endpoint();
         this.user = new User();
+        this.project = new Project();
+        this.role = new Role();
+        this.roleAssignments = new RoleAssignments();
+
         this.region = new Region();
         // nova
         this.hypervisor = new Hypervisor();
