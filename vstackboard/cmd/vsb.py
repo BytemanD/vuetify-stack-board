@@ -92,8 +92,8 @@ class Upgrade(cli.SubCli):
                 help='Show debug message'),
         cli.Arg('-y', '--yes', action='store_true',
                 help='answer yes for all questions'),
-        cli.Arg('-f', '--force', action='store_true',
-                help='force reinstall if itis installed')
+        cli.Arg('-c', '--cache', action='store_true',
+                help='use cache if it is downloaded'),
     ]
 
     def __call__(self, args):
@@ -125,8 +125,8 @@ class Upgrade(cli.SubCli):
             return
         download_url = asset.get("browser_download_url")
         msg = f'\nA new {constants.NAME} release is available: ' \
-            f'{latest["tag_name"]}\n' \
-            f'Upgrade from:\n    {download_url}\n'
+              f'{latest["tag_name"]}\n' \
+              f'Upgrade from:\n    {download_url}\n'
         print(msg)
 
         if not args.yes:
@@ -139,25 +139,31 @@ class Upgrade(cli.SubCli):
                 else:
                     print('Error, invalid input, must be y or n.')
 
-        self.download(download_url)
-        file_name = os.path.basename(download_url)
-        LOG.info('download success, start to install %s', file_name)
-
-        self.pip_install(file_name, force=args.force)
+        file_path = self.download(download_url, cache=args.cache)
+        self.pip_install(file_path)
 
     def pip_install(self, file_path, force=False):
-        install_cmd = ['pip', 'install', file_path]
+        install_cmd = ['pip3', 'install', file_path]
         if force:
             install_cmd.append('--force-reinstall')
+        LOG.info('start to install')
         status, output = subprocess.getstatusoutput(install_cmd)
         if status == 0:
-            print('Install success')
+            LOG.info('Install success')
         else:
-            print(f'install failed, Output: {output}')
+            LOG.info('install failed, Output: %s', output)
 
-    def download(self, url):
+    def download(self, url, cache=False):
+        file_path = os.path.basename(url)
+        if cache and os.path.exists(file_path):
+            LOG.warning('use cache: %s', file_path)
+            return file_path
+
         downloader = driver.Urllib3Driver(progress=True)
+        LOG.info('download from %s', url)
         downloader.download(url)
+        LOG.info('download success, start to install %s', file_path)
+        return file_path
 
 
 class Serve(cli.SubCli):
