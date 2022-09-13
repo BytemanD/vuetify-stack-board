@@ -789,6 +789,23 @@ export class ProjectTable extends DataTable {
     }
     async waitDeleted(id){ }
 }
+export class RoleTable extends DataTable {
+    constructor() {
+        super([
+            { text: 'ID', value: 'id' },
+            { text: '名字', value: 'name' },
+            { text: 'domain_id', value: 'domain_id' },
+        ], API.role, 'roles', '角色');
+        this.domainId = null;
+    }
+    async refresh(filters = {}) {
+        if (this.domainId) {
+            filters.domain_id = this.domainId;
+        }
+        super.refresh(filters)
+    };
+    async waitDeleted(id){ }
+}
 export class HypervisortTable extends DataTable {
     constructor() {
         super([
@@ -936,6 +953,7 @@ export class ImageDataTable extends DataTable{
 
 export const userTable = new UserTable();
 export const projectTable = new ProjectTable();
+export const roleTable = new RoleTable();
 
 export const hypervisorTable = new HypervisortTable();
 export const volumeTable = new VolumeDataTable();

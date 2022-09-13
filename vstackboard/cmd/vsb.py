@@ -1,4 +1,6 @@
+import imp
 import logging
+import mimetypes
 import os
 import sys
 
@@ -10,7 +12,7 @@ from jinja2 import PackageLoader, Environment
 from easy2use.downloader.urllib import driver
 from easy2use.globals import cli
 from easy2use.globals import log
-
+from easy2use import system
 
 LOG = logging.getLogger(__name__)
 
@@ -152,6 +154,11 @@ class Serve(cli.SubCli):
     def __call__(self, args):
         from vstackboard.common import conf                          # noqa
         from vstackboard import server                               # noqa
+
+        if system.OS.is_windows():
+            # NOTE(fjboy) For windows host, MIME type of .js file is
+            # 'text/plain', so add this type before start http server.
+            mimetypes.add_type('application/javascript', '.js')
 
         conf.load_configs()
 

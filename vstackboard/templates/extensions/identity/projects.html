@@ -4,11 +4,16 @@
       <v-col>
         <v-btn small color="primary">创建</v-btn>
         <v-btn small color="error" @click="identity.projectTable.deleteSelected()">删除</v-btn>
-        <v-btn small color="info" v-on:click="identity.projectTable.refresh()" icon><v-icon>mdi-refresh</v-icon></v-btn>
+      </v-col>
+      <v-col cols="2">
+        <v-btn small color="info" v-on:click="identity.rolesDialog.open()">角色管理</v-btn>
       </v-col>
       <v-col>
         <v-text-field small dense v-model="identity.projectTable.search" append-icon="mdi-magnify" label="搜索"
-          single-line hide-details></v-text-field>
+        single-line hide-details></v-text-field>
+      </v-col>
+      <v-col cols="1">
+        <v-btn small color="info" v-on:click="identity.projectTable.refresh()" icon><v-icon>mdi-refresh</v-icon></v-btn>
       </v-col>
     </v-row>
   </v-card-text>
@@ -41,3 +46,4 @@
 </v-data-table>
 
 {% include '../dialog/projectUsers.html' %}
+{% include '../dialog/rolesDialog.html' %}

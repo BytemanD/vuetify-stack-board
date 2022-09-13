@@ -7,7 +7,7 @@ import {
     flavorTable,
     imageTable,
     keypairTable,
-    netTable, portTable, qosPolicyTable, routerTable,
+    netTable, portTable, qosPolicyTable, roleTable, routerTable,
     serverTable, sgTable, snapshotTable, UserTable, volumeTable, volumeTypeTable
 } from './tables.js';
 
@@ -106,6 +106,61 @@ export class NewUserDialog extends Dialog {
         }
     }
 }
+export class RolesDialog extends Dialog {
+    constructor() {
+        super();
+        this.domains = [];
+        this.domainId = null;
+        this.roleTable = roleTable;
+    }
+    randomName() {
+        this.name = Utils.getRandomName('user');
+    }
+    async changeDoamin(){
+        this.roleTable.domainId = this.domainId;
+        this.roleTable.refresh()
+    }
+    async open() {
+        this.domains = (await API.domain.list()).domains;
+        this.changeDoamin();
+        super.open();
+    }
+}
+export class NewRoleDialog extends Dialog {
+    constructor() {
+        super();
+        this.name = '';
+        this.domainId = null;
+        this.domains = [];
+    }
+    randomName() {
+        this.name = Utils.getRandomName('role');
+    }
+    async open() {
+        this.randomName();
+        this.domains = (await API.domain.list()).domains;
+        super.open();
+    }
+    async commit() {
+        if (! this.name) {
+            ALERT.warn(`角色名必须指定`)
+            return;
+        }
+        let data = { name: this.name }
+        if (this.domainId) {
+            data.domain_id = this.domainId
+        }
+        try {
+            await API.role.post({ role: data });
+            MESSAGE.success(`角色 ${this.name} 创建成功`);
+            roleTable.refresh();
+            super.hide();
+        } catch {
+            MESSAGE.error(`角色 ${this.name} 创建失败`)
+        }
+    }
+}
+
 export class NewNetworkDialog extends Dialog {
     constructor() {
         super({
@@ -1702,6 +1757,8 @@ export const newCluster = new NewClusterDialog()
 
 export const projectUserDialog = new ProjectUserDialog();
 export const newUserDialog = new NewUserDialog();
+export const rolesDialog = new RolesDialog();
+export const newRoleDialog = new NewRoleDialog();
 
 export const newServer = new NewServerDialog()
 export const serverVolumeDialog = new ServerVolumeDialog();

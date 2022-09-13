@@ -327,6 +327,10 @@ class Project extends Restfulclient {
 class Role extends Restfulclient {
     constructor() { super('/identity/roles') };
 }
+class Domain extends Restfulclient {
+    constructor() { super('/identity/domains') };
+}
+
 class RoleAssignments extends Restfulclient {
     constructor() { super('/identity/role_assignments') };
     async listByProject(projectId) {
@@ -490,6 +494,7 @@ export class OpenstackProxyApi {
         this.user = new User();
         this.project = new Project();
         this.role = new Role();
+        this.domain = new Domain();
         this.roleAssignments = new RoleAssignments();
 
         this.region = new Region();

@@ -9,7 +9,7 @@ import DataTable, {
     backupTable, clusterTable, keypairTable, volumeServiceTable,
     routerTable, netTable, portTable, volumeTypeTable, snapshotTable,
     hypervisorTable, azTable, regionTable, qosPolicyTable,
-    imageTable, sgTable, userTable, projectTable
+    imageTable, sgTable, userTable, projectTable, roleTable
 } from "./vstackboard/tables.js";
 import {
     newFlavor, flavorExtraDialog,
@@ -18,7 +18,7 @@ import {
     resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog,
     newVolume, newSnapshotDialog, newBackupDialog, backupResetStateDialog,
     newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog,
-    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents, newQosPolicyDialog, imageDeleteSmartDialog, volumeResetStateDialog, snapshotResetStateDialog, sgRulesDialog, newSGDialog, newSGRuleDialog, imagePropertiesDialog, qosPolicyRulesDialog, newQosPolicyRule, updateServerSG, serverConsoleLog, updatePortDialog, projectUserDialog, newUserDialog
+    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents, newQosPolicyDialog, imageDeleteSmartDialog, volumeResetStateDialog, snapshotResetStateDialog, sgRulesDialog, newSGDialog, newSGRuleDialog, imagePropertiesDialog, qosPolicyRulesDialog, newQosPolicyRule, updateServerSG, serverConsoleLog, updatePortDialog, projectUserDialog, newUserDialog, rolesDialog, newRoleDialog
 
 } from "./vstackboard/dialogs.js";
 import { init } from "./vstackboard/context.js";
@@ -61,6 +61,8 @@ new Vue({
             projectTable: projectTable,
             projectUserDialog: projectUserDialog,
             newUserDialog: newUserDialog,
+            rolesDialog: rolesDialog,
+            newRoleDialog: newRoleDialog,
         },
         computing: {
             tab: 0,

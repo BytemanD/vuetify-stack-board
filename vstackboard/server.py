@@ -44,7 +44,7 @@ def start(develop=False, host=None, port=None):
     views.CONF_DB_API = dbconf.DBApi(conf.configs_itesm_in_db)
 
     if develop:
-        app.listen(port or CONF.port)
+        app.listen(port or CONF.port, address=host)
     else:
         server = httpserver.HTTPServer(app)
         server.bind(port or CONF.port)
