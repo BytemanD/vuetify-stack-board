@@ -1,4 +1,3 @@
-import imp
 import logging
 import mimetypes
 import os
@@ -129,23 +128,22 @@ class Upgrade(cli.SubCli):
             f'{latest["tag_name"]}\n' \
             f'Upgrade from:\n    {download_url}\n'
         print(msg)
-        if args.yes:
-            self.download(download_url, yes=True)
-        else:
+
+        if not args.yes:
             while True:
                 input_str = input(r'Upgrade now ? [y/n] ')
                 if input_str == 'y':
-                    self.download(download_url)
-                    file_name = os.path.basename(download_url)
-                    LOG.info('download success, start to install %s',
-                             file_name)
-                    self.pip_install(os.path.basename(download_url),
-                                     force=args.force)
                     break
                 elif input_str == 'n':
-                    break
+                    return
                 else:
                     print('Error, invalid input, must be y or n.')
+
+        self.download(download_url)
+        file_name = os.path.basename(download_url)
+        LOG.info('download success, start to install %s', file_name)
+
+        self.pip_install(file_name, force=args.force)
 
     def pip_install(self, file_path, force=False):
         install_cmd = ['pip', 'install', file_path]
