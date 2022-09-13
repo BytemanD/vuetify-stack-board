@@ -13,6 +13,8 @@ class PackageVersion(object):
     def __init__(self, version):
         self.version = isinstance(version, list) and version or \
             version.split('.')
+        if self.version[0].lower().startswith('v'):
+            self.version[0] = self.version[0][1:]
         self.is_dev = 'dev' in self.version[-1]
 
     @property

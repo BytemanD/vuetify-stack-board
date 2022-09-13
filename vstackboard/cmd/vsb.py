@@ -3,6 +3,7 @@ import logging
 import mimetypes
 import os
 import sys
+import subprocess
 
 import bs4
 import requests
@@ -91,7 +92,9 @@ class Upgrade(cli.SubCli):
         cli.Arg('-d', '--debug', action='store_true',
                 help='Show debug message'),
         cli.Arg('-y', '--yes', action='store_true',
-                help='answer yes for all questions')
+                help='answer yes for all questions'),
+        cli.Arg('-f', '--force', action='store_true',
+                help='force reinstall if itis installed')
     ]
 
     def __call__(self, args):
@@ -117,8 +120,10 @@ class Upgrade(cli.SubCli):
         if v1 >= v2:
             print('The current version is the latest.')
             return
-        asset = latest.get('assets')[0] if latest.get('assets', []) \
-            else None
+        asset = latest.get('assets')[0] if latest.get('assets') else None
+        if not asset:
+            LOG.error('assets not found')
+            return
         download_url = asset.get("browser_download_url")
         msg = f'\nA new {constants.NAME} release is available: ' \
             f'{latest["tag_name"]}\n' \
@@ -131,11 +136,26 @@ class Upgrade(cli.SubCli):
                 input_str = input(r'Upgrade now ? [y/n] ')
                 if input_str == 'y':
                     self.download(download_url)
+                    file_name = os.path.basename(download_url)
+                    LOG.info('download success, start to install %s',
+                             file_name)
+                    self.pip_install(os.path.basename(download_url),
+                                     force=args.force)
                     break
                 elif input_str == 'n':
                     break
                 else:
                     print('Error, invalid input, must be y or n.')
+
+    def pip_install(self, file_path, force=False):
+        install_cmd = ['pip', 'install', file_path]
+        if force:
+            install_cmd.append('--force-reinstall')
+        status, output = subprocess.getstatusoutput(install_cmd)
+        if status == 0:
+            print('Install success')
+        else:
+            print(f'install failed, Output: {output}')
 
     def download(self, url):
         downloader = driver.Urllib3Driver(progress=True)
