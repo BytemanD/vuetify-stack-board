@@ -136,3 +136,6 @@ vstackboard/static/include
 
 etc/vstackboard.db
 etc/vstackboard.conf
+i18n/locale
+i18n/*.mo
+vstackboard/locale

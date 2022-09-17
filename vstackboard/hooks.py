@@ -1,8 +1,11 @@
 from distutils.command import install
 import shutil
 import os
+import site
+import subprocess
 
 from easy2use import fs
+from easy2use import system
 
 
 def _copy_vsm(static_path):
@@ -34,6 +37,46 @@ def _copy_and_unzip_cdn(static_path):
     fs.unzip(build_static_cdn_zip)
 
 
+def _make_i18n_in_windows():
+    msgfmt_path = None
+    for path in site.getsitepackages():
+        msgfmt_path = os.path.join(path, 'Tools', 'i18n', 'msgfmt.py')
+        if os.path.isfile(msgfmt_path):
+            break
+    else:
+        raise RuntimeError('msgfmt is not found')
+
+    for po_file in os.listdir('i18n'):
+        if not po_file.endswith('.po'):
+            continue
+
+        po_path = os.path.join('i18n', po_file)
+        msgfmt_cmd = ['python', msgfmt_path, po_path]
+
+        print(f'INFO: start to parse po file {po_path}')
+        status, output = subprocess.getstatusoutput(' '.join(msgfmt_cmd))
+        if status != 0:
+            raise RuntimeError(f'msgfmt faild, {output}')
+
+        language, _ = os.path.splitext(po_file)
+        mo_file = f'{language}.mo'
+        mo_path = os.path.join('i18n', mo_file)
+        if not os.path.isfile(mo_path):
+            raise RuntimeError(f'mo file {mo_file} not found')
+
+        locale_path = os.path.join('i18n', 'locale', language, 'LC_MESSAGES',
+                                   'vstackboard.mo')
+        if not os.path.isdir(os.path.dirname(locale_path)):
+            os.makedirs(os.path.dirname(locale_path))
+        shutil.move(mo_path, locale_path)
+    shutil.move(os.path.join('i18n', 'locale'), 'vstackboard')
+
+
+def _make_i18n():
+    if system.OS.is_windows():
+        _make_i18n_in_windows()
+
+
 def setup_hook(config):
     # Tell distutils not to put the data_files in platform-specific
     # installation locations.
@@ -44,3 +87,4 @@ def setup_hook(config):
     static_path = os.path.join('vstackboard', 'static')
     _copy_and_unzip_cdn(static_path)
     _copy_vsm(static_path)
+    _make_i18n()

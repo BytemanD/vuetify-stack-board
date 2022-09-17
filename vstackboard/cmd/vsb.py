@@ -103,11 +103,11 @@ class Upgrade(cli.SubCli):
         try:
             releases = requests.get(constants.RELEASES_API).json()
         except Exception as e:
-            print('Check releases failed, %s', e)
+            LOG.error('Check releases failed, %s', e)
             return
 
         if not releases:
-            print('No release found.')
+            LOG.info('No release found.')
             return
         current_version = utils.get_version()
         LOG.debug('Current version is: %s', current_version)
@@ -143,6 +143,9 @@ class Upgrade(cli.SubCli):
         file_path = self.download(download_url, cache=args.cache)
         try:
             self.pip_install(file_path)
+            print('Install success.')
+            print('Please Execute the command below to restart vstackboard:')
+            print('    systemctl restart vstackboard')
         except Exception as e:
             LOG.error('Install failed, error: %s', e)
 
@@ -154,9 +157,7 @@ class Upgrade(cli.SubCli):
             install_cmd.append('--force-reinstall')
         LOG.info('start to install %s', ' '.join(install_cmd))
         status, output = subprocess.getstatusoutput(' '.join(install_cmd))
-        if status == 0:
-            LOG.info('Install success, please restart vstackboard service')
-        else:
+        if status != 0:
             LOG.error('Install Output: %s', output)
             raise exceptions.PipInstallFailed(package=file_path,
                                               cmd=' '.join(install_cmd))
