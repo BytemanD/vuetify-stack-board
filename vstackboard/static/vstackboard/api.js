@@ -329,6 +329,12 @@ class Role extends Restfulclient {
 }
 class Domain extends Restfulclient {
     constructor() { super('/identity/domains') };
+    async enable(id) {
+        await this.patch(id, {domain: {enabled: true}})
+    }
+    async disable(id) {
+        await this.patch(id, {domain: {enabled: false}})
+    }
 }
 
 class RoleAssignments extends Restfulclient {

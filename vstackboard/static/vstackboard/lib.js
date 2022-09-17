@@ -1,8 +1,6 @@
 import API from "./api.js";
 import { CookieContext } from "./context.js";
-import { volumeTable } from "./tables.js";
-
-// import VueCookies from 'vue-cookies'
+// import { volumeTable } from "./objects.js";
 
 
 export class Message {
@@ -55,19 +53,6 @@ export class Utils {
             utcString += 'Z'
         }
         return Utils.nowFormat(new Date(`${utcString}`))
-    }
-    static checkServerStatus(server_id) {
-        API.server.detail({ id: server_id }).then(resp => {
-            let status = resp.data.server.status;
-            if (status == 'active') {
-                MESSAGE.success(`实例 ${server_id} 创建成功`);
-                return;
-            } else if (status == 'error') {
-                MESSAGE.error(`卷 ${volume_id} 创建成功`);
-                volumeTable.refresh();
-                return;
-            };
-        });
     }
     static getRandomName(prefix = null) {
         let date = this.nowFormat()

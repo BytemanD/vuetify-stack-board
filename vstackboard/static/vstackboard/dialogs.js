@@ -7,9 +7,10 @@ import {
     flavorTable,
     imageTable,
     keypairTable,
-    netTable, portTable, qosPolicyTable, roleTable, routerTable,
-    serverTable, sgTable, snapshotTable, UserTable, volumeTable, volumeTypeTable
-} from './tables.js';
+    netTable, portTable, projectUserDialog, qosPolicyTable, roleTable, routerTable,
+    serverTable, sgTable, snapshotTable, volumeTable, volumeTypeTable
+} from './objects.js';
+import { UserTable } from './tables.js';
 
 
 class Dialog {
@@ -106,6 +107,44 @@ export class NewUserDialog extends Dialog {
         }
     }
 }
+export class NewDomainDialog extends Dialog {
+    constructor() {
+        super();
+        this.name = '';
+        this.id = null;
+        this.enabled = true;
+        this.description = null;
+    }
+    randomName() {
+        this.name = Utils.getRandomName('domain');
+    }
+    async open() {
+        this.randomName();
+        super.open();
+    }
+    async commit() {
+        if (! this.name) {
+            ALERT.warn(`Domain名不能为空`);
+            return;
+        }
+        let data = {
+            name: this.name,
+            enabled: this.enabled,
+        }
+        if (this.description) { data.description = this.description };
+        if (this.id) { data.id = this.id };
+        try {
+            await API.domain.post({ domain: data })
+            MESSAGE.success(`域 ${this.params.name} 创建成功`)
+            super.hide();
+            return true;
+        } catch {
+            MESSAGE.error(`用户 ${this.name} 创建失败`)
+            return false;
+        }
+    }
+}
+
 export class RolesDialog extends Dialog {
     constructor() {
         super();
@@ -1753,52 +1792,5 @@ export class ImagePropertiesDialog extends Dialog {
         }
     }
 }
-export const newCluster = new NewClusterDialog()
 
-export const projectUserDialog = new ProjectUserDialog();
-export const newUserDialog = new NewUserDialog();
-export const rolesDialog = new RolesDialog();
-export const newRoleDialog = new NewRoleDialog();
-
-export const newServer = new NewServerDialog()
-export const serverVolumeDialog = new ServerVolumeDialog();
-export const serverInterfaceDialog = new ServerInterfaceDialog();
-export const newFlavor = new NewFlavorDialog()
-export const flavorExtraDialog = new FlavorExtraDialog();
-export const changePassword = new ChangePasswordDialog()
-export const changeServerName = new ChangeServerNameDialog()
-export const resizeDialog = new ResizeDialog();
-export const migrateDialog = new MigrateDialog();
-export const newKeypairDialog = new NewKeypairDialog();
-export const rebuildDialog = new RebuildDialog();
-export const updateServerSG = new UpdateServerSG();
-
-export const newVolume = new NewVolumeDialog()
-export const newVolumeTypeDialog = new NewVolumeTypeDialog();
-export const newSnapshotDialog = new NewSnapshotDialog();
-export const newBackupDialog = new NewBackupDialog();
-export const volumeResetStateDialog = new VolumeResetStateDialog();
-export const backupResetStateDialog = new BackupResetStateDialog();
-export const snapshotResetStateDialog = new SnapshotResetStateDialog();
-export const imageDeleteSmartDialog = new ImageDeleteSmartDialog();
-export const imagePropertiesDialog = new ImagePropertiesDialog();
-
-export const newRouterDialog = new NewRouterkDialog();
-export const newNetDialog = new NewNetworkDialog();
-export const newSubnetDialog = new NewSubnetDialog();
-export const routerInterfacesDialog = new RouterInterfacesDialog();
-export const newPortDialog = new NewPortDialog();
-export const updatePortDialog = new UpdatePort();
-
-export const newQosPolicyDialog = new NewQosPolicyDialog();
-export const qosPolicyRulesDialog = new QosPolicyRules();
-export const newQosPolicyRule = new NewQosPolicyRule();
-export const newSGDialog = new NewSGDialog();
-export const newSGRuleDialog = new NewSGRuleDialog();
-export const sgRulesDialog = new SGRulesDialog();
-
-export const serverTopology = new ServerTopology();
-export const serverActions = new ServerActionsDialog();
-export const serverActionEvents = new ServerActionEventsDialog();
-export const serverConsoleLog = new ServerConsoleLogDialog();
 export default Dialog;

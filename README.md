@@ -12,15 +12,14 @@ Openstack Dashboard with Vuetify
 - [ ] backup reset state 有时需执行多次才能成功, why?
 - [ ] 修复删除agg后，AZ 列表残留的问题
 
-### v0.0.6
-- [ ] domain 管理
-
 ### v0.0.5
 - [X] 虚拟机安全组更新操作
 - [X] 查看console log
 - [X] 用户管理
 - [X] 角色管理
 - [X] 端口安全组更新操作
+- [X] domain 管理
+- [ ] project 管理
 
 ### v0.0.4
 

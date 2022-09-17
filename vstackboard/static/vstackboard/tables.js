@@ -1,5 +1,6 @@
 import API from './api.js'
-import { ALERT, Level, LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
+import { NewDomainDialog } from './dialogs.js';
+import { Alert, ALERT, LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
 
 
 class DataTable {
@@ -14,6 +15,12 @@ class DataTable {
         this.statistics = {};
         this.selected = []
         this.extendItems = []
+        this.newItemDialog = null;
+    }
+    async openNewItemDialog(){
+        if (this.newItemDialog){
+            this.newItemDialog.open();
+        }
     }
     async deleteSelected() {
         if (this.selected.length == 0) {
@@ -774,6 +781,48 @@ export class UserTable extends DataTable {
         ], API.user, 'users', '用户');
     }
 }
+export class DomainTable extends DataTable {
+    constructor() {
+        super([
+            { text: 'ID', value: 'id' },
+            { text: '名字', value: 'name' },
+            { text: '启用', value: 'enabled' },
+            { text: '描述', value: 'description' },
+        ], API.domain, 'domains', '域');
+        this.newItemDialog = new NewDomainDialog();
+    }
+    async createNewItem(){
+        await this.newItemDialog.commit();
+        this.refresh();
+    }
+    async deleteSelected(){
+        for (let i in this.selected) {
+            let domain = this.selected[i];
+            if (domain.enabled) {
+                ALERT.warn(`Domin ${domain.name} 处于enabled状态，请先disable再删除`);
+                continue;
+            }
+            await API.domain.delete(domain.id);
+        }
+        this.refresh();
+        this.selected = [];
+    }
+    async toggleEnabled(domain){
+        try {
+            if (domain.enabled){
+                await API.domain.enable(domain.id)
+                MESSAGE.success(`Domain ${domain.name} 已启用`)
+            } else {
+                await API.domain.disable(domain.id)
+                MESSAGE.success(`Domain ${domain.name} 已关闭`)
+            }
+        } catch {
+            MESSAGE.success(`Domain ${domain.name} 操作失败`)
+            domain.enabled = ! domain.enabled;
+        }
+    }
+
+}
 export class ProjectTable extends DataTable {
     constructor() {
         super([
@@ -886,7 +935,6 @@ export class AZDataTable extends DataTable {
             }
             data.children.push({ name: azInfo.zoneName, children: children, })
         }
-        var option;
         myChart.setOption(
             (option = {
                 tooltip: { trigger: 'item', triggerOn: 'mousemove' },
@@ -951,32 +999,4 @@ export class ImageDataTable extends DataTable{
     }
 }
 
-export const userTable = new UserTable();
-export const projectTable = new ProjectTable();
-export const roleTable = new RoleTable();
-
-export const hypervisorTable = new HypervisortTable();
-export const volumeTable = new VolumeDataTable();
-export const volumeTypeTable = new VolumeTypeTable();
-export const snapshotTable = new SnapshotTable();
-export const flavorTable = new FlavorDataTable();
-export const backupTable = new BackupTable();
-export const volumeServiceTable = new VolumeServiceTable();
-
-export const keypairTable = new KeypairDataTable();;
-export const serverTable = new ServerDataTable();
-export const usageTable = new UsageTable();
-
-export const serviceTable = new ServiceTable();
-export const routerTable = new RouterDataTable();
-export const netTable = new NetDataTable();
-export const portTable = new PortDataTable();
-export const sgTable = new SecurityGroupDataTable();
-
-export const qosPolicyTable = new QosPolicyDataTable();
-export const clusterTable = new ClusterTable();
-export const regionTable = new RegionTable();
-export const azTable = new AZDataTable();
-
-export const imageTable = new ImageDataTable();
 export default DataTable;

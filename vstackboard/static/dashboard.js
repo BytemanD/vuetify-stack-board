@@ -4,13 +4,13 @@ import API from "./vstackboard/api.js";
 // import { TreeChart } from 'echarts/charts';
 // echarts.use([TreeChart]);
 
-import DataTable, {
+import {
     volumeTable, serviceTable, serverTable, flavorTable, usageTable,
     backupTable, clusterTable, keypairTable, volumeServiceTable,
     routerTable, netTable, portTable, volumeTypeTable, snapshotTable,
     hypervisorTable, azTable, regionTable, qosPolicyTable,
-    imageTable, sgTable, userTable, projectTable, roleTable
-} from "./vstackboard/tables.js";
+    imageTable, sgTable, userTable, projectTable, domainTable
+} from "./vstackboard/objects.js";
 import {
     newFlavor, flavorExtraDialog,
     newServer,
@@ -20,8 +20,9 @@ import {
     newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog,
     newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents, newQosPolicyDialog, imageDeleteSmartDialog, volumeResetStateDialog, snapshotResetStateDialog, sgRulesDialog, newSGDialog, newSGRuleDialog, imagePropertiesDialog, qosPolicyRulesDialog, newQosPolicyRule, updateServerSG, serverConsoleLog, updatePortDialog, projectUserDialog, newUserDialog, rolesDialog, newRoleDialog
 
-} from "./vstackboard/dialogs.js";
+} from "./vstackboard/objects.js";
 import { init } from "./vstackboard/context.js";
+import DataTable from "./vstackboard/tables.js";
 
 
 const navigationItems = [
@@ -34,6 +35,7 @@ const navigationItems = [
     { title: '网络', icon: 'mdi-web', group: '网络资源' },
     { title: '服务地址', icon: 'mdi-server', group: '认证' },
     { title: '租户', icon: 'mdi-account-supervisor' },
+    { title: '域', icon: 'mdi-domain' },
 
 ]
 
@@ -63,6 +65,7 @@ new Vue({
             newUserDialog: newUserDialog,
             rolesDialog: rolesDialog,
             newRoleDialog: newRoleDialog,
+            domainTable: domainTable,
         },
         computing: {
             tab: 0,
@@ -164,6 +167,9 @@ new Vue({
                 case '租户':
                     this.identity.projectTable.refresh();
                     this.identity.userTable.refresh();
+                    break;
+                case '域':
+                    this.identity.domainTable.refresh();
                     break;
                 case '实例':
                     this.computing.serverTable.refresh();
