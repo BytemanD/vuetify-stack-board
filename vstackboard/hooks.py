@@ -69,6 +69,9 @@ def _make_i18n_in_windows():
         if not os.path.isdir(os.path.dirname(locale_path)):
             os.makedirs(os.path.dirname(locale_path))
         shutil.move(mo_path, locale_path)
+
+    if os.path.exists(os.path.join('vstackboard', 'locale')):
+        shutil.rmtree(os.path.join('vstackboard', 'locale'))
     shutil.move(os.path.join('i18n', 'locale'), 'vstackboard')
 
 

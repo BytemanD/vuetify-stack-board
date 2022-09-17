@@ -9,8 +9,20 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "hello world"
-msgstr "你好世界"
-
 msgid "install success"
 msgstr "安装成功"
+
+msgid "Check releases failed"
+msgstr "检查release版本失败"
+
+msgid "No release found"
+msgstr "未发现release版本"
+
+msgid "Current version is: %s"
+msgstr "当前版本：%s"
+
+msgid "Latest release version: %s"
+msgstr "最新release版本：%s"
+
+msgid "The current version is the latest."
+msgstr "当前已经是最新版本。"

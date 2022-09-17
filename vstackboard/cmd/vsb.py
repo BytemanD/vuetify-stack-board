@@ -99,6 +99,7 @@ class Upgrade(cli.SubCli):
     def __call__(self, args):
         from vstackboard.common import constants                 # noqa
         from vstackboard.common import utils                     # noqa
+        from vstackboard.common.i18n import _                    # noqa
 
         try:
             releases = requests.get(constants.RELEASES_API).json()
@@ -110,15 +111,15 @@ class Upgrade(cli.SubCli):
             LOG.info('No release found.')
             return
         current_version = utils.get_version()
-        LOG.debug('Current version is: %s', current_version)
+        LOG.debug(_('Current version is: %s'), current_version)
         latest = releases[0]
-        LOG.debug('Latest release version: %s', latest.get('tag_name'))
+        LOG.debug(_('Latest release version: %s'), latest.get('tag_name'))
 
         v1 = utils.PackageVersion(current_version)
         v2 = utils.PackageVersion(latest.get('tag_name'))
 
         if v1 >= v2:
-            print('The current version is the latest.')
+            print(_('The current version is the latest.'))
             return
         asset = latest.get('assets')[0] if latest.get('assets') else None
         if not asset:
