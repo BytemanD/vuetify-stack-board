@@ -9,7 +9,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-msgid "install success"
+msgid "Install success."
 msgstr "安装成功"
 
 msgid "Check releases failed"
@@ -26,3 +26,30 @@ msgstr "最新release版本：%s"
 
 msgid "The current version is the latest."
 msgstr "当前已经是最新版本。"
+
+msgid "The current version is the latest."
+msgstr "当前已经是最新版本。"
+
+msgid "VStackBoard Command Line"
+msgstr "VStackBoard 命令行"
+
+msgid "Subcommands"
+msgstr "子命令"
+
+msgid "Run serve with specified port"
+msgstr "指定服务端口"
+
+msgid "Run serve with develop mode"
+msgstr "以开发者模式运行"
+
+msgid "Show debug message"
+msgstr "显示 debug 信息"
+
+msgid "answer yes for all questions"
+msgstr "对所有问题回答是"
+
+msgid "use cache if it is downloaded"
+msgstr "如果已经下载，使用缓存"
+
+
+

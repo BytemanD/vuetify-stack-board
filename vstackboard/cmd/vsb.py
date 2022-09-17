@@ -14,13 +14,19 @@ from easy2use.globals import cli
 from easy2use.globals import log
 from easy2use import system
 
+from vstackboard.common import conf
+from vstackboard.common import constants
+from vstackboard.common import exceptions
+from vstackboard.common import utils
+from vstackboard.common.i18n import _
+from vstackboard import server
+
 LOG = logging.getLogger(__name__)
 
 HOME = os.path.abspath(os.path.dirname(os.path.pardir))
 
 
 def download_statics_for_cdn():
-    from vstackboard.common import constants                      # noqa
 
     LOG.info('Check cdn static files')
     LOG.info('========================')
@@ -81,7 +87,6 @@ class Version(cli.SubCli):
     NAME = 'version'
 
     def __call__(self, args):
-        from vstackboard.common import utils
         print(utils.get_version())
 
 
@@ -89,18 +94,14 @@ class Upgrade(cli.SubCli):
     NAME = 'upgrade'
     ARGUMENTS = [
         cli.Arg('-d', '--debug', action='store_true',
-                help='Show debug message'),
+                help=_('Show debug message')),
         cli.Arg('-y', '--yes', action='store_true',
-                help='answer yes for all questions'),
+                help=_('answer yes for all questions')),
         cli.Arg('-c', '--cache', action='store_true',
-                help='use cache if it is downloaded'),
+                help=_('use cache if it is downloaded')),
     ]
 
     def __call__(self, args):
-        from vstackboard.common import constants                 # noqa
-        from vstackboard.common import utils                     # noqa
-        from vstackboard.common.i18n import _                    # noqa
-
         try:
             releases = requests.get(constants.RELEASES_API).json()
         except Exception as e:
@@ -144,22 +145,21 @@ class Upgrade(cli.SubCli):
         file_path = self.download(download_url, cache=args.cache)
         try:
             self.pip_install(file_path)
-            print('Install success.')
-            print('Please Execute the command below to restart vstackboard:')
-            print('    systemctl restart vstackboard')
         except Exception as e:
             LOG.error('Install failed, error: %s', e)
+            return
+        print(_('Install success.'))
+        print(_('Please execute the command below to restart vstackboard:'))
+        print('    systemctl restart vstackboard')
 
     def pip_install(self, file_path, force=False):
-        from vstackboard.common import exceptions                # noqa
-
         install_cmd = ['pip3', 'install', file_path]
         if force:
             install_cmd.append('--force-reinstall')
-        LOG.info('start to install %s', ' '.join(install_cmd))
+        LOG.info(_('start to install %s'), ' '.join(install_cmd))
         status, output = subprocess.getstatusoutput(' '.join(install_cmd))
         if status != 0:
-            LOG.error('Install Output: %s', output)
+            LOG.error(_('Install Output: %s'), output)
             raise exceptions.PipInstallFailed(package=file_path,
                                               cmd=' '.join(install_cmd))
 
@@ -170,9 +170,9 @@ class Upgrade(cli.SubCli):
             return file_path
 
         downloader = driver.Urllib3Driver(progress=True)
-        LOG.info('download from %s', url)
+        LOG.info(_('download from %s'), url)
         downloader.download(url)
-        LOG.info('download success')
+        LOG.info(_('download success'))
         return file_path
 
 
@@ -180,15 +180,12 @@ class Serve(cli.SubCli):
     NAME = 'serve'
     ARGUMENTS = log.get_args() + [
         cli.Arg('-p', '--port', type=int,
-                help="Run serve with specified port"),
+                help=_("Run serve with specified port")),
         cli.Arg('--develop', action='store_true',
-                help="Run serve with develop mode"),
+                help=_("Run serve with develop mode")),
     ]
 
     def __call__(self, args):
-        from vstackboard.common import conf                          # noqa
-        from vstackboard import server                               # noqa
-
         if system.OS.is_windows():
             # NOTE(fjboy) For windows host, MIME type of .js file is
             # 'text/plain', so add this type before start http server.
@@ -202,7 +199,8 @@ class Serve(cli.SubCli):
 
 
 def main():
-    cli_parser = cli.SubCliParser('VStackBoard Command Client')
+    cli_parser = cli.SubCliParser(_('VStackBoard Command Line'),
+                                  title=_('Subcommands'))
     cli_parser.register_clis(Version, Upgrade, Serve, StaticDownload)
     cli_parser.call()
 

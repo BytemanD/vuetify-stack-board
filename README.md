@@ -1,6 +1,18 @@
 # vuetify-stack-board
 Openstack Dashboard with Vuetify
 
+## 直接执行项目
+
+1. 进入项目目录，设置环境变量
+
+    + powershell: `$env:PYTHONPATH="./"`
+    + bat: `set PYTHONPATH=./`
+    + shell: `export PYTHONPATH=./`
+
+2. 执行文件vsb.py
+
+    ```python .\vstackboard\cmd\vsb.py <command>```
+
 ## ChangeLog
 
 ### TODO
