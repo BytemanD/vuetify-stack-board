@@ -99,6 +99,7 @@ class Upgrade(cli.SubCli):
     def __call__(self, args):
         from vstackboard.common import constants                 # noqa
         from vstackboard.common import utils                     # noqa
+
         try:
             releases = requests.get(constants.RELEASES_API).json()
         except Exception as e:
@@ -140,9 +141,14 @@ class Upgrade(cli.SubCli):
                     print('Error, invalid input, must be y or n.')
 
         file_path = self.download(download_url, cache=args.cache)
-        self.pip_install(file_path)
+        try:
+            self.pip_install(file_path)
+        except Exception as e:
+            LOG.error('Install failed, error: %s', e)
 
     def pip_install(self, file_path, force=False):
+        from vstackboard.common import exceptions                # noqa
+
         install_cmd = ['pip3', 'install', file_path]
         if force:
             install_cmd.append('--force-reinstall')
@@ -151,7 +157,9 @@ class Upgrade(cli.SubCli):
         if status == 0:
             LOG.info('Install success, please restart vstackboard service')
         else:
-            LOG.info('install failed, Output: %s', output)
+            LOG.error('Install Output: %s', output)
+            raise exceptions.PipInstallFailed(package=file_path,
+                                              cmd=' '.join(install_cmd))
 
     def download(self, url, cache=False):
         file_path = os.path.basename(url)
