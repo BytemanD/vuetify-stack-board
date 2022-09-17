@@ -146,10 +146,10 @@ class Upgrade(cli.SubCli):
         install_cmd = ['pip3', 'install', file_path]
         if force:
             install_cmd.append('--force-reinstall')
-        LOG.info('start to install')
-        status, output = subprocess.getstatusoutput(install_cmd)
+        LOG.info('start to install %s', ' '.join(install_cmd))
+        status, output = subprocess.getstatusoutput(' '.join(install_cmd))
         if status == 0:
-            LOG.info('Install success')
+            LOG.info('Install success, please restart vstackboard service')
         else:
             LOG.info('install failed, Output: %s', output)
 
@@ -162,7 +162,7 @@ class Upgrade(cli.SubCli):
         downloader = driver.Urllib3Driver(progress=True)
         LOG.info('download from %s', url)
         downloader.download(url)
-        LOG.info('download success, start to install %s', file_path)
+        LOG.info('download success')
         return file_path
 
 
