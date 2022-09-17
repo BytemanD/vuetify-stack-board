@@ -4,7 +4,7 @@
         <v-card-text>
             <v-row>
                 <v-col cols="10">
-                    <v-text-field label="名字" placeholder="请输入快照名" v-model="newSnapshotDialog.name"></v-text-field>
+                    <v-text-field label="名字" placeholder="请输入快照名" v-model="newSnapshotDialog.name" :rules="[newSnapshotDialog.checkNotNull]"></v-text-field>
                 </v-col>
                 <v-col cols="2" class="my-auto">
                     <v-btn text color="primary" @click="newSnapshotDialog.randomName()">随机名字</v-btn>

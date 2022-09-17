@@ -1,6 +1,7 @@
 import API from './api.js'
-import { NewDomainDialog } from './dialogs.js';
+import { NewDomainDialog, NewProjectDialog } from './dialogs.js';
 import { Alert, ALERT, LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
+import { netTable } from './objects.js';
 
 
 class DataTable {
@@ -20,6 +21,12 @@ class DataTable {
     async openNewItemDialog(){
         if (this.newItemDialog){
             this.newItemDialog.open();
+        }
+    }
+    async createNewItem(){
+        if (this.newItemDialog) {
+            await this.newItemDialog.commit();
+            this.refresh();
         }
     }
     async deleteSelected() {
@@ -121,11 +128,12 @@ export class NetDataTable extends DataTable {
         let subnet = this.subnets[subnet_id];
         try {
             await API.subnet.delete(subnet_id)
-            MESSAGE.success(`子网 ${subnet.cidr} 删除成功`)
-            netTable.refresh();
-        } catch {
+        } catch(error) {
             MESSAGE.error(`子网 ${subnet.cidr} 删除失败， ${error.response.data.NeutronError.message}`)
+            return;
         }
+        MESSAGE.success(`子网 ${subnet.cidr} 删除成功`)
+        netTable.refresh();
     }
     async adminStateDown(item) {
         await API.network.put(item.id, { network: { admin_state_up: item.admin_state_up } })
@@ -791,10 +799,6 @@ export class DomainTable extends DataTable {
         ], API.domain, 'domains', '域');
         this.newItemDialog = new NewDomainDialog();
     }
-    async createNewItem(){
-        await this.newItemDialog.commit();
-        this.refresh();
-    }
     async deleteSelected(){
         for (let i in this.selected) {
             let domain = this.selected[i];
@@ -835,6 +839,7 @@ export class ProjectTable extends DataTable {
             {text: 'id', value: 'id'},
             {text: 'description', value: 'description'},
         ]
+        this.newItemDialog = new NewProjectDialog();
     }
     async waitDeleted(id){ }
 }

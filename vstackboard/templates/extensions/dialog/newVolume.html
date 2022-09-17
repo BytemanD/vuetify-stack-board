@@ -4,7 +4,7 @@
       <v-card-text>
         <v-row>
           <v-col>
-            <v-text-field label="名字" placeholder="请输入卷名" v-model="newVolumeDialog.params.name"></v-text-field>
+            <v-text-field label="名字" placeholder="请输入卷名" v-model="newVolumeDialog.params.name" :rules="[newVolumeDialog.checkNotNull]"></v-text-field>
           </v-col>
           <v-col cols="2" class="my-auto">
             <v-btn text color="primary" @click="newVolumeDialog.params.name = UTILS.getRandomName('volume')">随机名字</v-btn>

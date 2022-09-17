@@ -17,8 +17,10 @@ class Dialog {
     constructor(params) {
         this.show = false;
         this.params = params || {};
+        this.errorMessage = null;
     }
     open() {
+        this.errorMessage = null;
         this.display()
     }
     display() {
@@ -27,14 +29,18 @@ class Dialog {
     hide() {
         this.show = false;
     }
+    checkNotNull(value) {
+        if (! value) {
+            return '该选项不能为空';
+        }
+        return true;
+    }
 }
 
 export class ProjectUserDialog extends Dialog {
     constructor() {
         super();
         this.project = {};
-        this.selected = [];
-
         this.userTable = new UserTable();
         this.netTypes = ['vlan', 'vxlan', 'flat', 'geneve'];
         this.qosPolices = [];
@@ -61,7 +67,7 @@ export class ProjectUserDialog extends Dialog {
             let user = this.userTable.selected[i];
             await API.user.delete(user.id);
         }
-        this.selected = [];
+        this.userTable.selected = [];
         MESSAGE.success(`用户删除成功`);
         this.refresh(false);
     }
@@ -85,10 +91,8 @@ export class NewUserDialog extends Dialog {
         this.roles = (await API.role.list()).roles;
     }
     async commit() {
-        if (! this.name) {
-            ALERT.warn(`用户名必须指定`)
-            return;
-        }
+        if (! this.name) { ALERT.warn(`用户名必须指定`); return; }
+        if (! this.userRole) { ALERT.warn(`用户角色不能为空`); return; }
         let data = {
             name: this.name,
             project_id: this.project.id,
@@ -97,21 +101,23 @@ export class NewUserDialog extends Dialog {
         try {
             let user = (await API.user.post({ user: data })).user
             if (this.userRole) {
-                API.project.addUser(this.project.id, user.id, this.userRole);
+                await API.project.addUser(this.project.id, user.id, this.userRole);
             };
-            MESSAGE.success(`用户 ${this.params.name} 创建成功`)
+            MESSAGE.success(`用户 ${this.name} 创建成功`)
             projectUserDialog.refresh();
             super.hide();
         } catch {
             MESSAGE.error(`用户 ${this.name} 创建失败`)
         }
     }
+    checkUserRole(value) {
+        return !!value || '用户角色不能为空.';
+    }
 }
 export class NewDomainDialog extends Dialog {
     constructor() {
         super();
         this.name = '';
-        this.id = null;
         this.enabled = true;
         this.description = null;
     }
@@ -123,28 +129,53 @@ export class NewDomainDialog extends Dialog {
         super.open();
     }
     async commit() {
-        if (! this.name) {
-            ALERT.warn(`Domain名不能为空`);
-            return;
-        }
-        let data = {
-            name: this.name,
-            enabled: this.enabled,
-        }
+        if (! this.name) { ALERT.warn(`Domain名不能为空`); return; }
+        let data = { name: this.name, enabled: this.enabled }
         if (this.description) { data.description = this.description };
-        if (this.id) { data.id = this.id };
         try {
             await API.domain.post({ domain: data })
-            MESSAGE.success(`域 ${this.params.name} 创建成功`)
+            MESSAGE.success(`域 ${this.name} 创建成功`)
             super.hide();
             return true;
         } catch {
-            MESSAGE.error(`用户 ${this.name} 创建失败`)
+            MESSAGE.error(`域 ${this.name} 创建失败`)
             return false;
         }
     }
 }
-
+export class NewProjectDialog extends Dialog {
+    constructor() {
+        super();
+        this.name = '';
+        this.enabled = true;
+        this.description = null;
+        this.domainId = 'default';
+        this.domains = [];
+    }
+    randomName() {
+        this.name = Utils.getRandomName('project');
+    }
+    async open() {
+        this.randomName();
+        this.domains = (await API.domain.list()).domains;
+        super.open();
+    }
+    async commit() {
+        if (! this.name) { ALERT.warn(`租户名不能为空`); return; }
+        let data = { name: this.name, enabled: this.enabled }
+        if (this.description) { data.description = this.description };
+        if (this.domainId) { data.domain_id = this.domainId };
+        try {
+            await API.project.post({ project: data })
+            MESSAGE.success(`租户 ${this.name} 创建成功`)
+            super.hide();
+            return true;
+        } catch {
+            MESSAGE.error(`租户 ${this.name} 创建失败`)
+            return false;
+        }
+    }
+}
 export class RolesDialog extends Dialog {
     constructor() {
         super();
@@ -248,9 +279,26 @@ export class NewSubnetDialog extends Dialog {
     async open() {
         this.randomName();
         super.open();
-        this.networks = (await API.network.list()).networks
+        this.networks = (await API.network.list()).networks;
+    }
+    checkCidr(value){
+        if (!value){ return '子网cidr不能为空' }
+        value = value.trim();
+        if (value.indexOf('/') < 0){ return '非法的cidr'; }
+        let items = value.split('/');
+        if ( items[1].search(/^[0-9]+$/) < 0 || parseInt(items[1]) > 32){ return '非法的cidr'; }
+        let ipList = items[0].split('.');
+        for (let i in ipList){
+            console.log(`xxx ${ipList[i]} ${parseInt(ipList[i])}`)
+            if ( ipList[i].search(/^[0-9]+$/) < 0 || parseInt(ipList[i]) > 255){ return '非法的cidr'; }
+        }
+        return true;
     }
     async commit() {
+        if (! this.params.network){
+            ALERT.error(`请选择网络`)
+            return;
+        }
         let data = {
             name: this.params.name,
             network_id: this.params.network,
@@ -259,17 +307,16 @@ export class NewSubnetDialog extends Dialog {
             enable_dhcp: this.params.enableDhcp,
         }
         if (this.params.gateway != '') { data.gateway = this.params.gateway };
-
+        this.errorMessage = null;
         try {
             await API.subnet.post({ subnet: data })
             this.hide();
             MESSAGE.success(`子网 ${this.params.name} 创建成功`)
             await netTable.refreshSubnets();
             netTable.refresh();
-        } catch {
-            // MESSAGE.error(`子网 ${this.params.name} 创建失败, ${error.response.data.NeutronError.message}`)
-            MESSAGE.error(`子网 ${this.params.name} 创建失败`)
-
+        } catch (error) {
+            this.errorMessage = error.response.data.NeutronError.message;
+            MESSAGE.error(`子网 ${this.params.name} 创建失败.`)
         }
     }
 }

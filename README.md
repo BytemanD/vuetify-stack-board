@@ -19,7 +19,7 @@ Openstack Dashboard with Vuetify
 - [X] 角色管理
 - [X] 端口安全组更新操作
 - [X] domain 管理
-- [ ] project 管理
+- [X] project 管理
 
 ### v0.0.4
 

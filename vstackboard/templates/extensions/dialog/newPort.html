@@ -3,17 +3,16 @@
       <v-card-title class="headline grey lighten-2" primary-title>新建</v-card-title>
       <v-card-text>
         <v-row>
-          <v-col>
-            <v-text-field label="*名字" placeholder="请输入端口名" v-model="newPortDialog.name"></v-text-field>
-          </v-col>
-          <v-col cols="2" class="my-auto">
-            <v-btn text color="primary" @click="newPortDialog.randomName()">随机名字</v-btn>
-          </v-col>
-        </v-row>
-        <v-row>
+            <v-col cols="10">
+              <v-text-field label="*名字" placeholder="请输入端口名" v-model="newPortDialog.name"
+                            :error="!newPortDialog.name"></v-text-field>
+            </v-col>
+            <v-col cols="2" class="my-auto">
+              <v-btn text color="primary" @click="newPortDialog.randomName()">随机名字</v-btn>
+            </v-col>
             <v-col cols="8">
               <v-select :items="newPortDialog.networks" label="网络" item-text="name" item-value="id" dense outlined
-                        v-model="newPortDialog.networkId">
+                        v-model="newPortDialog.networkId" :error="!newPortDialog.networkId">
               </v-select>
             </v-col>
             <v-col cols="4">
@@ -31,7 +30,7 @@
               <v-slider v-model="newPortDialog.nums" label="端口数量" class="align-center" ticks="always" max="20" min="1" hide-details>
                 <template v-slot:append ><v-chip label small>[[newPortDialog.nums]]</v-chip></template>
               </v-slider>
-            </v-col>
+          </v-col>
         </v-row>
       </v-card-text>
       <v-divider></v-divider>

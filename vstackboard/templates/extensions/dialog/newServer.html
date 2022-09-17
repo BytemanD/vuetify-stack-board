@@ -10,21 +10,22 @@
         <v-stepper-content step="1">
           <v-row>
             <v-col cols="10">
-              <v-text-field hide-details label="*名字" placeholder="请输入实例名" v-model="newServerDialog.params.name">
+              <v-text-field label="名字" placeholder="请输入实例名" v-model="newServerDialog.params.name"
+                :error="!newServerDialog.params.name" :rules="[newServerDialog.checkNotNull]">
               </v-text-field>
             </v-col>
             <v-col cols="2">
               <v-btn class="mt-4" text color="primary" @click="newServerDialog.params.name = UTILS.getRandomName('server')">随机名字</v-btn>
             </v-col>
             <v-col cols="6">
-                <v-select :items="newServerDialog.flavors" label="*规格" dense :key="name" item-text="name" item-value="id"
-                  v-model="newServerDialog.params.flavor">
+                <v-select :items="newServerDialog.flavors" label="规格" dense :key="name" item-text="name" item-value="id"
+                  v-model="newServerDialog.params.flavor" :error="!newServerDialog.params.flavor">
                   <template v-slot:selection="{ item }"> [[ item.name ]] </template>
                 </v-select>
               </v-col>
               <v-col cols="6">
                 <v-select :items="newServerDialog.images" label="*镜像" dense item-text="name" item-value="id"
-                v-model="newServerDialog.params.image">
+                v-model="newServerDialog.params.image" :error="!newServerDialog.params.image">
                 <template v-slot:selection="{ item }"> [[ item.name ]] </template>
               </v-select>
             </v-col>

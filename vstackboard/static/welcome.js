@@ -1,8 +1,7 @@
-import { MESSAGE, Message, Utils } from "./vstackboard/lib.js";
-import { newCluster } from "./vstackboard/dialogs.js";
+import { MESSAGE } from "./vstackboard/lib.js";
+import { newCluster, clusterTable } from "./vstackboard/objects.js";
 
 import API from "./vstackboard/api.js";
-import { clusterTable } from "./vstackboard/tables.js";
 
 new Vue({
     el: '#app',

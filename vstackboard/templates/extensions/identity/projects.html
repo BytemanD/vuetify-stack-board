@@ -2,7 +2,7 @@
   <v-card-text>
     <v-row>
       <v-col>
-        <v-btn small color="primary">创建</v-btn>
+        <v-btn small color="primary" @click="identity.projectTable.openNewItemDialog()">创建</v-btn>
         <v-btn small color="error" @click="identity.projectTable.deleteSelected()">删除</v-btn>
       </v-col>
       <v-col cols="2">
@@ -46,4 +46,5 @@
 </v-data-table>
 
 {% include '../dialog/projectUsers.html' %}
+{% include '../dialog/newProject.html' %}
 {% include '../dialog/rolesDialog.html' %}
