@@ -218,20 +218,24 @@ class KeystoneProxy(OpenstackProxyBase):
 
 
 class NovaProxy(OpenstackProxyBase):
+
     def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
         return proxy_driver.proxy_nova
 
 
 class GlanceProxy(OpenstackProxyBase):
+
     def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
         return proxy_driver.proxy_glance
 
 
 class CinderProxy(OpenstackProxyBase):
+
     def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
         return proxy_driver.proxy_cinder
 
 
 class NeutronProxy(OpenstackProxyBase):
+
     def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
         return proxy_driver.proxy_neutron

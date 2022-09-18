@@ -1,5 +1,5 @@
 import API from './api.js'
-import { NewDomainDialog, NewProjectDialog } from './dialogs.js';
+import { NewDomainDialog, NewImageDialog, NewProjectDialog } from './dialogs.js';
 import { Alert, ALERT, LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
 import { netTable } from './objects.js';
 
@@ -990,6 +990,7 @@ export class ImageDataTable extends DataTable{
         this.KB = 1024;
         this.MB = this.KB * 1024;
         this.GB = this.MB * 1024;
+        this.newItemDialog = new NewImageDialog()
     }
     humanSize(image) {
         if (image.size >= this.GB) {

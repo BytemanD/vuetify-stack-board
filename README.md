@@ -19,13 +19,13 @@ Openstack Dashboard with Vuetify
 
 - [ ] 创建规格时可以从已有的复制
 - [ ] inerface 卸载，自动检测后刷新表
-- [ ] 上传镜像
 - [ ] 修复 Volume 服务 expanded-item 显示问题
 - [ ] backup reset state 有时需执行多次才能成功, why?
 - [ ] 修复删除agg后，AZ 列表残留的问题
 
 ### v0.0.6
-- [ ] 国际化
+- [X] 国际化
+- [ ] 上传镜像
 
 ### v0.0.5
 - [X] 虚拟机安全组更新操作

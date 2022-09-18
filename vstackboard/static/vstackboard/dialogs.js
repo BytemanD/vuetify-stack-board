@@ -1764,25 +1764,27 @@ export class ImageDeleteSmartDialog extends Dialog {
             await imageTable.deleteSelected();
             this.hide();
             return;
-        }
-        for (let i in imageTable.selected){
-            let item = imageTable.selected[i];
-            if (!item.image_type) {
-                await API.image.delete(item.id);
-                await imageTable.waitDeleted(item.id);
-                imageTable.refresh();
-                continue;
+        } else {
+            for (let i in imageTable.selected){
+                let item = imageTable.selected[i];
+                if (!item.image_type) {
+                    await API.image.delete(item.id);
+                    await imageTable.waitDeleted(item.id);
+                    imageTable.refresh();
+                    continue;
+                }
+                if (item.image_type == 'instance_backup'){
+                    await this.deleteInstanceBackup(item);
+                    await imageTable.waitDeleted(item.id);
+                } else if (item.image_type == 'snapshot') {
+                    await this.deleteSnapshot(item);
+                    await imageTable.waitDeleted(item.id);
+                } else {
+                    console.warn(`TODO: image type ${item.image_type} is not supported.`)
+                }
             }
-            if (item.image_type == 'instance_backup'){
-                await this.deleteInstanceBackup(item);
-                await imageTable.waitDeleted(item.id);
-            } else if (item.image_type == 'snapshot') {
-                await this.deleteSnapshot(item);
-                await imageTable.waitDeleted(item.id);
-            } else {
-                console.warn(`TODO: image type ${item.image_type} is not supported.`)
-            }
         }
+        this.hide();
         imageTable.resetSelected();
     }
 }
@@ -1836,6 +1838,91 @@ export class ImagePropertiesDialog extends Dialog {
         MESSAGE.success(`属性添加成功`);
         for (let key in properties) {
             Vue.set(this.properties, key, properties[key])
+        }
+    }
+}
+export class NewImageDialog extends Dialog {
+    constructor(){
+        super();
+        this.name = null;
+        this.diskFormat = 'qcow2';
+        this.containerFormat = 'bare';
+
+        this.architecture = null;
+        this.protected = false;
+        this.minDisk = null;
+        this.visibility = null;
+        this.kernelId = null;
+        this.tags = null;
+        this.osVersion = null;
+        this.osDistro = null;
+        this.id = null;
+        this.owner = null;
+        this.ramdiskID = null;
+        this.minRam = null;
+        this.property = null;
+
+        this.diskFormats = ['None', 'ami', 'ari', 'aki', 'vhd', 'vhdx', 'vmdk', 'raw', 'qcow2', 'vdi', 'iso', 'ploop'];
+        this.visibilities = ['public', 'private', 'community', 'shared'];
+        this.containerFormats = ['None', 'ami', 'ari', 'aki', 'bare', 'ovf', 'ova', 'docker'];
+
+        this.file = null;
+        this.process = '0';
+    }
+    randomName() {
+        this.name = Utils.getRandomName('image');
+    }
+    async open() {
+        this.randomName();
+        this.process = '0';
+        this.file = null;
+        super.open();
+    }
+    async readImage(file) {
+        return new Promise(function(resolve, reject) {
+            let reader = new FileReader();
+            reader.onloadend = function() {
+                if (reader.error){
+                    MESSAGE.error('文件读取失败');
+                    reject()
+                } else {
+                    resolve(reader)
+                }
+            }
+            reader.readAsArrayBuffer(file);
+        });
+    }
+    setName(){
+        if (this.file) {
+            this.name = this.file.name;
+        }
+    }
+
+    async upload(id) {
+        let self = this;
+        console.log(this.file)
+        console.log(this.file.size)
+        let reader = await this.readImage(this.file);
+        MESSAGE.info('开始上传镜像...')
+
+        await API.image.upload(
+            id, reader.result, this.file.size,
+            (loaded, total) => { self.process = (loaded * 100 / total).toFixed(3);}
+        )
+        MESSAGE.success('镜像上传成功')
+        imageTable.refresh();
+        self.hide();
+    }
+    async commit(){
+        if (!this.name) { ALERT.error(`请输入镜像名`); return ;}
+        let data = {name: this.name, disk_format: this.diskFormat, container_format: this.containerFormat};
+        if (this.visibility) {data.visibility = this.visibility};
+        
+        let image = await API.image.post(data);
+        MESSAGE.success(`镜像创建成功`)
+        
+        if (this.file) {
+            await this.upload(image.id);
         }
     }
 }

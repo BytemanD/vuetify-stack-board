@@ -1,4 +1,4 @@
-import { LOG, Utils, ALERT } from "./lib.js";
+import { LOG, Utils, ALERT, MESSAGE } from "./lib.js";
 
 class Restfulclient {
     constructor(baseUrl) {
@@ -359,6 +359,57 @@ class Image extends Restfulclient {
             data.push({path: `/${key}`, value: properties[key],  op: 'add' });
         }
         return await this.patch(id, data, {'Content-Type': 'application/openstack-images-v2.1-json-patch'})
+    }
+    upload(id, binary, size, uploadCallback=null) {
+        let self = this;
+        return new Promise(function(resolve, reject) {
+            var xhr = new XMLHttpRequest();
+            xhr.onload = () => {
+                if (xhr.status == 204 ){
+                    resolve(xhr)
+                } else {
+                    reject(xhr)
+                }
+            };
+            xhr.onerror = () => {
+                console.error('11111111111111111111');
+                console.error(xhr)
+                reject(xhr)
+            };
+            xhr.open("PUT", `${self.baseUrl}/${id}/file`, true);
+            xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+            if (size) {
+                xhr.setRequestHeader('x-image-meta-size', size);
+            }
+            xhr.upload.addEventListener('progress', function (e) {
+                if (e.lengthComputable) {
+                    if (uploadCallback) {
+                        uploadCallback(e.loaded, e.total);
+                    }
+                }
+            });
+            if (xhr.sendAsBinary){
+                xhr.sendAsBinary(binary)
+            } else {
+                xhr.send(binary);
+            }
+        })
+    }
+    uploadLarge(id, file, uploadCallback=null) {
+        let self = this
+        let formData = new FormData();
+        formData.append('file', file);
+        return axios({
+            url: `${self.baseUrl}/${id}/file`,
+            method: 'PUT',
+            data: formData,
+            headers: {'Content-Type': 'multipart/form-data'},
+            onUploadProgress: function(progressEvent){
+                if(uploadCallback){
+                    uploadCallback(progressEvent)
+                }
+            },
+        });
     }
 }
 
