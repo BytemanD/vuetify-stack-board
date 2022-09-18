@@ -1,6 +1,7 @@
 import abc
 import json
 import logging
+import re
 from urllib import parse
 
 from tornado import web
@@ -9,6 +10,7 @@ from vstackboard.common import conf, exceptions
 from vstackboard.common import constants
 from vstackboard.common import utils
 from vstackboard.common import context
+from vstackboard.common.i18n import _
 from vstackboard.db import api
 from vstackboard.openstack import proxy
 
@@ -163,6 +165,14 @@ class OpenstackProxyBase(web.RequestHandler, GetContext):
     def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
         raise ImportError()
 
+    def _get_proxy_headers(self):
+        proxy_headers = {}
+        for header in ['Content-Type']:
+            header_value = self._get_header_value(header)
+            if header_value:
+                proxy_headers[header] = header_value
+        return proxy_headers
+
     def do_proxy(self, method, url):
         LOG.debug('do proxy  %s %s', method, url)
         context = self._get_context()
@@ -171,12 +181,7 @@ class OpenstackProxyBase(web.RequestHandler, GetContext):
             query = parse.urlparse(self.request.uri).query
             if query:
                 url += f'?{query}'
-            proxy_headers = {}
-            for header in ['Content-Type']:
-                header_value = self._get_header_value(header)
-                if header_value:
-                    proxy_headers[header] = header_value
-
+            proxy_headers = self._get_proxy_headers()
             resp = self.get_proxy_method(cluster_proxy)(
                 method=method, url=url, data=self._request_body(),
                 headers=proxy_headers)
@@ -223,10 +228,70 @@ class NovaProxy(OpenstackProxyBase):
         return proxy_driver.proxy_nova
 
 
+class SlicedFile(object):
+
+    def __init__(self, size) -> None:
+        self.size = int(size)
+        self.slices = []
+
+    def add(self, length, data):
+        self.slices.append({'size': int(length), 'data': data})
+
+    def received(self):
+        return sum(slice['size'] for slice in self.slices)
+
+    def percent(self):
+        return self.received() * 100 / self.size
+
+
 class GlanceProxy(OpenstackProxyBase):
+    UPLOADING_IMAGES = {}
 
     def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
         return proxy_driver.proxy_glance
+
+    def is_upload_file(self):
+        return self.request.method.upper() == 'PUT' and \
+            re.match(r'/(.*)/images/(.*)/file', self.request.uri) is not None
+
+    def proxy_glance_upload(self, url):
+        if url not in self.UPLOADING_IMAGES:
+            image_size = self.request.headers.get('x-image-meta-size')
+            self.UPLOADING_IMAGES.setdefault(url, SlicedFile(image_size))
+        sliced_file = self.UPLOADING_IMAGES[url]
+
+        content_length = self.request.headers.get('Content-Length')
+        sliced_file.add(content_length, self.request.body)
+        LOG.debug('%s percent: %.2f', url, sliced_file.percent())
+        if sliced_file.percent() >= 100:
+            LOG.info(_('saving image %s'), url)
+            context = self._get_context()
+            cluster_proxy = proxy.get_proxy(context)
+            data = b''
+            for slice in sliced_file.slices:
+                data += slice['data']
+            LOG.info(_('saved image %s'), url)
+
+            proxy_headers = self._get_proxy_headers()
+            proxy_headers.update({
+                'Content-Length': str(sliced_file.size),
+                'x-image-meta-size': self.request.headers.get(
+                    'x-image-meta-size'),
+            })
+
+            resp = cluster_proxy.proxy_glance(method='PUT', url=url, data=data,
+                                              headers=proxy_headers)
+            self.set_status(resp.status_code, resp.reason)
+        else:
+            self.set_status(204)
+        self.finish()
+
+    def put(self, url):
+        if self.is_upload_file():
+            # self.do_proxy('PUT', url)
+            self.proxy_glance_upload(url)
+        else:
+            self.do_proxy('PUT', url)
 
 
 class CinderProxy(OpenstackProxyBase):

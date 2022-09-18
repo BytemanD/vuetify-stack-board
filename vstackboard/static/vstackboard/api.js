@@ -360,7 +360,25 @@ class Image extends Restfulclient {
         }
         return await this.patch(id, data, {'Content-Type': 'application/openstack-images-v2.1-json-patch'})
     }
-    upload(id, binary, size, uploadCallback=null) {
+    async uploadSlice(id, binary, size, uploadCallback=null){
+        let maxSize = 1024 * 1024 * 50;
+        let start = 0;
+        let end = 0;
+        while (true){
+            end = Math.min(start + maxSize, size);
+            console.log(`send ${size} data ${start} ${end}`)
+            await this.upload(id, binary.slice(start, end), size)
+            if (uploadCallback) {
+                uploadCallback(end, size)
+            }
+            if (end >= size){
+                break;
+            }
+            start += maxSize;
+        }
+        return
+    }
+    async upload(id, binary, size, uploadCallback=null) {
         let self = this;
         return new Promise(function(resolve, reject) {
             var xhr = new XMLHttpRequest();
@@ -372,7 +390,6 @@ class Image extends Restfulclient {
                 }
             };
             xhr.onerror = () => {
-                console.error('11111111111111111111');
                 console.error(xhr)
                 reject(xhr)
             };
@@ -406,7 +423,7 @@ class Image extends Restfulclient {
             headers: {'Content-Type': 'multipart/form-data'},
             onUploadProgress: function(progressEvent){
                 if(uploadCallback){
-                    uploadCallback(progressEvent)
+                    uploadCallback(progressEvent.loaded, progressEvent.total)
                 }
             },
         });

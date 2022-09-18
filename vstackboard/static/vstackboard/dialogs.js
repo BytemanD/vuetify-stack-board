@@ -289,7 +289,7 @@ export class NewSubnetDialog extends Dialog {
         if ( items[1].search(/^[0-9]+$/) < 0 || parseInt(items[1]) > 32){ return '非法的cidr'; }
         let ipList = items[0].split('.');
         for (let i in ipList){
-            console.log(`xxx ${ipList[i]} ${parseInt(ipList[i])}`)
+            console.log(`${ipList[i]} ${parseInt(ipList[i])}`)
             if ( ipList[i].search(/^[0-9]+$/) < 0 || parseInt(ipList[i]) > 255){ return '非法的cidr'; }
         }
         return true;
@@ -1894,18 +1894,19 @@ export class NewImageDialog extends Dialog {
     }
     setName(){
         if (this.file) {
-            this.name = this.file.name;
+            let fileNameList = this.file.name.split('.');
+            let extName = fileNameList.slice(-1)[0]
+            this.name = fileNameList.slice(0, -1).join('.');
+            if (this.diskFormats.indexOf(extName) >= 0){
+                this.diskFormat = extName;
+            }
         }
     }
-
     async upload(id) {
         let self = this;
-        console.log(this.file)
-        console.log(this.file.size)
-        let reader = await this.readImage(this.file);
         MESSAGE.info('开始上传镜像...')
-
-        await API.image.upload(
+        let reader = await this.readImage(this.file);
+        await API.image.uploadSlice(
             id, reader.result, this.file.size,
             (loaded, total) => { self.process = (loaded * 100 / total).toFixed(3);}
         )

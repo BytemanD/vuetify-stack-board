@@ -46,7 +46,8 @@ def start(develop=False, host=None, port=None):
     if develop:
         app.listen(port or CONF.port, address=host)
     else:
-        server = httpserver.HTTPServer(app)
+        MAX_BODY_SIZE = 1024 * 1024 * 1024
+        server = httpserver.HTTPServer(app, max_body_size=MAX_BODY_SIZE)
         server.bind(port or CONF.port)
         server.start(num_processes=CONF.workers)
     ioloop.IOLoop.instance().start()
