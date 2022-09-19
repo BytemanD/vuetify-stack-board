@@ -130,6 +130,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# vscode
+.vscode
+
 vstackboard/static/cdn
 vstackboard/static/cdn.zip
 vstackboard/static/include
