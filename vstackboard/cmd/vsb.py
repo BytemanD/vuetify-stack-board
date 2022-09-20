@@ -13,6 +13,7 @@ from easy2use.downloader.urllib import driver
 from easy2use.globals import cli
 from easy2use.globals import log
 from easy2use import system
+from easy2use.common import pkg
 
 from vstackboard.common import conf
 from vstackboard.common import constants
@@ -116,8 +117,8 @@ class Upgrade(cli.SubCli):
         latest = releases[0]
         LOG.debug(_('Latest release version: %s'), latest.get('tag_name'))
 
-        v1 = utils.PackageVersion(current_version)
-        v2 = utils.PackageVersion(latest.get('tag_name'))
+        v1 = pkg.PackageVersion(current_version)
+        v2 = pkg.PackageVersion(latest.get('tag_name'))
 
         if v1 >= v2:
             print(_('The current version is the latest.'))

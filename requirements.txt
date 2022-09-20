@@ -8,4 +8,4 @@ jinja2
 bs4
 sqlalchemy
 dataclasses>=0.6; python_version < '3.7'
-https://github.com/fjboy/easy-to-use/releases/download/1.0.2/easy2use-1.0.2-py3-none-any.whl
+https://github.com/fjboy/easy-to-use/releases/download/1.0.3/easy2use-1.0.3-py3-none-any.whl

@@ -23,6 +23,7 @@ ROUTES = [
     (r'/configs', views.Configs),
     (r'/cluster', views.Cluster),
     (r'/cluster/(.*)', views.Cluster),
+    (r'/tasks', views.Tasks),
     (r'/identity(.*)', views.KeystoneProxy),
     (r'/computing(.*)', views.NovaProxy),
     (r'/image(.*)', views.GlanceProxy),
@@ -42,6 +43,13 @@ def start(develop=False, host=None, port=None):
 
     db_api.init()
     views.CONF_DB_API = dbconf.DBApi(conf.configs_itesm_in_db)
+
+    # import multiprocessing
+
+    # manager = multiprocessing.Manager()
+
+    # views.UPLOADING_IMAGES = manager.dict()
+    # views.UPLOADING_IMAGES = manager.dict()
 
     if develop:
         app.listen(port or CONF.port, address=host)

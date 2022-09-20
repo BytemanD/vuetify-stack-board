@@ -1,6 +1,10 @@
 from pbr import version
+import queue
+import logging
 
 from vstackboard.common import constants
+
+LOG = logging.getLogger(__name__)
 
 
 def get_version():
@@ -8,48 +12,39 @@ def get_version():
     return info.release_string()
 
 
-class PackageVersion(object):
+class ImageChunk(object):
 
-    def __init__(self, version):
-        self.version = isinstance(version, list) and version or \
-            version.split('.')
-        if self.version[0].lower().startswith('v'):
-            self.version[0] = self.version[0][1:]
-        self.is_dev = 'dev' in self.version[-1]
+    def __init__(self, size):
+        self.size = int(size)
+        self.chunks = queue.Queue()
 
-    @property
-    def version_list(self):
-        return self.version[:-1] if self.is_dev else self.version
+        self.cached = 0
+        self.readed = 0
 
-    def __lt__(self, other):
-        return self._compare(other) < 0
+    def add(self, chunk, size):
+        self.cached += int(size)
+        LOG.info('chunk cached: %.2f %%', self.cached_percent())
+        self.chunks.put((chunk, int(size)))
 
-    def __eq__(self, other):
-        return self._compare(other) == 0
+    def cached_percent(self):
+        return self.cached * 100 / self.size
 
-    def __gt__(self, other):
-        return self._compare(other) > 0
+    def readed_percent(self):
+        return self.readed * 100 / self.size
 
-    def __le__(self, other):
-        return self._compare(other) <= 0
+    def read(self, *args, **kwargs):
+        if self.chunks.empty() and self.all_cached():
+            return None
+        chunk = self.chunks.get()
+        self.readed += chunk[1]
 
-    def __ge__(self, other):
-        return self._compare(other) >= 0
+        LOG.info('chunk readed: %.2f %% empty: %s completed: %s',
+                 self.readed_percent(), self.chunks.empty(), self.all_cached())
 
-    def _compare(self, other):
-        for v1, v2 in zip(self.version_list, other.version_list):
-            if int(v1) > int(v2):
-                return 1
-            if int(v1) < int(v2):
-                return -1
+        return chunk[0]
 
-        if self.is_dev and not other.is_dev:
-            return -1
-        elif not self.is_dev and other.is_dev:
-            return 1
-        elif not self.is_dev:
-            return 0
+    def all_cached(self):
+        return self.cached >= self.size
 
-        dev1_num = int(self.version[-1].replace('dev', ''))
-        dev2_num = int(other.version[-1].replace('dev', ''))
-        return dev1_num - dev2_num
+    def __len__(self):
+        return self.size

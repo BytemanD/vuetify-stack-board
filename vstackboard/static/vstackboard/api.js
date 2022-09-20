@@ -361,7 +361,7 @@ class Image extends Restfulclient {
         return await this.patch(id, data, {'Content-Type': 'application/openstack-images-v2.1-json-patch'})
     }
     async uploadSlice(id, binary, size, uploadCallback=null){
-        let maxSize = 1024 * 1024 * 50;
+        let maxSize = 1024 * 1024 * 2;
         let start = 0;
         let end = 0;
         while (true){
@@ -559,6 +559,9 @@ class AuthInfo extends Restfulclient {
         return (await this.list()).auth_info
     }
 }
+class Task extends Restfulclient {
+    constructor() { super('/tasks') };
+}
 
 export class OpenstackProxyApi {
     constructor() {
@@ -599,6 +602,7 @@ export class OpenstackProxyApi {
 
         this.cluster = new Cluster();
         this.authInfo = new AuthInfo();
+        this.task = new Task();
     }
 }
 

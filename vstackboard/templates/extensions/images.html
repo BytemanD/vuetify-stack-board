@@ -14,6 +14,10 @@
         <v-text-field small dense v-model="image.imageTable.search" append-icon="mdi-magnify" label="搜索" single-line
           hide-details></v-text-field>
       </v-col>
+      <v-col cols="1" class="text-right">
+        <v-btn small fab color="primary" @click="image.imageTable.tasksDialog.open()"><v-icon>mdi-progress-upload</v-icon></v-btn>
+        </v-btn>
+      </v-col>
     </v-row>
 
   </v-card-text>
@@ -53,3 +57,4 @@
 {% include './dialog/imageDeleteSmart.html' %}
 {% include './dialog/imageProperties.html' %}
 {% include './dialog/newImage.html' %}
+{% include './dialog/tasksDialog.html' %}

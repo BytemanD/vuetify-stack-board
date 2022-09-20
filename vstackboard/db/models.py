@@ -21,3 +21,13 @@ class Cluster(Base, BaseModel):
     auth_project = Column(String(32))
     auth_user = Column(String(32))
     auth_password = Column(String(32))
+
+
+class ImageChunk(Base, BaseModel):
+    __tablename__ = 'image_chunk'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    imgae_id = Column(String(32))
+    size = Column(Integer)
+    cached = Column(Integer, default=0)
+    readed = Column(Integer, default=0)

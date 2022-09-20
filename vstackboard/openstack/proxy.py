@@ -165,6 +165,17 @@ class OpenstackV3AuthProxy(object):
         return requests.request(method, proxy_url, data=data,
                                 headers=proxy_headers)
 
+    def proxy_glance_upload(self, url, image_chunk):
+        headers = self.get_header()
+        headers.update({'Content-Type': 'application/octet-stream'})
+
+        LOG.info('uploading image %s', url)
+        resp = requests.put(
+            '{}{}'.format(self._get_endpoint('glance'), url or '/'),
+            headers=headers, data=image_chunk)
+        LOG.info('uploaded image %s', url)
+        return resp
+
     def proxy_glance(self, method='GET', url=None, data=None, headers=None):
         proxy_url = '{}{}'.format(self._get_endpoint('glance'), url or '/')
         proxy_headers = self.get_header()

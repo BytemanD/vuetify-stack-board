@@ -1,0 +1,16 @@
+<v-dialog v-model="image.imageTable.tasksDialog.show" width="900" scrollable>
+    <v-card min-height="300">
+      <v-card-title class="headline grey lighten-2" primary-title>镜像上传进度</v-card-title>
+      <v-card-text>
+          <v-template v-for="item in image.imageTable.tasksDialog.tasks.uploading">
+            <v-card class="mt-2">
+              <v-card-text>
+                【镜像Id：<code>[[ item.image_id ]]</code>】【总大小：[[ item.size ]] B】【已缓存：[[ item.cached.toFixed(2) ]]%】【已上传：[[ item.readed.toFixed(2) ]]%】
+                <v-progress-linear height="10" :value="item.readed" :buffer-value="item.cached" ></v-progress-linear>
+              </v-card-text>
+            </v-card>
+          </v-template>
+
+      </v-card-text>
+    </v-card>
+</v-dialog>

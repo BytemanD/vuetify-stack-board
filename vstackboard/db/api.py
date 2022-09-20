@@ -52,3 +52,24 @@ def delete_cluster_by_id(cluster_id):
     deleted = SESSION.query(models.Cluster).filter_by(id=cluster_id).delete()
     SESSION.commit()
     return deleted
+
+
+# image chunk
+def create_image_chunk(image_id, size):
+    SESSION.add(
+        models.ImageChunk(image_id=image_id, size=size, cached=0, readed=0)
+    )
+    SESSION.commit()
+
+
+def query_image_chunk():
+    return SESSION.query(models.ImageChunk).all()
+
+
+def get_image_chunk_by_id(image_chunk_id):
+    return SESSION.query(models.ImageChunk).filter_by(
+        id=image_chunk_id).first()
+
+
+def get_image_chunk_by_image_id(image_id):
+    return SESSION.query(models.ImageChunk).filter_by(id=image_id).first()

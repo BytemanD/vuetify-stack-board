@@ -1928,4 +1928,35 @@ export class NewImageDialog extends Dialog {
     }
 }
 
+export class TasksDialog extends Dialog {
+    constructor(){
+        super();
+        this.tasks = {
+            'uploading': []
+        };
+        this.interval = null;
+    }
+    async refresh(){
+        this.tasks = (await API.task.list()).tasks;
+    }
+    async open() {
+        let self = this;
+
+        this.refresh();
+        super.open()
+
+        if (!this.interval){
+            this.interval = setInterval(() => {
+                self.refresh()
+            }, 3000);
+        }
+    }
+    stopInterval(){
+        if (this.interval){
+            clearInterval(this.interval);
+            this.interval = null;
+        }
+    }
+}
+
 export default Dialog;

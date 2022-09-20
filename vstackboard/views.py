@@ -2,23 +2,26 @@ import abc
 import json
 import logging
 import re
+import threading
 from urllib import parse
 
 from tornado import web
 
-from vstackboard.common import conf, exceptions
+from vstackboard.common import conf
 from vstackboard.common import constants
-from vstackboard.common import utils
 from vstackboard.common import context
-from vstackboard.common.i18n import _
+from vstackboard.common import exceptions
+from vstackboard.common import utils
 from vstackboard.db import api
 from vstackboard.openstack import proxy
-
 
 LOG = logging.getLogger(__name__)
 CONF = conf.CONF
 
 CONF_DB_API = None
+
+UPLOADING_IMAGES = {}
+UPLOADING_THREADS = {}
 
 
 class Index(web.RequestHandler):
@@ -128,6 +131,36 @@ class Cluster(web.RequestHandler):
         return
 
 
+class Tasks(web.RequestHandler):
+
+    def _get_uploading_tasks(self):
+        global UPLOADING_IMAGES, UPLOADING_THREADS
+
+        uploading_tasks = []
+        for url, image_chunk in UPLOADING_IMAGES.items():
+            matched = re.match(r'.*/images/(.*)/file', url)
+            if not matched:
+                LOG.warning('image id not matched for url %s', url)
+                continue
+            image_id = matched.group(1)
+            uploading_tasks.append({'image_id': image_id,
+                                    'size': image_chunk.size,
+                                    'cached': image_chunk.cached_percent(),
+                                    'readed': image_chunk.readed_percent()})
+        return uploading_tasks
+
+    def get(self):
+        global UPLOADING_IMAGES
+        tasks = {}
+        try:
+            tasks['uploading'] = self._get_uploading_tasks()
+            self.set_status(201)
+            self.finish({'tasks': tasks})
+        except Exception as e:
+            self.set_status(400)
+            self.finish({'error': str(e)})
+
+
 class GetContext(object):
 
     def _get_context(self):
@@ -228,24 +261,7 @@ class NovaProxy(OpenstackProxyBase):
         return proxy_driver.proxy_nova
 
 
-class SlicedFile(object):
-
-    def __init__(self, size) -> None:
-        self.size = int(size)
-        self.slices = []
-
-    def add(self, length, data):
-        self.slices.append({'size': int(length), 'data': data})
-
-    def received(self):
-        return sum(slice['size'] for slice in self.slices)
-
-    def percent(self):
-        return self.received() * 100 / self.size
-
-
 class GlanceProxy(OpenstackProxyBase):
-    UPLOADING_IMAGES = {}
 
     def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
         return proxy_driver.proxy_glance
@@ -255,35 +271,38 @@ class GlanceProxy(OpenstackProxyBase):
             re.match(r'/(.*)/images/(.*)/file', self.request.uri) is not None
 
     def proxy_glance_upload(self, url):
-        if url not in self.UPLOADING_IMAGES:
-            image_size = self.request.headers.get('x-image-meta-size')
-            self.UPLOADING_IMAGES.setdefault(url, SlicedFile(image_size))
-        sliced_file = self.UPLOADING_IMAGES[url]
+        global UPLOADING_IMAGES, UPLOADING_THREADS
+
+        cluster_proxy = proxy.get_proxy(self._get_context())
+
+        if url not in UPLOADING_IMAGES:
+            image_chunk = utils.ImageChunk(
+                self.request.headers.get('x-image-meta-size'))
+            UPLOADING_IMAGES[url] = image_chunk
+
+            LOG.info('image %s start thread %s', url, image_chunk.size)
+            upload_thread = threading.Thread(
+                target=cluster_proxy.proxy_glance_upload,
+                args=(url, image_chunk))
+            upload_thread.setDaemon(True)
+            upload_thread.start()
+            UPLOADING_THREADS[url] = upload_thread
+
+        else:
+            image_chunk = UPLOADING_IMAGES[url]
 
         content_length = self.request.headers.get('Content-Length')
-        sliced_file.add(content_length, self.request.body)
-        LOG.debug('%s percent: %.2f', url, sliced_file.percent())
-        if sliced_file.percent() >= 100:
-            LOG.info(_('saving image %s'), url)
-            context = self._get_context()
-            cluster_proxy = proxy.get_proxy(context)
-            data = b''
-            for slice in sliced_file.slices:
-                data += slice['data']
-            LOG.info(_('saved image %s'), url)
+        LOG.info('image %s add chunk, size=%s', url, content_length)
+        image_chunk.add(self.request.body, content_length)
 
-            proxy_headers = self._get_proxy_headers()
-            proxy_headers.update({
-                'Content-Length': str(sliced_file.size),
-                'x-image-meta-size': self.request.headers.get(
-                    'x-image-meta-size'),
-            })
+        if image_chunk.all_cached() and url in UPLOADING_IMAGES:
+            LOG.info('image %s all cached, waitting for upload', url)
+            # NOTE: do not wait for uploading, because it can take a long time.
+            # UPLOADING_THREADS.get(url).join()
+            del UPLOADING_THREADS[url]
+            del UPLOADING_IMAGES[url]
 
-            resp = cluster_proxy.proxy_glance(method='PUT', url=url, data=data,
-                                              headers=proxy_headers)
-            self.set_status(resp.status_code, resp.reason)
-        else:
-            self.set_status(204)
+        self.set_status(204)
         self.finish()
 
     def put(self, url):
