@@ -361,12 +361,13 @@ class Image extends Restfulclient {
         return await this.patch(id, data, {'Content-Type': 'application/openstack-images-v2.1-json-patch'})
     }
     async uploadSlice(id, binary, size, uploadCallback=null){
-        let maxSize = 1024 * 1024 * 2;
+        // TODO: What is the right maxSize
+        let maxSize = 1024 * 1024 * 10;
         let start = 0;
         let end = 0;
         while (true){
             end = Math.min(start + maxSize, size);
-            console.log(`send ${size} data ${start} ${end}`)
+            console.log(`send ${size} data [${start}, ${end}]`)
             await this.upload(id, binary.slice(start, end), size)
             if (uploadCallback) {
                 uploadCallback(end, size)

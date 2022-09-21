@@ -27,7 +27,7 @@ class ImageChunk(Base, BaseModel):
     __tablename__ = 'image_chunk'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    imgae_id = Column(String(32))
+    image_id = Column(String(36))
     size = Column(Integer)
     cached = Column(Integer, default=0)
     readed = Column(Integer, default=0)

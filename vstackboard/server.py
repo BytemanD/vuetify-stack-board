@@ -1,5 +1,6 @@
 import os
 import logging
+import signal
 
 from tornado import ioloop
 from tornado import httpserver
@@ -33,6 +34,14 @@ ROUTES = [
 ]
 
 
+def stop_ioloop(signum, frame):
+    LOG.info('catch signal %s, stop ioloop', signum)
+
+    ioloop.IOLoop.instance().add_callback_from_signal(
+        lambda: ioloop.IOLoop.instance().stop()
+    )
+
+
 def start(develop=False, host=None, port=None):
     template_path = os.path.join(ROOT, 'templates')
     static_path = os.path.join(ROOT, 'static')
@@ -47,9 +56,11 @@ def start(develop=False, host=None, port=None):
     # import multiprocessing
 
     # manager = multiprocessing.Manager()
+    # views.UPLOADING_IMAGES = manager.dict()
+    # views.UPLOADING_IMAGES = manager.dict()
 
-    # views.UPLOADING_IMAGES = manager.dict()
-    # views.UPLOADING_IMAGES = manager.dict()
+    signal.signal(signal.SIGINT, stop_ioloop)
+    signal.signal(signal.SIGTERM, stop_ioloop)
 
     if develop:
         app.listen(port or CONF.port, address=host)
@@ -58,4 +69,5 @@ def start(develop=False, host=None, port=None):
         server = httpserver.HTTPServer(app, max_body_size=MAX_BODY_SIZE)
         server.bind(port or CONF.port)
         server.start(num_processes=CONF.workers)
+
     ioloop.IOLoop.instance().start()

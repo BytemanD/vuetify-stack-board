@@ -134,19 +134,12 @@ class Cluster(web.RequestHandler):
 class Tasks(web.RequestHandler):
 
     def _get_uploading_tasks(self):
-        global UPLOADING_IMAGES, UPLOADING_THREADS
-
         uploading_tasks = []
-        for url, image_chunk in UPLOADING_IMAGES.items():
-            matched = re.match(r'.*/images/(.*)/file', url)
-            if not matched:
-                LOG.warning('image id not matched for url %s', url)
-                continue
-            image_id = matched.group(1)
-            uploading_tasks.append({'image_id': image_id,
-                                    'size': image_chunk.size,
-                                    'cached': image_chunk.cached_percent(),
-                                    'readed': image_chunk.readed_percent()})
+        for image_chunk in api.query_image_chunk():
+            data = {'image_id': image_chunk.image_id, 'size': image_chunk.size,
+                    'cached': image_chunk.cached * 100 / image_chunk.size,
+                    'readed': image_chunk.readed * 100 / image_chunk.size}
+            uploading_tasks.append(data)
         return uploading_tasks
 
     def get(self):
@@ -277,7 +270,7 @@ class GlanceProxy(OpenstackProxyBase):
 
         if url not in UPLOADING_IMAGES:
             image_chunk = utils.ImageChunk(
-                self.request.headers.get('x-image-meta-size'))
+                url, self.request.headers.get('x-image-meta-size'))
             UPLOADING_IMAGES[url] = image_chunk
 
             LOG.info('image %s start thread %s', url, image_chunk.size)
@@ -286,21 +279,22 @@ class GlanceProxy(OpenstackProxyBase):
                 args=(url, image_chunk))
             upload_thread.setDaemon(True)
             upload_thread.start()
-            UPLOADING_THREADS[url] = upload_thread
+            # UPLOADING_THREADS[url] = upload_thread
 
         else:
             image_chunk = UPLOADING_IMAGES[url]
 
         content_length = self.request.headers.get('Content-Length')
         LOG.info('image %s add chunk, size=%s', url, content_length)
-        image_chunk.add(self.request.body, content_length)
+        image_chunk.add(self.request.body, int(content_length))
+        api.add_image_chunk_cached(image_chunk.image_id, int(content_length))
 
         if image_chunk.all_cached() and url in UPLOADING_IMAGES:
             LOG.info('image %s all cached, waitting for upload', url)
             # NOTE: do not wait for uploading, because it can take a long time.
             # UPLOADING_THREADS.get(url).join()
-            del UPLOADING_THREADS[url]
-            del UPLOADING_IMAGES[url]
+            # del UPLOADING_THREADS[url]
+            # del UPLOADING_IMAGES[url]
 
         self.set_status(204)
         self.finish()

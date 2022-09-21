@@ -54,7 +54,7 @@ docker run -itd --network=host \
 ### v0.0.6
 
 - [x] 国际化
-- [ ] 上传镜像
+- [X] 上传镜像
 
 ### v0.0.5
 

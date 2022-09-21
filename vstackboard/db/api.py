@@ -3,6 +3,7 @@ import logging
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session
 
 from vstackboard.db import models
 from vstackboard.common import conf, dbconf
@@ -18,7 +19,7 @@ def init():
 
     DB_FILE = os.path.join(CONF.data_path, 'vstackboard.db')
     ENGINE = create_engine('sqlite:///{}'.format(DB_FILE))
-    SESSION = sessionmaker(bind=ENGINE)()
+    SESSION = scoped_session(sessionmaker(bind=ENGINE))
 
     LOG.info('database file is %s', DB_FILE)
     models.Base.metadata.create_all(ENGINE, checkfirst=True)
@@ -72,4 +73,17 @@ def get_image_chunk_by_id(image_chunk_id):
 
 
 def get_image_chunk_by_image_id(image_id):
-    return SESSION.query(models.ImageChunk).filter_by(id=image_id).first()
+    return SESSION.query(
+        models.ImageChunk).filter_by(image_id=image_id).first()
+
+
+def add_image_chunk_cached(image_id, cached):
+    image_chunk = get_image_chunk_by_image_id(image_id)
+    image_chunk.cached += cached
+    SESSION.commit()
+
+
+def add_image_chunk_readed(image_id, readed):
+    image_chunk = get_image_chunk_by_image_id(image_id)
+    image_chunk.readed += readed
+    SESSION.commit()
