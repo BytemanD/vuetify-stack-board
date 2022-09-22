@@ -12,8 +12,11 @@ def get_translater():
     locale_path = os.path.join(project_name, 'locale')
     locale_language = locale.getdefaultlocale()[0]
     LOG.debug('locale language: %s', locale_language)
-    return gettext.translation('vstackboard', locale_path,
-                               [locale_language, "en_US"]).gettext
+    try:
+        return gettext.translation('vstackboard', locale_path,
+                                   [locale_language, "en_US"]).gettext
+    except:
+        return gettext.gettext
 
 
 _ = get_translater()
