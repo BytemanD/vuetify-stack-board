@@ -34,7 +34,12 @@ export class Alert {
     }
 }
 
+const KB = 1024;
+const MB = KB * 1024;
+const GB = MB * 1024;
+
 export class Utils {
+
     static nowFormat(dateObject=null) {
         let date = dateObject ? dateObject : new Date();
         let month = date.getMonth() + 1;
@@ -110,6 +115,17 @@ export class Utils {
             return `${size} MB`
         }
         return `${(size / 1024).toFixed(0)} GB`
+    }
+    static humanSize(size) {
+        if (size <= KB) {
+            return `${size} B`
+        } else if (size <= MB) {
+            return `${(size / KB).toFixed(2)} KB`
+        } else if (size <= GB) {
+            return `${(size / MB).toFixed(2)} MB`
+        } else {
+            return `${(size / GB).toFixed(2)} TB`
+        }
     }
     static sleep(seconds) {
         seconds = (seconds || 0);

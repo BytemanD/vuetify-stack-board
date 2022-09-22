@@ -2,44 +2,58 @@
 
 Openstack Dashboard with Vuetify
 
-## 环境要求
+## 1.环境要求
 
 ```
 python >= 3.9
 ```
 
-## 在docker容器中运行
+## 2.安装wheel包
+
+1. 编译：`python3 setup.py bdist_wheel`
+
+2. 安装：`pip3 install dist/<THE_PATH_OF_WHEEL_FILE>`
+
+安装成功后，可执行以下命令查看帮助信息
+
+```shell
+vastackboard --help
+```
+
+## 3.在docker容器中运行
 
 1. 构建镜像
 
-```
-python3 setup.py bdist_wheel
-sh install/build.sh /the/path/of/wheel/file
+```shell
+sh install/build.sh dist/<THE_PATH_OF_WHEEL_FILE>
 ```
 
 2. 启动容器
 
-```
+```shell
 VERSION=<VERSION>
 mkdir -p /var/log/vstackboard
 docker run -itd --network=host \
     -v /etc/vstackboard:/etc/vstackboard \
+    -v /var/log/vstackboard:/var/log/vstackboard \
     --name vstackboard \
     vstackboard:${VERSION} \
     --log-file /var/log/vstackboard/vstackboard.log
 ```
 
-## 直接运行
+## 4.直接运行（开发者模式）
 
 1. 进入项目目录，设置环境变量
    
    + powershell: `$env:PYTHONPATH="./"`
-   + bat: `set PYTHONPATH=./`
+   + cmd: `set PYTHONPATH=./`
    + shell: `export PYTHONPATH=./`
 
-2. 执行文件vsb.py
+2. 执行文件 vsb.py： 
    
-    ```python .\vstackboard\cmd\vsb.py <command>```
+   ```python .\vstackboard\cmd\vsb.py```
+   
+   更多用法参考帮助信息。
 
 ## ChangeLog
 
@@ -50,11 +64,16 @@ docker run -itd --network=host \
 - [ ] 修复 Volume 服务 expanded-item 显示问题
 - [ ] backup reset state 有时需执行多次才能成功, why?
 - [ ] 修复删除agg后，AZ 列表残留的问题
+- [ ] 禁止删除正在进行中的记录
 
 ### v0.0.6
 
 - [x] 国际化
-- [X] 上传镜像
+- [x] 上传镜像
+- [x] UI调整
+- [x] 支持删除镜像上传任务记录
+- [ ] 增加虚拟机操作：状态重置
+- [ ] 新建虚拟机支持更多参数
 
 ### v0.0.5
 

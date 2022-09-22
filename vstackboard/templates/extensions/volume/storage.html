@@ -1,10 +1,11 @@
-<v-tabs v-model="volume.tab" centered>
-  <v-tab > 卷 </v-tab>
-  <v-tab > 快照 </v-tab>
-  <v-tab > 备份 </v-tab>
-  <v-tab > 类型 </v-tab>
-  <v-tab > 服务 </v-tab>
+<v-tabs v-model="volume.tab" centered color="purple">
+  <v-tab><v-icon>mdi-alpha-v-box</v-icon> 卷 </v-tab>
+  <v-tab><v-icon>mdi-alpha-s-box</v-icon> 快照 </v-tab>
+  <v-tab><v-icon>mdi-alpha-b-box</v-icon> 备份 </v-tab>
+  <v-tab><v-icon>mdi-alpha-t-box</v-icon> 类型 </v-tab>
+  <v-tab><v-icon>mdi-alpha-s-box</v-icon> 服务 </v-tab>
   <v-tabs-items v-model="volume.tab">
+    <br>
     <v-tab-item>{% include 'volumes.html' %}</v-tab-item>
     <v-tab-item>{% include 'snapshots.html' %}</v-tab-item>
     <v-tab-item>{% include 'backups.html' %}</v-tab-item>

@@ -68,9 +68,9 @@
 </v-card>
 <br>
 [[ computing.hypervisorTable.search ]]
-<v-data-table :headers="computing.hypervisorTable.headers" :items="computing.hypervisorTable.items"
+<v-data-table  dense :headers="computing.hypervisorTable.headers" :items="computing.hypervisorTable.items"
   :items-per-page="computing.hypervisorTable.itemsPerPage" :search="computing.hypervisorTable.search"
-  class="elevation-1" dense>
+  class="elevation-1">
   <template v-slot:item.status="{ item }">
     <v-icon v-if="item.status == 'enabled'" color="success">mdi-emoticon-happy</v-icon>
     <v-icon v-else color="error">mdi-emoticon-sad</v-icon>

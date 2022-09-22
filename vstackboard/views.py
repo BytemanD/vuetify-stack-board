@@ -136,7 +136,8 @@ class Tasks(web.RequestHandler):
     def _get_uploading_tasks(self):
         uploading_tasks = []
         for image_chunk in api.query_image_chunk():
-            data = {'image_id': image_chunk.image_id, 'size': image_chunk.size,
+            data = {'id': image_chunk.id,
+                    'image_id': image_chunk.image_id, 'size': image_chunk.size,
                     'cached': image_chunk.cached * 100 / image_chunk.size,
                     'readed': image_chunk.readed * 100 / image_chunk.size}
             uploading_tasks.append(data)
@@ -152,6 +153,16 @@ class Tasks(web.RequestHandler):
         except Exception as e:
             self.set_status(400)
             self.finish({'error': str(e)})
+
+    def delete(self, task_id):
+        try:
+            api.delete_image_chunk(task_id)
+            self.set_status(204)
+            self.finish()
+        except Exception:
+            LOG.exception('delete image chunk %s faield', task_id)
+            self.set_status(400)
+            self.finish()
 
 
 class GetContext(object):

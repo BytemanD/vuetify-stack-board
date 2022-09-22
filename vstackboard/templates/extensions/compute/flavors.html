@@ -1,24 +1,19 @@
-<v-card dense>
-  <v-card-text>
-    <v-row>
-      <v-col>
-        <v-btn small color="primary" @click="newFlavorDialog.open()"><v-icon small>mdi-plus</v-icon>新建</v-btn>
-        <v-btn small color="error" @click="computing.flavorTable.deleteSelected()">删除</v-btn>
-      </v-col>
-      <v-col cols="1">
-        <v-switch dense class="my-auto" hide-details v-model="computing.flavorTable.isPublic" label="共享" @click="computing.flavorTable.refresh()"></v-switch>
-      </v-col>
-      <v-col class="text-right">
-        <v-btn fab x-small outlined color="info" v-on:click="computing.flavorTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
-      </v-col>
-      <v-col>
-        <v-text-field small dense v-model="computing.flavorTable.search" append-icon="mdi-magnify" label="搜索"
-          single-line hide-details></v-text-field>
-      </v-col>
-    </v-row>
-  </v-card-text>
-</v-card>
-
+<v-row >
+  <v-col>
+    <v-btn small color="primary" @click="newFlavorDialog.open()"><v-icon small>mdi-plus</v-icon>新建</v-btn>
+    <v-btn small color="error" @click="computing.flavorTable.deleteSelected()">删除</v-btn>
+  </v-col>
+  <v-col>
+    <v-text-field small dense v-model="computing.flavorTable.search" append-icon="mdi-magnify" label="搜索" single-line hide-details></v-text-field>
+  </v-col>
+  <v-col cols="1"  class="text-center">
+    <v-switch dense class="my-auto" hide-details v-model="computing.flavorTable.isPublic" label="共享" @click="computing.flavorTable.refresh()"></v-switch>
+  </v-col>
+  <v-col cols="1" class="text-center">
+    <v-btn fab x-small color="info" v-on:click="computing.flavorTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
+  </v-col>
+</v-row>
+<br>
 <v-data-table :headers="computing.flavorTable.headers" :items="computing.flavorTable.items"
   :items-per-page="computing.flavorTable.itemsPerPage" :search="computing.flavorTable.search" dense
   show-select v-model="computing.flavorTable.selected" show-expand single-expand>

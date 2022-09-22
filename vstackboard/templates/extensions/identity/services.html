@@ -1,27 +1,19 @@
-<v-card dense>
-  <v-card-text>
-    <v-row>
-      <v-col>
-        <v-btn small color="primary">创建</v-btn>
-        <v-btn small color="error">删除</v-btn>
-      </v-col>
-      <v-col>
-        <v-text-field small dense v-model="identity.endpointTable.search" append-icon="mdi-magnify" label="搜索"
-          single-line hide-details></v-text-field>
-      </v-col>
-    </v-row>
-  </v-card-text>
-</v-card>
-
+<v-row>
+  <v-col>
+    <v-btn small color="primary">创建</v-btn>
+    <v-btn small color="error">删除</v-btn>
+  </v-col>
+  <v-col>
+    <v-text-field small dense v-model="identity.endpointTable.search" append-icon="mdi-magnify" label="搜索"
+      single-line hide-details></v-text-field>
+  </v-col>
+</v-row>
+<br>
 <v-data-table :headers="identity.endpointTable.headers" :items="identity.endpointTable.items"
-  :items-per-page="identity.endpointTable.itemsPerPage" :search="identity.endpointTable.search" class="elevation-1"
+  :items-per-page="identity.endpointTable.itemsPerPage" :search="identity.endpointTable.search"
   dense show-select>
 
-  <template v-slot:item.service_name="{ item }">
-    [[ identity.serviceMap[item.service_id].name ]]
-  </template>
-  <template v-slot:item.service_type="{ item }">
-    [[ identity.serviceMap[item.service_id].type ]]
-  </template>
+  <template v-slot:item.service_name="{ item }">[[ identity.serviceMap[item.service_id].name ]]</template>
+  <template v-slot:item.service_type="{ item }">[[ identity.serviceMap[item.service_id].type ]]</template>
 
 </v-data-table>

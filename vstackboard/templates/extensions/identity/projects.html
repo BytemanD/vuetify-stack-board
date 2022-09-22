@@ -1,26 +1,20 @@
-<v-card dense>
-  <v-card-text>
-    <v-row>
-      <v-col>
-        <v-btn small color="primary" @click="identity.projectTable.openNewItemDialog()">创建</v-btn>
-        <v-btn small color="error" @click="identity.projectTable.deleteSelected()">删除</v-btn>
-      </v-col>
-      <v-col cols="2">
-        <v-btn small color="info" v-on:click="identity.rolesDialog.open()">角色管理</v-btn>
-      </v-col>
-      <v-col>
-        <v-text-field small dense v-model="identity.projectTable.search" append-icon="mdi-magnify" label="搜索"
+<v-row>
+  <v-col>
+    <v-btn small color="primary" @click="identity.projectTable.openNewItemDialog()">创建</v-btn>
+    <v-btn small color="error" @click="identity.projectTable.deleteSelected()">删除</v-btn>
+    <v-btn small color="info" v-on:click="identity.rolesDialog.open()">角色管理</v-btn>
+  </v-col>
+  <v-col>
+    <v-text-field small dense v-model="identity.projectTable.search" append-icon="mdi-magnify" label="搜索"
         single-line hide-details></v-text-field>
-      </v-col>
-      <v-col cols="1">
-        <v-btn small color="info" v-on:click="identity.projectTable.refresh()" icon><v-icon>mdi-refresh</v-icon></v-btn>
-      </v-col>
-    </v-row>
-  </v-card-text>
-</v-card>
-
+  </v-col>
+  <v-col cols="1" class="text-center">
+    <v-btn fab x-small color="info" v-on:click="identity.projectTable.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
+  </v-col>
+</v-row>
+<br>
 <v-data-table :headers="identity.projectTable.headers" :items="identity.projectTable.items"
-  :items-per-page="identity.projectTable.itemsPerPage" :search="identity.projectTable.search" class="elevation-1"
+  :items-per-page="identity.projectTable.itemsPerPage" :search="identity.projectTable.search"
   dense show-select v-model="identity.projectTable.selected" show-expand single-expand>
   <template v-slot:item.name="{ item }">
     [[ item.name || item.id ]]

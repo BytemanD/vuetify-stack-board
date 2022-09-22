@@ -700,9 +700,9 @@ export class VolumeServiceTable extends DataTable {
             { text: '可用状态', value: 'status' },
             { text: '服务状态', value: 'state' },
             { text: '节点', value: 'host' },
+            { text: '更新时间', value: 'updated_at' },
         ], API.volumeService, 'services', '卷服务');
         this.extendItems = [
-            { text: 'updated_at', value: 'updated_at' },
             { text: 'disabled_reason', value: 'disabled_reason' },
             { text: 'disabled_policy', value: 'disabled_policy' },
             { text: 'zone', value: 'zone' },
@@ -940,28 +940,26 @@ export class AZDataTable extends DataTable {
             }
             data.children.push({ name: azInfo.zoneName, children: children, })
         }
-        myChart.setOption(
-            (option = {
-                tooltip: { trigger: 'item', triggerOn: 'mousemove' },
-                series: [
-                    {
-                        type: 'tree', data: [data], symbolSize: 20,
+        myChart.setOption({
+            tooltip: { trigger: 'item', triggerOn: 'mousemove' },
+            series: [
+                {
+                    type: 'tree', data: [data], symbolSize: 20,
+                    label: {
+                        position: 'left', verticalAlign: 'middle', align: 'right', fontSize: 14
+                    },
+                    leaves: {
                         label: {
-                            position: 'left', verticalAlign: 'middle', align: 'right', fontSize: 14
-                        },
-                        leaves: {
-                            label: {
-                                position: 'right', verticalAlign: 'middle', align: 'left'
-                            }
-                        },
-                        emphasis: {focus: 'descendant'},
-                        expandAndCollapse: true,
-                        animationDuration: 550,
-                        animationDurationUpdate: 750
-                    }
-                ]
-            })
-        );
+                            position: 'right', verticalAlign: 'middle', align: 'left'
+                        }
+                    },
+                    emphasis: {focus: 'descendant'},
+                    expandAndCollapse: true,
+                    animationDuration: 550,
+                    animationDurationUpdate: 750
+                }
+            ]
+        });
         myChart.resize();
     }
 }

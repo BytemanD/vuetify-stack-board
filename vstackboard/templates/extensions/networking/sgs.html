@@ -1,21 +1,17 @@
-<v-card dense>
-    <v-card-text>
-      <v-row>
-        <v-col>
-          <v-btn small color="primary" @click="networking.newSGDialog.open()"><v-icon>mdi-plus</v-icon>新建</v-btn>
-          <v-btn small color="error" @click="networking.sgTable.deleteSelected()">删除</v-btn>
-        </v-col>
-        <v-col class="text-right">
-          <v-btn fab x-small outlined fab x-small color="info"  @click="networking.sgTable.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
-        </v-col>
-        <v-col>
-          <v-text-field small dense v-model="networking.sgTable.search" append-icon="mdi-magnify" label="搜索"
-            single-line hide-details></v-text-field>
-        </v-col>
-      </v-row>
-    </v-card-text>
-</v-card>
-  
+<v-row>
+  <v-col>
+    <v-btn small color="primary" @click="networking.newSGDialog.open()"><v-icon>mdi-plus</v-icon>新建</v-btn>
+    <v-btn small color="error" @click="networking.sgTable.deleteSelected()">删除</v-btn>
+  </v-col>
+  <v-col>
+    <v-text-field small dense v-model="networking.sgTable.search" append-icon="mdi-magnify" label="搜索"
+    single-line hide-details></v-text-field>
+  </v-col>
+  <v-col cols="1" class="text-center">
+    <v-btn fab x-small fab x-small color="info"  @click="networking.sgTable.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
+  </v-col>
+</v-row>
+<br>
 <v-data-table :headers="networking.sgTable.headers" :items="networking.sgTable.items"
   :items-per-page="networking.sgTable.itemsPerPage" :search="networking.sgTable.search" class="elevation-1"
   dense show-select v-model="networking.sgTable.selected" show-expand single-expand>

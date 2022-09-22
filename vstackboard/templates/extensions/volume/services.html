@@ -8,7 +8,7 @@
         <v-icon v-if="item.state == 'up'" color="success">mdi-emoticon-happy</v-icon>
         <v-icon v-else-if="item.state == 'error'" color="error">mdi-emoticon-sad</v-icon>
         <p v-else>[[item.state]]</p>
-      </template>
+    </template>
     <template v-slot:expanded-item="{ headers, item }">
         <td></td><td></td>
         <td :colspan="headers.length -1" >

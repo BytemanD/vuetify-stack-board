@@ -15,7 +15,7 @@ def get_translater():
     try:
         return gettext.translation('vstackboard', locale_path,
                                    [locale_language, "en_US"]).gettext
-    except:
+    except FileNotFoundError:
         return gettext.gettext
 
 

@@ -1,10 +1,11 @@
-<v-tabs v-model="computing.tab" centered>
+<v-tabs v-model="computing.tab" centered color="purple">
     <v-tab><v-icon>mdi-alpha-f-box</v-icon> 规格 </v-tab>
     <v-tab><v-icon>mdi-alpha-k-box</v-icon> 密钥对 </v-tab>
     <v-tab><v-icon>mdi-alpha-s-box</v-icon> 服务 </v-tab>
     <v-tab><v-icon>mdi-alpha-z-box</v-icon> AZ </v-tab>
     <v-tab><v-icon>mdi-alpha-a-box</v-icon> 聚合 </v-tab>
     <v-tabs-items v-model="computing.tab">
+      <br>
       <v-tab-item>{% include 'flavors.html' %}</v-tab-item>
       <v-tab-item>{% include 'keypair.html' %}</v-tab-item>
       <v-tab-item>{% include 'service.html' %}</v-tab-item>

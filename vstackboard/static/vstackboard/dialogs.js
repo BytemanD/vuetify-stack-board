@@ -1910,7 +1910,7 @@ export class NewImageDialog extends Dialog {
             id, reader.result, this.file.size,
             (loaded, total) => { self.process = (loaded * 100 / total).toFixed(3);}
         )
-        MESSAGE.success('镜像上传成功')
+        MESSAGE.success('镜像缓存成功，等待上传。')
         imageTable.refresh();
         self.hide();
     }
@@ -1938,6 +1938,14 @@ export class TasksDialog extends Dialog {
     }
     async refresh(){
         this.tasks = (await API.task.list()).tasks;
+    }
+    async delete(task_id) {
+        try {
+            await API.task.delete(task_id);
+            this.refresh();
+        } catch {
+            MESSAGE.error(`删除失败`)
+        }
     }
     async open() {
         let self = this;

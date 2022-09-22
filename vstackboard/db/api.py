@@ -87,3 +87,10 @@ def add_image_chunk_readed(image_id, readed):
     image_chunk = get_image_chunk_by_image_id(image_id)
     image_chunk.readed += readed
     SESSION.commit()
+
+
+def delete_image_chunk(image_chunk_id):
+    deleted = SESSION.query(
+        models.ImageChunk).filter_by(id=image_chunk_id).delete()
+    SESSION.commit()
+    return deleted

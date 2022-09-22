@@ -25,6 +25,7 @@ ROUTES = [
     (r'/cluster', views.Cluster),
     (r'/cluster/(.*)', views.Cluster),
     (r'/tasks', views.Tasks),
+    (r'/tasks/(.*)', views.Tasks),
     (r'/identity(.*)', views.KeystoneProxy),
     (r'/computing(.*)', views.NovaProxy),
     (r'/image(.*)', views.GlanceProxy),
