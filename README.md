@@ -8,11 +8,17 @@ Openstack Dashboard with Vuetify
 python >= 3.9
 ```
 
-## 2.安装wheel包
+## 2.编译&安装 wheel包
 
-1. 编译：`python3 setup.py bdist_wheel`
+1. 安装gettext：对于linux系统，先安装gettext工具，windowns无需操作安装。
+   
+   + Ubuntu：`apt get-install gettext`
+   
+   + Centos：`yum install gettext`
 
-2. 安装：`pip3 install dist/<THE_PATH_OF_WHEEL_FILE>`
+2. 编译：`python3 setup.py bdist_wheel`
+
+3. 安装：`pip3 install dist/<THE_PATH_OF_WHEEL_FILE>`
 
 安装成功后，可执行以下命令查看帮助信息
 
@@ -72,7 +78,8 @@ docker run -itd --network=host \
 - [x] 上传镜像
 - [x] UI调整
 - [x] 支持删除镜像上传任务记录
-- [ ] 增加虚拟机操作：状态重置
+- [x] 优化docker容器构建工具
+- [x] 增加虚拟机操作：状态重置
 - [ ] 新建虚拟机支持更多参数
 
 ### v0.0.5

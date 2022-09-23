@@ -299,6 +299,9 @@ class Server extends ClientExt {
     async getConsoleLog(id, length=null) {
         return (await this.doAction(id, {'os-getConsoleOutput': {length: length}})).output
     }
+    async resetState(id, active=false){
+        return (await this.doAction(id, {'os-resetState': {state: active ? 'active' : 'error'}}))
+    }
 }
 
 class Endpoint extends Restfulclient {

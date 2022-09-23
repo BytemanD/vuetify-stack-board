@@ -1,6 +1,6 @@
 <v-row>
   <v-col>
-    <v-btn small color="primary" @click="image.imageTable.newItemDialog.open()">创建</v-btn>
+    <v-btn small color="primary" @click="image.imageTable.newItemDialog.open()"><v-icon>mdi-plus</v-icon></v-btn>
     <v-btn small color="error"  @click="imageDeleteSmartDialog.open()" :disabled="image.imageTable.selected.length == 0">
         <v-icon small>mdi-trash-can</v-icon>删除
     </v-btn>

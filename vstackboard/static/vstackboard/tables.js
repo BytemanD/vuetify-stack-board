@@ -1,6 +1,6 @@
 import API from './api.js'
-import { NewDomainDialog, NewImageDialog, NewProjectDialog, TasksDialog } from './dialogs.js';
-import { Alert, ALERT, LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
+import { NewDomainDialog, NewImageDialog, NewProjectDialog, ServerResetStateDialog, TasksDialog } from './dialogs.js';
+import { ALERT, LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
 import { netTable } from './objects.js';
 
 
@@ -327,6 +327,11 @@ export class ServerDataTable extends DataTable {
               ], API.server, 'servers', '实例');
         this.imageMap = {}
         this.errorMessage = {};
+        this.resetStateDialog = new ServerResetStateDialog();
+    }
+
+    openResetStateDialog(){
+        this.resetStateDialog.open(this);
     }
 
     async recheckSavedTasks(clusterId, region){
@@ -901,7 +906,7 @@ export class AZDataTable extends DataTable {
         this.azMap = {internal: {hosts: []}}
         this.statistics = {};
         this.zoneName = 'internal';
-        this.showAZTree = false;
+        this.showTree = 0;
     }
     async refresh() {
         await super.refresh();

@@ -10,7 +10,7 @@ import {
     netTable, portTable, projectUserDialog, qosPolicyTable, roleTable, routerTable,
     serverTable, sgTable, snapshotTable, volumeTable, volumeTypeTable
 } from './objects.js';
-import { UserTable } from './tables.js';
+import { ServerDataTable, UserTable } from './tables.js';
 
 
 class Dialog {
@@ -1715,6 +1715,31 @@ export class ServerConsoleLogDialog extends Dialog {
         this.length = null;
     }
 }
+export class ServerResetStateDialog extends Dialog {
+    constructor() {
+        super();
+        this.serverTable = {};
+        this.active = false;
+    }
+    async open(serverTable) {
+        this.serverTable = serverTable;
+        super.open();
+    }
+    async commit(){
+        for (let i in this.serverTable.selected){
+            let server = this.serverTable.selected[i];
+            try {
+                await API.server.resetState(server.id, this.active);
+                MESSAGE.success(`虚拟机${server.name || server.name}状态重置成功`);
+            } catch {
+                MESSAGE.error(`虚拟机${server.name || server.name}状态重置失败`);
+            }
+        }
+        this.serverTable.refresh();
+        this.hide();
+    }
+}
+
 export class ImageDeleteSmartDialog extends Dialog {
     constructor(){
         super();
@@ -1910,7 +1935,7 @@ export class NewImageDialog extends Dialog {
             id, reader.result, this.file.size,
             (loaded, total) => { self.process = (loaded * 100 / total).toFixed(3);}
         )
-        MESSAGE.success('镜像缓存成功，等待上传。')
+        MESSAGE.success('镜像缓存成功，等待上传，点击右上角查看任务进度。')
         imageTable.refresh();
         self.hide();
     }

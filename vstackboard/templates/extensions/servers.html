@@ -1,6 +1,6 @@
 <v-row>
   <v-col>
-    <v-btn small color="primary" v-on:click="newServerDialog.open()"><v-icon>mdi-plus</v-icon> 新建</v-btn>
+    <v-btn small color="primary" v-on:click="newServerDialog.open()"><v-icon>mdi-plus</v-icon></v-btn>
     <v-btn class="rounded-l-xl" small color="success" v-on:click="computing.serverTable.startSelected()" :disabled="computing.serverTable.selected.length == 0">开机</v-btn>
     <v-btn class="rounded-r-xl" small color="warning" v-on:click="computing.serverTable.stopSelected()" :disabled="computing.serverTable.selected.length == 0">关机</v-btn>
     <v-btn class="rounded-l-xl" small color="success" v-on:click="computing.serverTable.unpauseSelected()" :disabled="computing.serverTable.selected.length == 0">开启</v-btn>
@@ -9,14 +9,13 @@
       <template v-slot:activator="{ on, attrs }">
         <v-btn small color="info" v-bind="attrs" v-on="on" :disabled="computing.serverTable.selected.length == 0"><v-icon small>mdi-menu</v-icon> 重启</v-btn>
       </template>
-      <v-list >
+      <v-list>
         <v-list-item small @click="computing.serverTable.rebootSelected('SOFT')"><v-list-item-title>软重启</v-list-item-title></v-list-item>
         <v-list-item small @click="computing.serverTable.rebootSelected('HARD')"><v-list-item-title>硬重启</v-list-item-title></v-list-item>
       </v-list>
     </v-menu>
-    
-    <v-btn small color="primary" @click="migrateDialog.open()" :disabled="computing.serverTable.selected.length == 0">
-    </v-icon>迁移</v-btn>
+    <v-btn small color="primary" @click="migrateDialog.open()" :disabled="computing.serverTable.selected.length == 0"></v-icon>迁移</v-btn>
+    <v-btn small color="warning" @click="computing.serverTable.openResetStateDialog()" :disabled="computing.serverTable.selected.length == 0">状态重置</v-btn>
     <v-btn small color="error" @click="computing.serverTable.deleteSelected()" :disabled="computing.serverTable.selected.length == 0">
         <v-icon small>mdi-trash-can</v-icon>删除</v-btn>
     <v-btn small color="info" @click="computing.serverTopology.open(computing.serverTable)">拓扑</v-btn>
@@ -124,3 +123,4 @@
 {% include 'dialog/serverActions.html' %}
 {% include 'dialog/serverActionEvents.html' %}
 {% include 'dialog/serverConsoleLog.html' %}
+{% include 'dialog/serverResetState.html' %}

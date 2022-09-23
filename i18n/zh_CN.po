@@ -27,9 +27,6 @@ msgstr "最新release版本：%s"
 msgid "The current version is the latest."
 msgstr "当前已经是最新版本。"
 
-msgid "The current version is the latest."
-msgstr "当前已经是最新版本。"
-
 msgid "VStackBoard Command Line"
 msgstr "VStackBoard 命令行"
 

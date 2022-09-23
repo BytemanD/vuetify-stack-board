@@ -1,4 +1,4 @@
-import { ALERT, Alert, ServerTasks, Utils } from "./vstackboard/lib.js";
+import { ALERT, Utils } from "./vstackboard/lib.js";
 import API from "./vstackboard/api.js";
 // import * as echarts from 'echarts';
 // import { TreeChart } from 'echarts/charts';
@@ -38,6 +38,10 @@ const navigationItems = [
     { title: '域', icon: 'mdi-domain' },
 
 ]
+// init cookies
+if (!$cookies.get('navigationItem') || !navigationItems[$cookies.get('navigationItem')]){
+    $cookies.set('navigationItem', 0);
+}
 
 new Vue({
     el: '#app',
@@ -108,7 +112,7 @@ new Vue({
             volumeServiceTable: volumeServiceTable,
         },
         navigation: {
-            item: $cookies.get('navigationItem') || 0,
+            item: $cookies.get('navigationItem'),
             items: navigationItems,
         },
         drawer: '',
@@ -227,7 +231,6 @@ new Vue({
         drawAz() {
             this.computing.azTable.drawTopoloy('az');
         },
-
     },
     mounted: function () {
         // this.drawAz();
@@ -257,7 +260,7 @@ new Vue({
     watch: {
         'navigation.item': {
             handler(newValue, oldValue) {
-                if (typeof (oldValue) != 'undefined') {
+                if (newValue != undefined) {
                     this.$cookies.set('navigationItem', newValue);
                 }
                 this.refreshContainer();
