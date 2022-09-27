@@ -1,36 +1,54 @@
 import API from "./api.js";
 import { CookieContext } from "./context.js";
+import { SETTINGS } from "./settings.js";
 // import { volumeTable } from "./objects.js";
 
+class Notify {
+    constructor(position){
+        this.position = position;
+    }
+    getNofity(){
+        switch (this.position.getValue()) {
+            case 'top-left':
+                return VuetifyMessageSnackbar.Notify.topLeft()
+            case 'top':
+                return VuetifyMessageSnackbar.Notify.top();
+            case 'top-right':
+                return VuetifyMessageSnackbar.Notify.topRight();
+            case 'bottom-left':
+                return VuetifyMessageSnackbar.Notify.bottomLeft();
+            case 'bottom':
+                return VuetifyMessageSnackbar.Notify.bottom();
+            case 'bottom-right':
+                return VuetifyMessageSnackbar.Notify.bottomRight();
+            default:
+                return VuetifyMessageSnackbar.Notify.topRight();
+        }
+    }
+    info(msg, timeout=3) {
+        this.getNofity().timeout(timeout * 1000).info(msg);
+    };
+    info(msg, timeout = 3) {
+        this.getNofity().timeout(timeout * 1000).info(msg);
+    };
+    success(msg, timeout = 2) {
+        this.getNofity().timeout(timeout * 1000).success(msg);
+    };
+    error(msg, timeout = 5) {
+        this.getNofity().timeout(timeout * 1000).error(msg)
+    };
+}
 
-export class Message {
-    constructor() {
-        this.info = function (msg, timeout = 3) {
-            VuetifyMessageSnackbar.Notify.topRight().timeout(timeout * 1000).info(msg);
-        };
-        this.success = function (msg, timeout = 2) {
-            VuetifyMessageSnackbar.Notify.topRight().timeout(timeout * 1000).success(msg);
-        };
-        this.error = function (msg, timeout = 5) {
-            VuetifyMessageSnackbar.Notify.topRight().timeout(timeout * 1000).error(msg)
-        };
+export class Message extends Notify {
+
+    constructor(){
+        super(SETTINGS.getItem('messagePosition'));
     }
 }
 
-export class Alert {
-    constructor() {
-        this.info = function (msg, timeout = 5) {
-            VuetifyMessageSnackbar.Notify.top().timeout(timeout * 1000).info(msg);
-        };
-        this.success = function (msg, timeout = 5) {
-            VuetifyMessageSnackbar.Notify.top().timeout(timeout * 1000).success(msg);
-        };
-        this.error = function (msg, timeout = 5) {
-            VuetifyMessageSnackbar.Notify.top().timeout(timeout * 1000).error(msg)
-        };
-        this.warn = function (msg, timeout = 5) {
-            VuetifyMessageSnackbar.Notify.top().timeout(timeout * 1000).warning(msg)
-        };
+export class Alert extends Notify {
+    constructor(){
+        super(SETTINGS.getItem('alertPosition'));
     }
 }
 
@@ -134,6 +152,18 @@ export class Utils {
                 resolve(true);
             }, seconds * 1000)
         })
+    }
+    static copyToClipboard(text) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text);
+        } else {
+            let element = document.createElement('input', text)
+            element.setAttribute('value', text);
+            document.body.appendChild(element)
+            element.select();
+            document.execCommand('copy');
+            document.body.removeAttribute(element);
+        }
     }
 
 }

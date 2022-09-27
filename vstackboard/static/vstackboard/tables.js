@@ -291,7 +291,7 @@ export class KeypairDataTable extends DataTable {
         // ]
     }
     copyPublicKey(item) {
-        navigator.clipboard.writeText(item.public_key);
+        Utils.copyToClipboard(item.public_key)
         MESSAGE.success(`公钥内容已复制`);
     }
     waitDeleted(id) {

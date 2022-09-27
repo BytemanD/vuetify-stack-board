@@ -1,4 +1,4 @@
-import { ALERT, Utils } from "./vstackboard/lib.js";
+import { ALERT, MESSAGE, Utils } from "./vstackboard/lib.js";
 import API from "./vstackboard/api.js";
 // import * as echarts from 'echarts';
 // import { TreeChart } from 'echarts/charts';
@@ -23,6 +23,8 @@ import {
 } from "./vstackboard/objects.js";
 import { init } from "./vstackboard/context.js";
 import DataTable from "./vstackboard/tables.js";
+import { SETTINGS } from "./vstackboard/settings.js";
+import { I18N } from "./i18n.js";
 
 
 const navigationItems = [
@@ -51,6 +53,8 @@ new Vue({
         UTILS: Utils,
         clusterTable: clusterTable,
         regionTable: regionTable,
+        settings: SETTINGS,
+        I18N: I18N,
         identity: {
             showAllService: false,
             serviceMap: {},
@@ -230,6 +234,14 @@ new Vue({
         },
         drawAz() {
             this.computing.azTable.drawTopoloy('az');
+        },
+        saveSettings(){
+            this.settings.save();
+            MESSAGE.success('配置已保存');
+        },
+        resetSettings(){
+            this.settings.reset();
+            MESSAGE.success('配置已重置');
         },
     },
     mounted: function () {
