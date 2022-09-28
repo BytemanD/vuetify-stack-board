@@ -37,6 +37,11 @@ class Restfulclient {
         let resp = await axios.patch(`${this.baseUrl}/${id}`, body, config);
         return resp.data
     }
+    async postAction(id, action, data) {
+        let body = {};
+        body[action] = data;
+        return (await axios.post(`${this.baseUrl}/${id}/action`, body)).data;
+    }
 }
 class ClientExt extends Restfulclient {
     constructor(baseUrl) { super(baseUrl); }
@@ -100,6 +105,17 @@ class Flavor extends ClientExt {
 class AZ extends ClientExt {
     constructor() { super('/computing/os-availability-zone') }
 }
+
+class Aggregates extends Restfulclient {
+    constructor() { super('/computing/os-aggregates') }
+    async removeHost(aggId, host) {
+        return await this.postAction(aggId, 'remove_host',{host: host});
+    }
+    async addHost() {
+        return await axios.postAction(aggId, 'add_host', {host: host});
+    }
+}
+
 class Keypair extends Restfulclient {
     constructor() { super('/computing/os-keypairs') }
 }
@@ -583,6 +599,7 @@ export class OpenstackProxyApi {
         this.hypervisor = new Hypervisor();
         this.flavor = new Flavor();
         this.az = new AZ();
+        this.agg = new Aggregates()
         this.computeService = new ComputeService();
         this.server = new Server();
         this.usage = new Usage();

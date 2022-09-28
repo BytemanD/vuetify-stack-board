@@ -1,0 +1,22 @@
+<v-dialog v-model="computing.aggTable.newItemDialog.show" width="600">
+    <v-card>
+      <v-card-title class="headline grey lighten-2" primary-title>新建聚合</v-card-title>
+      <v-card-text>
+        <v-row>
+            <v-col class="my-auto">
+                <v-text-field label="*名字" placeholder="请输入聚合名" v-model="computing.aggTable.newItemDialog.name"
+                              :error="!computing.aggTable.newItemDialog.name"></v-text-field>
+            </v-col>
+            <v-col cols="2" class="my-auto">
+                <v-btn text color="primary" @click="computing.aggTable.newItemDialog.refreshName()">随机名字</v-btn>
+            </v-col>
+        </v-row>
+        <v-text-field label="域" placeholder="请输入域名字" v-model="computing.aggTable.newItemDialog.az"></v-text-field>
+      </v-card-text>
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" @click="computing.aggTable.createNewItem()">创建</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>

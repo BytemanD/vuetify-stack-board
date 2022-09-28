@@ -1,4 +1,4 @@
-<v-data-table :headers="volume.volumeServiceTable.headers" :items="volume.volumeServiceTable.items"
+<v-data-table :headers="volume.volumeServiceTable.headers" :items="volume.volumeServiceTable.items" item-key="id"
     :items-per-page="volume.volumeServiceTable.itemsPerPage" :search="volume.volumeServiceTable.search" class="elevation-1" dense
     show-select v-model="volume.volumeServiceTable.selected" show-expand single-expand>
     <template v-slot:item.status="{ item }">

@@ -9,7 +9,7 @@ import {
     backupTable, clusterTable, keypairTable, volumeServiceTable,
     routerTable, netTable, portTable, volumeTypeTable, snapshotTable,
     hypervisorTable, azTable, regionTable, qosPolicyTable,
-    imageTable, sgTable, userTable, projectTable, domainTable
+    imageTable, sgTable, userTable, projectTable, domainTable, aggTable
 } from "./vstackboard/objects.js";
 import {
     newFlavor, flavorExtraDialog,
@@ -84,6 +84,7 @@ new Vue({
             usageTable: usageTable,
             keypairTable: keypairTable,
             azTable: azTable,
+            aggTable: aggTable,
             serverTopology: serverTopology,
             serverActions: serverActions,
             serverActionEvents: serverActionEvents,
@@ -189,6 +190,7 @@ new Vue({
                     this.computing.keypairTable.refresh();
                     this.computing.serviceTable.refresh();
                     this.computing.azTable.refresh();
+                    this.computing.aggTable.refresh();
                     break;
                 case '虚拟化资源':
                     this.computing.hypervisorTable.refresh();

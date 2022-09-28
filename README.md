@@ -67,7 +67,6 @@ docker run -itd --network=host \
 
 - [ ] 创建规格时可以从已有的复制
 - [ ] inerface 卸载，自动检测后刷新表
-- [ ] 修复 Volume 服务 expanded-item 显示问题
 - [ ] backup reset state 有时需执行多次才能成功, why?
 - [ ] 修复删除agg后，AZ 列表残留的问题
 - [ ] 禁止删除正在进行中的记录
@@ -82,6 +81,7 @@ docker run -itd --network=host \
 - [x] 增加虚拟机操作：状态重置
 - [x] 前端自定义配置
 - [X] 前端国际化
+- [x] Aggregate 管理
 - [ ] 新建虚拟机支持更多参数
 
 ### v0.0.5

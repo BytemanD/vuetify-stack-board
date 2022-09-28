@@ -1,28 +1,34 @@
 <v-row>
   <v-col>
-    <v-btn small color="error" @click="computing.serviceTable.deleteSelected()"><v-icon small>mdi-trash-can</v-icon> 删除</v-btn>
+    <v-btn small color="primary" @click="computing.aggTable.newItemDialog.open()"><v-icon small>mdi-plus</v-icon></v-btn>
+    <v-btn small color="error" @click="computing.aggTable.deleteSelected()" :disabled="computing.aggTable.selected.length == 0"><v-icon small>mdi-trash-can</v-icon> 删除</v-btn>
+    <!-- <v-btn small color="warning" @click="">节点管理</v-btn> -->
   </v-col>
   <v-col>
-    <v-text-field small dense v-model="computing.serviceTable.search" append-icon="mdi-magnify" label="搜索" single-line hide-details></v-text-field>
+    <v-text-field small dense v-model="computing.aggTable.search" append-icon="mdi-magnify" label="搜索" single-line hide-details></v-text-field>
   </v-col>
   <v-col cols="1" class="text-center">
-    <v-btn fab x-small color="info" v-on:click="computing.serviceTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
+    <v-btn fab x-small color="info" v-on:click="computing.aggTable.refresh()" ><v-icon>mdi-refresh</v-icon></v-btn>
   </v-col>
 </v-row>
 <br>
-<v-data-table :headers="computing.serviceTable.headers" :items="computing.serviceTable.items"
-    :items-per-page="computing.serviceTable.itemsPerPage" :search="computing.serviceTable.search" class="elevation-1" dense
-    show-select v-model="computing.serviceTable.selected">
-    <template v-slot:item.status="{ item }">
-        <v-switch class="my-auto" v-model="item.status == 'enabled'" hide-details color="success" :disabled="item.binary!='nova-compute'"
-               @click="computing.serviceTable.enable(item)"></v-switch>
+<v-data-table :headers="computing.aggTable.headers" :items="computing.aggTable.items"
+    :items-per-page="computing.aggTable.itemsPerPage" :search="computing.aggTable.search" class="elevation-1" dense
+    show-select v-model="computing.aggTable.selected" show-expand single-expand>
+    <template v-slot:item.host_num="{ item }">
+      <v-btn small text color="info" @click="computing.aggTable.aggHostsDialog.open(item)">[[ item.hosts.length ]]</v-btn>
     </template>
-    <template v-slot:item.forced_down="{ item }">
-      <v-switch class="my-auto" v-model="item.forced_down" hide-details color="warning" :disabled="item.binary!='nova-compute'"
-               @click="computing.serviceTable.forceDown(item)"></v-switch>
-   </template>
-   <template v-slot:item.state="{ item }">
-      <v-icon v-if="item.state == 'up'" color="success">mdi-emoticon-happy</v-icon>
-      <v-icon v-else color="error">mdi-emoticon-sad</v-icon>
+    <template v-slot:expanded-item="{ headers, item }">
+      <td></td><td></td>
+      <td :colspan="headers.length -1" >
+        <table>
+          <template v-for="extendItem in computing.aggTable.extendItems">
+            <tr><td><strong>[[ extendItem.text ]]:</strong> </td><td>[[ item[extendItem.value] ]]</td></tr>
+          </template>
+        </table>
+      </td>
     </template>
 </v-data-table>
+
+{% include '../dialog/newAgg.html' %}
+{% include '../dialog/aggHosts.html' %}

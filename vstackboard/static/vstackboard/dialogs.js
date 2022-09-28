@@ -15,9 +15,17 @@ import { ServerDataTable, UserTable } from './tables.js';
 
 class Dialog {
     constructor(params) {
+        this.name = null;
+        this.resource = 'resource';
         this.show = false;
         this.params = params || {};
         this.errorMessage = null;
+    }
+    refreshName() {
+        this.name = this.randomName();
+    }
+    randomName() {
+        return Utils.getRandomName(this.resource);
     }
     open() {
         this.errorMessage = null;
@@ -879,6 +887,75 @@ export class NewKeypairDialog extends Dialog {
         MESSAGE.success(`密钥对创建成功`)
         this.privateKey = body.keypair.private_key;
         keypairTable.refresh()
+    }
+}
+export class NewAggDialog extends Dialog {
+    constructor() {
+        super();
+        this.resource = 'aggregate';
+        this.name = null;
+        this.az = null;
+    }
+    open() {
+        this.refreshName();
+        super.open();
+    }
+    async commit() {
+        if (!this.name) {
+            ALERT.error(`聚合名字不能为空`);
+            return;
+        }
+        let data = { name: this.name };
+        if (this.az){ data.availability_zone = this.az};
+        await API.agg.post({aggregate: data})
+        MESSAGE.success(`聚合${this.name}创建成功`)
+    }
+}
+export class AggHostsDialog extends Dialog {
+    constructor() {
+        super();
+        this.agg = {};
+        this.selected = [];
+        this.hosts = [];
+        this.headers = [{text: '节点', value: 'name'}];
+    }
+    refresh() {
+        this.hosts = [];
+        for (let i in this.agg.hosts) {
+            this.hosts.push({'name': this.agg.hosts[i]});
+        }
+    }
+    async open(agg) {
+        this.hosts = [];
+        this.agg = agg;
+        this.refresh();
+        super.open();
+    }
+    async removeHosts() {
+        for (let i in this.selected){
+            try {
+                await API.agg.removeHost(this.agg.id, this.selected[i].name);
+                MESSAGE.success(`节点${this.selected[i].name}移除成功`);
+            } catch {
+                MESSAGE.success(`节点${this.selected[i].name}移除失败`);
+            }
+        }
+        this.selected = [];
+        this.agg = (await API.agg.show(this.agg.id)).aggregate;
+        this.refresh();
+    }
+    async addHosts() {
+        for (let i in this.selected){
+            try {
+                await API.agg.addHost(this.agg.id, this.selected[i].name);
+                MESSAGE.success(`节点${this.selected[i].name}添加成功`);
+            } catch {
+                MESSAGE.success(`节点${this.selected[i].name}添加失败`);
+            }
+        }
+        this.selected = [];
+        this.agg = await API.agg.show(this.agg.id).aggregate;
+        this.refresh();
     }
 }
 export class RebuildDialog extends Dialog {

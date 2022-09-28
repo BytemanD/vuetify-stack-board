@@ -1,5 +1,5 @@
 import API from './api.js'
-import { NewDomainDialog, NewImageDialog, NewProjectDialog, ServerResetStateDialog, TasksDialog } from './dialogs.js';
+import { AggHostsDialog, NewAggDialog, NewDomainDialog, NewImageDialog, NewProjectDialog, ServerResetStateDialog, TasksDialog } from './dialogs.js';
 import { ALERT, LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
 import { netTable } from './objects.js';
 
@@ -713,6 +713,18 @@ export class VolumeServiceTable extends DataTable {
             { text: 'zone', value: 'zone' },
         ];
     }
+    itemKey() {
+        return this.index;
+    }
+    async refresh(){
+        await super.refresh();
+        // NOTE: For volume services, no id in items, so add id to make
+        // v-data-table item-key works.
+        let index = 0;
+        for (let i in this.items) {
+            this.items[i].id = index ++;
+        }
+    }
     async toggleEnabled(item) {
         let body = null;
         switch (item.status) {
@@ -968,7 +980,32 @@ export class AZDataTable extends DataTable {
         myChart.resize();
     }
 }
-
+export class AggDataTable extends DataTable {
+    constructor() {
+        super([
+            { text: 'ID', value: 'uuid', class: 'blue--text' },
+            { text: '名字', value: 'name', class: 'blue--text' },
+            { text: '域', value: 'availability_zone', class: 'blue--text' },
+            { text: '节点数量', value: 'host_num', class: 'blue--text' },
+        ], API.agg, 'aggregates', '聚合');
+        this.extendItems = [
+            { text: 'created_at', value: 'created_at'},
+            { text: 'updated_at', value: 'updated_at'},
+            { text: 'metadata', value: 'metadata'},
+            { text: 'hosts', value: 'hosts'},
+        ];
+        this.newItemDialog = new NewAggDialog();
+        this.aggHostsDialog = new AggHostsDialog();
+    }
+    async removeHosts(){
+        await this.aggHostsDialog.removeHosts();
+        this.refresh()
+    }
+    async addHosts(){
+        await this.aggHostsDialog.addHosts();
+        this.refresh();
+    }
+}
 export class ImageDataTable extends DataTable{
     constructor() {
         super([
