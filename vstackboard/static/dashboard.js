@@ -30,8 +30,8 @@ import { I18N } from "./i18n.js";
 const navigationItems = [
     { title: '虚拟化资源', icon: 'mdi-alpha-h-circle' },
     { title: '实例', icon: 'mdi-laptop-account', group: '计算资源' },
-    { title: '计算管理', icon: 'mdi-react', },
-    { title: '存储', icon: 'mdi-storage-tank' },
+    { title: '计算管理', icon: 'mdi-layers', },
+    { title: '存储', icon: 'mdi-expansion-card' },
     { title: '镜像', icon: 'mdi-package-variant-closed' },
 
     { title: '网络', icon: 'mdi-web', group: '网络资源' },

@@ -3,19 +3,20 @@
 </v-app-bar-nav-icon>
 <v-toolbar-title>{{ name }}</v-toolbar-title>
 <v-toolbar-title class="my-auto ml-7" style="width: 16%">
-    <v-select :items="clusterTable.items" append-icon="mdi-map" prefix='集群：' item-text="name" solo-inverted class="rounded-0" flat
+    <v-select solo-inverted flat hide-details :items="clusterTable.items" prefix='集群：' item-text="name" class="rounded-0" append-icon="mdi-map"
         v-model="clusterTable.selected" v-on:change="useCluster">
     </v-select>
 </v-toolbar-title>
 <v-toolbar-title class="my-auto ml-2" style="width: 16%">
-    <v-select :items="regionTable.items" clearable solo-inverted flat prefix='域：' class="rounded-0" append-icon="mdi-domain"
+    <v-select solo-inverted flat hide-details clearable :items="regionTable.items" prefix='域：' class="rounded-0" append-icon="mdi-domain"
         item-text="id" item-name="id" v-model="regionTable.selected" v-on:change="useRegion">
     </v-select>
 </v-toolbar-title>
 
 <v-spacer></v-spacer>
 
-<v-btn text tile height="100%" @click="window.open('/welcome', '_self')">首页</v-btn>
-<v-btn text tile height="100%" @click="settings.show = !settings.show">设置</v-btn>
+<v-btn text tile height="100%" @click="window.open('/welcome', '_self')"><v-icon>mdi-home</v-icon></v-btn>
+<v-btn text tile height="100%" @click="settings.show = !settings.show"><v-icon>mdi-cog</v-icon></v-btn>
+
 
 {% include 'settings.html' %}
