@@ -909,6 +909,7 @@ export class NewAggDialog extends Dialog {
         if (this.az){ data.availability_zone = this.az};
         await API.agg.post({aggregate: data})
         MESSAGE.success(`聚合${this.name}创建成功`)
+        this.hide()
     }
 }
 export class AggHostsDialog extends Dialog {

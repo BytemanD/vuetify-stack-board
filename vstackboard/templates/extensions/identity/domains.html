@@ -13,7 +13,7 @@
 </v-row>
 <br>
 <v-data-table :headers="identity.domainTable.headers" :items="identity.domainTable.items"
-  :items-per-page="identity.domainTable.itemsPerPage" :search="identity.domainTable.search" class="elevation-5"
+  :items-per-page="identity.domainTable.itemsPerPage" :search="identity.domainTable.search"
   dense show-select v-model="identity.domainTable.selected">
 
   <template v-slot:item.enabled="{ item }">

@@ -25,8 +25,8 @@ class Notify {
                 return VuetifyMessageSnackbar.Notify.topRight();
         }
     }
-    info(msg, timeout=3) {
-        this.getNofity().timeout(timeout * 1000).info(msg);
+    warn(msg, timeout=3) {
+        this.getNofity().timeout(timeout * 1000).warning(msg);
     };
     info(msg, timeout = 3) {
         this.getNofity().timeout(timeout * 1000).info(msg);
