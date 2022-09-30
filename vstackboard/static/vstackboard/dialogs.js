@@ -660,9 +660,11 @@ export class NewServerDialog extends Dialog {
             nums: 1, az: '', host: '',
             password: ''
         })
+        this.portId = null;
         this.flavors = [];
         this.images = [];
         this.networks = [];
+        this.ports = [];
         this.azs = [];
         this.hosts = [];
         this.azHosts = {};
@@ -672,6 +674,19 @@ export class NewServerDialog extends Dialog {
         this.securityGroup = null;
         this.volumeTypes = [];
         this.securityGroups = [];
+    }
+    async refresPorts(){
+        let ports = (await API.port.list()).ports;
+        this.ports = [];
+        for (let i in ports){
+            if (ports[i]['binding:vif_type'] != 'unbound') {
+                continue
+            }
+            this.ports.push(ports[i])
+        }
+    }
+    async refresNetworks(){
+        this.networks = (await API.network.list()).networks;
     }
     async open() {
         this.params.name = Utils.getRandomName('server');
@@ -683,7 +698,6 @@ export class NewServerDialog extends Dialog {
         this.flavors.sort(function (flavor1, flavor2) { return flavor1.name.localeCompare(flavor2.name) })
         this.volumeTypes = (await API.volumeType.list()).volume_types;
         this.images = (await API.image.list()).images;
-        this.networks = (await API.network.list()).networks;
         this.keypairs = (await API.keypair.list()).keypairs;
 
         let authInfo = await API.authInfo.get();
@@ -707,10 +721,13 @@ export class NewServerDialog extends Dialog {
             MESSAGE.error(`实例名字不能为空`);
             return;
         }
+        let networks = [];
+        if (this.portId){ networks.push({port: this.portId}) };
+        if (this.params.netId){ networks.push({ uuid: this.params.netId }) }
         let data = {
             minCount: this.params.nums, maxCount: this.params.nums,
             useBdm: this.params.useBdm, volumeSize: this.params.volumeSize,
-            networks: this.params.netId ? [{ uuid: this.params.netId }] : 'none',
+            networks: networks,
             az: this.params.az == '自动选择' ? null : this.params.az,
             host: this.params.host,
             password: this.params.password,

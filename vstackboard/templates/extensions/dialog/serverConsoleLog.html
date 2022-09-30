@@ -2,14 +2,14 @@
     <v-card>
       <v-card-title class="headline grey lighten-2" primary-title>控制台日志([[computing.serverConsoleLog.length || '**']]行)</v-card-title>
       <v-card-text>
-            <v-icon>mdi-arrow-up</v-icon>
-            <v-btn small text color="info" @click="computing.serverConsoleLog.more()" :disabled="computing.serverConsoleLog.refreshing">
-                更多...</v-btn>
-            <v-btn small text color="info" @click="computing.serverConsoleLog.all()" :disabled="computing.serverConsoleLog.refreshing">
-                全部</v-btn>
-                <!-- class="mdi-spin">mdi-rotate-right</v-icon> -->
-            <v-icon v-if="computing.serverConsoleLog.refreshing" class="mdi-spin">mdi-rotate-right</v-icon>
-            <v-textarea filled auto-grow readonly hide-details :value="computing.serverConsoleLog.content"></v-textarea>
+          <v-btn small text color="info" @click="computing.serverConsoleLog.more()" :disabled="computing.serverConsoleLog.refreshing">
+              <v-icon>mdi-arrow-up</v-icon>更多...
+          </v-btn>
+          <v-btn small text color="info" @click="computing.serverConsoleLog.all()" :disabled="computing.serverConsoleLog.refreshing">
+              全部
+          </v-btn>
+          <v-icon v-if="computing.serverConsoleLog.refreshing" class="mdi-spin">mdi-rotate-right</v-icon>
+          <pre>[[ computing.serverConsoleLog.content ]]</pre>
       </v-card-text>
     </v-card>
   </v-dialog>

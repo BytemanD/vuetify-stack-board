@@ -9,6 +9,7 @@ const MESSAGES = {
         name: 'name',
         messagePosition: 'message position',
         alertPosition: 'alert position',
+        security: 'security',
     },
     'zh-CN': {
         language: '语言',
@@ -20,6 +21,7 @@ const MESSAGES = {
         name: '名字',
         messagePosition: '消息框显示位置',
         alertPosition: '警告框显示位置',
+        security: '安全',
     },
 };
 

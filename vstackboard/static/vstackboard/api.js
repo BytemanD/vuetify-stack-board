@@ -178,7 +178,7 @@ class Server extends ClientExt {
             max_count: options.minCount || 1,
             min_count: options.maxCount || 1
         };
-        if (!options.networks) {
+        if (!options.networks || options.networks.length == 0) {
             data.networks = 'none';
         } else {
             data.networks = options.networks;

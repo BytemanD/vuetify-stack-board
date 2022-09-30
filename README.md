@@ -82,7 +82,7 @@ docker run -itd --network=host \
 - [x] 前端自定义配置
 - [X] 前端国际化
 - [x] Aggregate 管理
-- [ ] 新建虚拟机支持更多参数
+- [X] 新建虚拟机支持指定port
 
 ### v0.0.5
 
