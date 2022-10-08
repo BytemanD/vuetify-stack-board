@@ -10,6 +10,7 @@ const MESSAGES = {
         messagePosition: 'message position',
         alertPosition: 'alert position',
         security: 'security',
+        region: 'Region',
     },
     'zh-CN': {
         language: '语言',
@@ -22,6 +23,7 @@ const MESSAGES = {
         messagePosition: '消息框显示位置',
         alertPosition: '警告框显示位置',
         security: '安全',
+        region: '地区',
     },
 };
 

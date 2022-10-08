@@ -43,6 +43,12 @@ class Dialog {
         }
         return true;
     }
+    checkNameNotNull(value) {
+        if (! value) {
+            return '名字不能为空';
+        }
+        return true;
+    }
     formatTime(dateTime){
         return dateTime ? Utils.parseUTCToLocal(dateTime) : '';
     }
@@ -767,6 +773,7 @@ export class NewFlavorDialog extends Dialog {
             this.ramValues.push(this.ramValues[i - 1] * 2)
         }
         this.ramLabels = this.getRamLabels();
+        this.extraSpcs = {};
     }
     getRamLabels() {
         let labels = []
@@ -778,27 +785,53 @@ export class NewFlavorDialog extends Dialog {
     getRam() {
         return this.params.ram * 1024;
     }
+    checkExtrasValid(value){
+        let extras = {};
+        let extraLines = value.split('\n');
+        for (var i = 0; i < extraLines.length; i++) {
+            let line = extraLines[i];
+            if (line.trim() == '') { continue; }
+            let kv = line.split('=');
+            if (kv.length != 2) {
+                return `输入内容有误: ${line}`;
+            }
+            let key = kv[0].trim();
+            let value = kv[1].trim();
+            if (key == '' || value == '') {
+                return `输入内容有误: ${line}`;
+            }
+            extras[key] = value;
+        }
+        console.log(extras)
+        if (typeof(this) != 'undefined' ) {
+            this.extraSpcs = extras;
+            console.log('1111111111')
+            console.log(this.extraSpcs)
+        }
+        return true;
+    }
     async commit() {
-        if (!this.params.id || !this.params.name) {
-            ALERT.error(`规格ID规格和名字不能为空`, 2);
-            return;
-        }
-        let extraSpcs = this.checkExtras();
-        if (typeof (extraSpcs) == 'undefined') {
-            return;
-        }
+        let checkResult = this.checkNameNotNull(this.params.name);
+        if (checkResult == true){ this.checkExtrasValid(this.params.extrasContent); }
+        if (checkResult != true){ ALERT.error(checkResult); return; }
 
-        let body = await API.flavor.create({
-            id: this.params.id, name: this.params.name,
+        this.checkExtrasValid(this.params.extrasContent);
+        let data = {
+            name: this.params.name,
             ram: this.getRam(), vcpus: this.params.vcpu, disk: this.params.disk,
             'os-flavor-access:is_public': this.params.isPublic
-        });
+        };
+        if (this.params.id){ data.id = this.params.id; }
+        let body = await API.flavor.create(data);
         let flavor = body.flavor;
-        await API.flavor.updateExtras(flavor.id, extraSpcs);
+        if (this.extraSpcs) {
+            await API.flavor.updateExtras(flavor.id, this.extraSpcs);
+        }
         MESSAGE.success(`规格 ${this.params.name} 创建成功`);
         flavorTable.refresh();
         this.hide();
     }
+
     checkExtras() {
         let extras = {};
         let extraLines = this.params.extrasContent.split('\n');
@@ -807,13 +840,14 @@ export class NewFlavorDialog extends Dialog {
             if (line.trim() == '') { continue; }
             let kv = line.split('=');
             if (kv.length != 2) {
-                ALERT.error(`输入内容有误: ${line}`)
-                return;
+                // ALERT.error(`输入内容有误: ${line}`);
+                throw Error(`输入内容有误: ${line}`)
             }
             let key = kv[0].trim();
             let value = kv[1].trim();
             if (key == '' || value == '') {
-                ALERT.error(`输入内容有误: ${line}`)
+                throw Error(`输入内容有误: ${line}`)
+                // ALERT.error(`输入内容有误: ${line}`)
                 return;
             }
             extras[key] = value;
@@ -834,7 +868,6 @@ export class FlavorExtraDialog extends Dialog {
             { key: 'hw:vif_multiqueue_enabled', value: 'True' },
             { key: 'hw:vif_queues_num', value: 4 }, { key: 'hw:vif_queues_num', value: 8 },
             { key: 'hw:cpu_policy', value: 'dedicated' },
-
         ]
     }
     async deleteExtra(key) {

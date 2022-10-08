@@ -8,7 +8,7 @@
     </v-select>
 </v-toolbar-title>
 <v-toolbar-title class="my-auto ml-2" style="width: 16%">
-    <v-select solo-inverted flat hide-details clearable :items="regionTable.items" prefix='域：' class="rounded-0" append-icon="mdi-domain"
+    <v-select solo-inverted flat hide-details clearable :items="regionTable.items" :prefix='I18N.t("region")+":"' class="rounded-0" append-icon="mdi-map-marker"
         item-text="id" item-name="id" v-model="regionTable.selected" v-on:change="useRegion">
     </v-select>
 </v-toolbar-title>

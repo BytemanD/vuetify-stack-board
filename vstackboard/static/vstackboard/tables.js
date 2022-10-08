@@ -1008,11 +1008,11 @@ export class ImageDataTable extends DataTable{
         super([
             { text: '名字', value: 'name' },
             { text: '状态', value: 'status' },
-            { text: '大小', value: 'size' },
+            { text: '大小', value: 'size', align: 'end' },
             { text: 'visibility', value: 'visibility' },
-            { text: 'container_format', value: 'container_format' },
-            { text: 'disk_format', value: 'disk_format' },
-            { text: '操作', value: 'actions' },
+            { text: 'container_format', value: 'container_format', align: 'center' },
+            { text: 'disk_format', value: 'disk_format', align: 'center' },
+            { text: '操作', value: 'actions', align: 'center' },
         ], API.image, 'images')
         this.extendItems = [
             { text: 'id', value: 'id' },
