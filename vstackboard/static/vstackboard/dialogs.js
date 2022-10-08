@@ -43,6 +43,9 @@ class Dialog {
         }
         return true;
     }
+    formatTime(dateTime){
+        return dateTime ? Utils.parseUTCToLocal(dateTime) : '';
+    }
 }
 
 export class ProjectUserDialog extends Dialog {
@@ -1726,12 +1729,6 @@ export class ServerActionsDialog extends Dialog {
         super.open();
         this.actions = (await API.server.actionList(this.server.id)).reverse();
     }
-    getStartTime(startTime){
-        if (! startTime){
-            return ''
-        }
-        return Utils.parseUTCToLocal(startTime);
-    }
     isActionError(action){
         if (action.message && action.message.toLowerCase().includes('error')){
             return true;
@@ -1758,9 +1755,7 @@ export class ServerActionEventsDialog extends Dialog {
         super.open();
         this.instanceAction = await API.server.actionShow(this.server.id, this.requestId);
     }
-    getStartTime(startTime){
-        return Utils.parseUTCToLocal(startTime);
-    }
+
     isEventError(event){
         if (event.result && event.result.toLowerCase().includes('error')){
             return true;

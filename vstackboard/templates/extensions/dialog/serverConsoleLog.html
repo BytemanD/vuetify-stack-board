@@ -1,4 +1,4 @@
-<v-dialog v-model="computing.serverConsoleLog.show" width="900" scrollable>
+<v-dialog v-model="computing.serverConsoleLog.show" width="1000" scrollable>
     <v-card>
       <v-card-title class="headline grey lighten-2" primary-title>控制台日志([[computing.serverConsoleLog.length || '**']]行)</v-card-title>
       <v-card-text>
@@ -9,7 +9,7 @@
               全部
           </v-btn>
           <v-icon v-if="computing.serverConsoleLog.refreshing" class="mdi-spin">mdi-rotate-right</v-icon>
-          <pre>[[ computing.serverConsoleLog.content ]]</pre>
-      </v-card-text>
+          <pre class="white--text grey darken-3 pa-4">[[ computing.serverConsoleLog.content ]]</pre>
+        </v-card-text>
     </v-card>
   </v-dialog>

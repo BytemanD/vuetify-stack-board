@@ -3,20 +3,21 @@
     <v-card-title class="headline grey lighten-2" primary-title>虚拟机 [[ computing.serverActionEvents.instanceAction.action ]] 事件 </v-card-title>
     <v-card-text>
       <v-timeline dense>
-        <v-timeline-item v-for="item in computing.serverActionEvents.instanceAction.events" small right 
+        <v-timeline-item v-for="item in computing.serverActionEvents.instanceAction.events" small right
           :color="computing.serverActionEvents.isEventError(item) ? 'error' : 'success'">
           <v-row>
-              <v-col class="text-left" cols="5">
-                [[ computing.serverActionEvents.getStartTime(item.start_time) ]] ~ 
-                [[ computing.serverActionEvents.getStartTime(item.finish_time) ]]
+              <v-col class="text-left" cols="10">
+                [[ computing.serverActionEvents.formatTime(item.start_time) ]] ~ 
+                [[ computing.serverActionEvents.formatTime(item.finish_time) ]]
+                <strong class="ml-4">[[ item.event ]]</strong>
               </v-col>
-              <v-col><strong>[[ item.event ]]</strong> <v-chip small label outlined color="info">[[item.result]]</v-chip></v-col>
+              <v-col cols="2">[[item.result]]</v-col>
           </v-row>
           <v-expansion-panels v-if="item.traceback">
             <v-expansion-panel>
               <v-expansion-panel-header>错误堆栈</v-expansion-panel-header>
               <v-expansion-panel-content>
-                  <v-textarea hide-details auto-grow filled readonly :value="item.traceback"></v-textarea>
+                  <pre class="white--text grey darken-3 pa-4">[[ item.traceback ]]</pre>
               </v-expansion-panel-content>
             </v-expansion-panel>
           </v-expansion-panels>

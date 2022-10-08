@@ -15,8 +15,8 @@
     :items-per-page="volume.volumeTypeTable.itemsPerPage" :search="volume.volumeTypeTable.search" class="elevation-1" dense
     show-select v-model="volume.volumeTypeTable.selected" show-expand single-expand>
     <template v-slot:item.is_public="{ item }">
-      <v-icon v-if="item.is_public == true" color="success">mdi-check-circle</v-icon>
-      <v-icon v-else color="error">mdi-close-circle</v-icon>
+      <v-icon v-if="item.is_public == true" color="success">mdi-check</v-icon>
+      <v-icon v-else color="error">mdi-close</v-icon>
     </template>
 
     <template v-slot:item.extra_specs="{ item }">

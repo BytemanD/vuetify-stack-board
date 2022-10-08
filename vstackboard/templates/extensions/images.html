@@ -21,9 +21,17 @@
   :items-per-page="image.imageTable.itemsPerPage" :search="image.imageTable.search" dense
   show-select v-model="image.imageTable.selected" show-expand single-expand>
 
-  <template v-slot:item.size="{ item }">
-    <v-chip small outlined label color="info">[[ image.imageTable.humanSize(item) ]]</v-chip>
+  <template v-slot:item.status="{ item }">
+    <v-icon v-if="item.status == 'active'" color="success">mdi-emoticon-happy</v-icon>
+    <v-icon v-else-if="item.status == 'error'" color="error">mdi-emoticon-sad</v-icon>
+    <template v-else-if="item.status == 'saving'">
+      <v-icon color="warning" class="mdi-spin">mdi-rotate-right</v-icon>[[item.status]]
+    </template>
+    <p v-else>[[item.status]]</p>
   </template>
+
+
+  <template v-slot:item.size="{ item }"><span class="blue--text">[[ image.imageTable.humanSize(item) ]]</span></template>
   <template v-slot:item.actions="{ item }">
     <v-btn small text color="purple" @click="imagePropertiesDialog.open(item)">设置属性</v-btn>
   </template>

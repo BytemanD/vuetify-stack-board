@@ -251,8 +251,7 @@ export class FlavorDataTable extends DataTable {
         this.extraSpecsMap = {};
         this.isPublic = true;
     }
-    waitDeleted(id) {
-    }
+    waitDeleted(id) {}
     async deleteSelected() {
         if (this.selected.length == 0) {
             return;
@@ -268,9 +267,6 @@ export class FlavorDataTable extends DataTable {
     async refreshExtraSpecs() {
         for (let i in this.items) {
             let item = this.items[i];
-            // if (Object.keys(this.extraSpecsMap).indexOf(item.id) > 0){
-            //     return;
-            // }
             let body = await API.flavor.getExtraSpecs(item.id);
             Vue.set(this.extraSpecsMap, item.id, body.extra_specs);
         }
@@ -1035,7 +1031,10 @@ export class ImageDataTable extends DataTable{
         this.tasksDialog = new TasksDialog();
     }
     humanSize(image) {
-        if (image.size >= this.GB) {
+        if (! image.size ) {
+            return '' ;
+        }
+        else if (image.size >= this.GB) {
             return `${(image.size / this.GB).toFixed(2)} GB` ;
         } else if(image.size >= this.MB) {
             return `${(image.size / this.MB).toFixed(2)} MB`;

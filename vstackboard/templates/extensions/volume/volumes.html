@@ -22,7 +22,8 @@
       [[ item.name || item.id ]]
     </template>
     <template v-slot:item.status="{ item }">
-      <v-icon v-if="item.status == 'available'" color="success">mdi-check-circle</v-icon>
+      <v-icon v-if="item.status == 'available'">mdi-pipe-disconnected</v-icon>
+      <v-icon v-else-if="item.status == 'in-use'" color="success">mdi-pipe</v-icon>
       <v-icon v-else-if="item.status == 'error'" color="error">mdi-close-circle</v-icon>
       <p v-else>[[item.status]]</p>
     </template>

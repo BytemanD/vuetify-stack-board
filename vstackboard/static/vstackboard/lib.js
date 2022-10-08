@@ -65,7 +65,7 @@ export class Utils {
         let hours = date.getHours();
         let minutes = date.getMinutes();
         let seconds = date.getSeconds();
-        return `${date.getFullYear()}${month >= 10 ? month : '0' + month}${day >= 10 ? day : '0' + day}-` +
+        return `${date.getFullYear()}-${month >= 10 ? month : '0' + month}-${day >= 10 ? day : '0' + day} ` +
             `${hours >= 10 ? hours : '0' + hours}:${minutes >= 10 ? minutes : '0' + minutes}:${seconds >= 10 ? seconds : '0' + seconds}`;
     }
     static parseUTCToLocal(utcString){
@@ -129,7 +129,7 @@ export class Utils {
         });
     }
     static humanRam(size) {
-        if (size <= 1024) {
+        if (size < 1024) {
             return `${size} MB`
         }
         return `${(size / 1024).toFixed(0)} GB`
