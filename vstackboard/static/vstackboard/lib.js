@@ -1,7 +1,7 @@
 import API from "./api.js";
 import { CookieContext } from "./context.js";
 import { SETTINGS } from "./settings.js";
-// import { volumeTable } from "./objects.js";
+
 
 class Notify {
     constructor(position){
@@ -135,14 +135,16 @@ export class Utils {
         return `${(size / 1024).toFixed(0)} GB`
     }
     static humanSize(size) {
-        if (size <= KB) {
+        if (size == null){
+            return ''
+        } else if (size <= KB) {
             return `${size} B`
         } else if (size <= MB) {
             return `${(size / KB).toFixed(2)} KB`
         } else if (size <= GB) {
             return `${(size / MB).toFixed(2)} MB`
         } else {
-            return `${(size / GB).toFixed(2)} TB`
+            return `${(size / GB).toFixed(2)} GB`
         }
     }
     static sleep(seconds) {

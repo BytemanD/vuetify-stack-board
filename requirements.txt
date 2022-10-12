@@ -1,6 +1,7 @@
 pbr
 wheel
 cffi>=1.4.1
+futures==3.1.1
 setuptools_rust
 tornado
 requests
@@ -8,4 +9,5 @@ jinja2
 bs4
 sqlalchemy
 dataclasses>=0.6; python_version < '3.7'
-https://github.com/fjboy/easy-to-use/releases/download/1.0.3/easy2use-1.0.3-py3-none-any.whl
+# https://github.com/fjboy/easy-to-use/releases/download/1.0.3/easy2use-1.0.3-py3-none-any.whl
+git+https://github.com/fjboy/easy-to-use.git

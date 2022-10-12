@@ -42,6 +42,10 @@ class Restfulclient {
         body[action] = data;
         return (await axios.post(`${this.baseUrl}/${id}/action`, body)).data;
     }
+
+    async listActive(){
+        return (await self.list({status: 'active'}))
+    }
 }
 class ClientExt extends Restfulclient {
     constructor(baseUrl) { super(baseUrl); }

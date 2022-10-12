@@ -706,7 +706,7 @@ export class NewServerDialog extends Dialog {
         this.flavors = (await API.flavor.detail()).flavors;
         this.flavors.sort(function (flavor1, flavor2) { return flavor1.name.localeCompare(flavor2.name) })
         this.volumeTypes = (await API.volumeType.list()).volume_types;
-        this.images = (await API.image.list()).images;
+        this.images = (await API.image.listActive()).images;
         this.keypairs = (await API.keypair.list()).keypairs;
 
         let authInfo = await API.authInfo.get();
@@ -1026,8 +1026,7 @@ export class RebuildDialog extends Dialog {
         this.server = server;
         this.images = [];
         this.data.imageRef = ''
-        let body = await API.image.list();
-        this.images = this.images.concat(body.images);
+        this.images = (await API.image.listActive()).images;
         super.open();
     }
     async commit() {
@@ -1928,7 +1927,7 @@ export class ImageDeleteSmartDialog extends Dialog {
                     await this.deleteSnapshot(item);
                     await imageTable.waitDeleted(item.id);
                 } else {
-                    console.warn(`TODO: image type ${item.image_type} is not supported.`)
+                    ALERT.warn(`image type ${item.image_type} is not supported.`)
                 }
             }
         }

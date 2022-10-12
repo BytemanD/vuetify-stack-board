@@ -489,8 +489,8 @@ export class ServiceTable extends DataTable {
         super([{ text: '服务', value: 'binary' },
         { text: '主机', value: 'host' },
         { text: 'zone', value: 'zone' },
-        { text: '可用状态', value: 'status' },
         { text: '服务状态', value: 'state' },
+        { text: '启用', value: 'status' },
         { text: '强制down', value: 'forced_down' },
         { text: '更新时间', value: 'updated_at' },
         ], API.computeService, 'services')

@@ -328,3 +328,22 @@ class NeutronProxy(OpenstackProxyBase):
 
     def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
         return proxy_driver.proxy_neutron
+
+
+def get_routes():
+    return [
+        (r'/', Index),
+        (r'/dashboard', Dashboard),
+        (r'/welcome', Welcome),
+        (r'/configs', Configs),
+        (r'/cluster', Cluster),
+        (r'/cluster/(.*)', Cluster),
+        (r'/tasks', Tasks),
+        (r'/tasks/(.*)', Tasks),
+        (r'/identity(.*)', KeystoneProxy),
+        (r'/computing(.*)', NovaProxy),
+        (r'/image(.*)', GlanceProxy),
+        (r'/networking(.*)', NeutronProxy),
+        (r'/volume(.*)', CinderProxy),
+        (r'/auth_info', AuthInfo),
+    ]

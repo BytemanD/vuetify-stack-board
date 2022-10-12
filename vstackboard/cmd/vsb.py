@@ -14,17 +14,22 @@ from easy2use.globals import cli
 from easy2use.globals import log
 from easy2use import system
 from easy2use.common import pkg
+from easy2use.web import application
 
 from vstackboard.common import conf
 from vstackboard.common import constants
 from vstackboard.common import exceptions
 from vstackboard.common import utils
 from vstackboard.common.i18n import _
-from vstackboard import server
+from vstackboard import views
+from vstackboard.db import api as db_api
+from vstackboard.common import dbconf
+
 
 LOG = logging.getLogger(__name__)
+CONF = conf.CONF
 
-HOME = os.path.abspath(os.path.dirname(os.path.pardir))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def download_statics_for_cdn():
@@ -54,8 +59,9 @@ def download_statics_for_cdn():
 
 
 def save_static_content(link):
+    home = os.path.abspath(os.path.dirname(os.path.pardir))
     url = parse.urlparse(link)
-    local_path = os.path.join(HOME, 'static', 'cdn', url.path[1:])
+    local_path = os.path.join(home, 'static', 'cdn', url.path[1:])
     if os.path.exists(local_path):
         LOG.info('file exists: %s', local_path)
         return
@@ -177,6 +183,15 @@ class Upgrade(cli.SubCli):
         return file_path
 
 
+class VstackboardApp(application.TornadoApp):
+
+    def start(self, **kwargs):
+        LOG.info('Staring server ...')
+        db_api.init()
+        views.CONF_DB_API = dbconf.DBApi(conf.configs_itesm_in_db)
+        super().start(**kwargs)
+
+
 class Serve(cli.SubCli):
     NAME = 'serve'
     ARGUMENTS = log.get_args() + [
@@ -194,9 +209,14 @@ class Serve(cli.SubCli):
 
         conf.load_configs()
 
-        # from gevent import monkey
-        # monkey.patch_all()
-        server.start(develop=args.develop, port=args.port)
+        template_path = os.path.join(ROOT, 'templates')
+        static_path = os.path.join(ROOT, 'static')
+
+        app = VstackboardApp(views.get_routes(), develop=args.develop,
+                             template_path=template_path,
+                             static_path=static_path)
+        app.start(port=args.port or CONF.port,
+                  num_processes=CONF.workers)
 
 
 def main():
@@ -207,5 +227,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.path.insert(0, HOME)
     sys.exit(main())
