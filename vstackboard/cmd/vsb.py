@@ -12,6 +12,7 @@ from jinja2 import PackageLoader, Environment
 from easy2use.downloader.urllib import driver
 from easy2use.globals import cli
 from easy2use.globals import log
+from easy2use.system import OS
 from easy2use import system
 from easy2use.web import application
 
@@ -152,11 +153,14 @@ class Upgrade(cli.SubCli):
 
     def download(self, url, cache=False):
         file_path = os.path.basename(url)
-        if cache and os.path.exists(file_path):
-            LOG.warning('use cache: %s', file_path)
-            return file_path
+        tmp_dir = OS.is_windows() and os.getenv('TMP') or '/tmp'
+        cached_file = os.path.join(tmp_dir, '/tmp')
+        if cache and os.path.exists(cached_file):
+            LOG.warning('use cache: %s', cached_file)
+            return cached_file
 
-        downloader = driver.Urllib3Driver(progress=True)
+        downloader = driver.Urllib3Driver(progress=True,
+                                          cached_file=tmp_dir)
         LOG.info(_('download from %s'), url)
         downloader.download(url)
         LOG.info(_('download success'))
