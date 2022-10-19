@@ -25,10 +25,13 @@ class DockerCmd(object):
     cmd = 'docker'
 
     @classmethod
-    def build(cls, path='./', network=None, build_args=None, target=None):
+    def build(cls, path='./', network=None, build_args=None, target=None,
+              no_cache=False):
         cmd = [cls.cmd, 'build']
         if network:
             cmd.extend(['--network', network])
+        if no_cache:
+            cmd.append('--no-cache')
         if build_args:
             for arg in build_args:
                 cmd.extend(['--build-arg', arg])
@@ -60,11 +63,13 @@ def main():
                              'registry1:5100, 125.0.0.1')
     parser.add_argument('-l', '--push-as-latest', action='store_true',
                         help='Push image to registry as latest version')
+    parser.add_argument('-n', '--no-cache', action='store_true',
+                        help='Force to build')
     parser.add_argument('-d', '--debug', action='store_true',
                         help='Show debug message')
     args = parser.parse_args()
 
-    logging.basicConfig(level= args.debug and logging.DEBUG or logging.INFO,
+    logging.basicConfig(level=args.debug and logging.DEBUG or logging.INFO,
                         format=LOG_FORMAT)
 
     whl_file_path = os.path.abspath(args.whl_file)
@@ -94,6 +99,7 @@ def main():
         return 1
     try:
         DockerCmd.build('./', network='host', target=target,
+                        no_cache=args.no_cache,
                         build_args=[f'PACKAGE_NAME={whl_name}'])
         LOG.info('image build success')
     except Exception as e:
@@ -121,6 +127,7 @@ def main():
         return 1
 
     LOG.info('vstackboard build completed.')
+
 
 if __name__ == '__main__':
     sys.exit(main())
