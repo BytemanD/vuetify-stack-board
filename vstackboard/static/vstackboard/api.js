@@ -586,6 +586,13 @@ class AuthInfo extends Restfulclient {
 class Task extends Restfulclient {
     constructor() { super('/tasks') };
 }
+class Actions extends Restfulclient {
+    constructor() { super('/actions') };
+    async checkLastVersion() {
+        let body = await this.post({'checkLastVersion': {}});
+        return body.checkLastVersion
+    }
+}
 
 export class OpenstackProxyApi {
     constructor() {
@@ -628,6 +635,8 @@ export class OpenstackProxyApi {
         this.cluster = new Cluster();
         this.authInfo = new AuthInfo();
         this.task = new Task();
+
+        this.actions = new Actions();
     }
 }
 

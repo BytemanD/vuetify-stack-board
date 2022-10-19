@@ -13,7 +13,6 @@ from easy2use.downloader.urllib import driver
 from easy2use.globals import cli
 from easy2use.globals import log
 from easy2use import system
-from easy2use.common import pkg
 from easy2use.web import application
 
 from vstackboard.common import conf
@@ -109,33 +108,14 @@ class Upgrade(cli.SubCli):
     ]
 
     def __call__(self, args):
-        try:
-            releases = requests.get(constants.RELEASES_API).json()
-        except Exception as e:
-            LOG.error('Check releases failed, %s', e)
-            return
-
-        if not releases:
-            LOG.info('No release found.')
-            return
-        current_version = utils.get_version()
-        LOG.debug(_('Current version is: %s'), current_version)
-        latest = releases[0]
-        LOG.debug(_('Latest release version: %s'), latest.get('tag_name'))
-
-        v1 = pkg.PackageVersion(current_version)
-        v2 = pkg.PackageVersion(latest.get('tag_name'))
-
-        if v1 >= v2:
+        last_version = utils.check_last_version()
+        if not last_version:
             print(_('The current version is the latest.'))
             return
-        asset = latest.get('assets')[0] if latest.get('assets') else None
-        if not asset:
-            LOG.error('assets not found')
-            return
-        download_url = asset.get("browser_download_url")
+        version = last_version.get('version')
+        download_url = last_version.get('download_url')
         msg = f'\nA new {constants.NAME} release is available: ' \
-              f'{latest["tag_name"]}\n' \
+              f'{version}\n' \
               f'Upgrade from:\n    {download_url}\n'
         print(msg)
 

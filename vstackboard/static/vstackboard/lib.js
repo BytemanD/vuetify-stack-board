@@ -10,7 +10,7 @@ class Notify {
     getNofity(){
         switch (this.position.getValue()) {
             case 'top-left':
-                return VuetifyMessageSnackbar.Notify.topLeft()
+                return VuetifyMessageSnackbar.Notify.topLeft();
             case 'top':
                 return VuetifyMessageSnackbar.Notify.top();
             case 'top-right':

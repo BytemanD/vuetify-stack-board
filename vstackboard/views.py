@@ -330,6 +330,20 @@ class NeutronProxy(OpenstackProxyBase):
         return proxy_driver.proxy_neutron
 
 
+class Actions(web.RequestHandler, GetContext):
+
+    def check_update(self):
+        last_version = utils.check_last_version()
+        self.set_status(200)
+        self.finish({'checkLastVersion': last_version})
+
+    def post(self):
+        data = json.loads(self.request.body)
+        LOG.debug('action body: %s', data)
+        if 'checkLastVersion' in data:
+            self.check_update()
+
+
 def get_routes():
     return [
         (r'/', Index),
@@ -346,4 +360,5 @@ def get_routes():
         (r'/networking(.*)', NeutronProxy),
         (r'/volume(.*)', CinderProxy),
         (r'/auth_info', AuthInfo),
+        (r'/actions', Actions),
     ]

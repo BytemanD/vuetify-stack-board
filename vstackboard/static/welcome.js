@@ -11,6 +11,7 @@ new Vue({
         api: API,
         newCluster: newCluster,
         clusterTable: clusterTable,
+        newVersion: {}
     },
     methods: {
         useCluster: function(cluster){
@@ -21,10 +22,13 @@ new Vue({
             }).catch(error => {
                 MESSAGE.error(`连接 ${cluster.name} 失败`)
             })
+        },
+        checkLastVersion: async function(){
+            this.newVersion = await API.actions.checkLastVersion()
         }
     },
     created: function () {
         this.clusterTable.refresh();
+        this.checkLastVersion();
     },
-
 });

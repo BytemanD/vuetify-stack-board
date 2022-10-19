@@ -3,7 +3,12 @@ from pbr import version
 import queue
 import logging
 
+import requests
+
+from easy2use.common import pkg
+
 from vstackboard.common import constants
+from vstackboard.common.i18n import _
 from vstackboard.db import api
 
 LOG = logging.getLogger(__name__)
@@ -12,6 +17,33 @@ LOG = logging.getLogger(__name__)
 def get_version():
     info = version.VersionInfo(constants.NAME)
     return info.release_string()
+
+
+def check_last_version():
+    try:
+        releases = requests.get(constants.RELEASES_API).json()
+    except Exception as e:
+        LOG.error('Check releases failed, %s', e)
+        return
+
+    if not releases:
+        LOG.info('No release found.')
+        return
+    current_version = get_version()
+    LOG.debug(_('Current version is: %s'), current_version)
+    latest = releases[0]
+    LOG.debug(_('Latest release version: %s'), latest.get('tag_name'))
+
+    v1 = pkg.PackageVersion(current_version)
+    v2 = pkg.PackageVersion(latest.get('tag_name'))
+    if v1 >= v2:
+        return
+    asset = latest.get('assets')[0] if latest.get('assets') else None
+    if not asset:
+        LOG.error('assets not found')
+        return
+    download_url = asset.get("browser_download_url")
+    return {'version': v2.version, 'download_url': download_url}
 
 
 class ImageChunk(object):

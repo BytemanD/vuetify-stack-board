@@ -13,8 +13,13 @@
             <v-main class="indigo lighten-4">
                 <v-card class="mx-auto mt-10 blue-grey lighten-4" width="56%" elevation="4">
                     <v-img class="white--text align-end" src="/static/welcome.svg">
-                        <v-card-title>欢迎使用 VStackBoard</v-card-title>
-                        <v-card-subtitle>版本：{{ version }}</v-card-subtitle>
+                        <v-card-title>
+                            欢迎使用 VStackBoard
+                            <v-chip x-small color="warning" class="ml-4" v-if="newVersion.version"><v-icon x-small>mdi-star</v-icon>新版本：[[newVersion.version]]</v-chip>
+                        </v-card-title>
+                        <v-card-subtitle>
+                            版本：{{ version }}
+                        </v-card-subtitle>
                         <v-card-subtitle>VStackBoard ( Vuetify OpenStack Dashboard ) 是一个基于Vuetify实现的 Openstack 管理服务。</v-card-subtitle>
                     </v-img>
                     <v-card-text class="text--primary">
