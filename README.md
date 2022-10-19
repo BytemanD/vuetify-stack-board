@@ -66,10 +66,14 @@ docker run -itd --network=host \
 ### TODO
 
 - [ ] 创建规格时可以从已有的复制
-- [ ] inerface 卸载，自动检测后刷新表
 - [ ] backup reset state 有时需执行多次才能成功, why?
 - [ ] 修复删除agg后，AZ 列表残留的问题
 - [ ] 禁止删除正在进行中的记录
+
+### v0.0.7
+- [x] 前端检查最新版本
+- [x] 下载安装包时使用tmp目录
+- [x] UI调整
 
 ### v0.0.6
 
@@ -83,6 +87,7 @@ docker run -itd --network=host \
 - [X] 前端国际化
 - [x] Aggregate 管理
 - [X] 新建虚拟机支持指定port
+- [X] inerface 卸载，自动检测后刷新表
 
 ### v0.0.5
 
