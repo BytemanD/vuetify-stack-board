@@ -44,7 +44,7 @@ class Restfulclient {
     }
 
     async listActive(){
-        return (await self.list({status: 'active'}))
+        return (await this.list({status: 'active'}))
     }
 }
 class ClientExt extends Restfulclient {
