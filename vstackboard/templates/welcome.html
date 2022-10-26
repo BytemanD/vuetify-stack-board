@@ -15,7 +15,7 @@
                     <v-img class="white--text align-end" src="/static/welcome.svg">
                         <v-card-title>
                             欢迎使用 VStackBoard
-                            <v-chip x-small color="warning" class="ml-4" v-if="newVersion.version"><v-icon x-small>mdi-star</v-icon>新版本：[[newVersion.version]]</v-chip>
+                            <v-chip x-small color="warning" class="ml-4" v-if="newVersion && newVersion.version"><v-icon x-small>mdi-star</v-icon>新版本：[[newVersion.version]]</v-chip>
                         </v-card-title>
                         <v-card-subtitle>
                             版本：{{ version }}

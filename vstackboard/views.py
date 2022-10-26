@@ -335,7 +335,7 @@ class Actions(web.RequestHandler, GetContext):
     def check_update(self):
         last_version = utils.check_last_version()
         self.set_status(200)
-        self.finish({'checkLastVersion': last_version})
+        self.finish({'checkLastVersion': last_version or {}})
 
     def post(self):
         data = json.loads(self.request.body)

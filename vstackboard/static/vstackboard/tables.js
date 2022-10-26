@@ -88,11 +88,20 @@ class DataTable {
 export class RouterDataTable extends DataTable {
     constructor() {
         super([
+            { text: 'id', value: 'id' },
             { text: 'name', value: 'name' },
             { text: 'status', value: 'status' },
             { text: 'admin_state_up', value: 'admin_state_up' },
+            { text: 'revision_number', value: 'revision_number' },
             { text: 'routes', value: 'routes' },
-        ], API.router, 'routers')
+        ], API.router, 'routers');
+        this.extendItems = [
+            { text: 'description', value: 'description' },
+            { text: 'created_at', value: 'created_at' },
+            { text: 'project_id', value: 'project_id' },
+            { text: 'tags', value: 'tags' },
+            { text: 'external_gateway_info', value: 'external_gateway_info' },
+        ];
     }
     adminStateDown(item) {
         API.router.put(item.id, { router: { admin_state_up: item.admin_state_up } }).then(resp => {
@@ -108,6 +117,7 @@ export class RouterDataTable extends DataTable {
 export class NetDataTable extends DataTable {
     constructor() {
         super([
+            { text: 'ID', value: 'id' },
             { text: '名字', value: 'name' },
             { text: '状态', value: 'status' },
             { text: 'admin_state_up', value: 'admin_state_up' },
@@ -115,7 +125,21 @@ export class NetDataTable extends DataTable {
             { text: '网络类型', value: 'provider:network_type' },
             { text: 'MTU', value: 'mtu' },
             { text: '子网', value: 'subnets' },
-        ], API.network, 'networks', '网络')
+        ], API.network, 'networks', '网络');
+        this.extendItems = [
+            { text: 'description', value: 'description' },
+            { text: 'created_at', value: 'created_at' },
+            { text: 'project_id', value: 'project_id' },
+            { text: 'qos_policy_id', value: 'qos_policy_id' },
+            { text: 'port_security_enabled', value: 'port_security_enabled' },
+            { text: 'ipv4_address_scope', value: 'ipv4_address_scope' },
+            { text: 'provider:physical_network', value: 'provider:physical_network' },
+            { text: 'provider:segmentation_id', value: 'provider:segmentation_id' },
+            { text: 'ipv4_address_scope', value: 'ipv4_address_scope' },
+            { text: 'ipv6_address_scope', value: 'ipv6_address_scope' },
+            { text: 'dns_domain', value: 'dns_domain' },
+            { text: 'vlan_transparent', value: 'vlan_transparent' },
+        ];
         this.subnets = {};
     }
     async refreshSubnets() {
@@ -212,6 +236,7 @@ export class SecurityGroupDataTable extends DataTable {
 export class QosPolicyDataTable extends DataTable {
     constructor() {
         super([
+                { text: 'id', value: 'id' },
                 { text: '名字', value: 'name' },
                 { text: '标签', value: 'tags' },
                 { text: 'revision_number', value: 'revision_number' },
@@ -220,7 +245,6 @@ export class QosPolicyDataTable extends DataTable {
                 { text: '操作', value: 'actions' },
         ], API.qosPolicy, 'policies');
         this.extendItems = [
-            { text: 'id', value: 'id' },
             { text: 'rules', value: 'rules' },
             { text: 'created_at', value: 'created_at' },
             { text: 'updated_at', value: 'updated_at' },

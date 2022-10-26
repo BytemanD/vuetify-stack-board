@@ -428,6 +428,16 @@ export class ServerInterfaceDialog extends Dialog {
         this.netSelected = [];
         this.ports = [];
         this.networks = [];
+        this.table = {
+            headers: [
+                {text: '端口ID', value: 'port_id'},
+                {text: 'MAC地址', value: 'mac_addr'},
+                {text: 'IP地址', value: 'fixed_ips'},
+                {text: '操作', value: 'actions'},
+                
+            ],
+            selected: [],
+        }
     }
 
     async refreshInterfaces() {
