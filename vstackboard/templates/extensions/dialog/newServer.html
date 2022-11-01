@@ -55,7 +55,7 @@
       </v-stepper-items>
       <v-stepper-items>
         <v-stepper-content step="2">
-          <v-select :items="newServerDialog.securityGroups" clearable label="安全组" dense item-text="name" item-value="id" 
+          <v-select :items="newServerDialog.securityGroups" clearable label="安全组" item-text="name" item-value="id" 
                     v-model="newServerDialog.securityGroup" persistent-hint hint="只能选择当前租户的安全组">
           </v-select>
           <v-text-field label="密码" placeholder="请输入实例密码" v-model="newServerDialog.params.password"></v-text-field>

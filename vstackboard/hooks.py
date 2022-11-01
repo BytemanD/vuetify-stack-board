@@ -128,7 +128,6 @@ class WindowsMsgfmtDriver(MsgFmtDriver):
         name, _ = os.path.splitext(os.path.basename(po_path))
         return os.path.join('i18n', f'{name}.mo')
 
-
 def _make_i18n():
     driver = WindowsMsgfmtDriver() if system.OS.is_windows() else \
         LinuxMsgfmtDriver()

@@ -1814,6 +1814,8 @@ export class ServerConsoleLogDialog extends Dialog {
         this.length = 10;
         this.content = '';
         this.refreshing = false;
+        this.interval = null;
+        this._autoRefresh = false;
     }
     async open(server) {
         this.server = server;
@@ -1833,6 +1835,22 @@ export class ServerConsoleLogDialog extends Dialog {
             console.error(e)
         }
         this.refreshing = false;
+    }
+    async autoRefresh(){
+        let self = this;
+        if (! this._autoRefresh) {
+            return
+        }
+        this.interval = setInterval(() => {
+            self.refresh()
+        }, 5000);
+    }
+    async refresh() {
+        if ((! this.show || ! this._autoRefresh) && this.interval) {
+            clearInterval(this.interval);
+            return;
+        }
+        await this.refreshConsoleLog(this.length);
     }
     async more() {
         if (this.length == null) {
