@@ -15,10 +15,6 @@
 <v-data-table :headers="networking.portTable.headers" :items="networking.portTable.items"
   :items-per-page="networking.portTable.itemsPerPage" :search="networking.portTable.search" class="elevation-1"
   dense show-select v-model="networking.portTable.selected" show-expand single-expand>
-
-  <template v-slot:item.name_or_id="{ item }">
-    [[ item.name || item.id ]]
-  </template>
   <template v-slot:item.status="{ item }">
     <v-icon v-if="item.status == 'ACTIVE'" color="success">mdi-emoticon-happy</v-icon>
     <v-icon v-else color="error">mdi-emoticon-sad</v-icon>

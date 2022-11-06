@@ -179,7 +179,8 @@ export class NetDataTable extends DataTable {
 export class PortDataTable extends DataTable {
     constructor() {
         super([
-                { text: 'Name/ID', value: 'name_or_id' },
+                { text: 'ID', value: 'id' },
+                { text: 'Name', value: 'name' },
                 { text: 'vnic_type', value: 'binding:vnic_type' },
                 { text: 'vif_type', value: 'binding:vif_type' },
                 { text: 'status', value: 'status' },
@@ -190,7 +191,6 @@ export class PortDataTable extends DataTable {
         ], API.port, 'ports');
 
         this.extendItems = [
-            { text: 'id', value: 'id' },
             { text: 'binding:vif_details', value: 'binding:vif_details' },
             { text: 'binding:profile', value: 'binding:profile' },
             { text: 'binding:host_id', value: 'binding:host_id' },
@@ -219,13 +219,13 @@ export class PortDataTable extends DataTable {
 export class SecurityGroupDataTable extends DataTable {
     constructor() {
         super([
-                { text: '名字/ID', value: 'name' },
-                { text: 'revision_number', value: 'revision_number' },
-                { text: '租户ID', value: 'tenant_id' },
-                { text: '操作', value: 'actions' },
+            { text: 'id', value: 'id' },
+            { text: '名字', value: 'name' },
+            { text: 'revision_number', value: 'revision_number' },
+            { text: '租户ID', value: 'tenant_id' },
+            { text: '操作', value: 'actions' },
         ], API.sg, 'security_groups');
         this.extendItems = [
-            { text: 'id', value: 'id' },
             { text: 'description', value: 'description' },
             { text: 'created_at', value: 'created_at' },
             { text: 'updated_at', value: 'updated_at' },

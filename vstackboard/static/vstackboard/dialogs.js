@@ -367,6 +367,13 @@ export class NewRouterkDialog extends Dialog {
 export class ServerVolumeDialog extends Dialog {
     constructor() {
         super({ server: {}, attachments: [], volumes: [], selectedVolumes: [] })
+        this.headers = [
+            {value: 'device', text: '设备'},
+            {value: 'id', text: 'ID'},
+            {value: 'volumeId', text: '卷ID'},
+            {value: 'actions', text: '操作'},
+        ];
+        this.selected = [];
     }
 
     async refreshAttachments() {
@@ -416,6 +423,7 @@ export class ServerVolumeDialog extends Dialog {
             MESSAGE.success(`卷 ${volume_id} 挂载成功`);
             this.refreshAttachments();
         }
+        this.params.selectedVolumes = [];
     }
 }
 
@@ -775,25 +783,42 @@ export class NewServerDialog extends Dialog {
 export class NewFlavorDialog extends Dialog {
     constructor() {
         super({
-            id: '', name: '', ram: 2, vcpu: 1, disk: 0, isPublic: true, extrasContent: '',
+            id: '', name: '', ram: 1024, vcpu: 1, disk: 0, isPublic: true, extrasContent: '',
             extras: [], newKey: '', newValue: ''
         })
-        this.ramValues = [256];
-        for (var i = 1; i <= 10; i++) {
-            this.ramValues.push(this.ramValues[i - 1] * 2)
-        }
-        this.ramLabels = this.getRamLabels();
         this.extraSpcs = {};
+        this.minRam = 256;
+        this.mimVcpu = 1;
+        this.minDisk = 0;
     }
-    getRamLabels() {
-        let labels = []
-        this.ramValues.forEach(item => {
-            labels.push(Utils.humanRam(item));
-        })
-        return labels
+    ramMinus() {
+        if (parseInt(this.params.ram) <= this.minRam){ return; }
+        this.params.ram /= 2;
     }
-    getRam() {
-        return this.params.ram * 1024;
+    ramPlus(){
+        this.params.ram *= 2;
+    }
+    vcpuMinus() {
+        if (parseInt(this.params.vcpu) <= this.mimVcpu){ return; }
+        this.params.vcpu -= 1;
+    }
+    vcpuPlus(){
+        this.params.vcpu += 1;
+    }
+    diskMinus() {
+        if (parseInt(this.params.disk) <= this.minDisk){ return; }
+        if (parseInt(this.params.disk) <= 100 ){
+            this.params.disk -= 10;
+        } else {
+            this.params.disk -= 100;
+        }
+    }
+    diskPlus(){
+        if (parseInt(this.params.disk) < 100 ){
+            this.params.disk += 10;
+        } else {
+            this.params.disk += 100;
+        }
     }
     checkExtrasValid(value){
         let extras = {};
@@ -815,7 +840,6 @@ export class NewFlavorDialog extends Dialog {
         console.log(extras)
         if (typeof(this) != 'undefined' ) {
             this.extraSpcs = extras;
-            console.log('1111111111')
             console.log(this.extraSpcs)
         }
         return true;
@@ -828,7 +852,7 @@ export class NewFlavorDialog extends Dialog {
         this.checkExtrasValid(this.params.extrasContent);
         let data = {
             name: this.params.name,
-            ram: this.getRam(), vcpus: this.params.vcpu, disk: this.params.disk,
+            ram: this.params.ram, vcpus: this.params.vcpu, disk: this.params.disk,
             'os-flavor-access:is_public': this.params.isPublic
         };
         if (this.params.id){ data.id = this.params.id; }

@@ -38,15 +38,16 @@
     <template v-slot:expanded-item="{ headers, item }">
       <td></td><td></td>
       <td :colspan="headers.length -1">
-        <strong>id: </strong> [[ item.id ]] <br>
-        <strong>migration_status: </strong> [[ item.migration_status ]] <br>
-        <strong>availability_zone: </strong> [[ item.availability_zone ]] <br>
-        <strong>updated_at: </strong> [[ item.updated_at ]] <br>
-        <strong>replication_status: </strong> [[ item.replication_status ]] <br>
-        <strong>tenant_id: </strong> [[ item['os-vol-tenant-attr:tenant_id'] ]] <br>
-        <strong>metadata: </strong> [[ item.metadata ]] <br>
-        <strong>volume_image_metadata: </strong> [[ item.volume_image_metadata ]] <br>
-        <strong>description: </strong> [[ item.description ]] <br>
+        <table>
+          <tr><td><strong>description</strong></td><td>[[ item.description ]]</td></tr>
+          <tr><td><strong>migration_status</strong></td><td>[[ item.migration_status ]]</td></tr>
+          <tr><td><strong>availability_zone</strong></td><td>[[ item.availability_zone ]]</td></tr>
+          <tr><td><strong>updated_at</strong></td><td>[[ item.updated_at ]]</td></tr>
+          <tr><td><strong>replication_status</strong></td><td>[[ item.replication_status ]]</td></tr>
+          <tr><td><strong>tenant_id</strong></td><td>[[ item.tenant_id ]]</td></tr>
+          <tr><td><strong>metadata</strong></td><td>[[ item.metadata ]]</td></tr>
+          <tr><td><strong>volume_image_metadata</strong></td><td>[[ item.volume_image_metadata ]]</td></tr>
+        </table>
       </td>
     </template>
 </v-data-table>

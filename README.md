@@ -37,13 +37,13 @@ sh install/build.sh dist/<THE_PATH_OF_WHEEL_FILE>
 2. 启动容器
 
 ```shell
-VERSION=<VERSION>
+IMAGE=vstackboard:<VERSION>
 mkdir -p /var/log/vstackboard
 docker run -itd --network=host \
     -v /etc/vstackboard:/etc/vstackboard \
     -v /var/log/vstackboard:/var/log/vstackboard \
     --name vstackboard \
-    vstackboard:${VERSION} \
+    ${IMAGE} \
     --log-file /var/log/vstackboard/vstackboard.log
 ```
 
