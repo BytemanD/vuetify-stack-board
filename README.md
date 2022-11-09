@@ -72,6 +72,7 @@ docker run -itd --network=host \
 
 ### v0.0.8
 - [X] 控制台日志，支持刷新
+- [X] 添加疏散
 - [ ] UI调整
 
 ### v0.0.7

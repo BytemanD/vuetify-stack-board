@@ -138,6 +138,9 @@ class ComputeService extends Restfulclient {
         let resp = await axios.put(`${this.baseUrl}/${id}`, { status: 'enabled' });
         return resp.data;
     }
+    async getComputeServices(){
+        return (await this.list({binary: 'nova-compute'})).services
+    }
 }
 
 class Usage extends Restfulclient {
@@ -294,12 +297,17 @@ class Server extends ClientExt {
     async resize(id, flavor_id) {
         return this.doAction(id, { resize: { flavorRef: flavor_id } })
     }
-    async liveMigrate(id) {
-        let data = { block_migration: "auto", host: null }
+    async liveMigrate(id, host=null) {
+        let data = { block_migration: "auto", host: host }
         return this.doAction(id, { 'os-migrateLive': data })
     }
-    async migrate(id) {
-        return this.doAction(id, { migrate: {} })
+    async migrate(id, host=null) {
+        return this.doAction(id, { migrate: {host: host} })
+    }
+    async evacuate(id, params={}) {
+        let data = {force: params.force ? true : false};
+        if (params.host){ data.host = params.host }
+        return this.doAction(id, {evacuate: data})
     }
     async rebuild(id, options={}){
         let data = {description: null}

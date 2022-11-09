@@ -1,52 +1,21 @@
 import { 
-    NewClusterDialog,
-    ProjectUserDialog,
-    NewUserDialog,
-    RolesDialog,
-    NewRoleDialog,
+    NewClusterDialog, ProjectUserDialog, NewUserDialog, RolesDialog, NewRoleDialog,
     
-    NewServerDialog,
-    ServerVolumeDialog,
-    ServerInterfaceDialog,
-    NewFlavorDialog,
-    FlavorExtraDialog,
-    ChangePasswordDialog,
-    ChangeServerNameDialog,
-    ResizeDialog,
-    MigrateDialog,
-    NewKeypairDialog,
-    RebuildDialog,
-    UpdateServerSG,
-    
-    NewVolumeDialog,
-    NewVolumeTypeDialog,
-    NewSnapshotDialog,
-    NewBackupDialog,
-    VolumeResetStateDialog,
-    BackupResetStateDialog,
-    SnapshotResetStateDialog,
-    ImageDeleteSmartDialog,
-    ImagePropertiesDialog,
-    
-    NewRouterkDialog,
-    NewNetworkDialog,
-    NewSubnetDialog,
-    RouterInterfacesDialog,
-    NewPortDialog,
-    UpdatePort,
-    
-    NewQosPolicyDialog,
-    QosPolicyRules,
-    NewQosPolicyRule,
-    NewSGDialog,
-    NewSGRuleDialog,
-    SGRulesDialog,
-    
-    ServerTopology,
-    ServerActionsDialog,
+    NewServerDialog, ServerVolumeDialog, ServerInterfaceDialog, NewFlavorDialog,
+    FlavorExtraDialog, ChangePasswordDialog, ChangeServerNameDialog,
+    ResizeDialog, MigrateDialog, NewKeypairDialog, RebuildDialog,
+    EvacuateDialog, UpdateServerSG,
+    ServerTopology, ServerActionsDialog,
     ServerActionEventsDialog,
     ServerConsoleLogDialog,
 
+    NewVolumeDialog, NewVolumeTypeDialog, NewSnapshotDialog, NewBackupDialog,
+    VolumeResetStateDialog, BackupResetStateDialog, SnapshotResetStateDialog,
+    ImageDeleteSmartDialog, ImagePropertiesDialog,
+
+    NewRouterkDialog, NewNetworkDialog, NewSubnetDialog, RouterInterfacesDialog,
+    NewPortDialog, UpdatePort, NewQosPolicyDialog, QosPolicyRules,
+    NewQosPolicyRule, NewSGDialog, NewSGRuleDialog, SGRulesDialog,
 } from './dialogs.js';
 import {
     DomainTable, ProjectTable, RoleTable, UserTable,HypervisortTable,
@@ -107,6 +76,7 @@ export const changePassword = new ChangePasswordDialog()
 export const changeServerName = new ChangeServerNameDialog()
 export const resizeDialog = new ResizeDialog();
 export const migrateDialog = new MigrateDialog();
+export const evacuateDialog = new EvacuateDialog();
 export const newKeypairDialog = new NewKeypairDialog();
 export const rebuildDialog = new RebuildDialog();
 export const updateServerSG = new UpdateServerSG();

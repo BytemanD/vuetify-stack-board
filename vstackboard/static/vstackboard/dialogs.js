@@ -600,21 +600,28 @@ export class MigrateDialog extends Dialog {
         this.servers = [];
         this.liveMigrate = true;
         this.smart = true;
+        this.nodes = [];
+        this.host = null;
     }
-    open() {
+
+    async open() {
         this.servers = serverTable.selected;
-        super.open()
+        this.nodes = [];
+        super.open();
+    }
+    async refreshHosts(){
+        this.nodes = await serverTable.getAvailableMoveHosts();
     }
     async liveMigrateAndWait(server){
+        await API.server.liveMigrate(server.id, this.host)
         MESSAGE.info(`热迁移 ${server.name} ...`)
-        await API.server.liveMigrate(server.id)
         await serverTable.waitServerStatus(server.id);
         MESSAGE.success(`虚拟机 ${server.id} 迁移完成`);
         serverTable.refresh();
     }
-    async migrateAndWati(server){
+    async migrateAndWait(server){
+        await API.server.migrate(server.id, this.host);
         MESSAGE.info(`冷迁移 ${server.name} ...`)
-        await API.server.migrate(server.id);
         await serverTable.waitServerStatus(server.id, ['SHUTOFF', 'ERROR'])
         MESSAGE.success(`虚拟机 ${server.id} 迁移完成`);
         serverTable.refresh();
@@ -631,7 +638,7 @@ export class MigrateDialog extends Dialog {
                     case 'ACTIVE':
                         this.liveMigrateAndWait(item); break;
                     case 'SHUTOFF':
-                        this.migrateAndWati(item); break;
+                        this.migrateAndWait(item); break;
                     default:
                         break;
                 }
@@ -640,10 +647,55 @@ export class MigrateDialog extends Dialog {
             if (this.liveMigrate && item.status.toUpperCase() == 'ACTIVE') {
                 this.liveMigrateAndWait(item);
             } else if(!this.liveMigrate && item.status.toUpperCase() == 'SHUTOFF') {
-                this.migrateAndWati(item)
+                this.migrateAndWait(item)
             } else {
                 ALERT.warn(`虚拟机 ${item.name} 状态异常，无法迁移`, 1)
             }
+        }
+    }
+}
+
+export class EvacuateDialog extends Dialog {
+    constructor() {
+        super();
+        this.servers = [];
+        this.force = false;
+        this.nodes = [];
+        this.host = null;
+    }
+    async open() {
+        this.servers = serverTable.selected;
+        this.nodes = [];
+        super.open();
+    }
+    async refreshHosts(){
+        this.nodes = await serverTable.getAvailableMoveHosts();
+    }
+    async evacuateServer(server){
+        let service = (await API.computeService.list({host: server['OS-EXT-SRV-ATTR:host']})).services[0];
+        if (service.state == 'up') {
+            ALERT.warn(`虚拟机所在节点 ${service.host} 正在使用中，无法疏散。`)
+            return;
+        }
+        try {
+            await API.server.evacuate(server.id, {host: this.host, force: this.force});
+        } catch(e) {
+            ALERT.warn(`节点 ${service.name}疏散失败`)
+            return
+        }
+        MESSAGE.info(`疏散 ${server.name} ...`);
+        await serverTable.waitServerMoved(server);
+        MESSAGE.success(`虚拟机 ${server.name} 疏散完成`);
+        serverTable.refresh();
+    }
+    async commit() {
+        for (let i in this.servers) {
+            let item = this.servers[i];
+            if (['ACTIVE', 'SHUTOFF'].indexOf(item.status) < 0){
+                ALERT.warn(`虚拟机 ${item.name} 状态异常，无法疏散`, 1)
+                continue
+            }
+            this.evacuateServer(item);
         }
     }
 }

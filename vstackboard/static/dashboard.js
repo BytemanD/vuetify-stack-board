@@ -15,11 +15,14 @@ import {
     newFlavor, flavorExtraDialog,
     newServer,
     changePassword, changeServerName, serverVolumeDialog, serverInterfaceDialog,
-    resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog,
+    resizeDialog, migrateDialog, newKeypairDialog, rebuildDialog, evacuateDialog,
     newVolume, newSnapshotDialog, newBackupDialog, backupResetStateDialog,
     newRouterDialog, newNetDialog, newSubnetDialog, routerInterfacesDialog,
-    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents, newQosPolicyDialog, imageDeleteSmartDialog, volumeResetStateDialog, snapshotResetStateDialog, sgRulesDialog, newSGDialog, newSGRuleDialog, imagePropertiesDialog, qosPolicyRulesDialog, newQosPolicyRule, updateServerSG, serverConsoleLog, updatePortDialog, projectUserDialog, newUserDialog, rolesDialog, newRoleDialog
-
+    newPortDialog, serverTopology, serverActions, newVolumeTypeDialog, serverActionEvents,
+    newQosPolicyDialog, imageDeleteSmartDialog, volumeResetStateDialog, snapshotResetStateDialog,
+    sgRulesDialog, newSGDialog, newSGRuleDialog, imagePropertiesDialog,
+    qosPolicyRulesDialog, newQosPolicyRule, updateServerSG, serverConsoleLog, updatePortDialog,
+    projectUserDialog, newUserDialog, rolesDialog, newRoleDialog
 } from "./vstackboard/objects.js";
 import { init } from "./vstackboard/context.js";
 import DataTable from "./vstackboard/tables.js";
@@ -143,6 +146,7 @@ new Vue({
         serverInterfaceDialog: serverInterfaceDialog,
         resizeDialog: resizeDialog,
         migrateDialog: migrateDialog,
+        evacuateDialog: evacuateDialog,
         rebuildDialog: rebuildDialog,
         newKeypairDialog: newKeypairDialog,
         // network dialogs

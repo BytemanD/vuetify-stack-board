@@ -349,7 +349,29 @@ export class ServerDataTable extends DataTable {
         this.errorMessage = {};
         this.resetStateDialog = new ServerResetStateDialog();
     }
+    getSelectedServerHosts(){
+        let serverHosts = []
+        for (let i in this.selected) {
+            if (!this.selected[i]['OS-EXT-SRV-ATTR:host']){
+                continue;
+            }
+            serverHosts.push(this.selected[i]['OS-EXT-SRV-ATTR:host'])
+        }
+        return serverHosts;
+    }
+    async getAvailableMoveHosts(){
+        let hosts = [];
+        let services = await API.computeService.getComputeServices();
+        let serverHosts = this.getSelectedServerHosts();
+        for (let i in services){
+            if (serverHosts.indexOf(services[i].host) >= 0 || services[i].state != 'up'){
+                continue
+            }
+            hosts.push(services[i].host);
+        }
+        return hosts
 
+    }
     openResetStateDialog(){
         this.resetStateDialog.open(this);
     }
@@ -368,7 +390,23 @@ export class ServerDataTable extends DataTable {
             });
         }
     }
-
+    async waitServerMoved(server) {
+        let srcHost = server['OS-EXT-SRV-ATTR:host'];
+        let serverUpdated = {};
+        while (true) {
+            let body = await API.server.get(server.id);
+            serverUpdated = body.server;
+            this.updateItem(serverUpdated);
+            if (! serverUpdated['OS-EXT-STS:task_state']) {
+                if (serverUpdated['OS-EXT-SRV-ATTR:host'] != srcHost) {
+                    return;
+                } else {
+                    throw Error(`疏散失败`);
+                }
+            }
+            await Utils.sleep(5)
+        }
+    }
     async waitServerStatus(server_id, expectStatus = ['ACTIVE', 'ERROR']) {
         let expectStatusList = []
         if (typeof expectStatus == 'string') {
@@ -524,16 +562,19 @@ export class ServiceTable extends DataTable {
     }
     async forceDown(service) {
         let down = service.forced_down;
-        API.computeService.forceDown(service.id, down).then(resp => {
+        try {
+            await API.computeService.forceDown(service.id, down)
             if (down) {
                 MESSAGE.success(`${service.host}:${service.binary} 已强制设为 Down`)
             } else {
                 MESSAGE.success(`${service.host}:${service.binary} 已取消强制 Down`)
             }
-        }).catch(error => {
+        } catch (error) {
             MESSAGE.error(`${service.host}:${service.binary} 设置强制down失败`)
             service.forced_down = !down;
-        });
+            return;
+        }
+        this.refresh();
     }
     enable(service) {
         let status = service.status;

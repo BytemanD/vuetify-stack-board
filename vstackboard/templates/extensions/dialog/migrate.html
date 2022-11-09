@@ -4,6 +4,7 @@
         <v-card-text>
             <v-switch v-model="migrateDialog.smart" label="智能模式" persistent-hint hint=智能模式根据虚拟机状态选择冷迁移还是热迁移></v-switch>
             <v-switch v-model="migrateDialog.liveMigrate" label="热迁移" :disabled="migrateDialog.smart"></v-switch>
+            <v-select clearable :items="migrateDialog.nodes" label="目标节点" v-model="migrateDialog.host" @click="migrateDialog.refreshHosts()">
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions>
