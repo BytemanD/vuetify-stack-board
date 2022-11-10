@@ -2,17 +2,28 @@
     <v-card>
       <v-card-title class="headline grey lighten-2" primary-title>添加规则</v-card-title>
       <v-card-text>
-        <br>
         <v-row>
-            <v-col cols="12">
-                <v-select hide-details :items="networking.newQosPolicyRuleDialog.directionList" label="方向" v-model="networking.newQosPolicyRuleDialog.direction"></v-select>
-            </v-col>
-            <v-col cols="6">
-                <v-text-field hide-details label="最大kbps" placeholder="请输入最大kbps" v-model="networking.newQosPolicyRuleDialog.maxKbps"></v-text-field>
-            </v-col>
-            <v-col cols="6">
-                <v-text-field hide-details label="最大峰值kbps" placeholder="请输入最大峰值kbps" v-model="networking.newQosPolicyRuleDialog.maxBurstKbps"></v-text-field>
-            </v-col>
+          <v-col cols="2">
+            <v-checkbox hide-details v-model="networking.newQosPolicyRuleDialog.directions" label="出" :value="networking.newQosPolicyRuleDialog.EGRESS"></v-checkbox>
+          </v-col>
+          <v-col cols="2">
+            <v-checkbox hide-details v-model="networking.newQosPolicyRuleDialog.directions" label="入" :value="networking.newQosPolicyRuleDialog.INGRESS"></v-checkbox>
+          </v-col>
+          <v-col cols="8"></v-col>
+          <v-col cols="6">
+              <v-sheet elevation="2" class="pa-2">
+                <v-checkbox v-model="networking.newQosPolicyRuleDialog.types" :label="networking.newQosPolicyRuleDialog.BPS" :value="networking.newQosPolicyRuleDialog.BPS"></v-checkbox>
+                <v-text-field type="number" label="最大值(kbps)" placeholder="请输入最大值" v-model="networking.newQosPolicyRuleDialog.maxKbps"></v-text-field>
+                <v-text-field type="number" label="最大突发值(kbps)" placeholder="请输入最大突发值" v-model="networking.newQosPolicyRuleDialog.maxBurstKbps"></v-text-field>
+              </v-sheet>
+          </v-col>
+          <v-col cols="6">
+            <v-sheet elevation="2" class="pa-2">
+              <v-checkbox v-model="networking.newQosPolicyRuleDialog.types" :label="networking.newQosPolicyRuleDialog.PPS" :value="networking.newQosPolicyRuleDialog.PPS"></v-checkbox>
+              <v-text-field type="number" label="最大值(kpps)" placeholder="请输入最大值" v-model="networking.newQosPolicyRuleDialog.maxKpps"></v-text-field>
+              <v-text-field type="number" label="最大突发值(kpps)" placeholder="请输入最大突发值" v-model="networking.newQosPolicyRuleDialog.maxBurstKpps"></v-text-field>
+            </v-sheet>
+          </v-col>
         </v-row>
       </v-card-text>
       <v-divider></v-divider>

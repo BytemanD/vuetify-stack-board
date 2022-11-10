@@ -1569,21 +1569,30 @@ export class QosPolicyRules extends Dialog {
             { text: 'direction', value: 'direction' },
             { text: 'max_kbps', value: 'max_kbps' },
             { text: 'max_burst_kbps', value: 'max_burst_kbps' },
+            { text: 'max_kpps', value: 'max_kpps' },
+            { text: 'max_burst_kpps', value: 'max_burst_kpps' },
         ];
         this.extendItems = []
     }
     async deleteSelected(){
         for (let i in this.selected){
             let rule = this.selected[i];
+            if (!rule){
+                continue;
+            }
             try {
-                await API.qosPolicy.deleteRule(this.qosPolicy.id, rule.id);
+                if (rule.max_kbps || rule.max_burst_kbps) {
+                    await API.qosPolicy.deleteBpsRule(this.qosPolicy.id, rule.id);
+                } else {
+                    await API.qosPolicy.deletePpsRule(this.qosPolicy.id, rule.id);
+                }
                 MESSAGE.success(`规则 ${rule.id} 删除成功`);
                 this.qosPolicy = (await API.qosPolicy.show(this.qosPolicy.id)).policy;
             } catch (e) {
                 MESSAGE.error(`规则 ${rule.id} 删除失败`);
             }
-            this.selected = [];
         }
+        this.selected = [];
     }
     async open(qosPolicy) {
         this.qosPolicy = qosPolicy;
@@ -1594,34 +1603,60 @@ export class QosPolicyRules extends Dialog {
 export class NewQosPolicyRule extends Dialog {
     constructor() {
         super();
+        this.BPS = 'bps';
+        this.PPS = 'pps';
+        this.INGRESS = 'ingress';
+        this.EGRESS = 'egress';
+
         this.qosPolicyRulesDialog = {};
-        this.directionList = ['ingress', 'egress'];
-        this.direction = 'ingress'
+        this.directions = ['ingress', 'egress'];
+        this.types = [this.BPS];
         this.maxKbps = null;
         this.maxBurstKbps = null;
+        this.maxKpps = null;
+        this.maxBurstKpps = null;
+    }
+    getQosPolicyId(){
+        return this.qosPolicyRulesDialog.qosPolicy.id;
+    }
+    async createBpsRule(){
+        if (this.types.indexOf(this.BPS) < 0){
+            return;
+        }
+        if (this.maxKbps > 2147483647 || this.maxBurstKbps > 2147483647){
+            ALERT.warn(`kbps值不能大于 2147483647`)
+            return;
+        }
+        for (let i in this.directions){
+            try {
+                await API.qosPolicy.addBpsRule(
+                    this.getQosPolicyId(), this.directions[i],
+                    {maxKbps: this.maxKbps, maxBurstKbps: this.maxBurstKbps});
+                MESSAGE.success(`规则 ${this.BPS} ${this.directions[i]} 创建成功`);
+            } catch {
+                MESSAGE.error(`规则 ${this.BPS} ${this.directions[i]} 创建失败`);
+            }
+        }
+    }
+    async createPpsRule(){
+        if (this.types.indexOf(this.PPS) < 0){
+            return;
+        }
+        for (let i in this.directions){
+            try {
+                await API.qosPolicy.addPpsRule(
+                    this.getQosPolicyId(), this.directions[i],
+                    {maxKpps: this.maxKpps, maxBurstKbps: this.maxBurstKpps})
+                MESSAGE.success(`规则 ${this.PPS} ${this.directions[i]} 创建成功`);
+            } catch(e) {
+                MESSAGE.error(`规则 ${this.PPS} ${this.directions[i]} 创建失败`);
+            }
+        }
     }
     async commit(){
-        let data = {direction: this.direction};
-        try {
-            if (this.maxKbps) { data.max_kbps = parseInt(this.maxKbps); }
-            if (this.maxBurstKbps) { data.max_burst_kbps = parseInt(this.maxBurstKbps); }
-        } catch {
-            ALERT.error(`非法数值`);
-            return;
-        }
-        if (Object.keys(data).length <= 1){
-            return;
-        }
-        let qosPolicy = this.qosPolicyRulesDialog.qosPolicy;
-        try {
-            await API.qosPolicy.addRule(qosPolicy.id, data);
-            MESSAGE.success(`规则创建成功`);
-        } catch (e) {
-            console.error(e);
-            MESSAGE.error(`规则创建失败: ${e}`);
-            return;
-        }
-        this.qosPolicyRulesDialog.qosPolicy = (await API.qosPolicy.show(qosPolicy.id)).policy;
+        await this.createBpsRule();
+        await this.createPpsRule();
+        this.qosPolicyRulesDialog.qosPolicy = (await API.qosPolicy.show(this.getQosPolicyId())).policy;
     }
     async open(qosPolicyRulesDialog) {
         this.qosPolicyRulesDialog = qosPolicyRulesDialog;

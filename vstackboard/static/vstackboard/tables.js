@@ -952,6 +952,14 @@ export class HypervisortTable extends DataTable {
         this.statistics = {};
         this._memUsedPercent = 0;
         this._vcpuUsedPercent = 0;
+        this.extendItems = [
+            { text: 'extra_resources', value: 'extra_resources'},
+            { text: 'numa_node_0_cpuset', value: 'numa_node_0_cpuset'},
+            { text: 'numa_node_1_cpuset', value: 'numa_node_1_cpuset'},
+            { text: 'numa_node_0_hugepages', value: 'numa_node_0_hugepages'},
+            { text: 'numa_node_1_hugepages', value: 'numa_node_1_hugepages'},
+            { text: 'numa_node_1_hugepages', value: 'numa_node_1_hugepages'},
+        ];
     }
     async refreshStatics() {
         this.statistics = (await API.hypervisor.statistics()).hypervisor_statistics;

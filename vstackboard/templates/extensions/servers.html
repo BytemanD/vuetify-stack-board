@@ -1,10 +1,14 @@
 <v-row>
   <v-col>
     <v-btn small color="primary" v-on:click="newServerDialog.open()"><v-icon>mdi-plus</v-icon></v-btn>
-    <v-btn class="rounded-l-lg rounded-r-0" small color="success" v-on:click="computing.serverTable.startSelected()" :disabled="computing.serverTable.selected.length == 0">开机</v-btn>
-    <v-btn class="rounded-l-0 rounded-r-lg" small color="warning" v-on:click="computing.serverTable.stopSelected()" :disabled="computing.serverTable.selected.length == 0">关机</v-btn>
-    <v-btn class="rounded-l-lg rounded-r-0" small color="success" v-on:click="computing.serverTable.unpauseSelected()" :disabled="computing.serverTable.selected.length == 0">开启</v-btn>
-    <v-btn class="rounded-l-0 rounded-r-lg" small color="warning" v-on:click="computing.serverTable.pauseSelected()" :disabled="computing.serverTable.selected.length == 0">暂停</v-btn>
+    <v-btn-toggle borderless>
+      <v-btn small elevation="2" color="success" v-on:click="computing.serverTable.startSelected()" :disabled="computing.serverTable.selected.length == 0">开机</v-btn>
+      <v-btn small elevation="2" color="warning" v-on:click="computing.serverTable.stopSelected()" :disabled="computing.serverTable.selected.length == 0">关机</v-btn>
+    </v-btn-toggle>
+    <v-btn-toggle borderless>
+      <v-btn small elevation="2" color="success" v-on:click="computing.serverTable.unpauseSelected()" :disabled="computing.serverTable.selected.length == 0">开启</v-btn>
+      <v-btn small elevation="2" color="warning" v-on:click="computing.serverTable.pauseSelected()" :disabled="computing.serverTable.selected.length == 0">暂停</v-btn>
+    </v-btn-toggle>
     <v-menu  offset-y>
       <template v-slot:activator="{ on, attrs }">
         <v-btn small color="info" v-bind="attrs" v-on="on" :disabled="computing.serverTable.selected.length == 0"><v-icon small>mdi-menu</v-icon> 重启</v-btn>
@@ -85,7 +89,7 @@
   </template>
 
   <template v-slot:expanded-item="{ headers, item }">
-    <td></td><td></td>
+    <td></td>
     <td :colspan="headers.length -1">
       <table>
         <tr><td><strong>UUID</strong></td><td>[[ item.id ]]</td></tr>
