@@ -1,13 +1,9 @@
-<v-app-bar-nav-icon>
-    <v-avatar><v-img src="/static/favicon.svg" max-width="28" contain></v-img></v-avatar>
-</v-app-bar-nav-icon>
-<v-toolbar-title>{{ name }}</v-toolbar-title>
-<v-toolbar-title class="my-auto ml-7" style="width: 16%">
+<v-toolbar-title style="width: 16%">
     <v-select solo-inverted flat hide-details :items="clusterTable.items" prefix='集群：' item-text="name" class="rounded-0" append-icon="mdi-map"
         v-model="clusterTable.selected" v-on:change="useCluster">
     </v-select>
 </v-toolbar-title>
-<v-toolbar-title class="my-auto ml-2" style="width: 16%">
+<v-toolbar-title class="ml-1" style="width: 16%">
     <v-select solo-inverted flat hide-details clearable :items="regionTable.items" :prefix='I18N.t("region")+":"' class="rounded-0" append-icon="mdi-map-marker"
         item-text="id" item-name="id" v-model="regionTable.selected" v-on:change="useRegion">
     </v-select>

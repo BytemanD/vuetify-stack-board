@@ -27,6 +27,8 @@ export class Settings {
         this.show = false;
         this.items = {
             // language: new Setting(navigator.language, { choises: LANGUAGE, onChangeCallback: I18N.setDisplayLang }),
+            theme: new Setting('dark', { 'choises': ['light', 'dark'] }),
+            navigatorWidth: new Setting('200', { 'choises': ['200', '220', '240', '260', '280', '300'] }),
             messagePosition: new Setting('bottom-right', { 'choises': NOTIFY_POSITION }),
             alertPosition: new Setting('bottom', { 'choises': NOTIFY_POSITION }),
         }

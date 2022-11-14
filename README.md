@@ -73,7 +73,8 @@ docker run -itd --network=host \
 ### v0.0.8
 - [X] 控制台日志，支持刷新
 - [X] 添加疏散
-- [ ] UI调整
+- [X] Hypervisor显示更多
+- [X] 修改logo、支持侧边栏收缩、console log 自动刷新
 
 ### v0.0.7
 - [x] 前端检查最新版本

@@ -11,6 +11,8 @@ const MESSAGES = {
         alertPosition: 'alert position',
         security: 'security',
         region: 'Region',
+        theme: "theme",
+        navigatorWidth: 'navigator width',
     },
     'zh-CN': {
         language: '语言',
@@ -24,6 +26,8 @@ const MESSAGES = {
         alertPosition: '警告框显示位置',
         security: '安全',
         region: '地区',
+        theme: "主题",
+        navigatorWidth: '侧边栏宽度',
     },
 };
 

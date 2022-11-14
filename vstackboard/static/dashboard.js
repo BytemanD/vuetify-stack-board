@@ -32,12 +32,12 @@ import { I18N } from "./i18n.js";
 
 const navigationItems = [
     { title: '虚拟化资源', icon: 'mdi-alpha-h-circle' },
-    { title: '实例', icon: 'mdi-laptop-account', group: '计算资源' },
+    { title: '实例', icon: 'mdi-laptop-account', group: '计算' },
     { title: '计算管理', icon: 'mdi-layers', },
     { title: '存储', icon: 'mdi-expansion-card' },
     { title: '镜像', icon: 'mdi-package-variant-closed' },
 
-    { title: '网络', icon: 'mdi-web', group: '网络资源' },
+    { title: '网络资源', icon: 'mdi-web', group: '网络' },
     { title: '服务地址', icon: 'mdi-server', group: '认证' },
     { title: '租户', icon: 'mdi-account-supervisor' },
     { title: '域', icon: 'mdi-domain' },
@@ -53,6 +53,10 @@ new Vue({
     delimiters: ['[[', ']]'],
     vuetify: new Vuetify(),
     data: {
+        ui: {
+            theme: SETTINGS.getItem('theme'),
+            navigatorWidth: SETTINGS.getItem('navigatorWidth'),
+        },
         UTILS: Utils,
         clusterTable: clusterTable,
         regionTable: regionTable,
@@ -123,7 +127,7 @@ new Vue({
             item: $cookies.get('navigationItem'),
             items: navigationItems,
         },
-        drawer: '',
+        drawer: true,
         miniVariant: false,
         // storage dialogs
         newVolumeDialog: newVolume,
@@ -201,7 +205,7 @@ new Vue({
                     this.computing.hypervisorTable.refreshStatics();
                     this.computing.usageTable.refresh();
                     break;
-                case '网络':
+                case '网络资源':
                     this.networking.networkTable.refresh();
                     this.networking.networkTable.refreshSubnets();
                     this.networking.portTable.refresh();
