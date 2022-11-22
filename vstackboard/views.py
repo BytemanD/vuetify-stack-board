@@ -117,6 +117,7 @@ class Cluster(web.RequestHandler):
             self.set_status(200)
             self.finish(json.dumps({}))
         except Exception as e:
+            LOG.exception(e)
             self.set_status(400)
             self.finish({'error': str(e)})
 

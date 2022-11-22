@@ -10,6 +10,12 @@ LOG_FORMAT = '%(asctime)s %(process)d %(levelname)s %(name)s:%(lineno)s ' \
 FILE_PATH = os.path.abspath(__file__)
 INSTALL_DIR = os.path.dirname(FILE_PATH)
 
+DOCKER = 'docker'
+PODMAN = 'podman'
+
+CONTAINER_CMD = None
+
+
 LOG = logging.getLogger(__name__)
 
 
@@ -22,7 +28,7 @@ def run_popen(cmd):
 
 
 class DockerCmd(object):
-    cmd = 'docker'
+    cmd = DOCKER
 
     @classmethod
     def build(cls, path='./', network=None, build_args=None, target=None,
@@ -55,7 +61,12 @@ class DockerCmd(object):
             raise RuntimeError(f'docker push return {status}')
 
 
+class PodmanCmd(DockerCmd):
+    cmd = PODMAN
+
+
 def main():
+    global CONTAINER_CMD
     parser = argparse.ArgumentParser(description='vstackboard build tool')
     parser.add_argument('whl_file', help='The file of whl package')
     parser.add_argument('-r', '--push-registry', action='append', nargs='?',
@@ -65,12 +76,19 @@ def main():
                         help='Push image to registry as latest version')
     parser.add_argument('-n', '--no-cache', action='store_true',
                         help='Force to build')
+    parser.add_argument('-c', '--container-cmd', default='docker',
+                        choices=['docker', 'podman'], help='Force to build')
     parser.add_argument('-d', '--debug', action='store_true',
                         help='Show debug message')
     args = parser.parse_args()
 
     logging.basicConfig(level=args.debug and logging.DEBUG or logging.INFO,
                         format=LOG_FORMAT)
+
+    if args.container_cmd == DOCKER:
+        CONTAINER_CMD = DockerCmd
+    elif args.container_cmd == PODMAN:
+        CONTAINER_CMD = PodmanCmd
 
     whl_file_path = os.path.abspath(args.whl_file)
     LOG.info('whl file path: %s', whl_file_path)
@@ -98,9 +116,9 @@ def main():
         LOG.error('file %s not exists', whl_name)
         return 1
     try:
-        DockerCmd.build('./', network='host', target=target,
-                        no_cache=args.no_cache,
-                        build_args=[f'PACKAGE_NAME={whl_name}'])
+        CONTAINER_CMD.build('./', network='host', target=target,
+                            no_cache=args.no_cache,
+                            build_args=[f'PACKAGE_NAME={whl_name}'])
         LOG.info('image build success')
     except Exception as e:
         LOG.error('build failed! %s', e)
@@ -113,14 +131,14 @@ def main():
     try:
         for registry in args.push_registry or []:
             alias = f'{registry}/{target}'
-            DockerCmd.tag(target, alias)
+            CONTAINER_CMD.tag(target, alias)
             LOG.info('try to push tag: %s', alias)
-            DockerCmd.push(alias)
+            CONTAINER_CMD.push(alias)
             if args.push_as_latest:
                 latest = f'{registry}/vstackboard:latest'
-                DockerCmd.tag(target, latest)
+                CONTAINER_CMD.tag(target, latest)
                 LOG.info('try to push tag: %s', latest)
-                DockerCmd.push(latest)
+                CONTAINER_CMD.push(latest)
 
     except Exception as e:
         LOG.error('tag/push failed! %s', e)

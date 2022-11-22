@@ -19,9 +19,25 @@ class Restfulclient {
         }
         return queryParams.join('&');
     }
+    _getErrorMsg(response){
+        let errorData = response.data;
+        if (errorData.badRequest && errorData.badRequest.message) {
+            return errorData.badRequest.message
+        } else {
+            return JSON.stringify(errorData)
+        }
+    }
     async get(id) { let resp = await axios.get(`${this.baseUrl}/${id}`); return resp.data };
     async delete(id) { let resp = await axios.delete(`${this.baseUrl}/${id}`) ; return resp.data };
-    async post(body) { let resp = await axios.post(`${this.baseUrl}`, body) ; return resp.data };
+    async post(body, url=null) {
+        try {
+            let resp = await axios.post(`${url || this.baseUrl}`, body);
+            return resp.data
+        } catch (e){
+            MESSAGE.error(this._getErrorMsg(e.response))
+            throw e
+        }
+    };
     async put(id, body) { let resp = await axios.put(`${this.baseUrl}/${id}`, body); return resp.data };
     async show(id) {  return await this.get(id)};
     async list(filters = {}) {
@@ -172,12 +188,12 @@ class Server extends ClientExt {
         return queryParams.join('&');
     }
     async volumeBoot(data) {
-        let resp = await axios.post('/computing/os-volumes_boot', { server: data });
-         return resp.data;
+        let respData = await this.post({ server: data }, '/computing/os-volumes_boot');
+        return respData;
     }
     async imageBoot(data) {
-        let resp = await axios.post('/computing/servers', { server: data });
-        return resp.data;
+        let respData = await this.post({ server: data }, '/computing/servers');
+        return respData;
     }
     async boot(name, flavorId, imageId, options = {}) {
         let data = {

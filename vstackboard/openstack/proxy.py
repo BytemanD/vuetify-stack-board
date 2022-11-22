@@ -62,7 +62,7 @@ class OpenstackV3AuthProxy(object):
         LOG.info('auth body: %s', json.dumps(self.auth_body))
         resp = requests.post('{}/v3/auth/tokens'.format(self.auth_url),
                              json=self.auth_body,
-                             timeout=10)
+                             timeout=60)
         token = json.loads(resp.content).get('token', {})
         self.auth_token = {
             'token': resp.headers.get('x-subject-token', None),

@@ -43,7 +43,6 @@ class DataTable {
                 MESSAGE.error(`删除 ${this.name} ${item.id} 失败`)
             }
         }
-        MESSAGE.success(`${this.name} 删除成功`)
         this.refresh();
         this.resetSelected();
     }

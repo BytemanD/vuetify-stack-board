@@ -801,7 +801,10 @@ export class NewServerDialog extends Dialog {
             return;
         }
         let networks = [];
-        if (this.portId){ networks.push({port: this.portId}) };
+        if (this.portId){
+            networks.push({port: this.portId});
+            this.params.nums = 1;
+        };
         if (this.params.netId){ networks.push({ uuid: this.params.netId }) }
         let data = {
             minCount: this.params.nums, maxCount: this.params.nums,

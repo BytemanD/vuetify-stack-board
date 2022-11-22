@@ -29,8 +29,8 @@
                 <v-select :items="newServerDialog.networks" clearable label="网络" dense item-text="name" item-value="id" 
                           v-model="newServerDialog.params.netId" @click="newServerDialog.refresNetworks()">
                 </v-select>
-                <v-select :items="newServerDialog.ports" clearable label="端口" dense item-text="name" item-value="id"
-                          v-model="newServerDialog.portId" @click="newServerDialog.refresPorts()">
+                <v-select clearable dense :items="newServerDialog.ports" label="端口" item-text="name" item-value="id"
+                          messages="如果选择端口，只能创建一台虚拟机。" v-model="newServerDialog.portId" @click="newServerDialog.refresPorts()">
                 </v-select>
             </v-col>
             <v-col cols="2">
@@ -65,7 +65,8 @@
       </v-stepper-items>
       <v-stepper-items>
         <v-stepper-content step="3">
-          <v-slider v-model="newServerDialog.params.nums" label="实例数量" class="align-center" ticks="always" max="10" min="1" >
+          <v-slider v-model="newServerDialog.params.nums" label="实例数量" class="align-center" ticks="always" max="10" min="1"
+                  :disabled="newServerDialog.portId != null">
               <template v-slot:append ><v-chip label small>[[newServerDialog.params.nums]]</v-chip></template>
           </v-slider>
           <v-row>
