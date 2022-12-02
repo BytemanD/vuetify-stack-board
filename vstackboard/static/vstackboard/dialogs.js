@@ -1,4 +1,4 @@
-import { Utils, MESSAGE, ALERT, LOG, ServerTasks, Alert } from './lib.js';
+import { Utils, MESSAGE, ALERT, LOG, ServerTasks, Alert, CONST } from './lib.js';
 import API from './api.js';
 
 import {
@@ -672,19 +672,32 @@ export class EvacuateDialog extends Dialog {
         this.nodes = await serverTable.getAvailableMoveHosts();
     }
     async evacuateServer(server){
-        let service = (await API.computeService.list({host: server['OS-EXT-SRV-ATTR:host']})).services[0];
-        if (service.state == 'up') {
-            ALERT.warn(`虚拟机所在节点 ${service.host} 正在使用中，无法疏散。`)
+        let hostServices = (await API.computeService.list({host: server['OS-EXT-SRV-ATTR:host']})).services;
+        let computeService = null;
+        for (let i in hostServices){
+            if (hostServices[i].binary != CONST.NOVA_COMPUTE){
+                continue
+            }
+            computeService = hostServices[i];
+        }
+        if (computeService == null){
+            // just in case
+            ALERT.warn(`该节点无 ${CONST.NOVA_COMPUTE} 服务`)
+            return;
+        }
+
+        if (computeService.state == 'up') {
+            ALERT.warn(`节点 ${computeService.host} 正在使用中，无法疏散。`)
             return;
         }
         try {
             await API.server.evacuate(server.id, {host: this.host, force: this.force});
+            await serverTable.waitServerMoved(server);
         } catch(e) {
-            ALERT.warn(`节点 ${service.name}疏散失败`)
+            ALERT.error(`虚拟机 ${server.name}疏散失败`)
             return
         }
         MESSAGE.info(`疏散 ${server.name} ...`);
-        await serverTable.waitServerMoved(server);
         MESSAGE.success(`虚拟机 ${server.name} 疏散完成`);
         serverTable.refresh();
     }

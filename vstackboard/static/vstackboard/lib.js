@@ -256,6 +256,10 @@ export class ServerTasks extends ContextLocalStorage {
     }
 }
 
+export var CONST = {
+    NOVA_COMPUTE: 'nova-compute'
+}
+
 export const MESSAGE = new Message();
 export const ALERT = new Alert();
 export const LOG = new Logger({level: Level.DEBUG});
