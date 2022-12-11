@@ -27,7 +27,11 @@ class Restfulclient {
             return JSON.stringify(errorData)
         }
     }
-    async get(id) { let resp = await axios.get(`${this.baseUrl}/${id}`); return resp.data };
+    async get(url=null) {
+        let reqUrl = url ? `${this.baseUrl}/${url}` : this.baseUrl;
+        let resp = await axios.get(reqUrl);
+        return resp.data
+    };
     async delete(id) { let resp = await axios.delete(`${this.baseUrl}/${id}`) ; return resp.data };
     async post(body, url=null) {
         try {
@@ -39,7 +43,11 @@ class Restfulclient {
         }
     };
     async put(id, body) { let resp = await axios.put(`${this.baseUrl}/${id}`, body); return resp.data };
-    async show(id) {  return await this.get(id)};
+    async show(id, filters={}) {
+        let url = filters ? `${id}?${this._parseToQueryString(filters)}` : id;
+        let data = await this.get(`${url}`);
+        return data
+    };
     async list(filters = {}) {
         let queryString = this._parseToQueryString(filters);
         let url = this.baseUrl;

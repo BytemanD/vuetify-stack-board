@@ -63,7 +63,10 @@
 <v-card dense class="mt-1">
   <v-card-text>
     <v-row>
-      <v-col><v-btn small color="primary" v-on:click="refreshContainer()">刷新</v-btn></v-col>
+      <v-col>
+        <v-btn small color="primary" v-on:click="refreshContainer()">刷新</v-btn>
+        <v-btn small color="info" v-on:click="computing.hypervisorTable.tenantUsageDialog.open()">资源使用情况</v-btn>
+      </v-col>
       <v-col>
         <v-text-field small dense v-model="computing.hypervisorTable.search" append-icon="mdi-magnify" label="搜索"
           single-line hide-details></v-text-field>
@@ -72,7 +75,6 @@
   </v-card-text>
 </v-card>
 
-[[ computing.hypervisorTable.search ]]
 <v-data-table dense show-expand single-expand :headers="computing.hypervisorTable.headers" :items="computing.hypervisorTable.items"
   :items-per-page="computing.hypervisorTable.itemsPerPage" :search="computing.hypervisorTable.search" class="elevation-1">
   <template v-slot:item.status="{ item }">
@@ -103,6 +105,7 @@
   </template>
 </v-data-table>
 
+{% include 'dialog/tenantUsage.html' %}
 
 <!-- <v-date-picker v-model="computing.usageTable.start"></v-date-picker>
 <v-date-picker v-model="computing.usageTable.end"></v-date-picker> -->

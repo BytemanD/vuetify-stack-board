@@ -1,5 +1,5 @@
 import API from './api.js'
-import { AggHostsDialog, NewAggDialog, NewDomainDialog, NewImageDialog, NewProjectDialog, ServerResetStateDialog, TasksDialog } from './dialogs.js';
+import { AggHostsDialog, NewAggDialog, NewDomainDialog, NewImageDialog, NewProjectDialog, ServerResetStateDialog, TasksDialog, TenantUsageDialog } from './dialogs.js';
 import { ALERT, LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
 import { netTable } from './objects.js';
 
@@ -959,6 +959,7 @@ export class HypervisortTable extends DataTable {
             { text: 'numa_node_1_hugepages', value: 'numa_node_1_hugepages'},
             { text: 'numa_node_1_hugepages', value: 'numa_node_1_hugepages'},
         ];
+        this.tenantUsageDialog = new TenantUsageDialog();
     }
     async refreshStatics() {
         this.statistics = (await API.hypervisor.statistics()).hypervisor_statistics;

@@ -56,9 +56,15 @@ class DockerCmd(object):
 
     @classmethod
     def push(cls, image):
+        LOG.info('try to push: %s', image)
         status = run_popen([cls.cmd, 'push', image])
         if status != 0:
             raise RuntimeError(f'docker push return {status}')
+
+    @classmethod
+    def tag_and_push(cls, image, tag):
+        cls.tag(image, tag)
+        cls.push(tag)
 
 
 class PodmanCmd(DockerCmd):
@@ -130,15 +136,11 @@ def main():
 
     try:
         for registry in args.push_registry or []:
-            alias = f'{registry}/{target}'
-            CONTAINER_CMD.tag(target, alias)
-            LOG.info('try to push tag: %s', alias)
-            CONTAINER_CMD.push(alias)
+            CONTAINER_CMD.tag_and_push(target, f'{registry}/{target}')
+
             if args.push_as_latest:
-                latest = f'{registry}/vstackboard:latest'
-                CONTAINER_CMD.tag(target, latest)
-                LOG.info('try to push tag: %s', latest)
-                CONTAINER_CMD.push(latest)
+                CONTAINER_CMD.tag_and_push(target,
+                                           f'{registry}/vstackboard:latest')
 
     except Exception as e:
         LOG.error('tag/push failed! %s', e)

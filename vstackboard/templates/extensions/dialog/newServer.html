@@ -76,7 +76,7 @@
               </v-select>
             </v-col>
             <v-col>
-              <v-select :items="newServerDialog.azHosts[newServerDialog.params.az]" label="节点" placeholder="请选择节点" v-model="newServerDialog.params.host">
+              <v-select :items="newServerDialog.azHosts[newServerDialog.params.az]" clearable label="节点" placeholder="请选择节点" v-model="newServerDialog.params.host">
                   <template v-slot:selection="{ item }"> [[ item ]] </template>
               </v-select>
             </v-col>

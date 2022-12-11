@@ -75,6 +75,7 @@ docker run -itd --network=host \
 - [X] 添加疏散
 - [X] Hypervisor显示更多
 - [X] 修改logo、支持侧边栏收缩、console log 自动刷新
+- [X] 支持显示Usage图表
 
 ### v0.0.7
 - [x] 前端检查最新版本

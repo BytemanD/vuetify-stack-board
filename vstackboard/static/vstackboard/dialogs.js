@@ -1886,6 +1886,138 @@ export class ServerTopology extends Dialog {
         this.drawServerTopoply();
     }
 }
+export class TenantUsageDialog extends Dialog {
+    constructor() {
+        super()
+        this.start = '2022-11-13T00:00:00'
+        this.end = null;
+        this.dateRangeList = [
+            {value: 'last1Day', text: '最近1天'},
+            {value: 'last7Days', text: '最近7天'},
+            {value: 'last6Monthes', text: '最近6个月'},
+            {value: 'last1Year', text: '最近1年'},
+        ]
+        this.dateRange = 'last7Days';
+    }
+    _getOption(titleText, xData, seriesData){
+        return {
+            title: {show: true, text: titleText},
+            tooltip: {show: true}, 
+            xAxis: {
+              type: 'category',
+              boundaryGap: false,
+              data: xData
+            },
+            yAxis: {type: 'value'},
+            series: [
+                {
+                    type: 'line',
+                    data: seriesData,
+                    areaStyle: {},
+                    label: { show: true, position: 'top' },
+              }
+            ]
+        };
+    }
+    async _getChart(eleId){
+        let chartDom = document.getElementById(eleId);
+        while (! chartDom){
+            await Utils.sleep(0.1);
+            chartDom = document.getElementById(eleId);
+        }
+        return echarts.init(chartDom);
+    }
+    _getDateList(){
+        let dateList = []
+        let startDate = new Date();
+        switch (this.dateRange) {
+            case 'last1Day':
+                startDate.setHours(startDate.getHours() - 25);
+                for (let i=-1; i < 24; i++){
+                    startDate.setHours(startDate.getHours() + 1);
+                    dateList.push(startDate.toISOString().slice(0, -1))
+                }
+                break;
+            case 'last7Days':
+                startDate.setDate(startDate.getDate() - 8);
+                for (let i=-1; i < 7; i++){
+                    startDate.setDate(startDate.getDate() + 1);
+                    dateList.push(startDate.toISOString().slice(0, -1))
+                }
+                break;
+            case 'last6Monthes':
+                startDate.setMonth(startDate.getMonth() - 7);
+                for (let i=-1; i < 6; i++){
+                    startDate.setMonth(startDate.getMonth() + 1);
+                    dateList.push(startDate.toISOString().slice(0, -1))
+                }
+                break;
+            case 'last1Year':
+                startDate.setMonth(startDate.getMonth() - 13);
+                for (let i=-1; i < 12; i++){
+                    startDate.setMonth(startDate.getMonth() + 1);
+                    dateList.push(startDate.toISOString().slice(0, -1))
+                }
+                break;
+        }
+        return dateList;
+    }
+    _getXDateList(dateList){
+        switch (this.dateRange) {
+            case 'last1Day':
+                return dateList.map(x => {return `${x.slice(5, 11)}\n${x.slice(11, 19)}`});
+            case 'last7Days':
+                case 'last6Monthes':
+                case 'last1Year':
+                return dateList.map(x => {return Date.parse(x)});
+                // return dateList.map(x => {return `${x.slice(0, 11)}`});
+        }
+    }
+    async drawTenantUsage() {
+        let authInfo = await API.authInfo.get();
+        let xData = this._getDateList();
+
+        let vcpuUsageData = [];
+        let memUsageData = [];
+        let diskUsageData = [];
+        let serverUsageData = [];
+
+        let dateList = this._getXDateList(xData.slice(1));
+
+        let vcpuOption = this._getOption('VCPU', dateList, vcpuUsageData);
+        let memOption = this._getOption('内存(MB)', dateList, memUsageData);
+        let diskOption = this._getOption('本地磁盘(GB)', dateList, diskUsageData);
+        let serverOption = this._getOption('虚拟机数量', dateList, serverUsageData);
+
+        var vcpuChart = await this._getChart('vcpuUsage'),
+            memChart = await this._getChart('memUsage'),
+            diskChart = await this._getChart('diskUsage'),
+            serverChart = await this._getChart('serverUsage');
+        for (let i in xData){
+            if (i == 0) {continue}
+            let startDate = xData[i - 1], endDate = xData[i];
+            let filters = {start: startDate, end: endDate}
+            let tenantUsage = (await API.usage.show(authInfo.project.id, filters)).tenant_usage;
+
+            vcpuUsageData.push(parseInt(tenantUsage.total_vcpus_usage || 0));
+            memUsageData.push(parseInt(tenantUsage.total_memory_mb_usage || 0));
+            diskUsageData.push(parseInt(tenantUsage.total_local_gb_usage || 0));
+            serverUsageData.push(tenantUsage.server_usages ? tenantUsage.server_usages.length : 0);
+
+            vcpuChart.setOption(vcpuOption);
+            memChart.setOption(memOption);
+            diskChart.setOption(diskOption);
+            serverChart.setOption(serverOption);
+        }
+    }
+    refresh(){ 
+        this.drawTenantUsage();
+    }
+    open() {
+        super.open();
+        this.drawTenantUsage();
+    }
+}
 export class ServerActionsDialog extends Dialog {
     constructor() {
         super();

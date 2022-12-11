@@ -203,7 +203,7 @@ new Vue({
                 case '虚拟化资源':
                     this.computing.hypervisorTable.refresh();
                     this.computing.hypervisorTable.refreshStatics();
-                    this.computing.usageTable.refresh();
+                    // this.computing.usageTable.refresh();
                     break;
                 case '网络资源':
                     this.networking.networkTable.refresh();
