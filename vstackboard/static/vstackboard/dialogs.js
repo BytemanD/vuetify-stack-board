@@ -1892,21 +1892,20 @@ export class TenantUsageDialog extends Dialog {
         this.start = '2022-11-13T00:00:00'
         this.end = null;
         this.dateRangeList = [
-            {value: 'last1Day', text: '最近1天'},
-            {value: 'last7Days', text: '最近7天'},
-            {value: 'last6Monthes', text: '最近6个月'},
-            {value: 'last1Year', text: '最近1年'},
+            {value: CONST.USAGE_LAST_1_DAY, text: '最近1天'},
+            {value: CONST.USAGE_LAST_7_DAY, text: '最近7天'},
+            {value: CONST.USAGE_LAST_6_MONTHES, text: '最近6个月'},
+            {value: CONST.USAGE_LAST_1_YEAR, text: '最近1年'},
         ]
-        this.dateRange = 'last7Days';
+        this.dateRange = CONST.USAGE_LAST_7_DAY;
     }
-    _getOption(titleText, xData, seriesData){
+    _getOption(titleText, seriesData){
         return {
             title: {show: true, text: titleText},
             tooltip: {show: true}, 
             xAxis: {
-              type: 'category',
+              type: 'time',
               boundaryGap: false,
-              data: xData
             },
             yAxis: {type: 'value'},
             series: [
@@ -1929,49 +1928,21 @@ export class TenantUsageDialog extends Dialog {
     }
     _getDateList(){
         let dateList = []
-        let startDate = new Date();
         switch (this.dateRange) {
-            case 'last1Day':
-                startDate.setHours(startDate.getHours() - 25);
-                for (let i=-1; i < 24; i++){
-                    startDate.setHours(startDate.getHours() + 1);
-                    dateList.push(startDate.toISOString().slice(0, -1))
-                }
+            case CONST.USAGE_LAST_1_DAY:
+                dateList = Utils.lastDateList({hour: 1}, 25);
                 break;
-            case 'last7Days':
-                startDate.setDate(startDate.getDate() - 8);
-                for (let i=-1; i < 7; i++){
-                    startDate.setDate(startDate.getDate() + 1);
-                    dateList.push(startDate.toISOString().slice(0, -1))
-                }
+            case CONST.USAGE_LAST_7_DAY:
+                dateList = Utils.lastDateList({day: 1}, 8);
                 break;
-            case 'last6Monthes':
-                startDate.setMonth(startDate.getMonth() - 7);
-                for (let i=-1; i < 6; i++){
-                    startDate.setMonth(startDate.getMonth() + 1);
-                    dateList.push(startDate.toISOString().slice(0, -1))
-                }
+            case CONST.USAGE_LAST_6_MONTHES:
+                dateList = Utils.lastDateList({month: 1}, 7);
                 break;
-            case 'last1Year':
-                startDate.setMonth(startDate.getMonth() - 13);
-                for (let i=-1; i < 12; i++){
-                    startDate.setMonth(startDate.getMonth() + 1);
-                    dateList.push(startDate.toISOString().slice(0, -1))
-                }
+            case CONST.USAGE_LAST_1_YEAR:
+                dateList = Utils.lastDateList({month: 1}, 13);
                 break;
         }
         return dateList;
-    }
-    _getXDateList(dateList){
-        switch (this.dateRange) {
-            case 'last1Day':
-                return dateList.map(x => {return `${x.slice(5, 11)}\n${x.slice(11, 19)}`});
-            case 'last7Days':
-                case 'last6Monthes':
-                case 'last1Year':
-                return dateList.map(x => {return Date.parse(x)});
-                // return dateList.map(x => {return `${x.slice(0, 11)}`});
-        }
     }
     async drawTenantUsage() {
         let authInfo = await API.authInfo.get();
@@ -1982,12 +1953,10 @@ export class TenantUsageDialog extends Dialog {
         let diskUsageData = [];
         let serverUsageData = [];
 
-        let dateList = this._getXDateList(xData.slice(1));
-
-        let vcpuOption = this._getOption('VCPU', dateList, vcpuUsageData);
-        let memOption = this._getOption('内存(MB)', dateList, memUsageData);
-        let diskOption = this._getOption('本地磁盘(GB)', dateList, diskUsageData);
-        let serverOption = this._getOption('虚拟机数量', dateList, serverUsageData);
+        let vcpuOption = this._getOption('VCPU', vcpuUsageData);
+        let memOption = this._getOption('内存(MB)', memUsageData);
+        let diskOption = this._getOption('本地磁盘(GB)', diskUsageData);
+        let serverOption = this._getOption('虚拟机数量', serverUsageData);
 
         var vcpuChart = await this._getChart('vcpuUsage'),
             memChart = await this._getChart('memUsage'),
@@ -1996,13 +1965,16 @@ export class TenantUsageDialog extends Dialog {
         for (let i in xData){
             if (i == 0) {continue}
             let startDate = xData[i - 1], endDate = xData[i];
-            let filters = {start: startDate, end: endDate}
+            let filters = {
+                start: new Date(startDate).toISOString().slice(0, -1),
+                end: new Date(endDate).toISOString().slice(0, -1)
+            };
             let tenantUsage = (await API.usage.show(authInfo.project.id, filters)).tenant_usage;
 
-            vcpuUsageData.push(parseInt(tenantUsage.total_vcpus_usage || 0));
-            memUsageData.push(parseInt(tenantUsage.total_memory_mb_usage || 0));
-            diskUsageData.push(parseInt(tenantUsage.total_local_gb_usage || 0));
-            serverUsageData.push(tenantUsage.server_usages ? tenantUsage.server_usages.length : 0);
+            vcpuUsageData.push([endDate, parseInt(tenantUsage.total_vcpus_usage || 0)]);
+            memUsageData.push([endDate, parseInt(tenantUsage.total_memory_mb_usage || 0)]);
+            diskUsageData.push([endDate, parseInt(tenantUsage.total_local_gb_usage || 0)]);
+            serverUsageData.push([endDate, tenantUsage.server_usages ? tenantUsage.server_usages.length : 0]);
 
             vcpuChart.setOption(vcpuOption);
             memChart.setOption(memOption);

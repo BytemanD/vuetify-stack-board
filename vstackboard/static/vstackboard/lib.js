@@ -1,5 +1,5 @@
 import API from "./api.js";
-import { CookieContext } from "./context.js";
+import { CookieContext, init } from "./context.js";
 import { SETTINGS } from "./settings.js";
 
 
@@ -167,7 +167,34 @@ export class Utils {
             document.body.removeAttribute(element);
         }
     }
-
+    static lastDateList(steps, nums){
+        // Get last n list of date
+        // e.g. [timestamp1, timestamp2, ...]
+        let endDate = new Date();
+        let dateList = [];
+        for (let i = 0; i < nums; i++){
+            for (let unit in steps) {
+                switch (unit) {
+                    case 'hour':
+                        endDate.setHours(endDate.getHours() - steps.hour);
+                        break;
+                    case 'month':
+                        endDate.setMonth(endDate.getMonth() - steps.month)
+                        break;
+                    case 'day':
+                        endDate.setDate(endDate.getDate() - steps.day);
+                        break;
+                    case 'year':
+                        endDate.setFullYear(endDate.getFullYear() - steps.year);
+                        break;
+                    default:
+                        throw Error(`Invalid step unit ${unit}`);
+                }
+            }
+            dateList.push(endDate.getTime());
+        }
+        return dateList.reverse();
+    }
 }
 
 //             error  warning info debug
@@ -187,22 +214,22 @@ export class Logger {
         if (this.level < Level.DEBUG){
             return
         }
-        console.debug(`${new Date().toISOString()} DEBUG ${msg}`)
+        console.debug(new Date().toLocaleString(), 'DEBUG', msg)
     };
     info(msg) {
         if (this.level < Level.INFO){
             return
         }
-        console.info(`${new Date().toISOString()} INFO ${msg}`)
+        console.info(`${new Date().toLocaleString()} INFO ${msg}`)
     };
     warn(msg) {
         if (this.level < Level.WARNING){
             return
         }
-        console.warn(`${new Date().toISOString()} WARN ${msg}`)
+        console.warn(`${new Date().toLocaleString()} WARN ${msg}`)
     };
     error(msg) {
-        console.error(`${new Date().toISOString()} ERROR ${msg}`)
+        console.error(`${new Date().toLocaleString()} ERROR ${msg}`)
         VuetifyMessageSnackbar.Notify.top().timeout(timeout * 1000).error(msg)
     };
 }
@@ -257,7 +284,17 @@ export class ServerTasks extends ContextLocalStorage {
 }
 
 export var CONST = {
-    NOVA_COMPUTE: 'nova-compute'
+    // service name
+    NOVA_COMPUTE: 'nova-compute',
+    // unit
+    UNIT_KB: 1024,
+    UNIT_MB: 1024 * 1024,
+    UNIT_GB: 1024 * 1024 * 1024,
+    // usage range of time
+    USAGE_LAST_1_DAY: 'last1Day',
+    USAGE_LAST_7_DAY: 'last7Days',
+    USAGE_LAST_6_MONTHES: 'last6Monthes',
+    USAGE_LAST_1_YEAR: 'last1Year',
 }
 
 export const MESSAGE = new Message();

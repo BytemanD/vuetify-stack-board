@@ -433,7 +433,24 @@ export class ServerDataTable extends DataTable {
         }
         return currentServer
     }
-
+    async waitServerTaskCompleted(server_id, taskState) {
+        let expectStateList = typeof taskState == 'string'? [taskState] : taskState
+        let currentServer = {};
+        let oldTaskState = ''
+        while (true) {
+            let body = await API.server.get(server_id);
+            currentServer = body.server;
+            if (expectStateList.indexOf(currentServer['OS-EXT-STS:task_state']) < 0) {
+                break
+            }
+            if (currentServer['OS-EXT-STS:task_state'] != oldTaskState) {
+                this.updateItem(currentServer);
+            }
+            console.debug(`wait server ${server_id} task state to be ${expectStateList}, now: ${currentServer['OS-EXT-STS:task_state']}`);
+            await Utils.sleep(5)
+        }
+        return currentServer
+    }
     async stopSelected() {
         let self = this;
         for (let i in this.selected) {
