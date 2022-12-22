@@ -974,7 +974,6 @@ export class HypervisortTable extends DataTable {
             { text: 'numa_node_1_cpuset', value: 'numa_node_1_cpuset'},
             { text: 'numa_node_0_hugepages', value: 'numa_node_0_hugepages'},
             { text: 'numa_node_1_hugepages', value: 'numa_node_1_hugepages'},
-            { text: 'numa_node_1_hugepages', value: 'numa_node_1_hugepages'},
         ];
         this.tenantUsageDialog = new TenantUsageDialog();
     }

@@ -704,7 +704,7 @@ export class EvacuateDialog extends Dialog {
     async commit() {
         for (let i in this.servers) {
             let item = this.servers[i];
-            if (['ACTIVE', 'SHUTOFF'].indexOf(item.status) < 0){
+            if (['ACTIVE', 'SHUTOFF', 'ERROR'].indexOf(item.status) < 0){
                 ALERT.warn(`虚拟机 ${item.name} 状态异常，无法疏散`, 1)
                 continue
             }
