@@ -16,4 +16,4 @@ RUN mkdir -p /etc/vstackboard && touch /etc/vstackboard/vstackboard.conf
 
 EXPOSE 80
 
-ENTRYPOINT [ "vstackboard", "serve" ]
+ENTRYPOINT [ "vstackboard", "serve", "--container"]

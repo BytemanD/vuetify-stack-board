@@ -27,6 +27,9 @@ msgstr "最新release版本：%s"
 msgid "The current version is the latest."
 msgstr "当前已经是最新版本。"
 
+msgid "A new image is available:"
+msgstr "有新的镜像:"
+
 msgid "VStackBoard Command Line"
 msgstr "VStackBoard 命令行"
 
@@ -48,5 +51,8 @@ msgstr "对所有问题回答是"
 msgid "use cache if it is downloaded"
 msgstr "如果已经下载，使用缓存"
 
+msgid "Check image version"
+msgstr "检查镜像版本"
 
-
+msgid "Image API"
+msgstr "镜像API"

@@ -106,10 +106,15 @@ class Upgrade(cli.SubCli):
                 help=_('answer yes for all questions')),
         cli.Arg('-c', '--cache', action='store_true',
                 help=_('use cache if it is downloaded')),
+        cli.Arg('--image', action='store_true',
+                help=_('Check image version')),
     ]
 
     def __call__(self, args):
-        last_version = utils.check_last_version()
+        if args.image:
+            last_version = self.upgrade_from_image()
+            return
+
         if not last_version:
             print(_('The current version is the latest.'))
             return
@@ -139,6 +144,16 @@ class Upgrade(cli.SubCli):
         print(_('Install success.'))
         print(_('Please execute the command below to restart vstackboard:'))
         print('    systemctl restart vstackboard')
+
+    def upgrade_from_image(self):
+        latest_version = utils.check_last_image_version()
+        if not latest_version:
+            print(_('The current version is the latest.'))
+            return
+
+        msg = f'{_("A new image is available:")} ' \
+              f'{latest_version.get("version")}'
+        print('\n' + msg + '\n')
 
     def pip_install(self, file_path, force=False):
         install_cmd = ['pip3', 'install', file_path]
@@ -183,9 +198,12 @@ class Serve(cli.SubCli):
                 help=_("Run serve with specified port")),
         cli.Arg('--develop', action='store_true',
                 help=_("Run serve with develop mode")),
+        cli.Arg('--container', action='store_true',
+                help=_("Run serve with docker container")),
     ]
 
     def __call__(self, args):
+
         if system.OS.is_windows():
             # NOTE(fjboy) For windows host, MIME type of .js file is
             # 'text/plain', so add this type before start http server.
@@ -195,6 +213,8 @@ class Serve(cli.SubCli):
 
         template_path = os.path.join(ROOT, 'templates')
         static_path = os.path.join(ROOT, 'static')
+
+        views.RUN_AS_CONTAINER = args.container
 
         app = VstackboardApp(views.get_routes(), develop=args.develop,
                              template_path=template_path,

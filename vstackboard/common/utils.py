@@ -46,6 +46,37 @@ def check_last_version():
     return {'version': '.'.join(v2.version), 'download_url': download_url}
 
 
+def check_last_image_version():
+    try:
+        tags = requests.get(constants.IMAGE_TAGS_API).json().get('results')
+    except Exception as e:
+        LOG.error('get tags failed, %s', e)
+        return
+
+    if not tags:
+        LOG.info('no repository tags found.')
+        return
+    current_version = get_version()
+    LOG.debug(_('Current version is: %s'), current_version)
+
+    v1 = pkg.PackageVersion(current_version)
+
+    latest_version = v1
+    for tag in tags:
+        if tag.get('name') == 'latest':
+            continue
+        v2 = pkg.PackageVersion(tag.get('name'))
+        if v2 > latest_version:
+            latest_version = v2
+
+    if latest_version > v1:
+        version_string = '.'.join(latest_version.version)
+        return {
+            'version': version_string,
+            'pull_url': f'fjboy/{constants.NAME}:${version_string}'
+        }
+
+
 class ImageChunk(object):
 
     def __init__(self, url, size):
