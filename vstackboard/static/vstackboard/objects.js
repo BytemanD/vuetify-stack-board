@@ -25,7 +25,7 @@ import {
     RouterDataTable, NetDataTable, PortDataTable, SecurityGroupDataTable, QosPolicyDataTable, 
     ImageDataTable,
     ClusterTable,
-    AggDataTable,
+    AggDataTable, MigrationDataTable,
 } from './tables.js';
 
 
@@ -47,6 +47,8 @@ export const keypairTable = new KeypairDataTable();;
 export const serverTable = new ServerDataTable();
 export const usageTable = new UsageTable();
 export const aggTable = new AggDataTable();
+export const migrationTable = new MigrationDataTable();
+
 export const serviceTable = new ServiceTable();
 export const routerTable = new RouterDataTable();
 export const netTable = new NetDataTable();

@@ -43,7 +43,7 @@ def check_last_version():
         LOG.error('assets not found')
         return
     download_url = asset.get("browser_download_url")
-    return {'version': v2.version, 'download_url': download_url}
+    return {'version': '.'.join(v2.version), 'download_url': download_url}
 
 
 class ImageChunk(object):

@@ -170,6 +170,9 @@ class ComputeService extends Restfulclient {
 class Usage extends Restfulclient {
     constructor() { super('/computing/os-simple-tenant-usage') }
 }
+class Migrations extends Restfulclient {
+    constructor() { super('/computing/os-migrations') };
+}
 
 class Server extends ClientExt {
     constructor() { super('/computing/servers') };
@@ -670,6 +673,7 @@ export class OpenstackProxyApi {
         this.server = new Server();
         this.usage = new Usage();
         this.keypair = new Keypair();
+        this.migration = new Migrations();
         // glance
         this.image = new Image();
         // neutron

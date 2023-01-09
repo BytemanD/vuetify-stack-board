@@ -1135,4 +1135,20 @@ export class ImageDataTable extends DataTable{
     }
 }
 
+export class MigrationDataTable extends DataTable{
+    constructor() {
+        super([
+            { text: '类型', value: 'migration_type' },
+            { text: '实例ID', value: 'instance_uuid' },
+            { text: '源节点', value: 'source_compute' },
+            { text: '目的节点', value: 'dest_compute' },
+            { text: '旧规格', value: 'old_instance_type_id' },
+            { text: '新规格', value: 'new_instance_type_id' },
+            { text: '开始时间', value: 'created_at' },
+            { text: '状态', value: 'status'},
+        ], API.migration, 'migrations')
+        // this.extendItems = []
+    }
+}
+
 export default DataTable;

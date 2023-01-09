@@ -9,7 +9,8 @@ import {
     backupTable, clusterTable, keypairTable, volumeServiceTable,
     routerTable, netTable, portTable, volumeTypeTable, snapshotTable,
     hypervisorTable, azTable, regionTable, qosPolicyTable,
-    imageTable, sgTable, userTable, projectTable, domainTable, aggTable
+    imageTable, sgTable, userTable, projectTable, domainTable, aggTable,
+    migrationTable,
 } from "./vstackboard/objects.js";
 import {
     newFlavor, flavorExtraDialog,
@@ -92,6 +93,7 @@ new Vue({
             keypairTable: keypairTable,
             azTable: azTable,
             aggTable: aggTable,
+            migrationTable: migrationTable,
             serverTopology: serverTopology,
             serverActions: serverActions,
             serverActionEvents: serverActionEvents,
