@@ -1,3 +1,4 @@
+import { I18N } from '../i18n.js';
 import API from './api.js'
 import { AggHostsDialog, NewAggDialog, NewDomainDialog, NewImageDialog, NewProjectDialog, ServerResetStateDialog, TasksDialog, TenantUsageDialog } from './dialogs.js';
 import { ALERT, LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
@@ -958,12 +959,12 @@ export class RoleTable extends DataTable {
 export class HypervisortTable extends DataTable {
     constructor() {
         super([
-            { text: '主机名', value: 'hypervisor_hostname', class: 'blue--text' },
-            { text: '已用内存/总内存', value: 'memory_mb', class: 'blue--text' },
-            { text: '已用CPU/总CPU', value: 'vcpus', class: 'blue--text' },
-            { text: '状态', value: 'status', class: 'blue--text' },
-            { text: 'IP', value: 'host_ip', class: 'blue--text' },
-            { text: '虚拟化版本', value: 'hypervisor_version', class: 'blue--text' },
+            { text: I18N.t('hostName'), value: 'hypervisor_hostname', class: 'blue--text' },
+            { text: I18N.t('usedAndTotalMemory'), value: 'memory_mb', class: 'blue--text' },
+            { text: I18N.t('usedAndTotalCPU'), value: 'vcpus', class: 'blue--text' },
+            { text: I18N.t('status'), value: 'status', class: 'blue--text' },
+            { text: I18N.t('ipAddress'), value: 'host_ip', class: 'blue--text' },
+            { text: I18N.t('hypervisorVersion'), value: 'hypervisor_version', class: 'blue--text' },
         ], API.hypervisor, 'hypervisors')
         this.statistics = {};
         this._memUsedPercent = 0;

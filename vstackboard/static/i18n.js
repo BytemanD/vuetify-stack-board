@@ -13,6 +13,30 @@ const MESSAGES = {
         region: 'Region',
         theme: "theme",
         navigatorWidth: 'navigator width',
+        refresh: 'refresh',
+        cluster: 'cluster',
+
+        status: 'status',
+        hostName: 'hostname',
+        usedAndTotalMemory: 'used/total Memory',
+        usedAndTotalCPU: 'used/total CPU',
+        ipAddress: 'IP address',
+        hypervisorVersion: 'hypervisor version',
+
+        cpu: 'CPU',
+        memory: 'memory',
+        localDisk: 'local disk',
+        disk: 'disk',
+        vm: 'VM',
+        instance: 'instance',
+        instanceNum: 'instance num',
+        node: 'node',
+
+        tenantUsage: 'tenant usage',
+        last1Day: 'last 1 day',
+        last7Days: 'last 7 days',
+        last6Monthes: 'last 6 monthes',
+        last1Year: 'last 1 year',
     },
     'zh-CN': {
         language: '语言',
@@ -28,6 +52,31 @@ const MESSAGES = {
         region: '地区',
         theme: "主题",
         navigatorWidth: '侧边栏宽度',
+        refresh: '刷新',
+        cluster: '集群',
+
+        status: '状态',
+        hostName: '主机名',
+        usedAndTotalMemory: '已用内存/总内存',
+        usedAndTotalCPU: '已用CPU/总CPU',
+        ipAddress: 'IP地址',
+        hypervisorVersion: '虚拟机版本',
+
+        cpu: 'CPU',
+        memory: '内存',
+        localDisk: '本地磁盘',
+        disk: '磁盘',
+        vm: '虚拟机',
+        instance: '实例',
+        instanceNum: '虚拟机数量',
+        node: '节点',
+
+        tenantUsage: '资源使用情况',
+        last1Day: '最近1天',
+        last7Days: '最近7天',
+        last6Monthes: '最近6个月',
+        last1Year: '最近1年',
+
     },
 };
 

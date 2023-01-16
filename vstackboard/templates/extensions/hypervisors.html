@@ -5,7 +5,7 @@
         <template v-slot:activator="{ on, attrs }">
           <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="100" width="20"
             :value="computing.hypervisorTable._memUsedPercent" :color="computing.hypervisorTable._memUsedPercent < 80 ? 'teal lighten-2' : 'orange lighten-2' ">
-            内存
+            [[I18N.t('memory')]]
           </v-progress-circular>
         </template>
         <span>
@@ -20,7 +20,7 @@
         <template v-slot:activator="{ on, attrs }">
           <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="100" width="20"
             :value="computing.hypervisorTable._vcpuUsedPercent" :color="computing.hypervisorTable._vcpuUsedPercent < 80 ?'teal lighten-2' : 'orange lighten-2' ">
-            CPU
+            [[I18N.t('cpu')]]
           </v-progress-circular>
         </template>
         <span>
@@ -34,7 +34,8 @@
       <v-tooltip bottom>
         <template v-slot:activator="{ on, attrs }">
           <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="100" width="20"
-            :value="computing.hypervisorTable._diskUsedPercent" :color="computing.hypervisorTable._diskUsedPercent < 80 ? 'teal lighten-2' : 'orange lighten-2' ">磁盘
+            :value="computing.hypervisorTable._diskUsedPercent" :color="computing.hypervisorTable._diskUsedPercent < 80 ? 'teal lighten-2' : 'orange lighten-2' ">
+            [[ I18N.t('disk') ]]
           </v-progress-circular>
         </template>
         <span>百分比: [[ computing.hypervisorTable._diskUsedPercent ]]%<br>剩余: [[computing.hypervisorTable.statistics.local_gb - computing.hypervisorTable.statistics.local_gb_used ]]</span>
@@ -44,13 +45,13 @@
   <v-col cols="6" lg="2" md="4" sm="4" lg>
     <v-sheet elevation="2" class="pa-4 text-center">
       <v-progress-circular rotate="360" size="100" width="10" :value="computing.hypervisorTable.statistics.count * 100 / computing.hypervisorTable.items.length" color="teal lighten-2">
-        节点<br>[[computing.hypervisorTable.statistics.count]]/[[computing.hypervisorTable.items.length]]
+        [[ I18N.t('node') ]]<br>[[computing.hypervisorTable.statistics.count]]/[[computing.hypervisorTable.items.length]]
       </v-progress-circular>
     </v-sheet>
   </v-col>
   <v-col cols="6" lg="2" md="4" sm="4">
     <v-sheet elevation="2" class="pa-4 text-center" height="100%">
-      <v-avatar color="blue lighten-3" size="90"><span class="white--text">虚拟机<br>[[computing.hypervisorTable.statistics.running_vms]]</span></v-avatar>
+      <v-avatar color="blue lighten-3" size="90"><span class="white--text">[[I18N.t('instance')]]<br>[[computing.hypervisorTable.statistics.running_vms]]</span></v-avatar>
     </v-sheet>
   </v-col>
   <v-col cols="6" lg="2" md="4" sm="4">
@@ -64,8 +65,8 @@
   <v-card-text>
     <v-row>
       <v-col>
-        <v-btn small color="primary" v-on:click="refreshContainer()">刷新</v-btn>
-        <v-btn small color="info" v-on:click="computing.hypervisorTable.tenantUsageDialog.open()">资源使用情况</v-btn>
+        <v-btn small color="primary" v-on:click="refreshContainer()">[[ I18N.t('refresh') ]]</v-btn>
+        <v-btn small color="info" v-on:click="computing.hypervisorTable.tenantUsageDialog.open()">[[ I18N.t('tenantUsage') ]]</v-btn>
       </v-col>
       <v-col>
         <v-text-field small dense v-model="computing.hypervisorTable.search" append-icon="mdi-magnify" label="搜索"

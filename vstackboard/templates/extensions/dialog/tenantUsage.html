@@ -8,7 +8,7 @@
                             v-model="computing.hypervisorTable.tenantUsageDialog.dateRange" v-on:change="computing.hypervisorTable.tenantUsageDialog.refresh()">
                 </v-col>
                 <v-col>
-                    <v-btn small color="primary" @click="computing.hypervisorTable.tenantUsageDialog.refresh()">刷新</v-btn>
+                    <v-btn small color="primary" @click="computing.hypervisorTable.tenantUsageDialog.refresh()">[[ I18N.t('refresh') ]]</v-btn>
                 </v-col>
             </v-row>
         </v-card-title>

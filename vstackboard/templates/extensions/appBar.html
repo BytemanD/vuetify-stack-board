@@ -1,5 +1,5 @@
 <v-toolbar-title style="width: 16%">
-    <v-select solo-inverted flat hide-details :items="clusterTable.items" prefix='集群：' item-text="name" class="rounded-0" append-icon="mdi-map"
+    <v-select solo-inverted flat hide-details :items="clusterTable.items" :prefix='I18N.t("cluster")+":"' item-text="name" class="rounded-0" append-icon="mdi-map"
         v-model="clusterTable.selected" v-on:change="useCluster">
     </v-select>
 </v-toolbar-title>

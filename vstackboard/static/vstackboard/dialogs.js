@@ -11,6 +11,7 @@ import {
     serverTable, sgTable, snapshotTable, volumeTable, volumeTypeTable
 } from './objects.js';
 import { ServerDataTable, UserTable } from './tables.js';
+import { I18N } from '../i18n.js';
 
 
 class Dialog {
@@ -1891,13 +1892,22 @@ export class TenantUsageDialog extends Dialog {
         super()
         this.start = '2022-11-13T00:00:00'
         this.end = null;
-        this.dateRangeList = [
-            {value: CONST.USAGE_LAST_1_DAY, text: '最近1天'},
-            {value: CONST.USAGE_LAST_7_DAY, text: '最近7天'},
-            {value: CONST.USAGE_LAST_6_MONTHES, text: '最近6个月'},
-            {value: CONST.USAGE_LAST_1_YEAR, text: '最近1年'},
-        ]
+
+        // this.dateRangeList = [
+        //     {value: CONST.USAGE_LAST_1_DAY, text: I18N.t(CONST.USAGE_LAST_1_DAY)},
+        //     {value: CONST.USAGE_LAST_7_DAY, text: I18N.t(CONST.USAGE_LAST_7_DAY)},
+        //     {value: CONST.USAGE_LAST_6_MONTHES, text: I18N.t(CONST.USAGE_LAST_6_MONTHES)},
+        //     {value: CONST.USAGE_LAST_1_YEAR, text: I18N.t(CONST.USAGE_LAST_1_YEAR)},
+        // ]
         this.dateRange = CONST.USAGE_LAST_7_DAY;
+    }
+    _setDateRangeList(){
+        this.dateRangeList = [
+            {value: CONST.USAGE_LAST_1_DAY, text: I18N.t(CONST.USAGE_LAST_1_DAY)},
+            {value: CONST.USAGE_LAST_7_DAY, text: I18N.t(CONST.USAGE_LAST_7_DAY)},
+            {value: CONST.USAGE_LAST_6_MONTHES, text: I18N.t(CONST.USAGE_LAST_6_MONTHES)},
+            {value: CONST.USAGE_LAST_1_YEAR, text: I18N.t(CONST.USAGE_LAST_1_YEAR)},
+        ]
     }
     _getOption(titleText, seriesData){
         return {
@@ -1948,22 +1958,23 @@ export class TenantUsageDialog extends Dialog {
         let authInfo = await API.authInfo.get();
         let xData = this._getDateList();
 
-        let vcpuUsageData = [];
-        let memUsageData = [];
-        let diskUsageData = [];
-        let serverUsageData = [];
+        let vcpuUsageData = [],
+            memUsageData = [],
+            diskUsageData = [], 
+            serverUsageData = [];
 
         let vcpuOption = this._getOption('VCPU', vcpuUsageData);
-        let memOption = this._getOption('内存(MB)', memUsageData);
-        let diskOption = this._getOption('本地磁盘(GB)', diskUsageData);
-        let serverOption = this._getOption('虚拟机数量', serverUsageData);
+        let memOption = this._getOption(I18N.t('memory') + '(MB)', memUsageData);
+        let diskOption = this._getOption(I18N.t('localDisk'), diskUsageData);
+        let serverOption = this._getOption(I18N.t('instanceNum'), serverUsageData);
 
         var vcpuChart = await this._getChart('vcpuUsage'),
             memChart = await this._getChart('memUsage'),
             diskChart = await this._getChart('diskUsage'),
             serverChart = await this._getChart('serverUsage');
+        let minMem = null, minCPU = null;
         for (let i in xData){
-            if (i == 0) {continue}
+            if (i == 0) { continue }
             let startDate = xData[i - 1], endDate = xData[i];
             let filters = {
                 start: new Date(startDate).toISOString().slice(0, -1),
@@ -1971,8 +1982,14 @@ export class TenantUsageDialog extends Dialog {
             };
             let tenantUsage = (await API.usage.show(authInfo.project.id, filters)).tenant_usage;
 
-            vcpuUsageData.push([endDate, parseInt(tenantUsage.total_vcpus_usage || 0)]);
-            memUsageData.push([endDate, parseInt(tenantUsage.total_memory_mb_usage || 0)]);
+            let cpuNum = parseInt(tenantUsage.total_vcpus_usage || 0);
+            minCPU = (minCPU == null || minCPU == 0) ? cpuNum :  Math.min(minCPU, cpuNum);
+            vcpuUsageData.push([endDate, cpuNum]);
+
+            let memMb = parseInt(tenantUsage.total_memory_mb_usage || 0);
+            minMem = (minMem == null || minMem == 0) ? memMb :  Math.min(minMem, memMb);
+            memUsageData.push([endDate, memMb]);
+            
             diskUsageData.push([endDate, parseInt(tenantUsage.total_local_gb_usage || 0)]);
             serverUsageData.push([endDate, tenantUsage.server_usages ? tenantUsage.server_usages.length : 0]);
 
@@ -1981,11 +1998,49 @@ export class TenantUsageDialog extends Dialog {
             diskChart.setOption(diskOption);
             serverChart.setOption(serverOption);
         }
+        this._humanMemMb(memChart, memUsageData, minMem, memOption);
+        this._humanCPU(vcpuChart, vcpuUsageData, minCPU, vcpuOption);
+
+    }
+    _humanMemMb(memChart, memUsageData, minMem, memOption){
+        if (minMem == null) {
+            return
+        }
+        if (minMem > CONST.UNIT_MB){
+            for(let i in memUsageData){
+                memUsageData[i][1] = Math.round(memUsageData[i][1] / CONST.UNIT_MB);
+            }
+            memOption.title.text = I18N.t('memory') + '(TB)';
+        } else if (minMem > CONST.UNIT_KB){
+            for(let i in memUsageData){
+                memUsageData[i][1] = Math.round(memUsageData[i][1] / CONST.UNIT_KB);
+            }
+            memOption.title.text = I18N.t('memory') + '(GB)';
+        }
+        memChart.setOption(memOption);
+    }
+    _humanCPU(vcpuChart, vcpuUsageData, minCPU, vcpuOption){
+        if (minCPU == null) {
+            return
+        }
+        if (minCPU > CONST.UNIT_1000_000){
+            for(let i in vcpuUsageData){
+                vcpuUsageData[i][1] = Math.round(vcpuUsageData[i][1] / CONST.UNIT_1000_000);
+            }
+            vcpuOption.title.text = I18N.t('VCPU') + '(百万)';
+        } else if (minCPU > CONST.UNIT_1000){
+            for(let i in vcpuUsageData){
+                vcpuUsageData[i][1] = Math.round(vcpuUsageData[i][1] / CONST.UNIT_1000);
+            }
+            vcpuOption.title.text = I18N.t('VCPU') + '(千)';
+        } 
+        vcpuChart.setOption(vcpuOption);
     }
     refresh(){ 
         this.drawTenantUsage();
     }
     open() {
+        this._setDateRangeList()
         super.open();
         this.drawTenantUsage();
     }

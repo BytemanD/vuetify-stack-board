@@ -290,12 +290,43 @@ export var CONST = {
     UNIT_KB: 1024,
     UNIT_MB: 1024 * 1024,
     UNIT_GB: 1024 * 1024 * 1024,
+
+    UNIT_1000: 1000,
+    UNIT_1000_000: 1000000,
     // usage range of time
     USAGE_LAST_1_DAY: 'last1Day',
     USAGE_LAST_7_DAY: 'last7Days',
     USAGE_LAST_6_MONTHES: 'last6Monthes',
     USAGE_LAST_1_YEAR: 'last1Year',
 }
+
+export class UsageRange {
+    constructor(){
+        this.context = new CookieContext();
+        this.range = CONST.USAGE_LAST_1_DAY
+
+        this.dataList = [];
+    }
+    getDataList(){
+        let dateList = []
+        switch (this.range) {
+            case CONST.USAGE_LAST_1_DAY:
+                dateList = Utils.lastDateList({hour: 1}, 25);
+                break;
+            case CONST.USAGE_LAST_7_DAY:
+                dateList = Utils.lastDateList({day: 1}, 8);
+                break;
+            case CONST.USAGE_LAST_6_MONTHES:
+                dateList = Utils.lastDateList({month: 1}, 7);
+                break;
+            case CONST.USAGE_LAST_1_YEAR:
+                dateList = Utils.lastDateList({month: 1}, 13);
+                break;
+        }
+        return dateList;
+    }
+}
+
 
 export const MESSAGE = new Message();
 export const ALERT = new Alert();
