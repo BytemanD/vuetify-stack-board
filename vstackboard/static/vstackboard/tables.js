@@ -642,14 +642,25 @@ export class UsageTable extends DataTable {
 }
 export class VolumeDataTable extends DataTable {
     constructor() {
-        super([{ text: '名字/ID', value: 'name' },
-        { text: '状态', value: 'status' },
-        { text: '大小', value: 'size' },
-        { text: '可启动', value: 'bootable' },
-        { text: '卷类型', value: 'volume_type' },
-        { text: '镜像名', value: 'image_name' },
-        { text: 'multiattach', value: 'multiattach' },
-        ], API.volume, 'volumes', '卷')
+        super([
+            { text: 'ID', value: 'id' },
+            { text: '名字', value: 'name' },
+            { text: '状态|启动盘|共享', value: 'status_bootable_multi' },
+            { text: '大小', value: 'size' },
+            { text: '卷类型', value: 'volume_type' },
+            { text: '镜像名', value: 'image_name' },
+        ], API.volume, 'volumes', '卷');
+        this.extendItems = [
+            { text: 'id', value: 'id' },
+            { text: 'description', value: 'description' },
+            { text: 'attached_servers', value: 'attached_servers' },
+            { text: 'migration_status', value: 'migration_status' },
+            { text: 'replication_status', value: 'replication_status' },
+            { text: 'tenant_id', value: 'tenant_id' },
+            { text: 'volume_image_metadata', value: 'volume_image_metadata' },
+            { text: 'metadata', value: 'metadata' },
+            { text: 'updated_at', value: 'updated_at' },
+        ];
     }
 }
 
