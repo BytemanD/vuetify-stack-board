@@ -84,6 +84,39 @@ class DataTable {
     };
 }
 
+export class Server {
+    constructor(serverObj) {
+        this.serverObj = serverObj;
+    }
+    getId(){
+        return this.serverObj['id'];
+    }
+    getVolumesAttached(){
+        return this.serverObj['os-extended-volumes:volumes_attached']
+    }
+    getRootDeviceName(){
+        return this.serverObj['OS-EXT-SRV-ATTR:root_device_name'];
+    }
+    async getRootBdm(){
+        let volumesAttached = this.getVolumesAttached();
+        if (volumesAttached.length == 0){
+            return null;
+        }
+        let rootDeviceName = this.getRootDeviceName();
+        console.debug('rootDeviceName', rootDeviceName)
+        let attachments = (await API.server.volumeAttachments(this.serverObj['id'])).volumeAttachments;
+        // console.debug('1111', attachments)
+        for (let i in attachments){
+            console.debug('attachment', attachments[i])
+            if (attachments[i].device == rootDeviceName){
+                console.log('root volume', attachments[i])
+                return attachments[i];
+            }
+        }
+        return null;
+    }
+}
+
 
 export class RouterDataTable extends DataTable {
     constructor() {
@@ -345,7 +378,8 @@ export class ServerDataTable extends DataTable {
                 { text: '电源状态', value: 'power_state' },
                 { text: '操作', value: 'action' },
               ], API.server, 'servers', '实例');
-        this.imageMap = {}
+        this.imageMap = {};
+        this.rootBdmMap = {};
         this.errorMessage = {};
         this.resetStateDialog = new ServerResetStateDialog();
     }
@@ -529,16 +563,26 @@ export class ServerDataTable extends DataTable {
         let imageId = server.image.id;
         if (!imageId) {
             return {}
-        } else if (Object.keys(this.imageMap).indexOf(imageId) < 0) {
+        }
+        if (Object.keys(this.imageMap).indexOf(imageId) < 0) {
             Vue.set(this.imageMap, imageId, {})
             API.image.get(imageId).then(body => {
                 LOG.debug(`get image info for ${imageId} success`)
                 self.imageMap[imageId] = body;
             });
-            return this.imageMap[imageId];
-        } else {
-            return this.imageMap[imageId];
         }
+        return this.imageMap[imageId];
+    }
+    getRootBdm(server){
+        let self = this;
+        let serverObj = new Server(server);
+        if (Object.keys(this.rootBdmMap).indexOf(serverObj.getId()) < 0) {
+            Vue.set(this.rootBdmMap, serverObj.getId(), {});
+            serverObj.getRootBdm().then(bdm => {
+                self.rootBdmMap[serverObj.getId()] = bdm;
+            });
+        }
+        return this.rootBdmMap[serverObj.getId()];
     }
     getErrorMesage(server){
         if (server.fault && server.fault.message) {

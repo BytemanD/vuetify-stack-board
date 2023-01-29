@@ -69,7 +69,10 @@
     </v-chip>
   </template>
   <template v-slot:item.flavor="{ item }"><span class="cyan--text">[[ item.flavor.original_name || item.flavor.original_name ]]</span></template>
-  <template v-slot:item.image="{ item }"><span class="blue--text">[[ computing.serverTable.getImage(item).name ]]</span></template>
+  <template v-slot:item.image="{ item }">
+    <span class="blue--text">[[ computing.serverTable.getImage(item).name ]]</span>
+    <v-icon small v-if="computing.serverTable.getRootBdm(item)">mdi-cloud</v-icon>
+  </template>
   <template v-slot:item.action="{ item }">
     <v-menu  offset-y>
       <template v-slot:activator="{ on, attrs }">

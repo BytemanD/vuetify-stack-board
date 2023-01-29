@@ -77,6 +77,8 @@ docker run -itd --network=host \
 - [X] 修改logo、支持侧边栏收缩、console log 自动刷新
 - [X] 支持显示Usage图表
 - [X] 显示migration 列表
+- [X] 虚拟机标识云盘/本地盘
+- [X] volume 服务页面显示ID+名字
 
 ### v0.0.7
 - [x] 前端检查最新版本
