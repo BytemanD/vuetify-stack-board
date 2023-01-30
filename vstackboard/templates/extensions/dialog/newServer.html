@@ -37,8 +37,8 @@
               <v-switch v-model="newServerDialog.params.useBdm" label="创建卷" class="my-auto" hide-details></v-switch>
             </v-col>
             <v-col cols="4">
-              <v-select :disabled="!newServerDialog.params.useBdm"
-                        :items="newServerDialog.volumeTypes" clearable label="卷类型" dense item-text="name" item-value="id" hide-details
+              <v-select hide-details :disabled="!newServerDialog.params.useBdm" :items="newServerDialog.volumeTypes" clearable label="卷类型" dense item-text="name" item-value="id"
+                        @click="newServerDialog.refreshVolumeTypes()"
                         v-model="newServerDialog.volumeType">
                 <template v-slot:selection="{ item }"> [[ item.name ]] </template>
               </v-select>
@@ -55,12 +55,13 @@
       </v-stepper-items>
       <v-stepper-items>
         <v-stepper-content step="2">
-          <v-select :items="newServerDialog.securityGroups" clearable label="安全组" item-text="name" item-value="id" 
-                    v-model="newServerDialog.securityGroup" persistent-hint hint="只能选择当前租户的安全组">
+          <v-select :items="newServerDialog.securityGroups" clearable label="安全组" item-text="name" item-value="id"
+                    v-model="newServerDialog.securityGroup" persistent-hint hint="只能选择当前租户的安全组"
+                    @click="newServerDialog.refreshSecurityGroups()">
           </v-select>
           <v-text-field label="密码" placeholder="请输入实例密码" v-model="newServerDialog.params.password"></v-text-field>
           <v-select :items="newServerDialog.keypairs" clearable label="密钥对" item-text="keypair.name" item-value="keypair.name"
-                    v-model="newServerDialog.keypair"></v-select>
+                    v-model="newServerDialog.keypair" @click="newServerDialog.refreshKeypairs()"></v-select></v-select>
         </v-stepper-content>
       </v-stepper-items>
       <v-stepper-items>
@@ -71,7 +72,8 @@
           </v-slider>
           <v-row>
             <v-col>
-              <v-select :items="newServerDialog.azList" clearable label="AZ" placeholder="请选择AZ" item-text="zoneName" v-model="newServerDialog.params.az">
+              <v-select :items="newServerDialog.azList" clearable label="AZ" placeholder="请选择AZ" item-text="zoneName" v-model="newServerDialog.params.az"
+                  @click="newServerDialog.refreshAzList()">
                   <template v-slot:selection="{ item }"> [[ item.zoneName ]] </template>
               </v-select>
             </v-col>

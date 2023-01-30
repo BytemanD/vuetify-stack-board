@@ -758,15 +758,16 @@ export class NewServerDialog extends Dialog {
         this.images = [];
         this.networks = [];
         this.ports = [];
-        this.azs = [];
+        this.azList = [];
         this.hosts = [];
         this.azHosts = {};
         this.keypairs = [];
         this.keypair = '';
         this.volumeType = '';
-        this.securityGroup = null;
+        this.securityGroup = [];
         this.volumeTypes = [];
         this.securityGroups = [];
+        this.authInfo = null;
     }
     async refresPorts(){
         let ports = (await API.port.list()).ports;
@@ -789,21 +790,29 @@ export class NewServerDialog extends Dialog {
         }
         this.flavors = (await API.flavor.detail()).flavors;
         this.flavors.sort(function (flavor1, flavor2) { return flavor1.name.localeCompare(flavor2.name) })
-        this.volumeTypes = (await API.volumeType.list()).volume_types;
         this.images = (await API.image.listActive()).images;
+    }
+    async refreshVolumeTypes(){
+        this.volumeTypes = (await API.volumeType.list()).volume_types;
+    }
+    async refreshKeypairs(){
         this.keypairs = (await API.keypair.list()).keypairs;
-
-        let authInfo = await API.authInfo.get();
-        this.securityGroups = (await API.sg.list({tenant_id: authInfo.project.id})).security_groups;
-
-        let body = await API.az.detail();
-        this.azList = body.availabilityZoneInfo.filter(az => { return az.zoneName != 'internal' });
+    }
+    async refreshAzList(){
+        let azInfo = (await API.az.detail()).availabilityZoneInfo;
+        this.azList = azInfo.filter(az => { return az.zoneName != 'internal' });
         this.azHosts = {};
         if (this.azList){
             this.azList.forEach(az => { this.azHosts[az.zoneName] = Object.keys(az.hosts || {}); })
         } else {
             console.warn(`azList is null: ${this.azList}`)
         }
+    }
+    async refreshSecurityGroups(){
+        if (! this.authInfo){
+            this.authInfo = await API.authInfo.get();
+        }
+        this.securityGroups = (await API.sg.list({tenant_id: this.authInfo.project.id})).security_groups;
     }
     async commit() {
         if (!this.params.name) { ALERT.error(`实例名不能为空`); return; }
