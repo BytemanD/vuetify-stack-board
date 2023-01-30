@@ -248,6 +248,14 @@ export class NewRoleDialog extends Dialog {
         }
     }
 }
+export class UsersDialog extends Dialog {
+    constructor() {
+        super();
+    }
+    async open() {
+        super.open();
+    }
+}
 
 export class NewNetworkDialog extends Dialog {
     constructor() {

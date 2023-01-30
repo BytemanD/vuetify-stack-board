@@ -1,6 +1,6 @@
 import { I18N } from '../i18n.js';
 import API from './api.js'
-import { AggHostsDialog, NewAggDialog, NewDomainDialog, NewImageDialog, NewProjectDialog, ServerResetStateDialog, TasksDialog, TenantUsageDialog } from './dialogs.js';
+import { AggHostsDialog, NewAggDialog, NewDomainDialog, NewImageDialog, NewProjectDialog, ServerResetStateDialog, TasksDialog, TenantUsageDialog, UsersDialog } from './dialogs.js';
 import { ALERT, LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
 import { netTable } from './objects.js';
 
@@ -934,9 +934,10 @@ export class RegionTable extends DataTable {
 export class UserTable extends DataTable {
     constructor() {
         super([
-            { text: 'name', value: 'name' },
-            { text: 'domain_id', value: 'domain_id' },
-            { text: 'enabled', value: 'enabled' },
+            { text: 'ID', value: 'id' },
+            { text: '名字', value: 'name' },
+            { text: 'Domain', value: 'domain_id' },
+            { text: '启用', value: 'enabled' },
         ], API.user, 'users', '用户');
     }
 }
@@ -990,10 +991,17 @@ export class ProjectTable extends DataTable {
             {text: 'id', value: 'id'},
             {text: 'description', value: 'description'},
         ]
+        this.userTable = new UserTable();
+        this.usersDialog = new UsersDialog();
         this.newItemDialog = new NewProjectDialog();
     }
     async waitDeleted(id){ }
+    openUserTable(){
+        this.userTable.refresh()
+        this.usersDialog.open()
+    }
 }
+
 export class RoleTable extends DataTable {
     constructor() {
         super([

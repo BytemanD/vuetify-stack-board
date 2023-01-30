@@ -3,6 +3,7 @@
     <v-btn small color="primary" @click="identity.projectTable.openNewItemDialog()">创建</v-btn>
     <v-btn small color="error" @click="identity.projectTable.deleteSelected()">删除</v-btn>
     <v-btn small color="info" v-on:click="identity.rolesDialog.open()">角色管理</v-btn>
+    <v-btn small color="info" v-on:click="identity.projectTable.openUserTable()">用户管理</v-btn>
   </v-col>
   <v-col>
     <v-text-field small dense v-model="identity.projectTable.search" append-icon="mdi-magnify" label="搜索"
@@ -42,3 +43,4 @@
 {% include '../dialog/projectUsers.html' %}
 {% include '../dialog/newProject.html' %}
 {% include '../dialog/rolesDialog.html' %}
+{% include '../dialog/usersDialog.html' %}

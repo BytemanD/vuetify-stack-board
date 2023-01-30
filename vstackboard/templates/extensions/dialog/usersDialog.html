@@ -1,0 +1,21 @@
+<v-dialog scrollable v-model="identity.projectTable.usersDialog.show" width="900">
+    <v-card>
+        <v-card-title class="headline grey lighten-2" primary-title>用户管理</v-card-title>
+        <v-card-text>
+            <v-row>
+                <v-col>
+                    <v-btn small color="error" @click="identity.projectTable.userTable.deleteSelected()">删除</v-btn>
+                  </v-col>
+                  <v-col>
+                    <v-text-field small dense single-line hide-details v-model="identity.projectTable.userTable.search"
+                        append-icon="mdi-magnify" label="搜索"></v-text-field>
+                  </v-col>
+            </v-row>
+        <v-data-table dense show-select :headers="identity.projectTable.userTable.headers" :items="identity.projectTable.userTable.items"
+            :search="identity.projectTable.userTable.search"
+            :items-per-page="identity.projectTable.userTable.itemsPerPage" :search="identity.projectTable.userTable.search"
+            v-model="identity.projectTable.userTable.selected">
+        </v-data-table>
+      </v-card-text>
+    </v-card>
+</v-dialog>
