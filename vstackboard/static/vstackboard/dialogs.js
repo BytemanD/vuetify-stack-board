@@ -772,7 +772,7 @@ export class NewServerDialog extends Dialog {
         this.keypairs = [];
         this.keypair = '';
         this.volumeType = '';
-        this.securityGroup = [];
+        this.securityGroup = null;
         this.volumeTypes = [];
         this.securityGroups = [];
         this.authInfo = null;

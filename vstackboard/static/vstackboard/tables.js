@@ -1211,7 +1211,10 @@ export class MigrationDataTable extends DataTable{
             { text: '开始时间', value: 'created_at' },
             { text: '状态', value: 'status'},
         ], API.migration, 'migrations')
-        // this.extendItems = []
+        this.extendItems = [
+            { text: '更新时间', value: 'updated_at' },
+            { text: 'dest_host', value: 'dest_host' },
+        ]
     }
 }
 
