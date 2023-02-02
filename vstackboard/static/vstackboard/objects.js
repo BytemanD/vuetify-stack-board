@@ -25,15 +25,15 @@ import {
     RouterDataTable, NetDataTable, PortDataTable, SecurityGroupDataTable, QosPolicyDataTable, 
     ImageDataTable,
     ClusterTable,
-    AggDataTable, MigrationDataTable,
+    AggDataTable, MigrationDataTable, EndpointTable,
 } from './tables.js';
-
 
 
 export const userTable = new UserTable();
 export const projectTable = new ProjectTable();
 export const roleTable = new RoleTable();
 export const domainTable = new DomainTable();
+export const endpointTable = new EndpointTable();
 
 export const hypervisorTable = new HypervisortTable();
 export const volumeTable = new VolumeDataTable();

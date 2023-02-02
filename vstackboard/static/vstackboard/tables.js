@@ -1,6 +1,6 @@
 import { I18N } from '../i18n.js';
 import API from './api.js'
-import { AggHostsDialog, NewAggDialog, NewDomainDialog, NewImageDialog, NewProjectDialog, ServerResetStateDialog, TasksDialog, TenantUsageDialog, UsersDialog } from './dialogs.js';
+import { AggHostsDialog, NewAggDialog, NewDomainDialog, NewEndpoingDialog, NewImageDialog, NewProjectDialog, ServerResetStateDialog, TasksDialog, TenantUsageDialog, UsersDialog } from './dialogs.js';
 import { ALERT, LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
 import { netTable } from './objects.js';
 
@@ -44,6 +44,7 @@ class DataTable {
                 MESSAGE.error(`删除 ${this.name} ${item.id} 失败`)
             }
         }
+        MESSAGE.success('删除完成');
         this.refresh();
         this.resetSelected();
     }
@@ -1018,6 +1019,21 @@ export class RoleTable extends DataTable {
         super.refresh(filters)
     };
     async waitDeleted(id){ }
+}
+export class EndpointTable extends DataTable {
+    constructor() {
+        super([
+            { text: '服务名', value: 'service_name' },
+            { text: '服务类型', value: 'service_type' },
+            { text: 'interface', value: 'interface' },
+            { text: 'url', value: 'url' },
+            { text: 'region', value: 'region' }
+        ], API.endpoint, 'endpoints');
+        this.newItemDialog = new NewEndpoingDialog();
+    }
+    // waitDeleted(id){
+    //     MESSAGE.success(`Endpoint ${id} 删除成功`);
+    // }
 }
 export class HypervisortTable extends DataTable {
     constructor() {

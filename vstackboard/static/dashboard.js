@@ -11,6 +11,7 @@ import {
     hypervisorTable, azTable, regionTable, qosPolicyTable,
     imageTable, sgTable, userTable, projectTable, domainTable, aggTable,
     migrationTable,
+    endpointTable,
 } from "./vstackboard/objects.js";
 import {
     newFlavor, flavorExtraDialog,
@@ -68,13 +69,7 @@ new Vue({
             serviceMap: {},
             users: {},
             projectMap: {},
-            endpointTable: new DataTable([
-                { text: 'serviceName', value: 'service_name' },
-                { text: 'serviceType', value: 'service_type' },
-                { text: 'interface', value: 'interface' },
-                { text: 'url', value: 'url' },
-                { text: 'region', value: 'region' }
-            ], API.endpoint, 'endpoints'),
+            endpointTable: endpointTable,
             userTable: userTable,
             projectTable: projectTable,
             projectUserDialog: projectUserDialog,

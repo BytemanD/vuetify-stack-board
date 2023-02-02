@@ -50,6 +50,11 @@ class Dialog {
         }
         return true;
     }
+    checkNotEmpty(value, message){
+        if (value == null || (value instanceof Array && value.length == 0) || Object.keys(value).length == 0){
+            throw Error(message)
+        }
+    }
     formatTime(dateTime){
         return dateTime ? Utils.parseUTCToLocal(dateTime) : '';
     }
@@ -1083,6 +1088,49 @@ export class NewAggDialog extends Dialog {
         await API.agg.post({aggregate: data})
         MESSAGE.success(`聚合${this.name}创建成功`)
         this.hide()
+    }
+}
+export class NewEndpoingDialog extends Dialog {
+    constructor() {
+        super();
+        this.INTERFACES = ['admin', 'public', 'internal'];
+        this.SCHEMAS = ['http', 'https']
+        this.services = [];
+        this.service = null;
+        this.interfaces = [0, 1, 2];
+        this.url = null;
+        this.regionId = null;
+        this.region = null;
+        this.schema = this.SCHEMAS[0];
+    }
+    async open() {
+        this.services = (await API.service.list()).services;
+        super.open();
+    }
+
+    async commit() {
+        try {
+            this.checkNotEmpty(this.service, '请选择服务');
+            this.checkNotEmpty(this.interfaces, '请选择Endpoint类型');
+            this.checkNotEmpty(this.url, '请输入URL');
+            this.checkNotEmpty(this.region, '请输入Region');
+        } catch(e) {
+            ALERT.error(e.message);
+            return
+        }
+        let url = `${this.schema}://${this.url}`
+        let endpoints = this.interfaces.map(item => {
+            return {
+                url: url,
+                interface: this.INTERFACES[item],
+                service_id: this.service,
+                region: this.region,
+            }
+        });
+        for (let i in endpoints){
+            await API.endpoint.post({endpoint: endpoints[i]})
+        }
+        MESSAGE.success(`Endpoint 创建成功`)
     }
 }
 export class AggHostsDialog extends Dialog {

@@ -17,7 +17,8 @@
 - [x] 显示migration 列表
 - [x] 虚拟机标识云盘/本地盘
 - [x] volume 服务页面显示ID+名字
-- [ ] 添加user 管理
+- [x] 支持 user 删除
+- [x] 支持 endpoint 增加删除
 
 ## v0.0.7
 
