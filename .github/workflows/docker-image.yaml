@@ -27,7 +27,7 @@ jobs:
 
     - name: Build Python Bdist Wheel
       run: |
-        python3 setup.py bdist_wheel
+        python3 -m pip wheel --prefer-binary --no-deps --wheel-dir=dist ./
 
     - name: Log in to ali docker registry
       uses: docker/login-action@v1
