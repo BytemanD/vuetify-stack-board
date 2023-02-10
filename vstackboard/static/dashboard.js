@@ -6,7 +6,7 @@ import API from "./vstackboard/api.js";
 
 import {
     volumeTable, serviceTable, serverTable, flavorTable, usageTable,
-    backupTable, clusterTable, keypairTable, volumeServiceTable,
+    backupTable, clusterTable, keypairTable, volumeComputeServiceTable,
     routerTable, netTable, portTable, volumeTypeTable, snapshotTable,
     hypervisorTable, azTable, regionTable, qosPolicyTable,
     imageTable, sgTable, userTable, projectTable, domainTable, aggTable,
@@ -118,7 +118,7 @@ new Vue({
             volumeTypeTable: volumeTypeTable,
             snapshotTable: snapshotTable,
             backupTable: backupTable,
-            volumeServiceTable: volumeServiceTable,
+            volumeComputeServiceTable: volumeComputeServiceTable,
         },
         navigation: {
             item: $cookies.get('navigationItem'),
@@ -219,7 +219,7 @@ new Vue({
                     this.volume.snapshotTable.refresh();
                     this.image.imageTable.refresh();
                     this.volume.backupTable.refresh();
-                    this.volume.volumeServiceTable.refresh();
+                    this.volume.volumeComputeServiceTable.refresh();
                     break;
             }
         },

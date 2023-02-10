@@ -20,7 +20,7 @@ import {
 import {
     DomainTable, ProjectTable, RoleTable, UserTable,HypervisortTable,
     VolumeDataTable, VolumeTypeTable, SnapshotTable, BackupTable,
-    FlavorDataTable,VolumeServiceTable ,KeypairDataTable, ServerDataTable, UsageTable, ServiceTable,
+    FlavorDataTable,VolumeServiceTable ,KeypairDataTable, ServerDataTable, UsageTable, ComputeServiceTable,
     RegionTable, AZDataTable,
     RouterDataTable, NetDataTable, PortDataTable, SecurityGroupDataTable, QosPolicyDataTable, 
     ImageDataTable,
@@ -41,7 +41,7 @@ export const volumeTypeTable = new VolumeTypeTable();
 export const snapshotTable = new SnapshotTable();
 export const flavorTable = new FlavorDataTable();
 export const backupTable = new BackupTable();
-export const volumeServiceTable = new VolumeServiceTable();
+export const volumeComputeServiceTable = new VolumeServiceTable();
 
 export const keypairTable = new KeypairDataTable();;
 export const serverTable = new ServerDataTable();
@@ -49,7 +49,7 @@ export const usageTable = new UsageTable();
 export const aggTable = new AggDataTable();
 export const migrationTable = new MigrationDataTable();
 
-export const serviceTable = new ServiceTable();
+export const serviceTable = new ComputeServiceTable();
 export const routerTable = new RouterDataTable();
 export const netTable = new NetDataTable();
 export const portTable = new PortDataTable();

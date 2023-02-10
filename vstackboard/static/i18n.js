@@ -37,6 +37,9 @@ const MESSAGES = {
         last7Days: 'last 7 days',
         last6Monthes: 'last 6 monthes',
         last1Year: 'last 1 year',
+        newService: 'new service',
+        service: 'service',
+        new: 'new',
     },
     'zh-CN': {
         language: '语言',
@@ -76,7 +79,9 @@ const MESSAGES = {
         last7Days: '最近7天',
         last6Monthes: '最近6个月',
         last1Year: '最近1年',
-
+        newService: '新建服务',
+        service: '服务',
+        new: '新建',
     },
 };
 

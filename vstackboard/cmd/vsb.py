@@ -114,10 +114,11 @@ class Upgrade(cli.SubCli):
         if args.image:
             last_version = self.upgrade_from_image()
             return
-
+        last_version = utils.check_last_version()
         if not last_version:
             print(_('The current version is the latest.'))
             return
+
         version = last_version.get('version')
         download_url = last_version.get('download_url')
         msg = f'\nA new {constants.NAME} release is available: ' \

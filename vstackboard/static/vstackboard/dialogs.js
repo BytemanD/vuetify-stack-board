@@ -10,7 +10,7 @@ import {
     netTable, portTable, projectUserDialog, qosPolicyTable, roleTable, routerTable,
     serverTable, sgTable, snapshotTable, volumeTable, volumeTypeTable
 } from './objects.js';
-import { ServerDataTable, UserTable } from './tables.js';
+import { ComputeServiceTable, UserTable, RegionTable, RegionDataTable, ServiceTable,  } from './tables.js';
 import { I18N } from '../i18n.js';
 
 
@@ -1131,6 +1131,26 @@ export class NewEndpoingDialog extends Dialog {
             await API.endpoint.post({endpoint: endpoints[i]})
         }
         MESSAGE.success(`Endpoint 创建成功`)
+    }
+}
+export class ServiceDialog extends Dialog {
+    constructor(){
+        super();
+        this.serviceTable = new ServiceTable()
+    }
+    open(){
+        this.serviceTable.refresh();
+        super.open();
+    }
+}
+export class RegionDialog extends Dialog {
+    constructor(){
+        super();
+        this.regionTable = new RegionDataTable()
+    }
+    open(){
+        this.regionTable.refresh();
+        super.open();
     }
 }
 export class AggHostsDialog extends Dialog {

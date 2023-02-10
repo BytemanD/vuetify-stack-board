@@ -1,6 +1,6 @@
 import { I18N } from '../i18n.js';
 import API from './api.js'
-import { AggHostsDialog, NewAggDialog, NewDomainDialog, NewEndpoingDialog, NewImageDialog, NewProjectDialog, ServerResetStateDialog, TasksDialog, TenantUsageDialog, UsersDialog } from './dialogs.js';
+import { AggHostsDialog, NewAggDialog, NewDomainDialog, NewEndpoingDialog, NewImageDialog, NewProjectDialog, RegionDialog, ServerResetStateDialog, ServiceDialog, TasksDialog, TenantUsageDialog, UsersDialog } from './dialogs.js';
 import { ALERT, LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
 import { netTable } from './objects.js';
 
@@ -608,7 +608,7 @@ export class ServerDataTable extends DataTable {
         return Object.values(addressMap);
     }
 }
-export class ServiceTable extends DataTable {
+export class ComputeServiceTable extends DataTable {
     constructor() {
         super([{ text: '服务', value: 'binary' },
         { text: '主机', value: 'host' },
@@ -1030,10 +1030,33 @@ export class EndpointTable extends DataTable {
             { text: 'region', value: 'region' }
         ], API.endpoint, 'endpoints');
         this.newItemDialog = new NewEndpoingDialog();
+        this.serviceDialog = new ServiceDialog();
+        this.regionDialog = new RegionDialog();
     }
     // waitDeleted(id){
     //     MESSAGE.success(`Endpoint ${id} 删除成功`);
     // }
+}
+export class ServiceTable extends DataTable {
+    constructor() {
+        super([
+            { text: '名字', value: 'name' },
+            { text: '类型', value: 'type' },
+            { text: '描述', value: 'description' },
+            { text: '启用', value: 'enabled' },
+        ], API.service, 'services');
+        // this.newItemDialog = new NewEndpoingDialog();
+    }
+}
+export class RegionDataTable extends DataTable {
+    constructor() {
+        super([
+            // { text: 'ID', value: 'id' },
+            { text: 'ID', value: 'id' },
+            { text: '父Region', value: 'parent_region_id' },
+            { text: '描述', value: 'description' },
+        ], API.region, 'regions');
+    }
 }
 export class HypervisortTable extends DataTable {
     constructor() {

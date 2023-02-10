@@ -5,8 +5,8 @@
         <v-row class="mt-1">
           <v-row>
             <v-col>
-              <v-btn color="primary" @click="identity.newRoleDialog.open()">添加</v-btn>
-              <v-btn color="error" @click="identity.rolesDialog.roleTable.deleteSelected()" 
+              <v-btn small color="primary" @click="identity.newRoleDialog.open()">添加</v-btn>
+              <v-btn small color="error" @click="identity.rolesDialog.roleTable.deleteSelected()" 
                   :disabled="identity.rolesDialog.roleTable.selected.length == 0">删除</v-btn>
             </v-col>
             <v-col>
