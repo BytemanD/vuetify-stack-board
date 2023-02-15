@@ -106,11 +106,9 @@ export class Server {
         let rootDeviceName = this.getRootDeviceName();
         console.debug('rootDeviceName', rootDeviceName)
         let attachments = (await API.server.volumeAttachments(this.serverObj['id'])).volumeAttachments;
-        // console.debug('1111', attachments)
         for (let i in attachments){
             console.debug('attachment', attachments[i])
             if (attachments[i].device == rootDeviceName){
-                console.log('root volume', attachments[i])
                 return attachments[i];
             }
         }

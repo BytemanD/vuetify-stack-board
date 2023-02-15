@@ -12,6 +12,7 @@ import {
 } from './objects.js';
 import { ComputeServiceTable, UserTable, RegionTable, RegionDataTable, ServiceTable,  } from './tables.js';
 import { I18N } from '../i18n.js';
+import { SETTINGS } from './settings.js';
 
 
 class Dialog {
@@ -762,7 +763,7 @@ export class NewServerDialog extends Dialog {
     constructor() {
         super({
             name: '', flavor: '', image: '', netId: '',
-            useBdm: true, volumeSize: 40,
+            useBdm: true, volumeSize: SETTINGS.getItem('volumeSizeDefault').getValue(),
             nums: 1, az: '', host: '',
             password: ''
         })
@@ -781,6 +782,7 @@ export class NewServerDialog extends Dialog {
         this.volumeTypes = [];
         this.securityGroups = [];
         this.authInfo = null;
+        this.volumeSizeMin = SETTINGS.getItem('volumeSizeMin');
     }
     async refresPorts(){
         let ports = (await API.port.list()).ports;

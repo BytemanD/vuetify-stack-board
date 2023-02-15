@@ -44,7 +44,8 @@
               </v-select>
             </v-col>
             <v-col cols="12">
-                <v-slider :disabled="!newServerDialog.params.useBdm" hide-details v-model="newServerDialog.params.volumeSize" ticks="always" label="系统卷大小" max="100" min="20" step="10">
+                <v-slider :disabled="!newServerDialog.params.useBdm" hide-details v-model="newServerDialog.params.volumeSize" ticks="always" label="系统卷大小" max="100"
+                  :min="newServerDialog.volumeSizeMin.getValue()" step="10">
                   <template v-slot:append>
                     <v-chip label small>[[newServerDialog.params.volumeSize]] GB</v-chip>
                   </template>

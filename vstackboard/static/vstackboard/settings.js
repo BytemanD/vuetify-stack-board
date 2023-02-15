@@ -11,7 +11,6 @@ export class Setting {
         this.onChangeCallback = kwargs.onChangeCallback;
     }
     onChange(value){
-        console.log(this.onChangeCallback)
         if (! this.onChangeCallback){
             return
         }
@@ -22,6 +21,19 @@ export class Setting {
     }
 }
 
+class NullSetting extends Setting {
+    constructor() {
+        super(None);
+    }
+    onChange(value){
+        
+    }
+    getValue() {
+        return null;
+    }
+}
+
+
 export class Settings {
     constructor() {
         this.show = false;
@@ -31,6 +43,8 @@ export class Settings {
             navigatorWidth: new Setting('200', { 'choises': ['200', '220', '240', '260', '280', '300'] }),
             messagePosition: new Setting('bottom-right', { 'choises': NOTIFY_POSITION }),
             alertPosition: new Setting('bottom', { 'choises': NOTIFY_POSITION }),
+            volumeSizeDefault: new Setting(40, { 'choises': ['1', '10', '20', '30', '40', '50'] }),
+            volumeSizeMin: new Setting(40, { 'choises': ['1', '10', '20', '30', '40', '50'] }),
         }
         this.load();
     }
@@ -40,6 +54,7 @@ export class Settings {
                 return this.items[key];
             }
         }
+        return NullSetting();
     }
     load() {
         for (let key in this.items) {

@@ -51,6 +51,8 @@ const MESSAGES = {
         name: '名字',
         messagePosition: '消息框显示位置',
         alertPosition: '警告框显示位置',
+        volumeSizeDefault: '系统盘默认大小',
+        volumeSizeMin: '系统盘最小值',
         security: '安全',
         region: '地区',
         theme: "主题",
