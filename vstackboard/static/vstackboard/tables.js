@@ -307,7 +307,9 @@ export class FlavorDataTable extends DataTable {
         this.extraSpecsMap = {};
         this.isPublic = true;
     }
-    waitDeleted(id) {}
+    waitDeleted(id) {
+        MESSAGE.success(`${this.name || this.bodyKey } ${id} 删除成功`);
+    }
     async deleteSelected() {
         if (this.selected.length == 0) {
             return;
@@ -315,7 +317,6 @@ export class FlavorDataTable extends DataTable {
         for (let i in this.selected) {
             let item = this.selected[i];
             await this.api.delete(item.id);
-            MESSAGE.success(`规格 ${item.id} 删除成功`);
         }
         this.refresh();
         this.resetSelected();
@@ -363,7 +364,6 @@ export class KeypairDataTable extends DataTable {
         })
         return body
     };
-
 }
 
 export class ServerDataTable extends DataTable {
