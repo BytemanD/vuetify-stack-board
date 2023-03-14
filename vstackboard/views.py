@@ -32,11 +32,37 @@ class Index(web.RequestHandler):
         self.redirect('/welcome')
 
 
-class BaseReqHandler(web.RequestHandler):
+class GetContext(object):
 
     def _get_context(self):
-        return context.ClusterContext(self.get_cookie('clusterId'),
-                                      region=self.get_cookie('region'))
+        
+        LOG.info('X-Cluster-ID: %s', self._get_header_value('X-Cluster-Id'))
+        return context.ClusterContext(
+            self._get_header_value('X-Cluster-Id'),
+            region=self._get_header_value('X-Region')
+        )
+
+    def _get_header_value(self, header):
+        return self.request.headers.get(header)
+        # for h, v in self.request.headers.get_all():
+        #     if h == header:
+        #         return v
+
+
+class BaseReqHandler(web.RequestHandler, GetContext):
+
+    def set_default_headers(self):
+        super().set_default_headers()
+        self.set_header('Access-Control-Allow-Origin', '*')
+        self.set_header('Access-Control-Allow-Headers', '*')
+        self.set_header('Access-Control-Allow-Max-Age', 1000)
+        self.set_header('Access-Control-Allow-Methods',
+                        'GET, POST, PUT, DELETE, OPTIONS')
+
+    def options(self, *args, **kwargs):
+        LOG.debug('options request')
+        self.set_status(204)
+        self.finish()
 
 
 class Dashboard(BaseReqHandler):
@@ -68,11 +94,11 @@ class Dashboard(BaseReqHandler):
 
         cdn = CONF.use_cdn and constants.CDN or {
             k: '/static/cdn' for k in constants.CDN}
-        self.render('dashboard.html', name='VStackBoard', cdn=cdn,
+        self.render('dashboard.html', name=constants.BRAND, cdn=cdn,
                     cluster=ctxt.cluster.name)
 
 
-class Welcome(web.RequestHandler):
+class Welcome(BaseReqHandler):
 
     def get(self):
         if CONF.use_cdn:
@@ -82,7 +108,7 @@ class Welcome(web.RequestHandler):
         self.render('welcome.html', cdn=cdn, version=utils.get_version())
 
 
-class Configs(web.RequestHandler):
+class Configs(BaseReqHandler):
 
     def get(self):
         global CONF_DB_API
@@ -93,7 +119,7 @@ class Configs(web.RequestHandler):
         })
 
 
-class Cluster(web.RequestHandler):
+class Cluster(BaseReqHandler):
 
     def get(self):
         cluster_list = api.query_cluster()
@@ -134,7 +160,7 @@ class Cluster(web.RequestHandler):
         return
 
 
-class Tasks(web.RequestHandler):
+class Tasks(BaseReqHandler):
 
     def _get_uploading_tasks(self):
         uploading_tasks = []
@@ -168,19 +194,7 @@ class Tasks(web.RequestHandler):
             self.finish()
 
 
-class GetContext(object):
-
-    def _get_context(self):
-        return context.ClusterContext(self.get_cookie('clusterId'),
-                                      region=self.get_cookie('region'))
-
-    def _get_header_value(self, header):
-        for h, v in self.request.headers.get_all():
-            if h == header:
-                return v
-
-
-class AuthInfo(web.RequestHandler, GetContext):
+class AuthInfo(BaseReqHandler):
 
     def get(self):
         context = self._get_context()
@@ -195,7 +209,7 @@ class AuthInfo(web.RequestHandler, GetContext):
         })
 
 
-class OpenstackProxyBase(web.RequestHandler, GetContext):
+class OpenstackProxyBase(BaseReqHandler):
 
     def _request_body(self):
         return None if self.request.method.upper() in ['DELETE', 'GET'] else \
@@ -216,6 +230,9 @@ class OpenstackProxyBase(web.RequestHandler, GetContext):
     def do_proxy(self, method, url):
         LOG.debug('do proxy  %s %s', method, url)
         context = self._get_context()
+        if not context.cluster_id:
+            return 400, {'message': 'Cluster id not found in context'}  
+
         try:
             cluster_proxy = proxy.get_proxy(context)
             query = parse.urlparse(self.request.uri).query
@@ -225,35 +242,29 @@ class OpenstackProxyBase(web.RequestHandler, GetContext):
             resp = self.get_proxy_method(cluster_proxy)(
                 method=method, url=url, data=self._request_body(),
                 headers=proxy_headers)
-            self.set_status(resp.status_code, resp.reason)
-            if resp.status_code in [204]:
-                self.finish()
-            else:
-                self.finish(resp.content)
+
+            return resp.status_code, resp.content
         except exceptions.EndpointNotFound as e:
-            self.set_status(404)
-            self.finish({'error': str(e)})
-            return
-        except Exception as e:
-            LOG.exception(e)
-            self.set_status(500)
-            self.finish({'error': str(e)})
-            return
+            return 404, self.finish({'error': str(e)})
 
+    @utils.with_response()
     def get(self, url):
-        self.do_proxy('GET', url)
+        return self.do_proxy('GET', url)
 
+    @utils.with_response(return_code=202)
     def post(self, url):
-        self.do_proxy('POST', url)
+        return self.do_proxy('POST', url)
 
+    @utils.with_response(return_code=202)
     def put(self, url):
-        self.do_proxy('PUT', url)
+        return self.do_proxy('PUT', url)
 
+    @utils.with_response(return_code=204)
     def delete(self, url):
-        self.do_proxy('DELETE', url)
+        return self.do_proxy('DELETE', url)
 
     def patch(self, url):
-        self.do_proxy('PATCH', url)
+        return self.do_proxy('PATCH', url)
 
 
 class KeystoneProxy(OpenstackProxyBase):

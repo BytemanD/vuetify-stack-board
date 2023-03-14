@@ -26,8 +26,11 @@ Openstack Dashboard with Vuetify
 ### 2.2 在docker容器中运行
 
 1. 构建wheel包：`python3 setup.py bdist_wheel`
+
 2. 构建镜像 `python .\install\build.py dist/<THE_PATH_OF_WHEEL_FILE>`
+
 3. 启动容器
+   
    ```shell
    IMAGE=vstackboard:<VERSION>
    mkdir -p /var/log/vstackboard
@@ -37,6 +40,7 @@ Openstack Dashboard with Vuetify
 ### 2.3 直接运行（开发者模式）
 
 1. 进入项目目录，设置环境变量
+   
    + powershell: `$env:PYTHONPATH="./"`
    + cmd: `set PYTHONPATH=./`
    + shell: `export PYTHONPATH=./`

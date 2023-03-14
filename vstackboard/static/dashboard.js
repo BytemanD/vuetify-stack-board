@@ -27,7 +27,6 @@ import {
     projectUserDialog, newUserDialog, rolesDialog, newRoleDialog
 } from "./vstackboard/objects.js";
 import { init } from "./vstackboard/context.js";
-import DataTable from "./vstackboard/tables.js";
 import { SETTINGS } from "./vstackboard/settings.js";
 import { I18N } from "./i18n.js";
 

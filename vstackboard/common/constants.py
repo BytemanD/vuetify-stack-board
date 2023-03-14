@@ -1,3 +1,4 @@
+BRAND = 'Forward'
 NAME = 'vstackboard'
 
 CDN = {

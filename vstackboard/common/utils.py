@@ -2,9 +2,9 @@ import re
 from pbr import version
 import queue
 import logging
+import functools
 
 import requests
-
 from easy2use.common import pkg
 
 from vstackboard.common import constants
@@ -106,3 +106,35 @@ class ImageChunk(object):
 
     def __len__(self):
         return self.size
+
+
+# TODO: move is to easy2use
+def with_response(return_code=200):
+
+    def _response(func):
+        @functools.wraps(func)
+        def wrapper(self, *args, **kwargs):
+            try:
+                resp = func(self, *args, **kwargs)
+            except Exception as e:
+                LOG.exception(e)
+                resp = 500, f'Internal Server error: {str(e)}'
+
+            if resp is None:
+                status, body = 204, None
+            if isinstance(resp, tuple):
+                status, body = resp
+            else:
+                status = return_code
+                body = resp
+
+            if status >= 400:
+                LOG.error('request error, response body: %s', body)
+
+            self.set_status(status)
+            if body:
+                self.finish(body)
+
+        return wrapper
+
+    return _response
