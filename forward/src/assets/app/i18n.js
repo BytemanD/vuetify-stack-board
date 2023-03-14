@@ -45,6 +45,7 @@ const MESSAGES = {
         newService: 'new service',
         service: 'service',
         new: 'new',
+        workload: 'Workload',
     },
     'zh-CN': {
         language: '语言',
@@ -89,6 +90,8 @@ const MESSAGES = {
         newService: '新建服务',
         service: '服务',
         new: '新建',
+        workload: '负载',
+
     },
 };
 

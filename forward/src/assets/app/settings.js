@@ -70,8 +70,9 @@ export class Settings {
         if (Object.hasOwn(this.items, item)){
             this.items[item].value = value;
             this.save();
+        }else {
+            console.error(`配置 ${item} 不存在。`)
         }
-        console.error(`配置 ${item} 不存在。`)
     }
     load() {
         for (let key in this.items) {

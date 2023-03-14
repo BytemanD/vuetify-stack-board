@@ -1974,7 +1974,7 @@ export class TenantUsageDialog extends Dialog {
         super()
         this.start = '2022-11-13T00:00:00'
         this.end = null;
-
+        this.dateRangeList = [];
         // this.dateRangeList = [
         //     {value: CONST.USAGE_LAST_1_DAY, text: I18N.t(CONST.USAGE_LAST_1_DAY)},
         //     {value: CONST.USAGE_LAST_7_DAY, text: I18N.t(CONST.USAGE_LAST_7_DAY)},
