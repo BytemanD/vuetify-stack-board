@@ -47,9 +47,12 @@ class Restfulclient {
     }
     async post(body, url = null) {
         try {
-            // TODO: 修改此处代码: this.baseUrl + url
+            let reqUrl = this.baseUrl;
+            if (url){
+                reqUrl = `${this.baseUrl}/${url}`;
+            }
             let resp = await axios.post(
-                `${url || this.baseUrl}`, body, {headers: this.getHeaders()});
+                reqUrl, body, {headers: this.getHeaders()});
             return resp.data
         } catch (e) {
             Notify.error(this._getErrorMsg(e.response))
@@ -113,7 +116,7 @@ class VstackboardApi extends Restfulclient {
         return await this.get(url);
     }
     async doAction(id, data) {
-        return (await axios.post(`${this.baseUrl}/${id}/action`, data)).data;
+        return (await this.post(data, `${id}/action`));
     }
 }
 
@@ -296,19 +299,19 @@ class Server extends VstackboardApi {
     }
     async stop(id) {
         let resp = await this.doAction(id, { 'os-stop': null });
-        return resp.data;
+        return resp;
     }
     async start(id) {
         let resp = await this.doAction(id, { 'os-start': null })
-        return resp.data;
+        return resp;
     }
     async reboot(id, type = 'SOFT') {
         let resp = await this.doAction(id, { 'reboot': { type: type } })
-        return resp.data;
+        return resp;
     }
     async pause(id) {
         let resp = await this.doAction(id, { 'pause': null });
-        return resp.data;
+        return resp;
     }
     async unpause(id) {
         let resp = await this.doAction(id, { 'unpause': null });
@@ -336,10 +339,6 @@ class Server extends VstackboardApi {
     }
     async interfaceDetach(id, portId) {
         let resp = await axios.delete(`${this.baseUrl}/${id}/os-interface/${portId}`);
-        return resp.data;
-    }
-    async doAction(id, body) {
-        let resp = await axios.post(`${this.baseUrl}/${id}/action`, body);
         return resp.data;
     }
     async changePassword(id, password, userName = null) {

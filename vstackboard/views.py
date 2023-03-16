@@ -3,7 +3,7 @@ import json
 import logging
 import re
 import threading
-from urllib import parse
+from urllib.parse import urlparse
 
 from tornado import web
 
@@ -35,18 +35,14 @@ class Index(web.RequestHandler):
 class GetContext(object):
 
     def _get_context(self):
-        
-        LOG.info('X-Cluster-ID: %s', self._get_header_value('X-Cluster-Id'))
+        LOG.info('X-Cluster-ID: %s', self._get_header('X-Cluster-Id'))
         return context.ClusterContext(
-            self._get_header_value('X-Cluster-Id'),
-            region=self._get_header_value('X-Region')
+            self._get_header('X-Cluster-Id'),
+            region=self._get_header('X-Region')
         )
 
-    def _get_header_value(self, header):
+    def _get_header(self, header):
         return self.request.headers.get(header)
-        # for h, v in self.request.headers.get_all():
-        #     if h == header:
-        #         return v
 
 
 class BaseReqHandler(web.RequestHandler, GetContext):
@@ -220,22 +216,25 @@ class OpenstackProxyBase(BaseReqHandler):
         raise ImportError()
 
     def _get_proxy_headers(self):
+        # sourcery skip: extract-method, use-named-expression
         proxy_headers = {}
         for header in ['Content-Type']:
-            header_value = self._get_header_value(header)
+            header_value = self._get_header(header)
             if header_value:
                 proxy_headers[header] = header_value
         return proxy_headers
 
     def do_proxy(self, method, url):
+        # sourcery skip: extract-method, use-named-expression
         LOG.debug('do proxy  %s %s', method, url)
         context = self._get_context()
+
         if not context.cluster_id:
-            return 400, {'message': 'Cluster id not found in context'}  
+            return 400, {'message': 'Cluster id not found in context'}
 
         try:
             cluster_proxy = proxy.get_proxy(context)
-            query = parse.urlparse(self.request.uri).query
+            query = urlparse(self.request.uri).query
             if query:
                 url += f'?{query}'
             proxy_headers = self._get_proxy_headers()
@@ -288,10 +287,10 @@ class GlanceProxy(OpenstackProxyBase):
         return self.request.method.upper() == 'PUT' and \
             re.match(r'/(.*)/images/(.*)/file', self.request.uri) is not None
 
-    def proxy_glance_upload(self, url):
-        global UPLOADING_IMAGES, UPLOADING_THREADS
-
-        cluster_proxy = proxy.get_proxy(self._get_context())
+    def _get_image_chunck(self, url):
+        # sourcery skip: assign-if-exp, extract-method,
+        # inline-immediately-returned-variable
+        global UPLOADING_IMAGES
 
         if url not in UPLOADING_IMAGES:
             image_chunk = utils.ImageChunk(
@@ -299,16 +298,18 @@ class GlanceProxy(OpenstackProxyBase):
             UPLOADING_IMAGES[url] = image_chunk
 
             LOG.info('image %s start thread %s', url, image_chunk.size)
+            cluster_proxy = proxy.get_proxy(self._get_context())
             upload_thread = threading.Thread(
                 target=cluster_proxy.proxy_glance_upload,
                 args=(url, image_chunk))
             upload_thread.setDaemon(True)
             upload_thread.start()
-            # UPLOADING_THREADS[url] = upload_thread
-
         else:
             image_chunk = UPLOADING_IMAGES[url]
+        return image_chunk
 
+    def proxy_glance_upload(self, url):
+        image_chunk = self._get_image_chunck(url)
         content_length = self.request.headers.get('Content-Length')
         LOG.info('image %s add chunk, size=%s', url, content_length)
         image_chunk.add(self.request.body, int(content_length))
@@ -316,10 +317,6 @@ class GlanceProxy(OpenstackProxyBase):
 
         if image_chunk.all_cached() and url in UPLOADING_IMAGES:
             LOG.info('image %s all cached, waitting for upload', url)
-            # NOTE: do not wait for uploading, because it can take a long time.
-            # UPLOADING_THREADS.get(url).join()
-            # del UPLOADING_THREADS[url]
-            # del UPLOADING_IMAGES[url]
 
         self.set_status(204)
         self.finish()
@@ -367,9 +364,7 @@ class Actions(web.RequestHandler, GetContext):
 
 def get_routes():
     return [
-        (r'/', Index),
         (r'/dashboard', Dashboard),
-        (r'/welcome', Welcome),
         (r'/configs', Configs),
         (r'/cluster', Cluster),
         (r'/cluster/(.*)', Cluster),

@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="display" width="1200" scrollable>
         <v-card>
-            <v-card-title class="headline grey lighten-4" primary-title>
+            <v-card-title>
                 <v-row>
                     <v-col lg="6">
                         <v-select hide-details dense :items="tenantUsageDialog.dateRangeList" prepend-icon="mdi-calendar"
@@ -56,7 +56,6 @@ export default {
     },
     watch: {
         show(newVal) {
-            console.log('show -->', newVal)
             this.display = newVal;
         },
         display(newVal) {

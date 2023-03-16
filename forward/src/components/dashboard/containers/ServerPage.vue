@@ -1,18 +1,14 @@
 <template>
   <v-row>
       <v-col>
-        <v-btn small color="primary" v-on:click="newServerDialog.open()"><v-icon>mdi-plus</v-icon></v-btn>
+        <v-btn small color="primary" v-on:click="openNewServer = !openNewServer"><v-icon>mdi-plus</v-icon></v-btn>
         <v-btn-toggle borderless>
-          <v-btn small elevation="2" color="success" v-on:click="table.startSelected()"
-            :disabled="table.selected.length == 0">开机</v-btn>
-          <v-btn small elevation="2" color="warning" v-on:click="table.stopSelected()"
-            :disabled="table.selected.length == 0">关机</v-btn>
+          <v-btn small elevation="2" color="success" v-on:click="table.startSelected()" :disabled="table.selected.length == 0">开机</v-btn>
+          <v-btn small elevation="2" color="warning" v-on:click="table.stopSelected()" :disabled="table.selected.length == 0">关机</v-btn>
         </v-btn-toggle>
         <v-btn-toggle borderless>
-          <v-btn small elevation="2" color="success" v-on:click="table.unpauseSelected()"
-            :disabled="table.selected.length == 0">开启</v-btn>
-          <v-btn small elevation="2" color="warning" v-on:click="table.pauseSelected()"
-            :disabled="table.selected.length == 0">暂停</v-btn>
+          <v-btn small elevation="2" color="success" v-on:click="table.unpauseSelected()" :disabled="table.selected.length == 0">开启</v-btn>
+          <v-btn small elevation="2" color="warning" v-on:click="table.pauseSelected()" :disabled="table.selected.length == 0">暂停</v-btn>
         </v-btn-toggle>
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
@@ -149,26 +145,31 @@
                 </table>
               </td>
             </template>
-
           </v-data-table>
       </v-col>
+      <NewServerDialog :show.sync="openNewServer" />
   </v-row>
 </template>
 
 <script>
+import i18n from '@/assets/app/i18n';
+import { ServerDataTable } from '@/assets/app/tables.js';
 
-import { ServerDataTable } from '@/assets/app/tables.js'
+import NewServerDialog from './dialogs/NewServerDialog';
 
 export default {
+    props: {
+        show: Boolean,
+    },
   components: {
+    NewServerDialog
   },
 
   data: () => ({
+    i18n: i18n,
     deleted: false,
     table: new ServerDataTable(),
-    newServerDialog: {}
-    // table: {},
-    // miniVariant: false,
+    openNewServer: false
   }),
   methods: {
 

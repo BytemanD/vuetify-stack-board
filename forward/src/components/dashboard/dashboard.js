@@ -15,6 +15,8 @@ import EndpointPage from './containers/EndpointPage';
 import ProjectPage from './containers/ProjectPage';
 import DomainPage from './containers/DomainPage';
 
+import FlavorPage from './containers/compute/FlavorPage';
+
 
 axios.defaults.baseURL = 'http://vstackboard.local';
 
@@ -32,6 +34,7 @@ let router = new VueRouter({
         { path: '/endpoint', component: EndpointPage},
         { path: '/project', component: ProjectPage},
         { path: '/domain',    component: DomainPage},
+        { path: '/compute/flavor', components: {computeTabs: () => FlavorPage}},
     ]
 })
 

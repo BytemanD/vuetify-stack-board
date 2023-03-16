@@ -1,0 +1,133 @@
+<template>
+    <v-dialog v-model="display" width="900">
+        <v-card height="420" class="rounded-0">
+            <v-stepper elevation="0">
+                <v-stepper-header>
+                    <v-stepper-step step="1" editable="editable">*基本设置</v-stepper-step><v-divider></v-divider>
+                    <v-stepper-step key="2-step" step="2" editable="editable">{{ i18n.t('security') }}</v-stepper-step><v-divider></v-divider>
+                    <v-stepper-step key="3-step" step="3" editable="editable">自定义</v-stepper-step>
+                </v-stepper-header>
+                <v-stepper-items>
+                    <v-stepper-content step="1">
+                        <v-row>
+                            <v-col cols="10">
+                                <v-text-field label="名字" placeholder="请输入实例名" v-model="dialog.params.name"
+                                    :error="!dialog.params.name" :rules="[dialog.checkNotNull]">
+                                </v-text-field>
+                            </v-col>
+                            <v-col cols="2">
+                                <v-btn class="mt-4" text color="primary"
+                                    @click="dialog.params.name = UTILS.getRandomName('server')">随机名字</v-btn>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-select :items="dialog.flavors" label="规格" dense :key="name" item-text="name"
+                                    item-value="id" v-model="dialog.params.flavor" :error="!dialog.params.flavor">
+                                </v-select>
+                                <v-select :items="dialog.images" label="镜像" dense item-text="name" item-value="id"
+                                    v-model="dialog.params.image" :error="!dialog.params.image">
+                                </v-select>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-select :items="dialog.networks" clearable label="网络" dense item-text="name"
+                                    item-value="id" v-model="dialog.params.netId" @click="dialog.refresNetworks()">
+                                </v-select>
+                                <v-select clearable dense :items="dialog.ports" label="端口" item-text="name" item-value="id"
+                                    messages="如果选择端口，只能创建一台虚拟机。" v-model="dialog.portId" @click="dialog.refresPorts()">
+                                </v-select>
+                            </v-col>
+                            <v-col cols="2">
+                                <v-switch v-model="dialog.params.useBdm" label="创建卷" class="my-auto"
+                                    hide-details></v-switch>
+                            </v-col>
+                            <v-col cols="4">
+                                <v-select hide-details :disabled="!dialog.params.useBdm" :items="dialog.volumeTypes"
+                                    clearable label="卷类型" dense item-text="name" item-value="id"
+                                    @click="dialog.refreshVolumeTypes()" v-model="dialog.volumeType">
+                                    <template v-slot:selection="{ item }"> {{ item.name }} </template>
+                                </v-select>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-slider :disabled="!dialog.params.useBdm" hide-details v-model="dialog.params.volumeSize"
+                                    ticks="always" label="系统卷大小" max="100" :min="dialog.volumeSizeMin.getValue()" step="10">
+                                    <template v-slot:append>
+                                        <v-chip label small>{{dialog.params.volumeSize}} GB</v-chip>
+                                    </template>
+                                </v-slider>
+                            </v-col>
+                        </v-row>
+                    </v-stepper-content>
+                </v-stepper-items>
+                <v-stepper-items>
+                    <v-stepper-content step="2">
+                        <v-select :items="dialog.securityGroups" clearable label="安全组" item-text="name" item-value="id"
+                            v-model="dialog.securityGroup" persistent-hint hint="只能选择当前租户的安全组"
+                            @click="dialog.refreshSecurityGroups()">
+                        </v-select>
+                        <v-text-field label="密码" placeholder="请输入实例密码" v-model="dialog.params.password"></v-text-field>
+                        <v-select :items="dialog.keypairs" clearable label="密钥对" item-text="keypair.name"
+                            item-value="keypair.name" v-model="dialog.keypair"
+                            @click="dialog.refreshKeypairs()"></v-select>
+                    </v-stepper-content>
+                </v-stepper-items>
+                <v-stepper-items>
+                    <v-stepper-content step="3">
+                        <v-slider v-model="dialog.params.nums" label="实例数量" class="align-center" ticks="always" max="10"
+                            min="1" :disabled="dialog.portId != null">
+                            <template v-slot:append><v-chip label small>{{dialog.params.nums}}</v-chip></template>
+                        </v-slider>
+                        <v-row>
+                            <v-col>
+                                <v-select :items="dialog.azList" clearable label="AZ" placeholder="请选择AZ"
+                                    item-text="zoneName" v-model="dialog.params.az" @click="dialog.refreshAzList()">
+                                    <template v-slot:selection="{ item }"> {{ item.zoneName }} </template>
+                                </v-select>
+                            </v-col>
+                            <v-col>
+                                <v-select :items="dialog.azHosts[dialog.params.az]" clearable label="节点" placeholder="请选择节点"
+                                    v-model="dialog.params.host">
+                                    <template v-slot:selection="{ item }"> {{ item }} </template>
+                                </v-select>
+                            </v-col>
+                        </v-row>
+                    </v-stepper-content>
+                </v-stepper-items>
+            </v-stepper>
+        </v-card>
+        <v-card-title>
+            <v-spacer></v-spacer><v-btn color="primary" @click="dialog.commit()">创建</v-btn>
+        </v-card-title>
+    </v-dialog>
+</template>
+<script>
+import i18n from '@/assets/app/i18n';
+import { NewServerDialog } from '@/assets/app/dialogs';
+
+export default {
+    props: {
+        show: Boolean,
+    },
+    data: () => ({
+        // TODO: 未知原因：没有name，报错
+        name: 'xxx',
+        i18n: i18n,
+        display: false,
+        dialog: new NewServerDialog(),
+        windowsSize: {},
+    }),
+    methods: {
+
+    },
+    created() {
+
+    },
+    watch: {
+        show(newVal) {
+            this.display = newVal;
+        },
+        display(newVal) {
+            this.display = newVal;
+            this.$emit("update:show", this.display);
+        }
+    },
+};
+</script>

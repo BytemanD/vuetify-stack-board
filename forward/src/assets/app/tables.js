@@ -499,40 +499,75 @@ export class ServerDataTable extends DataTable {
         } while(expectStateList.indexOf(currentServer['OS-EXT-STS:task_state']) >= 0);
         return currentServer
     }
+    async stopServers(servers){
+        return new Promise((resolve) => {
+            let stopped = 0;
+            for (let i in servers){
+                let item = servers[i];
+                API.server.stop(item.id);
+                this.waitServerStatus(item.id, 'SHUTOFF').then(() => {
+                    Notify.success(`虚拟机 ${item.name}已关机`);
+                    stopped += 1;
+                    if (stopped == servers.length){
+                        resolve();
+                    }
+                });
+            }
+        });
+    }
     async stopSelected() {
-        let self = this;
+        let statusMap = {inactive: [], active: []};
         for (let i in this.selected) {
             let item = this.selected[i];
             if (item.status.toUpperCase() != 'ACTIVE') {
-                Notify.warn(`虚拟机 ${item.name} 不是运行状态`)
+                statusMap.inactive.push(item);
                 continue;
             }
-            self.api.stop(item.id);
-            self.waitServerStatus(item.id, 'SHUTOFF').then(() => {
-                Notify.success(`虚拟机 ${item.name}已关机`);
-            });
+            statusMap.active.push(item);
+        }
+        if (statusMap.active.length != 0){
+            Notify.info(`开始关机: ${statusMap.active.map((item) => {return item.name})} `);
+            await this.stopServers(statusMap.active)
+        }
+        if (statusMap.inactive.length != 0){
+            Notify.warning(`虚拟机不是运行状态: ${statusMap.inactive.map((item) => {return item.name})}`);
         }
     }
-    async startSelected() {
-        let self = this;
-        for (let i in this.selected) {
-            let item = this.selected[i];
-            if (item.status.toUpperCase() != 'SHUTOFF') {
-                Notify.warn(`虚拟机 ${item.name} 不是关机状态`)
-                continue;
-            }
-            await self.api.start(item.id)
-            self.waitServerStatus(item.id, 'ACTIVE').then(() => {
+    async startServesr(servers) {
+        for (let i in servers){
+            let item = servers[i];
+            await this.api.start(item.id)
+            this.waitServerStatus(item.id, 'ACTIVE').then(() => {
                 Notify.success(`虚拟机 ${item.name}已开机`);
             });
         }
     }
+    async startSelected() {
+        let statusMap = {notShutoff: [], shutoff: []};
+        for (let i in this.selected) {
+            let item = this.selected[i];
+            if (item.status.toUpperCase() != 'SHUTOFF') {
+                console.log(item.name, item.status)
+                statusMap.notShutoff.push(item);
+                continue;
+            }
+            statusMap.shutoff.push(item);
+        }
+        if (statusMap.shutoff.length != 0){
+            Notify.info(`开始开机: ${statusMap.shutoff.map((item) => {return item.name})} `);
+            await this.startServesr(statusMap.shutoff);
+        }
+        if (statusMap.notShutoff.length != 0) {
+            Notify.warning(`虚拟机不是关机状态: ${statusMap.notShutoff.map((item) => {return item.name})}`);
+        }
+    }
     async pauseSelected() {
+        // TODO: 待优化
         let self = this;
         for (let i in this.selected) {
             let item = this.selected[i];
             if (item.status.toUpperCase() != 'ACTIVE') {
-                Notify.warn(`虚拟机 ${item.name} 不是运行状态`)
+                Notify.warning(`虚拟机 ${item.name} 不是运行状态`)
                 continue;
             }
             await self.api.pause(item.id);
@@ -546,7 +581,7 @@ export class ServerDataTable extends DataTable {
         for (let i in this.selected) {
             let item = this.selected[i];
             if (item.status.toUpperCase() != 'PAUSED') {
-                Notify.warn(`虚拟机 ${item.name} 不是暂停状态`)
+                Notify.warning(`虚拟机 ${item.name} 不是暂停状态`)
                 continue;
             }
             await self.api.unpause(item.id);
@@ -559,7 +594,7 @@ export class ServerDataTable extends DataTable {
         for (let i in this.selected) {
             let item = this.selected[i];
             if (type == 'SOFT' && item.status.toUpperCase() != 'ACTIVE') {
-                Notify.warn(`虚拟机 ${item.name} 不是运行状态`, 1)
+                Notify.warning(`虚拟机 ${item.name} 不是运行状态`, 1)
                 continue;
             }
             await this.api.reboot(item.id, type)
@@ -970,7 +1005,7 @@ export class DomainTable extends DataTable {
         for (let i in this.selected) {
             let domain = this.selected[i];
             if (domain.enabled) {
-                Notify.warn(`Domin ${domain.name} 处于enabled状态，请先disable再删除`);
+                Notify.warning(`Domin ${domain.name} 处于enabled状态，请先disable再删除`);
                 continue;
             }
             await API.domain.delete(domain.id);

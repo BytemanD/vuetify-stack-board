@@ -63,17 +63,17 @@ export const navigationItems = {
     { title: '虚拟化资源', icon: 'mdi-alpha-h-circle', router: '/hypervisor' },
   ],
   '计算': [
-    { title: '实例', icon: 'mdi-laptop-account', group: '计算', router: '/server' },
+    { title: '实例', icon: 'mdi-laptop-account', router: '/server' },
     { title: '计算管理', icon: 'mdi-layers', router: '/compute' },
     { title: '存储', icon: 'mdi-expansion-card', router: '/storage' },
     { title: '镜像', icon: 'mdi-package-variant-closed', router: '/image' },
   ],
   '网络': [
-    { title: '网络资源', icon: 'mdi-web', group: '网络', router: '/networking' },
+    { title: '网络资源', icon: 'mdi-web', router: '/networking' },
 
   ],
   '认证': [
-    { title: '服务地址', icon: 'mdi-server', group: '认证', router: '/endpoint' },
+    { title: '服务地址', icon: 'mdi-server', router: '/endpoint' },
     { title: '租户', icon: 'mdi-account-supervisor', router: '/project' },
     { title: '域', icon: 'mdi-domain', router: '/domain' },
 

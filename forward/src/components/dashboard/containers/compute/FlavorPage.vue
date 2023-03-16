@@ -4,13 +4,13 @@
             <v-btn small color="primary" @click="newFlavorDialog.open()"><v-icon small>mdi-plus</v-icon>新建</v-btn>
             <v-btn small color="error" @click="table.deleteSelected()">删除</v-btn>
         </v-col>
+        <v-col cols="2" class="text-center">
+            <v-switch dense class="my-auto" hide-details v-model="table.isPublic" label="共享"
+                @click="table.refresh()"></v-switch>
+        </v-col>
         <v-col>
             <v-text-field small dense v-model="table.search" append-icon="mdi-magnify" label="搜索" single-line
                 hide-details></v-text-field>
-        </v-col>
-        <v-col cols="1" class="text-center">
-            <v-switch dense class="my-auto" hide-details v-model="table.isPublic" label="共享"
-                @click="table.refresh()"></v-switch>
         </v-col>
         <v-col cols="1" class="text-center">
             <v-btn fab x-small color="info" v-on:click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
