@@ -1,15 +1,11 @@
 <template>
-    <v-dialog v-model="display" width="900">
-        <v-card height="420" class="rounded-0">
-            <v-stepper elevation="0">
-                <v-stepper-header>
-                    <v-stepper-step step="1" editable="editable">*基本设置</v-stepper-step><v-divider></v-divider>
-                    <v-stepper-step key="2-step" step="2" editable="editable">{{ i18n.t('security') }}</v-stepper-step><v-divider></v-divider>
-                    <v-stepper-step key="3-step" step="3" editable="editable">自定义</v-stepper-step>
-                </v-stepper-header>
-                <v-stepper-items>
+    <v-dialog v-model="display" width="900" scrollable>
+        <v-card>
+            <v-card-text height="300" class="pa-0">
+                <v-stepper elevation="0" vertical height="510">
+                    <v-stepper-step step="1" color="success" editable="editable">*基本设置</v-stepper-step>
                     <v-stepper-content step="1">
-                        <v-row>
+                        <v-row >
                             <v-col cols="10">
                                 <v-text-field label="名字" placeholder="请输入实例名" v-model="dialog.params.name"
                                     :error="!dialog.params.name" :rules="[dialog.checkNotNull]">
@@ -50,14 +46,13 @@
                                 <v-slider :disabled="!dialog.params.useBdm" hide-details v-model="dialog.params.volumeSize"
                                     ticks="always" label="系统卷大小" max="100" :min="dialog.volumeSizeMin.getValue()" step="10">
                                     <template v-slot:append>
-                                        <v-chip label small>{{dialog.params.volumeSize}} GB</v-chip>
+                                        <v-chip label small>{{ dialog.params.volumeSize }} GB</v-chip>
                                     </template>
                                 </v-slider>
                             </v-col>
                         </v-row>
                     </v-stepper-content>
-                </v-stepper-items>
-                <v-stepper-items>
+                    <v-stepper-step step="2" color="success" editable="editable">{{ i18n.t('security') }}</v-stepper-step>
                     <v-stepper-content step="2">
                         <v-select :items="dialog.securityGroups" clearable label="安全组" item-text="name" item-value="id"
                             v-model="dialog.securityGroup" persistent-hint hint="只能选择当前租户的安全组"
@@ -65,15 +60,13 @@
                         </v-select>
                         <v-text-field label="密码" placeholder="请输入实例密码" v-model="dialog.params.password"></v-text-field>
                         <v-select :items="dialog.keypairs" clearable label="密钥对" item-text="keypair.name"
-                            item-value="keypair.name" v-model="dialog.keypair"
-                            @click="dialog.refreshKeypairs()"></v-select>
+                            item-value="keypair.name" v-model="dialog.keypair" @click="dialog.refreshKeypairs()"></v-select>
                     </v-stepper-content>
-                </v-stepper-items>
-                <v-stepper-items>
+                    <v-stepper-step step="3" color="success" editable="editable">自定义</v-stepper-step>
                     <v-stepper-content step="3">
-                        <v-slider v-model="dialog.params.nums" label="实例数量" class="align-center" ticks="always" max="10"
+                        <v-slider v-model="dialog.params.nums" label="实例数量" ticks="always" max="10"
                             min="1" :disabled="dialog.portId != null">
-                            <template v-slot:append><v-chip label small>{{dialog.params.nums}}</v-chip></template>
+                            <template v-slot:append><v-chip label small>{{ dialog.params.nums }}</v-chip></template>
                         </v-slider>
                         <v-row>
                             <v-col>
@@ -90,12 +83,12 @@
                             </v-col>
                         </v-row>
                     </v-stepper-content>
-                </v-stepper-items>
-            </v-stepper>
+                </v-stepper>
+            </v-card-text>
+            <v-card-title class="info">
+                <v-spacer></v-spacer><v-btn @click="dialog.commit()">创建</v-btn>
+            </v-card-title>
         </v-card>
-        <v-card-title>
-            <v-spacer></v-spacer><v-btn color="primary" @click="dialog.commit()">创建</v-btn>
-        </v-card-title>
     </v-dialog>
 </template>
 <script>
