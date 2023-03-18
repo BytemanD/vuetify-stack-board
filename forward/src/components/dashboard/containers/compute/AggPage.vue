@@ -14,7 +14,7 @@
             <v-btn fab x-small color="info" v-on:click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
         </v-col>
         <v-col cols="12">
-            <v-data-table dense show-expand single-expand :headers="table.headers" :items="table.items"
+            <v-data-table dense show-select show-expand single-expand :headers="table.headers" :items="table.items"
                 :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1" v-model="table.selected">
 
                 <template v-slot:[`item.host_num`]="{ item }">

@@ -179,7 +179,7 @@ export class ContextLocalStorage {
         this.context = new CookieContext();
     }
     domain(){
-        return `${this.context.getClusterId()}_${this.context.getRegion() || ''}`;
+        return `${this.context.getClusterId()}_${this.context.getRegion() || 'default'}`;
     }
     getAll(name){
         let itemName = `${this.domain()}_${name}`
@@ -242,7 +242,6 @@ export var CONST = {
 
 export class UsageRange {
     constructor(){
-        this.context = new CookieContext();
         this.range = CONST.USAGE_LAST_1_DAY
 
         this.dataList = [];

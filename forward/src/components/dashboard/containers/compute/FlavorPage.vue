@@ -1,7 +1,7 @@
 <template>
     <v-row>
         <v-col>
-            <v-btn small color="primary" @click="newFlavorDialog.open()"><v-icon small>mdi-plus</v-icon>新建</v-btn>
+            <v-btn x-small fab color="primary" class="mr-1" @click="openNewFlavorDialog = true"><v-icon small>mdi-plus</v-icon></v-btn>
             <v-btn small color="error" @click="table.deleteSelected()">删除</v-btn>
         </v-col>
         <v-col cols="2" class="text-center">
@@ -29,6 +29,9 @@
                 </template>
             </v-data-table>
         </v-col>
+        <v-col cols="12">
+            <NewFlavorDialog :show.sync="openNewFlavorDialog" @completed="table.refresh()"/>
+        </v-col>
     </v-row>
 </template>
     
@@ -36,13 +39,17 @@
 import { FlavorDataTable } from '@/assets/app/tables.js';
 import { Utils } from '@/assets/app/lib.js';
 
+import NewFlavorDialog from '../dialogs/NewFlavorDialog.vue';
+
+
 export default {
     components: {
-
+        NewFlavorDialog,
     },
 
     data: () => ({
         Utils: Utils,
+        openNewFlavorDialog: false,
         table: new FlavorDataTable()
         // miniVariant: false,
     }),

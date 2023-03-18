@@ -17,8 +17,9 @@
       </v-btn-toggle>
       <v-menu offset-y>
         <template v-slot:activator="{ on, attrs }">
-          <v-btn small color="primary" class="mr-1" v-bind="attrs" v-on="on" :disabled="table.selected.length == 0"><v-icon
-              small>mdi-menu</v-icon> 重启</v-btn>
+          <v-btn small color="primary" class="mr-1" v-bind="attrs" v-on="on" :disabled="table.selected.length == 0">
+            <v-icon>mdi-menu</v-icon>重启
+          </v-btn>
         </template>
         <v-list>
           <v-list-item small
@@ -47,8 +48,8 @@
         </template>
         显示未删除/已删除
       </v-tooltip>
-      <IconBtn icon="mdi-family-tree" toolTip="显示拓扑图" :onClick="refreshTable"/>
-      <IconBtn icon="mdi-refresh" color="info" toolTip="刷新" :onClick="refreshTable"/>
+      <BtnIcon icon="mdi-family-tree" toolTip="显示拓扑图" @click="openServerTopology = true"/>
+      <BtnIcon icon="mdi-refresh" color="info" toolTip="刷新" @click="table.refresh()"/>
     </v-col>
     <v-col cols="4">
       <v-text-field small dense hide-details v-model="table.search" append-icon="mdi-magnify" label="搜索"
@@ -163,6 +164,7 @@
       </v-data-table>
     </v-col>
     <NewServerDialog :show.sync="openNewServer" />
+    <ServerTopology :show.sync="openServerTopology" />
   </v-row>
 </template>
 
@@ -170,24 +172,24 @@
 import i18n from '@/assets/app/i18n';
 import { ServerDataTable } from '@/assets/app/tables.js';
 
-import IconBtn from '@/components/plulic/IconBtn'
+import BtnIcon from '@/components/plugins/BtnIcon'
 import NewServerDialog from './dialogs/NewServerDialog';
-
+import ServerTopology from './dialogs/ServerTopology.vue';
 
 export default {
   props: {
     show: Boolean,
   },
   components: {
-    IconBtn, NewServerDialog
+    BtnIcon, NewServerDialog, ServerTopology
   },
 
   data: () => ({
     i18n: i18n,
     deleted: false,
-    xx: 0,
     table: new ServerDataTable(),
-    openNewServer: false
+    openNewServer: false,
+    openServerTopology: false,
   }),
   methods: {
     refreshTable: function() {

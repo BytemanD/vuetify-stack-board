@@ -791,15 +791,18 @@ export class NewServerDialog extends Dialog {
     async refresNetworks() {
         this.networks = (await API.network.list()).networks;
     }
-    async open() {
+    async init() {
         this.params.name = Utils.getRandomName('server');
-        this.display()
         if (!this.params.az) {
             this.params.az = '自动选择';
         }
+        // 获取规格
         this.flavors = (await API.flavor.detail()).flavors;
         this.flavors.sort(function (flavor1, flavor2) { return flavor1.name.localeCompare(flavor2.name) })
+        if (this.flavors.length > 0) { this.params.flavor = this.flavors[0].id }
+        // 获取镜像
         this.images = (await API.image.listActive()).images;
+        if (this.images.length > 0) { this.params.image = this.images[0].id }
     }
     async refreshVolumeTypes() {
         this.volumeTypes = (await API.volumeType.list()).volume_types;
@@ -925,10 +928,8 @@ export class NewFlavorDialog extends Dialog {
             }
             extras[key] = value;
         }
-        console.log(extras)
         if (typeof (this) != 'undefined') {
             this.extraSpcs = extras;
-            console.log(this.extraSpcs)
         }
         return true;
     }
@@ -946,12 +947,10 @@ export class NewFlavorDialog extends Dialog {
         if (this.params.id) { data.id = this.params.id; }
         let body = await API.flavor.create(data);
         let flavor = body.flavor;
-        if (this.extraSpcs) {
+        if (Object.keys(this.extraSpcs).length > 0) {
             await API.flavor.updateExtras(flavor.id, this.extraSpcs);
         }
         Notify.success(`规格 ${this.params.name} 创建成功`);
-        // flavorTable.refresh();
-        this.hide();
     }
 
     checkExtras() {
@@ -1894,12 +1893,15 @@ export class ServerTopology extends Dialog {
     constructor() {
         super()
     }
-    async drawServerTopoply() {
-        var chartDom = document.getElementById('server');
-        while (!chartDom) {
-            await Utils.sleep(0.1);
-            chartDom = document.getElementById('server');
-        }
+    async drawServerTopoply(eleId) {
+        var chartDom = null;
+        do {
+            chartDom = document.getElementById(eleId);
+            if (!chartDom) {
+                await Utils.sleep(0.1);
+            }
+        } while (!chartDom)
+
         var myChart = Echarts.init(chartDom);
         let data = []
         let links = []
@@ -1916,8 +1918,7 @@ export class ServerTopology extends Dialog {
         }
 
         let serverNets = {};
-
-        let servers = serverTable.items;
+        let servers = (await API.server.detail()).servers;
         for (let i in servers) {
             let server = servers[i];
             data.push({
@@ -1964,9 +1965,8 @@ export class ServerTopology extends Dialog {
         })
         return netIds
     }
-    open() {
-        super.open();
-        this.drawServerTopoply();
+    init(eleId) {
+        this.drawServerTopoply(eleId);
     }
 }
 export class TenantUsageDialog extends Dialog {

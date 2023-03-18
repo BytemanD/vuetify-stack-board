@@ -103,6 +103,12 @@ class Welcome(BaseReqHandler):
             cdn = {k: '/static/cdn' for k in constants.CDN}
         self.render('welcome.html', cdn=cdn, version=utils.get_version())
 
+class Version(BaseReqHandler):
+
+    def get(self):
+        self.set_status(200)
+        self.finish({'version': utils.get_version()})
+
 
 class Configs(BaseReqHandler):
 
@@ -365,6 +371,7 @@ class Actions(web.RequestHandler, GetContext):
 def get_routes():
     return [
         (r'/dashboard', Dashboard),
+        (r'/version', Version),
         (r'/configs', Configs),
         (r'/cluster', Cluster),
         (r'/cluster/(.*)', Cluster),

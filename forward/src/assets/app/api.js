@@ -49,7 +49,11 @@ class Restfulclient {
         try {
             let reqUrl = this.baseUrl;
             if (url){
-                reqUrl = `${this.baseUrl}/${url}`;
+                if (url.startsWith('/')){
+                    reqUrl = url;
+                } else {
+                    reqUrl = `${this.baseUrl}/${url}`;
+                }
             }
             let resp = await axios.post(
                 reqUrl, body, {headers: this.getHeaders()});
@@ -132,11 +136,11 @@ class Flavor extends VstackboardApi {
         return await this.get(`${id}/os-extra_specs`);
     }
     async updateExtras(id, extras) {
-        let resp = await axios.post(`${this.baseUrl}/${id}/os-extra_specs`, { 'extra_specs': extras })
+        let resp = await this.post({ 'extra_specs': extras }, `${id}/os-extra_specs`, )
         return resp.data;
     }
     async deleteExtra(id, key) {
-        return (await axios.delete(`${this.baseUrl}/${id}/os-extra_specs/${key}`)).data;
+        return (await this.delete(`${this.baseUrl}/${id}/os-extra_specs/${key}`)).data;
     }
 
     parseExtras(content) {
@@ -235,7 +239,7 @@ class Server extends VstackboardApi {
         return respData;
     }
     async imageBoot(data) {
-        let respData = await this.post({ server: data }, '/computing/servers');
+        let respData = await this.post({ server: data });
         return respData;
     }
     async boot(name, flavorId, imageId, options = {}) {
@@ -671,7 +675,12 @@ class Actions extends Restfulclient {
         return body.checkLastVersion
     }
 }
-
+class Version extends Restfulclient {
+    constructor() { super('/version') }
+    async get() {
+        return (await super.get()).version;
+    }
+}
 
 export class OpenstackProxyApi {
     constructor() {
@@ -717,6 +726,7 @@ export class OpenstackProxyApi {
         this.task = new Task();
 
         this.actions = new Actions();
+        this.version = new Version();
     }
 }
 

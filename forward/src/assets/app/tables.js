@@ -13,7 +13,6 @@ import I18N from './i18n.js';
 import { LOG, ServerTasks, Utils } from './lib.js'
 
 
-
 class DataTable {
     constructor(headers, api, bodyKey = null, name = '') {
         this.headers = headers;
@@ -53,7 +52,6 @@ class DataTable {
                 Notify.error(`删除 ${this.name} ${item.id} 失败`)
             }
         }
-        Notify.success('删除完成');
         this.refresh();
         this.resetSelected();
     }
@@ -1175,8 +1173,15 @@ export class AZDataTable extends DataTable {
         })
     }
     async drawTopoloy(eleId) {
-        await Utils.sleep(1);
-        var chartDom = document.getElementById(eleId);
+        var chartDom = null;
+        do {
+            chartDom = document.getElementById(eleId);
+            console.log(chartDom)
+            if (!chartDom){
+                Utils.sleep(0.1)
+            }
+        } while(!chartDom)
+        
         var myChart = Echarts.init(chartDom);
         let data = { name: '集群', children: [] }
         for (let i in this.items) {

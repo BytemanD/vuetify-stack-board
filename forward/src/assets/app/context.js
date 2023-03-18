@@ -1,29 +1,20 @@
-var COOKIE_DRIVER = null;
 
 export class CookieContext{
     constructor() {
-        if (! COOKIE_DRIVER){
-            console.error(`COOKIE_DRIVER is null`);
-        }
-        this.cookies = COOKIE_DRIVER;
     }
     setClusterId(clusterId){
-        return this.cookies.set('clusterId', clusterId)
+        return localStorage.setItem('clusterId', clusterId)
     }
     setRegion(region){
-        return this.cookies.set('region', region)
+        return localStorage.setItem('region', region)
     }
     getClusterId(){
-        return this.cookies.get('clusterId')
+        return localStorage.getItem('clusterId')
     }
     getClusterName(){
-        return this.cookies.get('clusterName')
+        return localStorage.getItem('clusterName')
     }
     getRegion(){
-        return this.cookies.get('region')
+        return localStorage.getItem('region')
     }
-}
-
-export function init(cookieDriver){
-    COOKIE_DRIVER = cookieDriver;
 }

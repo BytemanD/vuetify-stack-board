@@ -55,7 +55,7 @@ export default {
 
   data: () => ({
     api: API,
-    version: 'xxx',
+    version: null,
     newVersion: {},
     newCluster: new NewAggDialog(),
     clusterTable: new ClusterTable(),
@@ -82,13 +82,15 @@ export default {
     deleteCluster: async (item) => {
       await this.clusterTable.delete(item);
       Notify.success('删除成功');
-      // clusterTable
       this.clusterTable.refresh();
-    }
+    },
+    getVersion: async function () {
+      this.version = await (API.version.get());
+    },
   },
   created() {
     this.clusterTable.refresh();
-    // this.checkLastVersion();
+    this.getVersion();
   }
 };
 </script>

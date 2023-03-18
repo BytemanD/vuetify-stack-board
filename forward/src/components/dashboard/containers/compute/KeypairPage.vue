@@ -1,9 +1,10 @@
 <template>
     <v-row>
         <v-col>
-            <v-btn small color="primary" ><v-icon small>mdi-plus</v-icon>添加</v-btn>
+            <v-btn x-small fab color="primary" class="mr-1" @click="openNewKeypairDialog = true"><v-icon small>mdi-plus</v-icon></v-btn>
             <v-btn small color="error" @click="table.deleteSelected()">删除</v-btn>
         </v-col>
+
         <v-col cols="6">
             <v-text-field small dense single-line hide-details v-model="table.search" append-icon="mdi-magnify" label="搜索"></v-text-field>
         </v-col>
@@ -11,7 +12,7 @@
             <v-btn fab x-small color="info" v-on:click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
         </v-col>
         <v-col cols="12">
-            <v-data-table dense show-expand single-expand :headers="table.headers" :items="table.items"
+            <v-data-table show-select dense show-expand single-expand :headers="table.headers" item-key="name" :items="table.items"
                 :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1" v-model="table.selected">
 
                 <template v-slot:[`item.name`]="{ item }">
@@ -23,8 +24,10 @@
                     <v-textarea hide-details filled readonly v-model="item.public_key"></v-textarea>
                     </td>
                 </template>
-                
             </v-data-table>
+        </v-col>
+        <v-col cols="12">
+            <NewKeypairDialog :show.sync="openNewKeypairDialog" @completed='table.refresh()' />
         </v-col>
     </v-row>
 </template>
@@ -34,16 +37,17 @@
 import { KeypairDataTable } from '@/assets/app/tables.js';
 import { Utils } from '@/assets/app/lib.js';
 
+import NewKeypairDialog from '../dialogs/NewKeypairDialog .vue';
+
 export default {
     components: {
-
+        NewKeypairDialog
     },
 
     data: () => ({
         Utils: Utils,
-        table: new KeypairDataTable()
-
-        // miniVariant: false,
+        table: new KeypairDataTable(),
+        openNewKeypairDialog: false,
     }),
     methods: {
 

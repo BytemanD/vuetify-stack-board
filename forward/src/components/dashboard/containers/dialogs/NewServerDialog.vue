@@ -13,10 +13,10 @@
                             </v-col>
                             <v-col cols="2">
                                 <v-btn class="mt-4" text color="primary"
-                                    @click="dialog.params.name = UTILS.getRandomName('server')">随机名字</v-btn>
+                                    @click="dialog.params.name = Utils.getRandomName('server')">随机名字</v-btn>
                             </v-col>
                             <v-col cols="6">
-                                <v-select :items="dialog.flavors" label="规格" dense :key="name" item-text="name"
+                                <v-select :items="dialog.flavors" label="规格" dense item-text="name"
                                     item-value="id" v-model="dialog.params.flavor" :error="!dialog.params.flavor">
                                 </v-select>
                                 <v-select :items="dialog.images" label="镜像" dense item-text="name" item-value="id"
@@ -94,24 +94,24 @@
 <script>
 import i18n from '@/assets/app/i18n';
 import { NewServerDialog } from '@/assets/app/dialogs';
+import { Utils } from '@/assets/app/lib';
 
 export default {
     props: {
         show: Boolean,
     },
     data: () => ({
-        // TODO: 未知原因：没有name，报错
-        name: 'xxx',
         i18n: i18n,
         display: false,
         dialog: new NewServerDialog(),
         windowsSize: {},
+        Utils: Utils
     }),
     methods: {
 
     },
     created() {
-
+        this.dialog.init();
     },
     watch: {
         show(newVal) {

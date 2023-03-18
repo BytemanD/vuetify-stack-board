@@ -1,6 +1,6 @@
 <template>
     <v-row>
-        <v-col>
+        <v-col cols="12">
             <v-tabs v-model="tabIndex" centered color="purple">
                 <v-tab><v-icon>mdi-alpha-f-box</v-icon> 规格 </v-tab>
                 <v-tab><v-icon>mdi-alpha-k-box</v-icon> 密钥对 </v-tab>
@@ -18,8 +18,6 @@
                     <v-tab-item> <MigrationPage /> </v-tab-item>
                 </v-tabs-items>
             </v-tabs>
-            <router-link to="/compute/flavor">Go to About</router-link>
-            <router-view name="computeTabs"></router-view>
         </v-col>
   </v-row>
 </template>
@@ -36,12 +34,12 @@ import MigrationPage from './compute/MigrationPage.vue';
 
 export default {
   components: {
-    FlavorPage, KeypairPage, AZPage, ServicePage, AggPage, MigrationPage
+    FlavorPage, KeypairPage, AZPage, ServicePage, AggPage, MigrationPage,
   },
   
   data: () => ({
     tabIndex: 0,
-    migrationTable: new MigrationDataTable()
+    migrationTable: new MigrationDataTable(),
   }),
   methods: {
 

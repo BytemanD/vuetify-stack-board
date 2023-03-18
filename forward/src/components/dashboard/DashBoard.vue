@@ -15,8 +15,8 @@
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
-      <v-btn icon @click="toggleTheme()"> <v-icon>mdi-theme-light-dark</v-icon></v-btn>
-      <v-btn icon @click="openWelcome()"><v-icon>mdi-home</v-icon></v-btn>
+      <BtnTheme />
+      <BtnHome />
       <v-btn icon><v-icon>mdi-cog</v-icon></v-btn>
     </v-app-bar>
 
@@ -58,6 +58,9 @@
 import { ClusterTable } from '@/assets/app/tables';
 import { SETTINGS } from '@/assets/app/settings';
 
+import BtnTheme from '../plugins/BtnTheme.vue';
+import BtnHome from '../plugins/BtnHome.vue';
+
 export const navigationItems = {
   default: [
     { title: '虚拟化资源', icon: 'mdi-alpha-h-circle', router: '/hypervisor' },
@@ -82,7 +85,7 @@ export const navigationItems = {
 
 export default {
   components: {
-
+    BtnTheme, BtnHome
   },
 
   data: () => ({
@@ -109,9 +112,6 @@ export default {
         this.$router.replace({ path: item.router });
       }
     },
-    openWelcome() {
-      window.open('/welcome', '_self');
-    },
     async refresh() {
       await this.clusterTable.refresh();
       for (let i in this.clusterTable.items) {
@@ -123,10 +123,6 @@ export default {
       }
       this.region = localStorage.getItem('region');
     },
-    toggleTheme() {
-      this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
-      SETTINGS.setItem('themeDark', this.$vuetify.theme.dark);
-    },
   },
   created() {
     this.$vuetify.theme.dark = SETTINGS.getItem('themeDark').getValue();
@@ -134,7 +130,6 @@ export default {
 
     let navigationSelectedItem = localStorage.getItem('navigationSelectedItem');
     this.selectItem(navigationSelectedItem && JSON.parse(navigationSelectedItem) || this.navigation.selectedItem);
-
     this.refresh();
   }
 };

@@ -46,6 +46,7 @@ const MESSAGES = {
         service: 'service',
         new: 'new',
         workload: 'Workload',
+        serverTopology: 'Server Topology',
     },
     'zh-CN': {
         language: '语言',
@@ -91,7 +92,7 @@ const MESSAGES = {
         service: '服务',
         new: '新建',
         workload: '负载',
-
+        serverTopology: '虚拟机拓扑',
     },
 };
 

@@ -1,29 +1,27 @@
 <template>
     <v-row>
         <v-col cols="6">
-            <v-btn-toggle mandatory v-model="table.showTree">
+            <v-btn-toggle mandatory v-model="displayType">
                 <v-btn small><v-icon>mdi-table</v-icon></v-btn>
-                <v-btn small><v-icon @click="drawAz()">mdi-chart-tree</v-icon></v-btn>
+                <v-btn small @click="drawAz()"><v-icon>mdi-chart-tree</v-icon></v-btn>
             </v-btn-toggle>
         </v-col>
-        <v-col :hidden="table.showTree != 0">
+        <v-col :hidden="displayType != 0">
             <v-row>
                 <v-col>
-                    <v-select solo :items="Object.keys(table.azMap)" label="AZ" dense
-                        v-model="table.zoneName"></v-select>
+                    <v-select solo dense :items="Object.keys(table.azMap)" label="AZ" v-model="table.zoneName"></v-select>
                 </v-col>
                 <v-col>
-                    <v-text-field small solo dense v-model="table.search" append-icon="mdi-magnify" label="搜索"
-                        hide-details></v-text-field>
+                    <v-text-field small solo dense hide-details v-model="table.search" 
+                        append-icon="mdi-magnify" label="搜索"></v-text-field>
                 </v-col>
                 <v-col cols="2" class="text-center">
-                    <v-btn fab x-small color="info"
-                        @click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
+                    <v-btn fab x-small color="info" @click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
                 </v-col>
             </v-row>
         </v-col>
         <v-col cols="12">
-            <v-data-table :hidden="table.showTree != 0" :headers="table.headers" :items="table.azMap[table.zoneName].hosts"
+            <v-data-table :hidden="displayType != 0" :headers="table.headers" :items="table.azMap[table.zoneName].hosts"
                 :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1" dense show-select
                 v-model="table.selected">
                 <template v-slot:[`item.active`]="{ item }">
@@ -36,10 +34,10 @@
                 </template>
             </v-data-table>
         </v-col>
-        <v-col :hidden="table.showTree != 1" cols="12">
-            <v-card :hidden="table.showTree != 1">
+        <v-col :hidden="displayType != 1" cols="12">
+            <v-card>
                 <v-card-text>
-                    <div id="az" style="height:400px;"></div>
+                    <div id="azTopolopy" style="height:400px;"></div>
                 </v-card-text>
             </v-card>
         </v-col>
@@ -57,11 +55,15 @@ export default {
 
     data: () => ({
         Utils: Utils,
+        displayType: 0,
         table: new AZDataTable()
-        // miniVariant: false,
     }),
     methods: {
-
+        drawAz: async function(){
+            // TODO: 需要等一会儿，否则不会显示，是否有更好的方法？
+            await Utils.sleep(1);
+            this.table.drawTopoloy('azTopolopy');
+        }
     },
     created() {
         this.table.refresh();
