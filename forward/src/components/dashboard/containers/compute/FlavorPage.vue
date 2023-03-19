@@ -51,7 +51,6 @@ export default {
         Utils: Utils,
         openNewFlavorDialog: false,
         table: new FlavorDataTable()
-        // miniVariant: false,
     }),
     methods: {
 

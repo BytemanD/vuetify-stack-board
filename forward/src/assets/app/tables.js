@@ -4,12 +4,6 @@ import { Notify } from "vuetify-message-snackbar";
 
 import API from './api.js'
 import I18N from './i18n.js';
-// import {
-//     AggHostsDialog, NewAggDialog, NewDomainDialog,
-//     NewEndpoingDialog, NewImageDialog, NewProjectDialog, RegionDialog,
-//     ServerResetStateDialog, ServiceDialog, TasksDialog, TenantUsageDialog,
-//     UsersDialog
-// } from './dialogs.js';
 import { LOG, ServerTasks, Utils } from './lib.js'
 
 
@@ -64,7 +58,6 @@ class DataTable {
             }
         } while(body[this.bodyKey].length != 0);
         Notify.success(`${this.name} ${id} 删除成功`, 2);
-        this.refresh();
     }
     resetSelected() {
         this.selected = [];
@@ -82,10 +75,15 @@ class DataTable {
     }
     async refresh(filters = {}) {
         let result = null
-        if (this.api.detail) {
-            result = await this.api.detail(filters);
-        } else {
-            result = await this.api.list(filters)
+        try {
+            if (this.api.detail) {
+                result = await this.api.detail(filters);
+            } else {
+                result = await this.api.list(filters)
+            }
+        } catch {
+            Notify.error(`${this.name || '资源'} 查询失败`)
+            return;
         }
         this.items = this.bodyKey ? result[this.bodyKey] : result;
         return result;
@@ -389,6 +387,16 @@ export class ServerDataTable extends DataTable {
                 { text: '电源状态', value: 'power_state' },
                 { text: '操作', value: 'action' },
               ], API.server, 'servers', '实例');
+        this.extendItems = [
+            { text: 'UUID', value: 'id' },
+            { text: '实例名', value: 'OS-EXT-SRV-ATTR:instance_name' },
+            { text: '创建时间', value: 'created' },
+            { text: '更新时间', value: 'updated' },
+            { text: '规格', value: 'flavor' },
+            { text: '租户ID', value: 'tenant_id' },
+            { text: '用户ID', value: 'iduser_id' },
+            { text: 'diskConfig', value: 'OS-DCF:diskConfig' },
+        ];
         this.imageMap = {};
         this.rootBdmMap = {};
         this.errorNotify = {};
@@ -737,7 +745,7 @@ export class VolumeDataTable extends DataTable {
         super([
             { text: 'ID', value: 'id' },
             { text: '名字', value: 'name' },
-            { text: '状态|启动盘|共享', value: 'status_bootable_multi' },
+            { text: '状态', value: 'status_bootable_multi' },
             { text: '大小', value: 'size' },
             { text: '卷类型', value: 'volume_type' },
             { text: '镜像名', value: 'image_name' },
@@ -753,6 +761,13 @@ export class VolumeDataTable extends DataTable {
             { text: 'metadata', value: 'metadata' },
             { text: 'updated_at', value: 'updated_at' },
         ];
+        // TODO: 补充其他状态
+        this.doingStatus = [
+            'creating', 'attaching', 'deleting'
+        ]
+    }
+    isDoing(item){
+        return this.doingStatus.indexOf(item.status)>= 0;
     }
 }
 
@@ -1295,7 +1310,7 @@ export class MigrationDataTable extends DataTable{
             { text: '新规格', value: 'new_instance_type_id' },
             { text: '开始时间', value: 'created_at' },
             { text: '状态', value: 'status'},
-        ], API.migration, 'migrations')
+        ], API.migration, 'migrations', '迁移记录');
         this.extendItems = [
             { text: '更新时间', value: 'updated_at' },
             { text: 'dest_host', value: 'dest_host' },

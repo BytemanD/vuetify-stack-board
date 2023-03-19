@@ -1,10 +1,11 @@
 <template>
   <v-row>
     <v-col>
-      <v-btn small color="primary" @click="table.newItemDialog.open()"><v-icon>mdi-plus</v-icon></v-btn>
-      <v-btn small color="error" @click="imageDeleteSmartDialog.open()" :disabled="table.selected.length == 0">
+      <v-btn x-small fab class="mr-1" color="primary" @click="openNewImageDialog = true"><v-icon>mdi-plus</v-icon></v-btn>
+      <v-btn small color="error" @click="openImageDeleteSmartDialog = true" :disabled="table.selected.length == 0">
         <v-icon small>mdi-trash-can</v-icon>删除
       </v-btn>
+      <ImageDeleteSmartDialog :show.sync="openImageDeleteSmartDialog" :images="table.selected" @completed="table.resetSelected(); table.refresh()" />
     </v-col>
     <v-col>
       <v-text-field small dense v-model="table.search" append-icon="mdi-magnify" label="搜索" single-line
@@ -40,7 +41,7 @@
             <table>
               <template >
                 <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
-                  <td><strong>{{ extendItem.text }}:</strong> </td>
+                  <td class="info--text">{{ extendItem.text }}:</td>
                   <td>{{ item[extendItem.value] }}</td>
                 </tr>
               </template>
@@ -57,19 +58,27 @@
         </template>
       </v-data-table>
     </v-col>
+    <v-col cols=12>
+      <NewImageVue :show.sync="openNewImageDialog" :images="table.selected" @completed="table.resetSelected(); table.refresh()" />
+      <!-- <ImageDeleteSmartDialog :show.sync="openImageDeleteSmartDialog" :images="table.selected" @completed="table.resetSelected(); table.refresh()" /> -->
+    </v-col>
   </v-row>
 </template>
 
 <script>
 import { ImageDataTable } from '@/assets/app/tables';
+import NewImageVue from './image/dialogs/NewImage.vue';
 
+import ImageDeleteSmartDialog from './image/dialogs/ImageDeleteSmartDialog.vue';
 
 export default {
   components: {
-
+    NewImageVue, ImageDeleteSmartDialog,
   },
 
   data: () => ({
+    openNewImageDialog: false,
+    openImageDeleteSmartDialog: false,
     table: new ImageDataTable()
   }),
   methods: {

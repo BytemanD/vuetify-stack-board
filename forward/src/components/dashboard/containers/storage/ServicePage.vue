@@ -1,11 +1,6 @@
 <template>
     <v-row>
-        <v-col>
-            <v-btn small color="primary" @click="newVolumeDialog.open()"><v-icon small>mdi-plus</v-icon>新建</v-btn>
-            <v-btn small color="warning" @click="volumeResetStateDialog.open()" :disabled="table.selected.length == 0">状态重置</v-btn>
-            <v-btn small color="error" @click="table.deleteSelected()" :disabled="table.selected.length == 0">
-                <v-icon small>mdi-trash-can</v-icon>删除</v-btn>
-        </v-col>
+        <v-col></v-col>
         <v-col>
             <v-text-field small dense v-model="table.search" append-icon="mdi-magnify" label="搜索" single-line
                 hide-details></v-text-field>
@@ -15,7 +10,7 @@
         </v-col>
 
         <v-col cols="12">
-            <v-data-table show-expand single-expand show-select dense :headers="table.headers" :items="table.items"
+            <v-data-table show-expand single-expand dense :headers="table.headers" :items="table.items"
                 :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1" v-model="table.selected" >
                 <template v-slot:[`item.status_bootable_multi`]="{ item }">
                     <v-icon v-if="item.status == 'available'">mdi-link-variant-off</v-icon>

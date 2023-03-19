@@ -465,6 +465,7 @@ class Image extends Restfulclient {
     }
     async upload(id, binary, size, uploadCallback = null) {
         let self = this;
+        let headers = this.getHeaders();
         return new Promise(function (resolve, reject) {
             var xhr = new XMLHttpRequest();
             xhr.onload = () => {
@@ -480,6 +481,9 @@ class Image extends Restfulclient {
             }
             xhr.open("PUT", `${self.baseUrl}/${id}/file`, true);
             xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+            for (let key in headers){
+                xhr.setRequestHeader(key, headers[key]);
+            }
             if (size) {
                 xhr.setRequestHeader('x-image-meta-size', size);
             }
@@ -588,14 +592,15 @@ class Volume extends VstackboardApi {
 
     async waitVolumeStatus(volume_id, expectStatus = ['available', 'error']) {
         let body = {}
-        while (expectStatus.indexOf(status) < 0) {
+        let status = null;
+        do {
             body = await API.volume.get(volume_id);
-            let status = body.volume.status;
+            status = body.volume.status;
             LOG.debug(`wait volume ${volume_id} status to be ${expectStatus}, now: ${status}`)
             if (expectStatus.indexOf(status) < 0) {
-                await Utils.sleep(3);
+                await Utils.sleep(5);
             }
-        }
+        } while (expectStatus.indexOf(status) < 0)
         return body
     }
     async resetState(id, data) {

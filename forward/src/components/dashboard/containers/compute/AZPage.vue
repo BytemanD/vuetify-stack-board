@@ -62,6 +62,7 @@ export default {
         drawAz: async function(){
             // TODO: 需要等一会儿，否则不会显示，是否有更好的方法？
             await Utils.sleep(1);
+            // await this.table.refresh();
             this.table.drawTopoloy('azTopolopy');
         }
     },

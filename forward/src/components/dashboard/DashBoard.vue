@@ -29,11 +29,11 @@
       </v-list-item>
       <v-list shaped dense>
         <v-list-item-group v-model="navigation.itemIndex" color="primary">
-          <template v-for="(items, group) in navigation.items">
-            <v-subheader v-if="group != 'default'" v-bind:key="group">
-              <h3> {{ group }}</h3><v-divider></v-divider>
+          <template v-for="group in navigation.group">
+            <v-subheader v-bind:key="group.name">
+              <h3> {{ group.name }}</h3><v-divider></v-divider>
             </v-subheader>
-            <v-list-item v-for="item in items" v-bind:key="item.router"
+            <v-list-item v-for="item in group.items" v-bind:key="item.router"
               :disabled="navigation.selectedItem.router == item.router"
               v-bind:class="{ 'v-list-item--active': navigation.selectedItem.router == item.router }"
               @click="selectItem(item)">
@@ -61,27 +61,38 @@ import { SETTINGS } from '@/assets/app/settings';
 import BtnTheme from '../plugins/BtnTheme.vue';
 import BtnHome from '../plugins/BtnHome.vue';
 
-export const navigationItems = {
-  default: [
-    { title: '虚拟化资源', icon: 'mdi-alpha-h-circle', router: '/hypervisor' },
-  ],
-  '计算': [
-    { title: '实例', icon: 'mdi-laptop-account', router: '/server' },
-    { title: '计算管理', icon: 'mdi-layers', router: '/compute' },
-    { title: '存储', icon: 'mdi-expansion-card', router: '/storage' },
-    { title: '镜像', icon: 'mdi-package-variant-closed', router: '/image' },
-  ],
-  '网络': [
-    { title: '网络资源', icon: 'mdi-web', router: '/networking' },
+const navigationGroup = [
+  {
+    name: '概览',
+    items: [
+      { title: '虚拟化资源', icon: 'mdi-alpha-h-circle', router: '/hypervisor' },
+    ]
+  },
+  {
+    name: '计算',
+    items: [
+      { title: '实例', icon: 'mdi-laptop-account', router: '/server' },
+      { title: '计算管理', icon: 'mdi-layers', router: '/compute' },
+      { title: '存储', icon: 'mdi-expansion-card', router: '/storage' },
+      { title: '镜像', icon: 'mdi-package-variant-closed', router: '/image' },
+    ],
+  },
+  {
+    name: '网络',
+    items: [
+      { title: '网络资源', icon: 'mdi-web', router: '/networking' },
+    ]
+  },
+  {
+    name: '认证',
+    items: [
+      { title: '服务地址', icon: 'mdi-server', router: '/endpoint' },
+      { title: '租户', icon: 'mdi-account-supervisor', router: '/project' },
+      { title: '域', icon: 'mdi-domain', router: '/domain' },
 
-  ],
-  '认证': [
-    { title: '服务地址', icon: 'mdi-server', router: '/endpoint' },
-    { title: '租户', icon: 'mdi-account-supervisor', router: '/project' },
-    { title: '域', icon: 'mdi-domain', router: '/domain' },
-
-  ],
-}
+    ]
+  }
+]
 
 export default {
   components: {
@@ -94,8 +105,8 @@ export default {
       navigationWidth: '200px'
     },
     navigation: {
-      items: navigationItems,
-      selectedItem: navigationItems.default[0],
+      group: navigationGroup,
+      selectedItem: navigationGroup[0],
       mini: false,
     },
     context: {

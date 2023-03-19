@@ -1,7 +1,8 @@
 <template>
     <v-row>
         <v-col>
-            <v-btn small color="primary" @click="table.newItemDialog.open()"><v-icon>mdi-plus</v-icon></v-btn>
+            <v-btn x-small fab class="mr-1" color="primary"
+                @click="openNewAggDialog = true"><v-icon>mdi-plus</v-icon></v-btn>
             <v-btn small color="error" @click="table.deleteSelected()" :disabled="table.selected.length == 0"><v-icon
                     small>mdi-trash-can</v-icon> 删除</v-btn>
             <!-- <v-btn small color="warning" @click="">节点管理</v-btn> -->
@@ -18,7 +19,7 @@
                 :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1" v-model="table.selected">
 
                 <template v-slot:[`item.host_num`]="{ item }">
-                    <v-btn small text color="info" @click="table.aggHostsDialog.open(item)">{{ item.hosts.length }}</v-btn>
+                    <v-btn small text color="info" @click="editAggHosts(item)">{{ item.hosts.length }}</v-btn>
                 </template>
                 <template v-slot:expanded-item="{ headers, item }">
                     <td></td>
@@ -31,8 +32,11 @@
                         </table>
                     </td>
                 </template>
-
             </v-data-table>
+        </v-col>
+        <v-col cols="12">
+            <NewAggDialog :show.sync="openNewAggDialog" @completed="table.refresh()"></NewAggDialog>
+            <AggHostDialog :show.sync="openAggHostsDialog" :aggregate="editAgg"></AggHostDialog>
         </v-col>
     </v-row>
 </template>
@@ -41,18 +45,27 @@
 import { AggDataTable } from '@/assets/app/tables.js';
 import { Utils } from '@/assets/app/lib.js';
 
+import NewAggDialog from '../dialogs/NewAggDialog.vue';
+import AggHostDialog from '../dialogs/AggHostsDialog';
+
+
 export default {
     components: {
-
+        NewAggDialog, AggHostDialog
     },
 
     data: () => ({
         Utils: Utils,
+        openNewAggDialog: false,
+        openAggHostsDialog: false,
+        editAgg: null,
         table: new AggDataTable()
-        // miniVariant: false,
     }),
     methods: {
-
+        editAggHosts: function(agg){
+            this.editAgg = agg;
+            this.openAggHostsDialog = true;
+        }
     },
     created() {
         this.table.refresh();

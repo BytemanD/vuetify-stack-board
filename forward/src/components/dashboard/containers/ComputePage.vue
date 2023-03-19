@@ -9,7 +9,6 @@
                 <v-tab><v-icon>mdi-alpha-a-box</v-icon> 聚合 </v-tab>
                 <v-tab @click="migrationTable.refresh()"><v-icon>mdi-alpha-m-box</v-icon> 迁移记录 </v-tab>
                 <v-tabs-items v-model="tabIndex">
-                    <v-divider></v-divider>
                     <v-tab-item> <FlavorPage /> </v-tab-item>
                     <v-tab-item> <KeypairPage /> </v-tab-item>
                     <v-tab-item> <ServicePage /> </v-tab-item>

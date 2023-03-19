@@ -9,7 +9,7 @@ import { Utils, LOG, ServerTasks, CONST } from './lib.js';
 import { BackupTable, VolumeDataTable, UserTable, RegionDataTable, ServiceTable, } from './tables.js';
 import {
     serverTable, imageTable,
-    snapshotTable, volumeTypeTable,
+    snapshotTable,
     qosPolicyTable, portTable, sgTable, netTable, routerTable,
 } from './objects.js'
 
@@ -31,6 +31,9 @@ class Dialog {
     open() {
         this.errorNotify = null;
         this.display()
+    }
+    init(){
+        this.refreshName();
     }
     display() {
         this.show = true;
@@ -104,18 +107,15 @@ export class NewUserDialog extends Dialog {
         this.userRole = null;
         this.roles = [];
     }
-    randomName() {
-        this.name = Utils.getRandomName('user');
-    }
     async open(project) {
-        this.randomName();
+        this.refreshName();
         this.project = project;
         super.open();
         this.roles = (await API.role.list()).roles;
     }
     async commit() {
-        if (!this.name) { Notify.warn(`用户名必须指定`); return; }
-        if (!this.userRole) { Notify.warn(`用户角色不能为空`); return; }
+        if (!this.name) { Notify.warning(`用户名必须指定`); return; }
+        if (!this.userRole) { Notify.warning(`用户角色不能为空`); return; }
         let data = {
             name: this.name,
             project_id: this.project.id,
@@ -152,7 +152,7 @@ export class NewDomainDialog extends Dialog {
         super.open();
     }
     async commit() {
-        if (!this.name) { Notify.warn(`Domain名不能为空`); return; }
+        if (!this.name) { Notify.warning(`Domain名不能为空`); return; }
         let data = { name: this.name, enabled: this.enabled }
         if (this.description) { data.description = this.description }
         try {
@@ -184,7 +184,7 @@ export class NewProjectDialog extends Dialog {
         super.open();
     }
     async commit() {
-        if (!this.name) { Notify.warn(`租户名不能为空`); return; }
+        if (!this.name) { Notify.warning(`租户名不能为空`); return; }
         let data = { name: this.name, enabled: this.enabled }
         if (this.description) { data.description = this.description }
         if (this.domainId) { data.domain_id = this.domainId }
@@ -234,7 +234,7 @@ export class NewRoleDialog extends Dialog {
     }
     async commit() {
         if (!this.name) {
-            Notify.warn(`角色名必须指定`)
+            Notify.warning(`角色名必须指定`)
             return;
         }
         let data = { name: this.name }
@@ -639,7 +639,7 @@ export class MigrateDialog extends Dialog {
         for (let i in this.servers) {
             let item = this.servers[i];
             if (['ACTIVE', 'SHUTOFF'].indexOf(item.status) < 0) {
-                Notify.warn(`虚拟机 ${item.name} 状态异常，无法迁移`, 1)
+                Notify.warning(`虚拟机 ${item.name} 状态异常，无法迁移`, 1)
                 continue
             }
             if (this.smart) {
@@ -658,7 +658,7 @@ export class MigrateDialog extends Dialog {
             } else if (!this.liveMigrate && item.status.toUpperCase() == 'SHUTOFF') {
                 this.migrateAndWait(item)
             } else {
-                Notify.warn(`虚拟机 ${item.name} 状态异常，无法迁移`, 1)
+                Notify.warning(`虚拟机 ${item.name} 状态异常，无法迁移`, 1)
             }
         }
     }
@@ -691,12 +691,12 @@ export class EvacuateDialog extends Dialog {
         }
         if (computeService == null) {
             // just in case
-            Notify.warn(`该节点无 ${CONST.NOVA_COMPUTE} 服务`)
+            Notify.warning(`该节点无 ${CONST.NOVA_COMPUTE} 服务`)
             return;
         }
 
         if (computeService.state == 'up') {
-            Notify.warn(`节点 ${computeService.host} 正在使用中，无法疏散。`)
+            Notify.warning(`节点 ${computeService.host} 正在使用中，无法疏散。`)
             return;
         }
         try {
@@ -714,7 +714,7 @@ export class EvacuateDialog extends Dialog {
         for (let i in this.servers) {
             let item = this.servers[i];
             if (['ACTIVE', 'SHUTOFF', 'ERROR'].indexOf(item.status) < 0) {
-                Notify.warn(`虚拟机 ${item.name} 状态异常，无法疏散`, 1)
+                Notify.warning(`虚拟机 ${item.name} 状态异常，无法疏散`, 1)
                 continue
             }
             this.evacuateServer(item);
@@ -1067,9 +1067,8 @@ export class NewAggDialog extends Dialog {
         this.name = null;
         this.az = null;
     }
-    open() {
+    init() {
         this.refreshName();
-        super.open();
     }
     async commit() {
         if (!this.name) {
@@ -1160,11 +1159,10 @@ export class AggHostsDialog extends Dialog {
             this.hosts.push({ 'name': this.agg.hosts[i] });
         }
     }
-    async open(agg) {
+    async init(agg) {
         this.hosts = [];
         this.agg = agg;
         this.refresh();
-        super.open();
     }
     async removeHosts() {
         for (let i in this.selected) {
@@ -1264,29 +1262,37 @@ export class UpdateServerSG extends Dialog {
 export class NewVolumeDialog extends Dialog {
     constructor() {
         super({
-            name: '', size: 10, nums: 1, image: null, type: null, snapshot: null,
+            size: 10, nums: 1, image: null, type: null, snapshot: null,
             snapshots: [], images: [], types: []
         })
+        this.resource = 'volume';
     }
-    async waitVOlumeCreated(volume) {
-        await API.volume.waitVolumeStatus(volume.id);
-        Notify.success(`卷 ${volume.name} 创建成功`);
-        // volumeTable.refresh();
+    init(){
+        this.refreshName();
     }
     async commit() {
+        if (!this.name) {
+            Notify.warning('卷名字不能为空');
+            return;
+        }
+        let creatingVolumes = [];
         for (var i = 1; i <= this.params.nums; i++) {
             let data = {
-                name: this.params.nums > 1 ? `${this.params.name}-${i}` : this.params.name,
+                name: this.params.nums > 1 ? `${this.name}-${i}` : this.name,
                 size: parseInt(this.params.size)
             }
             if (this.params.image) { data.imageRef = this.params.image; }
             if (this.params.snapshot) { data.snapshot_id = this.params.snapshot; }
             if (this.params.type != '') { data.volume_type = this.params.type; }
             let body = await API.volume.create(data)
-            this.waitVOlumeCreated(body.volume)
+            creatingVolumes.push(body.volume)
         }
-        Notify.info(`卷 ${this.params.name} 创建中`);
-        this.hide();
+        Notify.info(`卷 ${this.name} 创建中`);
+        for (let i in creatingVolumes){
+            let volume = creatingVolumes[i];
+            await API.volume.waitVolumeStatus(volume.id);
+            Notify.success(`卷 ${volume.name || volume.id} 创建完成`);
+        }
     }
     async open() {
         this.params.name = Utils.getRandomName('volume');
@@ -1383,7 +1389,7 @@ export class NewBackupDialog extends Dialog {
         this.volumes = (await API.volume.list()).volumes;
     }
 }
-export class VolumeResetStateDialog extends Dialog {
+export class VolumeStateResetDialog extends Dialog {
     constructor() {
         super();
         this.status = null;
@@ -1395,20 +1401,18 @@ export class VolumeResetStateDialog extends Dialog {
         this.attachStatusList = ['attached', 'detached']
         this.volumeTable = new VolumeDataTable();
     }
-    async commit() {
+    async commit(volumes) {
         let data = {};
         if (this.status) { data.status = this.status }
         if (this.attachStatus) { data.attach_status = this.attachStatus }
         if (this.resetMigrateStatus) { data.migration_status = null }
         if (Object.keys(data).length == 0) {
-            Notify.warn(`请至少指定一个要重置的属性。`)
-            return;
+            throw Error('请至少指定一个要重置的属性。')
         }
-        for (let i in this.volumeTable.selected) {
-            let volume = this.selected[i];
+        for (let i in volumes) {
+            let volume = volumes[i];
             await API.volume.resetState(volume.id, data);
             Notify.success(`卷 ${volume.name || volume.id} 状态重置成功`);
-            this.volumeTable.refresh();
         }
     }
 }
@@ -1448,17 +1452,17 @@ export class SnapshotResetStateDialog extends Dialog {
 export class NewVolumeTypeDialog extends Dialog {
     constructor() {
         super();
-        this.name = '';
         this.backendName = ''
         this.description = '';
         this.private = false;
-    }
-    randomName() {
-        return this.name = Utils.getRandomName('type');
+        this.resource = 'volumeType';
     }
     async commit() {
         let extraSpecs = {};
-        if (!this.name) { Notify.error(`名字不能为空`); return; }
+        if (!this.name) {
+            Notify.error('名字不能为空'); 
+            throw Error('名字不能为空');
+        }
         let data = {
             name: this.name,
             public: !this.private,
@@ -1475,12 +1479,9 @@ export class NewVolumeTypeDialog extends Dialog {
         LOG.debug(`Create volume type ${JSON.stringify(data)}`);
         await API.volumeType.create(data);
         Notify.success(`卷类型 ${this.name} 创建成功`);
-        this.hide();
-        volumeTypeTable.refresh();
     }
-    async open() {
-        this.randomName();
-        super.open();
+    async init() {
+        super.init();
     }
 }
 
@@ -1612,7 +1613,7 @@ export class UpdatePort extends Dialog {
         if (this.portSGs != this.port.security_groups) { data.security_groups = this.portSGs; }
         if (this.portQosPolicy != this.port.qos_policy_id) { data.qos_policy_id = this.portQosPolicy; }
         if (!data) {
-            Notify.warn(`端口属性没有变化`)
+            Notify.warning(`端口属性没有变化`)
             return;
         }
         await API.port.put(this.port.id, { port: data });
@@ -1722,7 +1723,7 @@ export class NewQosPolicyRule extends Dialog {
             return;
         }
         if (this.maxKbps > 2147483647 || this.maxBurstKbps > 2147483647) {
-            Notify.warn(`kbps值不能大于 2147483647`)
+            Notify.warning(`kbps值不能大于 2147483647`)
             return;
         }
         for (let i in this.directions) {
@@ -1828,7 +1829,7 @@ export class NewSGRuleDialog extends Dialog {
             ethertype: this.ethertype,
         }
         if (this.remoteIp && this.remoteGroup) {
-            Notify.warn(`对端IP和对端安全组不能同时设置`);
+            Notify.warning(`对端IP和对端安全组不能同时设置`);
             return;
         }
         if (this.remoteIp) { data['remote_ip_prefix'] = this.remoteIp }
@@ -2284,7 +2285,6 @@ export class ImageDeleteSmartDialog extends Dialog {
     async deleteInstanceBackup(image) {
         if (image.block_device_mapping && image.block_device_mapping.length > 0) {
             let bdm = JSON.parse(image.block_device_mapping)[0];
-            console.log(bdm)
             let backupId = bdm.backup_id;
             let resetSuccess = (await this.resetBackupState(backupId))
             if (resetSuccess) {
@@ -2302,33 +2302,35 @@ export class ImageDeleteSmartDialog extends Dialog {
         await this.deleteInstanceBackup(image);
     }
 
-    async commit() {
+    async commit(images) {
+        Notify.info('开始删除镜像');
         if (!this.smart) {
-            await imageTable.deleteSelected();
-            this.hide();
-            return;
-        } else {
-            for (let i in imageTable.selected) {
-                let item = imageTable.selected[i];
-                if (!item.image_type) {
-                    await API.image.delete(item.id);
-                    await imageTable.waitDeleted(item.id);
-                    imageTable.refresh();
-                    continue;
-                }
-                if (item.image_type == 'instance_backup') {
-                    await this.deleteInstanceBackup(item);
-                    await imageTable.waitDeleted(item.id);
-                } else if (item.image_type == 'snapshot') {
-                    await this.deleteSnapshot(item);
-                    await imageTable.waitDeleted(item.id);
-                } else {
-                    Notify.warn(`image type ${item.image_type} is not supported.`)
-                }
+            for (let i in images){
+                let image = images[i];
+                await API.image.delete(image.id);
+                await imageTable.waitDeleted(image.id);
             }
+            return;
+        } 
+        for (let i in images) {
+            let image = images[i];
+            if (!image.image_type) {
+                await API.image.delete(image.id);
+                await imageTable.waitDeleted(image.id);
+                continue;
+            }
+            if (image.image_type == 'instance_backup') {
+                await this.deleteInstanceBackup(image);
+                await imageTable.waitDeleted(image.id);
+                continue;
+            } 
+            if (image.image_type == 'snapshot') {
+                await this.deleteSnapshot(image);
+                await imageTable.waitDeleted(image.id);
+                continue;
+            }
+            Notify.warning(`image type ${image.image_type} is unkown.`)
         }
-        this.hide();
-        imageTable.resetSelected();
     }
 }
 export class ImagePropertiesDialog extends Dialog {
@@ -2387,7 +2389,7 @@ export class ImagePropertiesDialog extends Dialog {
 export class NewImageDialog extends Dialog {
     constructor() {
         super();
-        this.name = null;
+        this.resource = 'image';
         this.diskFormat = 'qcow2';
         this.containerFormat = 'bare';
 
@@ -2412,11 +2414,8 @@ export class NewImageDialog extends Dialog {
         this.file = null;
         this.process = '0';
     }
-    randomName() {
-        this.name = Utils.getRandomName('image');
-    }
-    async open() {
-        this.randomName();
+    async init() {
+        super.init();
         this.process = '0';
         this.file = null;
         super.open();
@@ -2447,8 +2446,8 @@ export class NewImageDialog extends Dialog {
     }
     async upload(id) {
         let self = this;
-        Notify.info('开始上传镜像...')
         let reader = await this.readImage(this.file);
+        Notify.info('开始上传镜像...')
         await API.image.uploadSlice(
             id, reader.result, this.file.size,
             (loaded, total) => { self.process = (loaded * 100 / total).toFixed(3); }
@@ -2464,7 +2463,7 @@ export class NewImageDialog extends Dialog {
 
         let image = await API.image.post(data);
         Notify.success(`镜像创建成功`)
-
+        
         if (this.file) {
             await this.upload(image.id);
         }

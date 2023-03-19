@@ -13,20 +13,19 @@
             <v-text-field label="名字" placeholder="请输入规格名" v-model="dialog.params.name"
                 :error="!dialog.params.name" :rules="[dialog.checkNameNotNull]"></v-text-field>
           </v-col>
-          <v-col cols="3">
+          <v-col cols="4">
             <v-text-field type="number" label="内存(MB)" v-model="dialog.params.ram" prepend-icon="mdi-minus" append-outer-icon="mdi-plus"
                           @click:prepend="dialog.ramMinus()" @click:append-outer="dialog.ramPlus()"></v-text-field>
             <v-text-field type="number" label="CPU个数" v-model="dialog.params.vcpu" prepend-icon="mdi-minus" append-outer-icon="mdi-plus"
                           @click:prepend="dialog.vcpuMinus()" @click:append-outer="dialog.vcpuPlus()"></v-text-field>
             <v-text-field type="number" label="磁盘(GB)" v-model="dialog.params.disk" prepend-icon="mdi-minus" append-outer-icon="mdi-plus"
                           @click:prepend="dialog.diskMinus()" @click:append-outer="dialog.diskPlus()"></v-text-field>
-
+            <v-switch hide-details dense v-model="dialog.params.isPublic" label="设为共享" ></v-switch>
           </v-col>
-          <v-col cols="7">
-              <v-textarea rows="6" filled label="设置规格属性" placeholder="请输入规格的属性,例如: hw:page_size=large, 多个属性换行输入。"
+          <v-col cols="8">
+              <v-textarea rows="8" filled label="设置规格属性" placeholder="请输入规格的属性,例如: hw:page_size=large, 多个属性换行输入。"
                       v-model="dialog.params.extrasContent" :rules="[dialog.checkExtrasValid]"></v-textarea>
           </v-col>
-          <v-col cols="2"><v-switch hide-details v-model="dialog.params.isPublic" label="设为共享" ></v-switch></v-col>
         </v-row>
       </v-card-text>
     </v-card>

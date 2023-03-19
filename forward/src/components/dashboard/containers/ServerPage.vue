@@ -48,8 +48,8 @@
         </template>
         显示未删除/已删除
       </v-tooltip>
-      <BtnIcon icon="mdi-family-tree" toolTip="显示拓扑图" @click="openServerTopology = true"/>
-      <BtnIcon icon="mdi-refresh" color="info" toolTip="刷新" @click="table.refresh()"/>
+      <BtnIcon icon="mdi-family-tree" toolTip="显示拓扑图" @click="openServerTopology = true" />
+      <BtnIcon icon="mdi-refresh" color="info" toolTip="刷新" @click="table.refresh()" />
     </v-col>
     <v-col cols="4">
       <v-text-field small dense hide-details v-model="table.search" append-icon="mdi-magnify" label="搜索"
@@ -65,9 +65,8 @@
         </template>
         <template v-slot:[`item.status`]="{ item }">
           <span v-if="item.status.toUpperCase() == 'DELETED'"> {{ item.status }}</span>
-          <template v-else-if="item['OS-EXT-STS:vm_state'] == 'building' || item['OS-EXT-STS:task_state']">
-            <v-icon color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
-          </template>
+          <v-icon v-else-if="item['OS-EXT-STS:vm_state'] == 'building' || item['OS-EXT-STS:task_state']" color="warning"
+            class="mdi-spin">mdi-rotate-right</v-icon>
           <v-icon v-else-if="item['OS-EXT-STS:vm_state'] == 'active'" color="success">mdi-play-circle</v-icon>
           <v-icon v-else-if="item['OS-EXT-STS:vm_state'] == 'stopped'" color="warning">mdi-stop-circle</v-icon>
           <v-icon v-else-if="item['OS-EXT-STS:vm_state'] == 'paused'" color="warning">mdi-pause-circle</v-icon>
@@ -121,44 +120,13 @@
             </v-list>
           </v-menu>
         </template>
-
         <template v-slot:expanded-item="{ headers, item }">
           <td></td>
           <td :colspan="headers.length - 1">
-            <table>
-              <tr>
-                <td><strong>UUID</strong></td>
-                <td>{{ item.id }}</td>
-              </tr>
-              <tr>
-                <td><strong>实例名</strong> </td>
-                <td>{{ item['OS-EXT-SRV-ATTR:instance_name'] }}</td>
-              </tr>
-              <tr>
-                <td><strong>创建时间</strong> </td>
-                <td>{{ item.created }}</td>
-              </tr>
-              <tr>
-                <td><strong>更新时间</strong> </td>
-                <td>{{ item.updated }}</td>
-              </tr>
-              <tr>
-                <td><strong>规格</strong></td>
-                <td>{{ item.flavor }}</td>
-              </tr>
-              <tr>
-                <td><strong>用户</strong> </td>
-                <td>{{ item['user_id'] }}</td>
-              </tr>
-              <tr>
-                <td><strong>租户</strong> </td>
-                <td>{{ item['tenant_id'] }}</td>
-              </tr>
-              <tr>
-                <td><strong>diskConfig</strong> </td>
-                <td>{{ item['OS-DCF:diskConfig'] }}</td>
-              </tr>
-            </table>
+            <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
+              <td class="info--text">{{ extendItem.text }}:</td>
+              <td>{{ item[extendItem.value] }}</td>
+            </tr>
           </td>
         </template>
       </v-data-table>
@@ -192,7 +160,7 @@ export default {
     openServerTopology: false,
   }),
   methods: {
-    refreshTable: function() {
+    refreshTable: function () {
       this.table.refresh();
     }
   },

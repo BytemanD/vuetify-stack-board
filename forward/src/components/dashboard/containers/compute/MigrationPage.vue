@@ -52,14 +52,12 @@ export default {
     data: () => ({
         Utils: Utils,
         table: new MigrationDataTable()
-
-        // miniVariant: false,
     }),
     methods: {
 
     },
     created() {
-        this.table.refresh();
+        // this.table.refresh();
     }
 };
 </script>
