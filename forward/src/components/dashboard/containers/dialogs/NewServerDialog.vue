@@ -3,7 +3,7 @@
         <v-card>
             <v-card-text height="300" class="pa-0">
                 <v-stepper elevation="0" vertical height="510">
-                    <v-stepper-step step="1" color="success" editable="editable">*基本设置</v-stepper-step>
+                    <v-stepper-step step="1" color="success" editable="editable"><h2>基本设置</h2></v-stepper-step>
                     <v-stepper-content step="1">
                         <v-row >
                             <v-col cols="10">
@@ -52,7 +52,7 @@
                             </v-col>
                         </v-row>
                     </v-stepper-content>
-                    <v-stepper-step step="2" color="success" editable="editable">{{ i18n.t('security') }}</v-stepper-step>
+                    <v-stepper-step step="2" color="success" editable="editable"><h2>{{ i18n.t('security') }}</h2></v-stepper-step>
                     <v-stepper-content step="2">
                         <v-select :items="dialog.securityGroups" clearable label="安全组" item-text="name" item-value="id"
                             v-model="dialog.securityGroup" persistent-hint hint="只能选择当前租户的安全组"
@@ -62,7 +62,7 @@
                         <v-select :items="dialog.keypairs" clearable label="密钥对" item-text="keypair.name"
                             item-value="keypair.name" v-model="dialog.keypair" @click="dialog.refreshKeypairs()"></v-select>
                     </v-stepper-content>
-                    <v-stepper-step step="3" color="success" editable="editable">自定义</v-stepper-step>
+                    <v-stepper-step step="3" color="success" editable="editable"><h2>自定义</h2></v-stepper-step>
                     <v-stepper-content step="3">
                         <v-slider v-model="dialog.params.nums" label="实例数量" ticks="always" max="10"
                             min="1" :disabled="dialog.portId != null">
@@ -104,7 +104,6 @@ export default {
         i18n: i18n,
         display: false,
         dialog: new NewServerDialog(),
-        windowsSize: {},
         Utils: Utils
     }),
     methods: {

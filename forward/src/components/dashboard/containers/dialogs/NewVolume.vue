@@ -54,7 +54,6 @@ export default {
         i18n: i18n,
         display: false,
         dialog: new NewVolumeDialog(),
-        windowsSize: {},
         Utils: Utils
     }),
     methods: {

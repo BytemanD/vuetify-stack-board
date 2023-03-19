@@ -20,6 +20,7 @@ class DataTable {
         this.selected = []
         this.extendItems = []
         this.newItemDialog = null;
+        this.loading = false;
     }
     async openNewItemDialog(){
         if (this.newItemDialog){
@@ -74,6 +75,7 @@ class DataTable {
         }
     }
     async refresh(filters = {}) {
+        this.loading = true;
         let result = null
         try {
             if (this.api.detail) {
@@ -84,6 +86,8 @@ class DataTable {
         } catch {
             Notify.error(`${this.name || '资源'} 查询失败`)
             return;
+        } finally {
+            this.loading = false;
         }
         this.items = this.bodyKey ? result[this.bodyKey] : result;
         return result;
@@ -171,6 +175,7 @@ export class NetDataTable extends DataTable {
         ], API.network, 'networks', '网络');
         this.extendItems = [
             { text: 'description', value: 'description' },
+            { text: 'enable_dhcp', value: 'enable_dhcp' },
             { text: 'created_at', value: 'created_at' },
             { text: 'project_id', value: 'project_id' },
             { text: 'qos_policy_id', value: 'qos_policy_id' },
@@ -954,14 +959,15 @@ export class ClusterTable extends DataTable {
         ]
         this.region = ''
     }
-    delete(item) {
-        API.cluster.delete(item.id).then(() => {
-            Notify.success(`集群 ${item.name} 删除成功`);
-            this.refresh();
-        }).catch(error => {
+    async delete(item) {
+        try {
+            await API.cluster.delete(item.id)
+            Notify.success(`集群 ${item.name || item.id} 删除成功`);
+        } catch (error){
+            console.error('集群删除失败', error);
             Notify.error(`集群 ${item.name} 删除失败`);
-            console.error(error);
-        })
+            throw error;
+        }
     }
     getSelectedCluster(){
         if (! this.selected){

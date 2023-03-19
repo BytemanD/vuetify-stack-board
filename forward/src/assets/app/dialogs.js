@@ -10,7 +10,7 @@ import { BackupTable, VolumeDataTable, UserTable, RegionDataTable, ServiceTable,
 import {
     serverTable, imageTable,
     snapshotTable,
-    qosPolicyTable, portTable, sgTable, netTable, routerTable,
+    qosPolicyTable, portTable, sgTable,
 } from './objects.js'
 
 
@@ -32,7 +32,7 @@ class Dialog {
         this.errorNotify = null;
         this.display()
     }
-    init(){
+    init() {
         this.refreshName();
     }
     display() {
@@ -262,19 +262,16 @@ export class UsersDialog extends Dialog {
 export class NewNetworkDialog extends Dialog {
     constructor() {
         super({
-            name: '', shared: false, networkType: null, qosPolicy: '',
+            shared: false, networkType: null, qosPolicy: '',
             segId: '', dnsDomain: '', azHint: ''
         })
+        this.resource = 'network';
         this.netTypes = ['vlan', 'vxlan', 'flat', 'geneve'];
         this.qosPolices = [];
     }
-    open() {
-        this.params.name = Utils.getRandomName('net');
-        super.open()
-    }
-    commit() {
+    async commit() {
         let data = {
-            name: this.params.name,
+            name: this.name,
             shared: this.params.shared,
         }
         if (this.params.networkType) { data['provider:network_type'] = this.params.networkType }
@@ -283,31 +280,31 @@ export class NewNetworkDialog extends Dialog {
         if (this.params.dnsDomain != '') { data.dns_domain = this.params.dnsDomain }
         if (this.params.azHint != '') { data.availability_zone_hints = [this.params.azHint] }
 
-        API.network.post({ network: data }).then(() => {
-            // netTable.refresh();
-        }).catch(error => {
-            Notify.error(`网络 ${this.params.name} 创建失败, ${error.response.data.NeutronError.Notify}`)
-        });
-        this.hide()
+        try {
+            await API.network.post({ network: data })
+            Notify.success(`网络 ${this.name} 创建成功`)
+        } catch (error) {
+            console.error(error.response)
+            Notify.error(`网络 ${this.name} 创建失败, ${error.response.data.NeutronError}`)
+            throw error
+        }
     }
 }
 
 export class NewSubnetDialog extends Dialog {
     constructor() {
-        super({
-            name: '', network: '', cidr: '192.168.1.0/24', enableDhcp: true,
-            ipVersion: 4, gateway: ''
-        })
-        this.networks = [];
+        super();
+        this.resource = 'subnet';
+        this.cidr = '192.168.1.0/24';
         this.ipVersions = [4, 6]
+        this.enableDhcp = true;
+        this.gateway = null;
+        this.ipVersion = 4;
+        this.network = {};
     }
-    randomName() {
-        this.params.name = Utils.getRandomName('subnet');
-    }
-    async open() {
-        this.randomName();
-        super.open();
-        this.networks = (await API.network.list()).networks;
+    async init(network) {
+        this.refreshName();
+        this.network = network;
     }
     checkCidr(value) {
         if (!value) { return '子网cidr不能为空' }
@@ -323,54 +320,43 @@ export class NewSubnetDialog extends Dialog {
         return true;
     }
     async commit() {
-        if (!this.params.network) {
-            Notify.error(`请选择网络`)
-            return;
-        }
         let data = {
-            name: this.params.name,
-            network_id: this.params.network,
-            cidr: this.params.cidr,
-            ip_version: this.params.ipVersion,
-            enable_dhcp: this.params.enableDhcp,
+            name: this.name,
+            network_id: this.network.id,
+            cidr: this.cidr,
+            ip_version: this.ipVersion,
+            enable_dhcp: this.enableDhcp,
         }
-        if (this.params.gateway != '') { data.gateway = this.params.gateway }
+        if (this.gateway) { data.gateway = this.gateway }
         this.errorNotify = null;
         try {
-            await API.subnet.post({ subnet: data })
-            this.hide();
-            Notify.success(`子网 ${this.params.name} 创建成功`)
-            // await netTable.refreshSubnets();
-            netTable.refresh();
+            await API.subnet.post({ subnet: data });
+            Notify.success(`子网 ${this.params.name} 创建成功`);
+            this.su
         } catch (error) {
-            this.errorNotify = error.response.data.NeutronError.Notify;
-            Notify.error(`子网 ${this.params.name} 创建失败.`)
+            this.errorNotify = error.response.data.NeutronError;
+            Notify.error(`子网 ${this.name} 创建失败.`)
+            throw error;
         }
     }
 }
 
 export class NewRouterkDialog extends Dialog {
     constructor() {
-        super({ name: '', azHint: '' })
-    }
-    randomName() {
-        this.params.name = Utils.getRandomName('router');
-    }
-    open() {
-        this.randomName();
-        super.open();
+        super();
+        this.resource = 'router'
+        this.azHint = '';
     }
     async commit() {
-        let data = { name: this.params.name }
-        if (this.params.azHint != '') { data.availability_zone_hints = [this.params.azHint] }
+        let data = { name: this.name }
+        if (this.azHint != '') { data.availability_zone_hints = [this.azHint] }
         try {
             await API.router.post({ router: data });
-            this.hide();
             Notify.success(`路由 ${this.params.name} 创建成功`)
-            routerTable.refresh();
-        } catch {
-            // Notify.error(`路由 ${this.params.name} 创建失败, ${error.response.data.NeutronError.Notify}`)
+        } catch (error) {
+            console.error(error)
             Notify.error(`路由 ${this.params.name} 创建失败`)
+            throw error;
         }
     }
 }
@@ -729,7 +715,7 @@ export class NewClusterDialog extends Dialog {
         })
         this.hidePassword = true;
     }
-    commit() {
+    async commit() {
         if (!this.params.name) { Notify.error(`环境名不能为空`); return; }
 
         let data = {
@@ -742,13 +728,13 @@ export class NewClusterDialog extends Dialog {
         if (data.name.endsWith('/')) {
             data.name = data.name.slice(0, -1);
         }
-        API.cluster.add(data).then(() => {
+        try {
+            await API.cluster.add(data)
             Notify.success(`环境 ${this.params.name} 添加成功`);
-            // clusterTable.refresh();
-            this.hide();
-        }).catch(() => {
+        } catch (error) {
+            console.error(error);
             Notify.error(`环境 ${this.params.name} 添加失败`)
-        })
+        }
     }
 
 }
@@ -1267,7 +1253,7 @@ export class NewVolumeDialog extends Dialog {
         })
         this.resource = 'volume';
     }
-    init(){
+    init() {
         this.refreshName();
     }
     async commit() {
@@ -1288,7 +1274,7 @@ export class NewVolumeDialog extends Dialog {
             creatingVolumes.push(body.volume)
         }
         Notify.info(`卷 ${this.name} 创建中`);
-        for (let i in creatingVolumes){
+        for (let i in creatingVolumes) {
             let volume = creatingVolumes[i];
             await API.volume.waitVolumeStatus(volume.id);
             Notify.success(`卷 ${volume.name || volume.id} 创建完成`);
@@ -1460,7 +1446,7 @@ export class NewVolumeTypeDialog extends Dialog {
     async commit() {
         let extraSpecs = {};
         if (!this.name) {
-            Notify.error('名字不能为空'); 
+            Notify.error('名字不能为空');
             throw Error('名字不能为空');
         }
         let data = {
@@ -1539,13 +1525,15 @@ export class RouterInterfacesDialog extends Dialog {
 }
 export class NewPortDialog extends Dialog {
     constructor() {
-        super()
-        this.name = '';
+        super();
+        this.resource = 'port';
         this.networkId = null;
         this.nums = 1;
         this.networks = [];
-        this.vnicTypes = ['normal', 'macvtap', 'direct', 'direct-physical',
-            'baremetal', 'virtio-forwarder', 'vdpa']
+        this.vnicTypes = [
+            'normal', 'macvtap', 'direct', 'direct-physical', 'baremetal',
+            'virtio-forwarder', 'vdpa'
+        ];
         this.vnicType = null;
         this.macAddress = null;
         this.qosPolicies = [];
@@ -1554,13 +1542,12 @@ export class NewPortDialog extends Dialog {
         this.securityGroups = [];
         this.portSecurityGroups = [];
     }
-    randomName() {
-        this.name = Utils.getRandomName('port');
-    }
-    open() {
-        this.randomName();
+    async init() {
+        this.refreshName();
         this.refreshNetwork();
-        super.open();
+    }
+    async refreshSecurityGroups(){
+        this.securityGroups = (await API.sg.list()).security_groups;
     }
     async refreshNetwork() {
         this.networks = (await API.network.list()).networks;
@@ -1574,16 +1561,15 @@ export class NewPortDialog extends Dialog {
         for (var i = 1; i <= this.nums; i++) {
             let data = {
                 name: this.nums > 1 ? `${this.name}-${i}` : this.name,
-                network_id: this.networkId
+                network_id: this.networkId,
             }
             if (this.vnicType) { data['binding:vnic_type'] = this.vnicType }
             if (this.macAddress) { data.mac_address = this.macAddress; }
             if (this.qosPolicyId) { data.qos_policy_id = this.qosPolicyId; }
             if (this.portSecurityEnabled) { data.port_security_enabled = this.portSecurityEnabled; }
-            if (this.portSecurityGroups) { data.security_groups = this.portSecurityGroups; }
+            if (this.portSecurityGroups.length > 0) { data.security_groups = this.portSecurityGroups; }
             await API.port.post({ port: data })
             Notify.success(`端口 ${this.name} 创建成功`);
-            portTable.refresh();
         }
         this.hide();
     }
@@ -1765,15 +1751,8 @@ export class NewQosPolicyRule extends Dialog {
 export class NewSGDialog extends Dialog {
     constructor() {
         super();
-        this.name = null;
+        this.resource = 'securityGroup';
         this.description = null;
-    }
-    randomName() {
-        this.name = Utils.getRandomName('security-group');
-    }
-    open() {
-        this.randomName();
-        super.open();
     }
     async commit() {
         if (!this.name) {
@@ -2305,13 +2284,13 @@ export class ImageDeleteSmartDialog extends Dialog {
     async commit(images) {
         Notify.info('开始删除镜像');
         if (!this.smart) {
-            for (let i in images){
+            for (let i in images) {
                 let image = images[i];
                 await API.image.delete(image.id);
                 await imageTable.waitDeleted(image.id);
             }
             return;
-        } 
+        }
         for (let i in images) {
             let image = images[i];
             if (!image.image_type) {
@@ -2323,7 +2302,7 @@ export class ImageDeleteSmartDialog extends Dialog {
                 await this.deleteInstanceBackup(image);
                 await imageTable.waitDeleted(image.id);
                 continue;
-            } 
+            }
             if (image.image_type == 'snapshot') {
                 await this.deleteSnapshot(image);
                 await imageTable.waitDeleted(image.id);
@@ -2463,7 +2442,7 @@ export class NewImageDialog extends Dialog {
 
         let image = await API.image.post(data);
         Notify.success(`镜像创建成功`)
-        
+
         if (this.file) {
             await this.upload(image.id);
         }

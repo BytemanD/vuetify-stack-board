@@ -56,7 +56,7 @@
         single-line></v-text-field>
     </v-col>
     <v-col cols='12'>
-      <v-data-table dense show-select show-expand single-expand :headers="table.headers" :items="table.items"
+      <v-data-table dense show-select show-expand single-expand :loading="table.loading" :headers="table.headers" :items="table.items"
         :items-per-page="table.itemsPerPage" :search="table.search" v-model="table.selected">
         <template v-slot:[`item.name`]="{ item }">
           {{ item.name }}

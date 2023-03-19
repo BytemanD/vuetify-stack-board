@@ -45,7 +45,6 @@ export default {
         i18n: i18n,
         display: false,
         tenantUsageDialog: new TenantUsageDialog(),
-        windowsSize: {},
     }),
     methods: {
 

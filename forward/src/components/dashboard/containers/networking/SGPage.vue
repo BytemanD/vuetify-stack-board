@@ -1,7 +1,7 @@
 <template>
     <v-row>
         <v-col>
-            <v-btn small color="primary" @click="networking.newSGDialog.open()"><v-icon>mdi-plus</v-icon>新建</v-btn>
+            <v-btn x-small fab class="mr-1" color="primary" @click="openNewSGDialog = true"><v-icon>mdi-plus</v-icon></v-btn>
             <v-btn small color="error" @click="table.deleteSelected()">删除</v-btn>
         </v-col>
         <v-col>
@@ -15,6 +15,7 @@
             <v-data-table show-select show-expand single-expand dense :headers="table.headers" :items="table.items"
                 :items-per-page="table.itemsPerPage" :search="table.search" v-model="table.selected">
                 <template v-slot:[`item.actions`]="{ item }">
+                    <!-- TODO -->
                     <v-btn text small color="purple" @click="networking.sgRulesDialog.open(item)">规则管理</v-btn>
                 </template>
                 <template v-slot:expanded-item="{ headers, item }">
@@ -31,18 +32,22 @@
                 </template>
             </v-data-table>
         </v-col>
+        <v-col><NewSecurityGroup :show.sync="openNewSGDialog" @completed="table.refresh()"/></v-col>
     </v-row>
 </template>
 
 <script>
 import { SecurityGroupDataTable } from '@/assets/app/tables';
 
+import NewSecurityGroup from './dialogs/NewSecurityGroup.vue';
+
 export default {
     components: {
+        NewSecurityGroup,
     },
     data: () => ({
-        table: new SecurityGroupDataTable()
-        // miniVariant: false,
+        table: new SecurityGroupDataTable(),
+        openNewSGDialog: false,
     }),
     methods: {
     },

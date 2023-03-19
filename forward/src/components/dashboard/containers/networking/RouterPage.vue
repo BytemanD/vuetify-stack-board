@@ -1,7 +1,7 @@
 <template>
     <v-row>
         <v-col>
-            <v-btn small color="primary" @click="newRouterDialog.open()"><v-icon>mdi-plus</v-icon> 新建</v-btn>
+            <v-btn x-small fab class="mr-1" color="primary" @click="showNewRouterDialog = true"><v-icon>mdi-plus</v-icon></v-btn>
             <v-btn small color="error" v-on:click="table.deleteSelected()">删除</v-btn>
         </v-col>
         <v-col>
@@ -41,17 +41,24 @@
                 </template>
             </v-data-table>
         </v-col>
+        <v-col cols=12>
+            <NewRouterDialog :show.sync="showNewRouterDialog" @completed="table.refresh()"/>
+        </v-col>
     </v-row>
 </template>
 
 <script>
 import { RouterDataTable } from '@/assets/app/tables';
 
+import NewRouterDialog from './dialogs/NewRouterDialog.vue';
+
 export default {
     components: {
+        NewRouterDialog,
     },
     data: () => ({
-        table: new RouterDataTable()
+        table: new RouterDataTable(),
+        showNewRouterDialog: false,
     }),
     methods: {
 

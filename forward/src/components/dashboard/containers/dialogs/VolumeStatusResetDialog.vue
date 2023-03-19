@@ -32,7 +32,6 @@ export default {
     i18n: i18n,
     display: false,
     dialog: new VolumeStateResetDialog(),
-    windowsSize: {},
     Utils: Utils
   }),
   methods: {

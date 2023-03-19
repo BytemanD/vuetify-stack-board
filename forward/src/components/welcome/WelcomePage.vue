@@ -1,9 +1,9 @@
 <template>
   <v-app>
     <v-main class="indigo lighten-4">
-      <v-row>
-        <v-col cols="2"></v-col>
-        <v-col cols="8">
+      <v-row text-center>
+        <!-- <v-col cols="2"></v-col> -->
+        <v-col cols="6" class="mx-auto">
           <v-card class="mx-auto mt-10 blue-grey lighten-4" elevation="4">
             <v-img class="white--text align-end" src="@/../public/welcome.svg">
               <v-card-title>
@@ -16,23 +16,24 @@
             </v-img>
             <v-card-text class="text--primary">
               <v-alert class="blue-grey lighten-4" border="left" colored-border color="deep-purple accent-1"
-                v-if="clusterTable.items.length == 0">
-                <v-icon>mdi-information-outline</v-icon>当前集群数目为 {{ clusterTable.items.length }}，请添加新集群。
+                v-if="table.items.length == 0">
+                <v-icon>mdi-information-outline</v-icon>当前集群数目为 {{ table.items.length }}，请添加新集群。
               </v-alert>
-              <h4>常用集群</h4>
-              <v-chip close label color="primary" class="mr-2 mt-2" v-bind:key="item.i" v-for="item in clusterTable.items"
-                @click:close="deleteCluster(item)" @click="useCluster(item)">{{ item.name }}
-              </v-chip>
+              <h4>常用集群 <v-btn icon @click="refresh()"><v-icon>mdi-refresh</v-icon></v-btn> </h4>
+                <v-chip close label color="primary" class="mr-2 mt-2" v-bind:key="item.i" v-for="item in table.items"
+                  @click:close="deleteCluster(item)" @click="useCluster(item)">{{ item.name }}
+                </v-chip>
+              <v-icon v-if="refreshing" class="mdi-spin">mdi-rotate-right</v-icon>
             </v-card-text>
             <v-card-actions>
-              <v-btn color="orange" text v-click="newCluster.display()"><v-icon>mdi-plus</v-icon> 添加集群</v-btn>
+              <v-btn color="orange" text @click="openNewClusterDialog = true"><v-icon>mdi-plus</v-icon> 添加集群</v-btn>
+              <NewClusterVue :show.sync="openNewClusterDialog" @completed="this.table.refreh()" />
               <v-spacer></v-spacer>
               <v-btn icon href="https://github.com/fjboy/vuetify-stack-board"
                 target="_new"><v-icon>mdi-github</v-icon></v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
-        <v-col cols="2"></v-col>
       </v-row>
     </v-main>
   </v-app>
@@ -45,20 +46,23 @@ import { Notify } from 'vuetify-message-snackbar';
 import API from '@/assets/app/api';
 import { NewAggDialog } from '@/assets/app/dialogs';
 import { ClusterTable } from '@/assets/app/tables';
+import NewClusterVue from './NewCluster.vue';
 
 
 export default {
   name: 'WelcomePage',
   components: {
-
+    NewClusterVue,
   },
 
   data: () => ({
     api: API,
     version: null,
     newVersion: {},
+    table: new ClusterTable(),
+    openNewClusterDialog: false,
     newCluster: new NewAggDialog(),
-    clusterTable: new ClusterTable(),
+    refreshing: true,
   }),
   methods: {
     useCluster: function (cluster) {
@@ -79,18 +83,22 @@ export default {
     checkLastVersion: async function () {
       this.newVersion = await API.actions.checkLastVersion()
     },
-    deleteCluster: async (item) => {
-      await this.clusterTable.delete(item);
-      Notify.success('删除成功');
-      this.clusterTable.refresh();
+    deleteCluster: async function (item) {
+      await this.table.delete(item);
+      this.table.refresh();
     },
     getVersion: async function () {
       this.version = await (API.version.get());
     },
+    refresh: async function () {
+      this.refreshing = true;
+      await this.table.refresh();
+      this.refreshing = false;
+    }
   },
   created() {
-    this.clusterTable.refresh();
     this.getVersion();
+    this.refresh();
   }
 };
 </script>
