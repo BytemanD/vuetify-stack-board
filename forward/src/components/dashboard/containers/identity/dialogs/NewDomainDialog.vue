@@ -1,5 +1,5 @@
 <template>
-<v-dialog v-model="display" width="600">
+  <v-dialog v-model="display" width="600">
     <v-card>
       <v-card-title class="primary lighten-2" primary-title>添加Domain</v-card-title>
       <v-card-text>
@@ -21,41 +21,40 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
-
 </template>
 
 <script>
 import { NewDomainDialog } from '@/assets/app/dialogs';
 
 export default {
-    props: {
-        show: Boolean,
-    },
-    data: () => ({
-        display: false,
-        dialog: new NewDomainDialog(),
-    }),
-    methods: {
-        commit: async function () {
-            await this.dialog.commit()
-            this.display = false;
-            this.$emit('completed');
-        }
-    },
-    created() {
+  props: {
+    show: Boolean,
+  },
+  data: () => ({
+    display: false,
+    dialog: new NewDomainDialog(),
+  }),
+  methods: {
+    commit: async function () {
+      await this.dialog.commit()
+      this.display = false;
+      this.$emit('completed');
+    }
+  },
+  created() {
 
+  },
+  watch: {
+    show(newVal) {
+      this.display = newVal;
+      if (this.display) {
+        this.dialog.init();
+      }
     },
-    watch: {
-        show(newVal) {
-            this.display = newVal;
-            if (this.display) {
-                this.dialog.init();
-            }
-        },
-        display(newVal) {
-            this.display = newVal;
-            this.$emit("update:show", this.display);
-        }
-    },
+    display(newVal) {
+      this.display = newVal;
+      this.$emit("update:show", this.display);
+    }
+  },
 };
 </script>

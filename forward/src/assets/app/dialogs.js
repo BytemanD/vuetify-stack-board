@@ -162,17 +162,15 @@ export class NewDomainDialog extends Dialog {
 export class NewProjectDialog extends Dialog {
     constructor() {
         super();
-        this.name = '';
+        this.resource = 'project';
         this.enabled = true;
         this.description = null;
         this.domainId = 'default';
         this.domains = [];
     }
-    randomName() {
-        this.name = Utils.getRandomName('project');
-    }
-    async open() {
-        this.randomName();
+
+    async init() {
+        super.init();
         this.domains = (await API.domain.list()).domains;
         super.open();
     }
@@ -198,16 +196,15 @@ export class RolesDialog extends Dialog {
         this.domains = [];
         this.domainId = null;
     }
-    randomName() {
-        this.name = Utils.getRandomName('user');
-    }
+
     async changeDoamin() {
+        // TODO:
         // this.roleTable.domainId = this.domainId;
     }
-    async open() {
+    async init() {
+        super.init();
         this.domains = (await API.domain.list()).domains;
         this.changeDoamin();
-        super.open();
     }
 }
 export class NewRoleDialog extends Dialog {
@@ -246,9 +243,12 @@ export class NewRoleDialog extends Dialog {
 export class UsersDialog extends Dialog {
     constructor() {
         super();
+        this.resource = 'user';
+        this.table = new UserTable();
     }
-    async open() {
-        super.open();
+    async init() {
+        super.init();
+        this.table.refresh();
     }
 }
 
@@ -1109,9 +1109,9 @@ export class ServiceDialog extends Dialog {
         super();
         this.serviceTable = new ServiceTable()
     }
-    open() {
+    init() {
+        super.init();
         this.serviceTable.refresh();
-        super.open();
     }
 }
 export class RegionDialog extends Dialog {
@@ -1119,9 +1119,9 @@ export class RegionDialog extends Dialog {
         super();
         this.regionTable = new RegionDataTable()
     }
-    open() {
+    init() {
+        super.init();
         this.regionTable.refresh();
-        super.open();
     }
 }
 export class AggHostsDialog extends Dialog {

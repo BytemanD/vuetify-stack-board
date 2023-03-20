@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="display" width="900" scrollable>
     <v-card>
-      <v-card-title class="headline grey lighten-2" primary-title>
+      <v-card-title class="headline primary lighten-2" primary-title>
         新建规格 <v-spacer></v-spacer> <v-btn color="primary" @click="commit()">创建</v-btn>
       </v-card-title>
       <v-card-text>

@@ -30,18 +30,20 @@
       <v-list shaped dense>
         <v-list-item-group v-model="navigation.itemIndex" color="primary">
           <template v-for="group in navigation.group">
-            <v-subheader v-bind:key="group.name">
-              <h3>{{ group.name }}</h3><v-divider></v-divider>
-            </v-subheader>
-            <v-list-item v-for="item in group.items" v-bind:key="item.router"
-              :disabled="navigation.selectedItem.router == item.router"
-              v-bind:class="{ 'v-list-item--active': navigation.selectedItem.router == item.router }"
-              @click="selectItem(item)">
-              <v-list-item-icon><v-icon>{{ item.icon }}</v-icon></v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title>{{ item.title }}</v-list-item-title>
-              </v-list-item-content>
-            </v-list-item>
+            <template>
+              <v-subheader v-bind:key="group.name">
+                <h3 class="primary--text">{{ group.name }}</h3><v-divider></v-divider>
+              </v-subheader>
+              <v-list-item v-for="item in group.items" v-bind:key="item.router"
+                :disabled="navigation.selectedItem.router == item.router"
+                v-bind:class="{ 'v-list-item--active': navigation.selectedItem.router == item.router }"
+                @click="selectItem(item)">
+                <v-list-item-icon><v-icon>{{ item.icon }}</v-icon></v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>{{ item.title }}</v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </template>
           </template>
         </v-list-item-group>
       </v-list>
@@ -87,7 +89,7 @@ const navigationGroup = [
     name: '认证',
     items: [
       { title: '服务地址', icon: 'mdi-server', router: '/endpoint' },
-      { title: '租户', icon: 'mdi-account-supervisor', router: '/project' },
+      { title: '项目', icon: 'mdi-account-supervisor', router: '/project' },
       { title: '域', icon: 'mdi-domain', router: '/domain' },
 
     ]

@@ -1,7 +1,7 @@
 <template>
     <v-row>
         <v-col>
-            <v-btn x-small fab color="primary" class="mr-1" @click="openNewFlavorDialog = true"><v-icon small>mdi-plus</v-icon></v-btn>
+            <v-btn x-small fab color="primary" class="mr-1" @click="openNewFlavorDialog = !openNewFlavorDialog"><v-icon small>mdi-plus</v-icon></v-btn>
             <v-btn small color="error" :disabled="table.selected.length == 0" @click="table.deleteSelected()">删除</v-btn>
         </v-col>
         <v-col cols="2" class="text-center">
