@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="display" width="600">
         <v-card>
-            <v-card-title class="headline grey lighten-2" primary-title>添加项目</v-card-title>
+            <v-card-title class="headline primary lighten-2" primary-title>添加项目</v-card-title>
             <v-card-text>
                 <v-row>
                     <v-col cols="10">

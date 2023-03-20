@@ -411,29 +411,6 @@ export class ServerDataTable extends DataTable {
         filters.deleted = this.deleted
         super.refresh(filters);
     }
-    getSelectedServerHosts(){
-        let serverHosts = []
-        for (let i in this.selected) {
-            if (!this.selected[i]['OS-EXT-SRV-ATTR:host']){
-                continue;
-            }
-            serverHosts.push(this.selected[i]['OS-EXT-SRV-ATTR:host'])
-        }
-        return serverHosts;
-    }
-    async getAvailableMoveHosts(){
-        let hosts = [];
-        let services = await API.computeService.getComputeServices();
-        let serverHosts = this.getSelectedServerHosts();
-        for (let i in services){
-            if (serverHosts.indexOf(services[i].host) >= 0 || services[i].state != 'up'){
-                continue
-            }
-            hosts.push(services[i].host);
-        }
-        return hosts
-
-    }
     openResetStateDialog(){
         this.resetStateDialog.open(this);
     }
@@ -750,13 +727,12 @@ export class VolumeDataTable extends DataTable {
         super([
             { text: 'ID', value: 'id' },
             { text: '名字', value: 'name' },
-            { text: '状态', value: 'status_bootable_multi' },
+            { text: '状态', value: 'status' },
             { text: '大小', value: 'size' },
             { text: '卷类型', value: 'volume_type' },
             { text: '镜像名', value: 'image_name' },
         ], API.volume, 'volumes', '卷');
         this.extendItems = [
-            { text: 'id', value: 'id' },
             { text: 'description', value: 'description' },
             { text: 'attached_servers', value: 'attached_servers' },
             { text: 'migration_status', value: 'migration_status' },
@@ -764,6 +740,7 @@ export class VolumeDataTable extends DataTable {
             { text: 'tenant_id', value: 'tenant_id' },
             { text: 'volume_image_metadata', value: 'volume_image_metadata' },
             { text: 'metadata', value: 'metadata' },
+            { text: 'created_at', value: 'created_at' },
             { text: 'updated_at', value: 'updated_at' },
         ];
         // TODO: 补充其他状态

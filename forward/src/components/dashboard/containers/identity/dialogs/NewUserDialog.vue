@@ -1,42 +1,42 @@
 <template>
-    <v-dialog v-model="display" width="600" scrollable>
+    <v-dialog v-model="display" width="600">
         <v-card>
-            <v-card-title class="headline primary lighten-2" primary-title>新建</v-card-title>
+            <v-card-title class="headline primary lighten-2" primary-title>添加用户</v-card-title>
             <v-card-text>
                 <v-row>
                     <v-col cols="10">
-                        <v-text-field label="*名字" placeholder="请输入安全组名" v-model="dialog.name"></v-text-field>
+                        <v-text-field label="名字" placeholder="请输入用户名" v-model="dialog.name"
+                            :rules="[dialog.checkNotNull]"></v-text-field>
                     </v-col>
                     <v-col cols="2" class="my-auto">
-                        <v-btn text color="primary" @click="dialog.refreshName()">随机名字</v-btn>
-                    </v-col>
-                    <v-col cols="12">
-                        <v-text-field hide-details label="描述" outlined dense placeholder="请输入描述信息" v-model="dialog.description"></v-text-field>
+                        <v-btn text color="primary" @click="dialog.randomName()">随机名字</v-btn>
                     </v-col>
                 </v-row>
+                <v-text-field label="密码" placeholder="请输入密码" v-model="dialog.password"></v-text-field>
+                <v-select clearable :items="dialog.roles" label="角色" item-text="name" item-value="id" dense outlined
+                    v-model="dialog.userRole" :rules="[dialog.checkUserRole]">
+                </v-select>
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" @click="commit()">创建</v-btn>
+                <v-btn color="primary" @click="dialog.commit()">创建</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
+
 <script>
-import i18n from '@/assets/app/i18n';
-import { Utils } from '@/assets/app/lib';
-import { NewSGDialog } from '@/assets/app/dialogs';
+import { NewUserDialog } from '@/assets/app/dialogs';
 
 export default {
     props: {
         show: Boolean,
+        project: Object
     },
     data: () => ({
-        i18n: i18n,
         display: false,
-        Utils: Utils,
-        dialog: new NewSGDialog(),
+        dialog: new NewUserDialog(),
     }),
     methods: {
         commit: async function () {
@@ -52,7 +52,7 @@ export default {
         show(newVal) {
             this.display = newVal;
             if (this.display) {
-                this.dialog.init(this.network);
+                this.dialog.init(this.project);
             }
         },
         display(newVal) {

@@ -32,7 +32,7 @@
           <td :colspan="headers.length - 1">
             <table>
               <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
-                <td><strong>{{ extendItem.text }}:</strong> </td>
+                <td class="info--text">{{ extendItem.text }}:</td>
                 <td>{{ item[extendItem.value] }}</td>
               </tr>
             </table>
@@ -40,9 +40,10 @@
         </template>
       </v-data-table>
     </v-col>
-    <NewProjectDialog :show.sync="showNewProjectDialog" @completed="table.refresh()"/>
-    <UserDialog :show.sync="showUserDialog"/>
-    <RoleDialog :show.sync="showRoleDialog"/>
+    <NewProjectDialog :show.sync="showNewProjectDialog" @completed="table.refresh()" />
+    <UserDialog :show.sync="showUserDialog" />
+    <RoleDialog :show.sync="showRoleDialog" />
+    <ProjectUserDialog :show.sync="showProjectUserDialog" :project="selectProject" />
   </v-row>
 </template>
 
@@ -53,10 +54,11 @@ import { ProjectTable } from '@/assets/app/tables';
 import NewProjectDialog from './dialogs/NewProjectDialog.vue';
 import UserDialog from './dialogs/UserDialog.vue';
 import RoleDialog from './dialogs/RoleDialog.vue';
+import ProjectUserDialog from './dialogs/ProjectUserDialog.vue';
 
 export default {
   components: {
-    NewProjectDialog, UserDialog, RoleDialog
+    NewProjectDialog, UserDialog, RoleDialog, ProjectUserDialog
   },
 
   data: () => ({
@@ -66,14 +68,15 @@ export default {
     showRoleDialog: false,
     showUserDialog: false,
     showProjectUserDialog: false,
+    selectProject: null,
   }),
   methods: {
     async refresh() {
       this.table.refresh();
     },
-    openProjectUserDialog: function(project){
+    openProjectUserDialog: function (project) {
       this.showProjectUserDialog = true;
-      console.log(project)
+      this.selectProject = project;
     }
   },
   created() {

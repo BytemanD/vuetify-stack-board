@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="display" width="800" scrollable>
         <v-card>
-            <v-card-title class="grey" primary-title>{{ i18n.t('serverTopology') }}</v-card-title>
+            <v-card-title class="primary" primary-title>{{ i18n.t('serverTopology') }}</v-card-title>
             <v-card-text>
                 <div id="topology" style="height:400px;"></div>
             </v-card-text>

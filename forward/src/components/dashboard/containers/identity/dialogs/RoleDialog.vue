@@ -1,7 +1,7 @@
 <template>
     <v-dialog scrollable v-model="display" width="900">
         <v-card>
-            <v-card-title class="headline grey lighten-2" primary-title>角色管理</v-card-title>
+            <v-card-title class="headline primary lighten-2" primary-title>角色管理</v-card-title>
             <v-card-text>
                 <v-row class="mt-1">
                     <v-col>

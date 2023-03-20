@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="display" width="800">
         <v-card>
-            <v-card-title class="headline grey lighten-2" primary-title>节点</v-card-title>
+            <v-card-title class="headline primary lighten-2" primary-title>节点</v-card-title>
             <v-card-text>
                 <v-btn small color="primary" @click="addHosts()">添加</v-btn>
                 <v-btn small color="error" @click="removeHosts()">移除</v-btn>

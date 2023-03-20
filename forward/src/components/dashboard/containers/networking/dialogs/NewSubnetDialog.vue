@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="display" width="600" scrollable>
         <v-card>
-            <v-card-title class="headline grey lighten-2" primary-title>网络: {{  dialog.network.name || dialog.network.id }}</v-card-title>
+            <v-card-title class="headline primary lighten-2" primary-title>网络: {{  dialog.network.name || dialog.network.id }}</v-card-title>
             <v-card-text>
                 <v-row>
                     <v-col cols="10">

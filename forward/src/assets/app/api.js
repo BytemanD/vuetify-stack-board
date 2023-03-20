@@ -8,7 +8,7 @@ class Restfulclient {
         this.baseUrl = baseUrl;
         this.clusterId = localStorage.getItem('clusterId');
     }
-    getHeaders(){
+    getHeaders() {
         console.info('Restfulclient.getHeaders')
         return null;
     }
@@ -37,26 +37,26 @@ class Restfulclient {
     }
     async get(url = null) {
         let reqUrl = url ? `${this.baseUrl}/${url}` : this.baseUrl;
-        let resp = await axios.get(reqUrl, {headers: this.getHeaders()});
+        let resp = await axios.get(reqUrl, { headers: this.getHeaders() });
         return resp.data
     }
     async delete(id) {
         let resp = await axios.delete(
-            `${this.baseUrl}/${id}`, {headers: this.getHeaders()});
+            `${this.baseUrl}/${id}`, { headers: this.getHeaders() });
         return resp.data
     }
     async post(body, url = null) {
         try {
             let reqUrl = this.baseUrl;
-            if (url){
-                if (url.startsWith('/')){
+            if (url) {
+                if (url.startsWith('/')) {
                     reqUrl = url;
                 } else {
                     reqUrl = `${this.baseUrl}/${url}`;
                 }
             }
             let resp = await axios.post(
-                reqUrl, body, {headers: this.getHeaders()});
+                reqUrl, body, { headers: this.getHeaders() });
             return resp.data
         } catch (e) {
             Notify.error(this._getErrorMsg(e.response))
@@ -64,28 +64,28 @@ class Restfulclient {
         }
     }
     async put(id, body) {
-        let resp = await axios.put(`${this.baseUrl}/${id}`, body, {headers: this.getHeaders()});
+        let resp = await axios.put(`${this.baseUrl}/${id}`, body, { headers: this.getHeaders() });
         return resp.data
     }
     async show(id, filters = {}) {
         let url = filters ? `${id}?${this._parseToQueryString(filters)}` : id;
-        let data = await this.get(`${url}`, {headers: this.getHeaders()});
+        let data = await this.get(`${url}`, { headers: this.getHeaders() });
         return data
     }
     async list(filters = {}) {
         let queryString = this._parseToQueryString(filters);
         let url = this.baseUrl;
         if (queryString) { url += `?${queryString}` }
-        let resp = await axios.get(`${url}`, {headers: this.getHeaders()});
+        let resp = await axios.get(`${url}`, { headers: this.getHeaders() });
         return resp.data;
     }
     async patch(id, body, headers = {}) {
-        let config = {headers: this.getHeaders()};
+        let config = { headers: this.getHeaders() };
         if (headers) {
-            for (let key in headers){
+            for (let key in headers) {
                 config[key] = headers[key];
             }
-         }
+        }
         let resp = await axios.patch(`${this.baseUrl}/${id}`, body, config);
         return resp.data
     }
@@ -93,7 +93,7 @@ class Restfulclient {
         let body = {};
         body[action] = data;
         return (await axios.post(
-            `${this.baseUrl}/${id}/action`, body, {headers: this.getHeaders()})).data;
+            `${this.baseUrl}/${id}/action`, body, { headers: this.getHeaders() })).data;
     }
 
     async listActive() {
@@ -101,7 +101,7 @@ class Restfulclient {
     }
 }
 
-Restfulclient.prototype.getHeaders = function(){
+Restfulclient.prototype.getHeaders = function () {
     return {
         'X-Cluster-Id': localStorage.getItem('clusterId'),
     }
@@ -136,7 +136,7 @@ class Flavor extends VstackboardApi {
         return await this.get(`${id}/os-extra_specs`);
     }
     async updateExtras(id, extras) {
-        let resp = await this.post({ 'extra_specs': extras }, `${id}/os-extra_specs`, )
+        let resp = await this.post({ 'extra_specs': extras }, `${id}/os-extra_specs`,)
         return resp.data;
     }
     async deleteExtra(id, key) {
@@ -198,7 +198,7 @@ class ComputeService extends Restfulclient {
         let resp = await axios.put(`${this.baseUrl}/${id}`, { status: 'enabled' });
         return resp.data;
     }
-    async getComputeServices() {
+    async getNovaComputeServices() {
         return (await this.list({ binary: 'nova-compute' })).services
     }
 }
@@ -297,9 +297,9 @@ class Server extends VstackboardApi {
         return resp.data;
     }
     async getVncConsole(id, type = 'novnc') {
-        let resp = await axios.post(`${this.baseUrl}/${id}/remote-consoles`,
-            { remote_console: { type: type, protocol: "vnc" } });
-        return resp.data;
+        return await this.post(
+            { remote_console: { type: type, protocol: "vnc" } },
+            `${id}/remote-consoles`);
     }
     async stop(id) {
         let resp = await this.doAction(id, { 'os-stop': null });
@@ -481,7 +481,7 @@ class Image extends Restfulclient {
             }
             xhr.open("PUT", `${self.baseUrl}/${id}/file`, true);
             xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-            for (let key in headers){
+            for (let key in headers) {
                 xhr.setRequestHeader(key, headers[key]);
             }
             if (size) {
@@ -732,6 +732,28 @@ export class OpenstackProxyApi {
 
         this.actions = new Actions();
         this.version = new Version();
+    }
+    getServerHosts(servers) {
+        let serverHosts = []
+        for (let i in servers) {
+            if (!servers[i]['OS-EXT-SRV-ATTR:host']){
+                continue;
+            }
+            serverHosts.push(servers[i]['OS-EXT-SRV-ATTR:host'])
+        }
+        return serverHosts;
+    }
+    async getMigratableHosts(servers) {
+        let hosts = [];
+        let services = await this.computeService.getNovaComputeServices();
+        let serverHosts = this.getServerHosts(servers);
+        for (let i in services){
+            if (serverHosts.indexOf(services[i].host) >= 0 || services[i].state.toUpperCase() != 'UP'){
+                continue
+            }
+            hosts.push(services[i].host);
+        }
+        return hosts
     }
 }
 

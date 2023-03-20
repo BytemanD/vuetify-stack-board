@@ -82,11 +82,10 @@ export class ProjectUserDialog extends Dialog {
         }
         this.userTable.items = users;
     }
-    async open(project) {
+    async init(project) {
         this.project = project;
-        this.userTable.items = [];
+        // this.userTable.items = [];
         this.refresh();
-        super.open();
     }
     async deleteSelected() {
         for (let i in this.userTable.selected) {
@@ -102,15 +101,14 @@ export class ProjectUserDialog extends Dialog {
 export class NewUserDialog extends Dialog {
     constructor() {
         super();
-        this.name = '';
+        this.resource = 'user'
         this.password = null;
         this.userRole = null;
         this.roles = [];
     }
-    async open(project) {
-        this.refreshName();
+    async init(project) {
+        super.init();
         this.project = project;
-        super.open();
         this.roles = (await API.role.list()).roles;
     }
     async commit() {
@@ -531,17 +529,18 @@ export class ChangePasswordDialog extends Dialog {
 }
 
 export class ChangeServerNameDialog extends Dialog {
-    constructor() { super({ newName: '', server: {} }) }
-
-    open(server) {
-        this.params.server = server;
-        this.params.newName = '';
-        this.show = true;
+    constructor() {
+        super();
+        this.newName = '';
+        this.server = {};
+    }
+    init(server) {
+        this.server = server;
+        this.newName = '';
     }
     async commit() {
-        await API.server.update(this.params.server.id, { name: this.params.newName });
+        await API.server.update(this.server.id, { name: this.newName });
         Notify.success('实例名修改成功');
-        // serverTable.refresh();
         this.hide();
     }
 }
@@ -591,20 +590,19 @@ export class MigrateDialog extends Dialog {
         this.host = null;
     }
 
-    async open() {
-        // this.servers = serverTable.selected;
+    async init(servers) {
+        this.servers = servers;
         this.nodes = [];
         super.open();
     }
     async refreshHosts() {
-        // this.nodes = await serverTable.getAvailableMoveHosts();
+        this.nodes = await API.getMigratableHosts(this.servers)
     }
     async liveMigrateAndWait(server) {
         await API.server.liveMigrate(server.id, this.host)
         Notify.info(`热迁移 ${server.name} ...`)
         // await serverTable.waitServerStatus(server.id);
         Notify.success(`虚拟机 ${server.id} 迁移完成`);
-        // serverTable.refresh();
     }
     async migrateAndWait(server) {
         await API.server.migrate(server.id, this.host);
@@ -614,30 +612,35 @@ export class MigrateDialog extends Dialog {
         Notify.success(`虚拟机 ${server.id} 迁移完成`);
         // serverTable.refresh();
     }
+    isValidLiveMigrateStatus(server){
+        return ['ACTIVE', 'PAUSE'].indexOf(server.status.toUpperCase()) >= 0 ;
+    }
+    canLiveMigrate(server){
+        if (this.smart){
+            return this.isValidLiveMigrateStatus(server) ;
+        }
+        if (this.liveMigrate && this.isValidLiveMigrateStatus(server)) {
+            return true;
+        } else if (!this.liveMigrate && server.status.toUpperCase() == 'SHUTOFF') {
+            return false;
+        } else {
+            throw Error(`虚拟机 ${server.name} 状态异常，无法迁移`)
+        }
+    }
     async commit() {
         for (let i in this.servers) {
-            let item = this.servers[i];
-            if (['ACTIVE', 'SHUTOFF'].indexOf(item.status) < 0) {
-                Notify.warning(`虚拟机 ${item.name} 状态异常，无法迁移`, 1)
+            let server = this.servers[i];
+            if (['ACTIVE', 'SHUTOFF', 'PAUSE'].indexOf(server.status) < 0) {
                 continue
             }
-            if (this.smart) {
-                switch (item.status.toUpperCase()) {
-                    case 'ACTIVE':
-                        this.liveMigrateAndWait(item); break;
-                    case 'SHUTOFF':
-                        this.migrateAndWait(item); break;
-                    default:
-                        break;
+            try {
+                if (this.canLiveMigrate(server)){
+                    this.liveMigrateAndWait(server); 
+                } else {
+                    this.migrateAndWait(server)
                 }
-                continue
-            }
-            if (this.liveMigrate && item.status.toUpperCase() == 'ACTIVE') {
-                this.liveMigrateAndWait(item);
-            } else if (!this.liveMigrate && item.status.toUpperCase() == 'SHUTOFF') {
-                this.migrateAndWait(item)
-            } else {
-                Notify.warning(`虚拟机 ${item.name} 状态异常，无法迁移`, 1)
+            } catch (error) {
+                Notify.warning(error);
             }
         }
     }
@@ -657,7 +660,7 @@ export class EvacuateDialog extends Dialog {
         super.open();
     }
     async refreshHosts() {
-        // this.nodes = await serverTable.getAvailableMoveHosts();
+        this.nodes = await serverTable.getAvailableMoveHosts();
     }
     async evacuateServer(server) {
         let hostServices = (await API.computeService.list({ host: server['OS-EXT-SRV-ATTR:host'] })).services;
@@ -2100,14 +2103,13 @@ export class ServerActionsDialog extends Dialog {
         this.server = {};
         this.actions = [];
     }
-    async open(server) {
+    async init(server) {
         this.server = server;
         this.actions = [];
-        super.open();
         this.actions = (await API.server.actionList(this.server.id)).reverse();
     }
     isActionError(action) {
-        if (action.Notify && action.Notify.toLowerCase().includes('error')) {
+        if (action.message && action.message.toLowerCase().includes('error')) {
             return true;
         }
         else {
@@ -2151,10 +2153,10 @@ export class ServerConsoleLogDialog extends Dialog {
         this.refreshing = false;
         this.interval = null;
         this._autoRefresh = false;
+        this.show = false;
     }
-    async open(server) {
+    async init(server) {
         this.server = server;
-        super.open();
         this.refreshConsoleLog(this.length);
     }
     async refreshConsoleLog(length) {
@@ -2171,19 +2173,21 @@ export class ServerConsoleLogDialog extends Dialog {
         }
         this.refreshing = false;
     }
-    async autoRefresh() {
-        let self = this;
-        if (!this._autoRefresh) {
-            return
+    async toggleAutoRefresh(){
+        if (this.interval){
+            clearInterval(this.interval);
+            this.interval = null;
+            return;
+        } else {
+            let self = this;
+            this.interval = setInterval(() => {
+                self.refresh()
+            }, 5000);
         }
-        this.interval = setInterval(() => {
-            self.refresh()
-        }, 5000);
     }
     async refresh() {
-        if ((!this.show || !this._autoRefresh) && this.interval) {
-            clearInterval(this.interval);
-            return;
+        if (!this.show){
+            return
         }
         await this.refreshConsoleLog(this.length);
     }
@@ -2203,16 +2207,15 @@ export class ServerConsoleLogDialog extends Dialog {
 export class ServerResetStateDialog extends Dialog {
     constructor() {
         super();
-        this.serverTable = {};
+        this.servers = [];
         this.active = false;
     }
-    async open(serverTable) {
-        this.serverTable = serverTable;
-        super.open();
+    init(servers) {
+        this.servers = servers;
     }
     async commit() {
-        for (let i in this.serverTable.selected) {
-            let server = this.serverTable.selected[i];
+        for (let i in this.servers) {
+            let server = this.servers[i];
             try {
                 await API.server.resetState(server.id, this.active);
                 Notify.success(`虚拟机${server.name || server.name}状态重置成功`);
@@ -2220,8 +2223,6 @@ export class ServerResetStateDialog extends Dialog {
                 Notify.error(`虚拟机${server.name || server.name}状态重置失败`);
             }
         }
-        this.serverTable.refresh();
-        this.hide();
     }
 }
 

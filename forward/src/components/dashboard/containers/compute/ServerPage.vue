@@ -28,11 +28,10 @@
             @click="table.rebootSelected('HARD')"><v-list-item-title>硬重启</v-list-item-title></v-list-item>
         </v-list>
       </v-menu>
-      <v-btn small color="primary" class="mr-1" @click="migrateDialog.open()"
-        :disabled="table.selected.length == 0">迁移</v-btn>
+      <v-btn small color="warning" class="mr-1" @click="showServerMigrateDialog = !showServerMigrateDialog" :disabled="table.selected.length == 0">迁移</v-btn>
       <v-btn small color="warning" class="mr-1" @click="evacuateDialog.open()"
         :disabled="table.selected.length == 0">疏散</v-btn>
-      <v-btn small color="warning" class="mr-1" @click="table.openResetStateDialog()"
+      <v-btn small color="warning" class="mr-1" @click="showServerResetStateDialog = !showServerResetStateDialog"
         :disabled="table.selected.length == 0">状态重置</v-btn>
       <v-btn small color="error" @click="table.deleteSelected()" :disabled="table.selected.length == 0">
         <v-icon small>mdi-trash-can</v-icon>删除
@@ -56,11 +55,11 @@
         single-line></v-text-field>
     </v-col>
     <v-col cols='12'>
-      <v-data-table dense show-select show-expand single-expand :loading="table.loading" :headers="table.headers" :items="table.items"
-        :items-per-page="table.itemsPerPage" :search="table.search" v-model="table.selected">
+      <v-data-table dense show-select show-expand single-expand :loading="table.loading" :headers="table.headers"
+        :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search" v-model="table.selected">
         <template v-slot:[`item.name`]="{ item }">
           {{ item.name }}
-          <v-btn @click="changeServerNameDialog.open(item)" x-small icon><v-icon>mdi-pencil-minus</v-icon></v-btn>
+          <v-btn @click="openChangeServerNameDialog(item)" x-small icon><v-icon>mdi-pencil-minus</v-icon></v-btn>
           <v-btn @click="loginVnc(item)" x-small icon><v-icon>mdi-console</v-icon></v-btn>
         </template>
         <template v-slot:[`item.status`]="{ item }">
@@ -103,9 +102,9 @@
             </template>
             <v-list dense>
               <v-list-item
-                @click="computing.serverActions.open(item)"><v-list-item-title>操作记录</v-list-item-title></v-list-item>
+                @click="openServerActionDialog(item)"><v-list-item-title>操作记录</v-list-item-title></v-list-item>
               <v-list-item
-                @click="computing.serverConsoleLog.open(item)"><v-list-item-title>控制台日志</v-list-item-title></v-list-item>
+                @click="openServerConsoleLogDialog(item)"><v-list-item-title>控制台日志</v-list-item-title></v-list-item>
               <v-list-item
                 @click="changePasswordDialog.open(item)"><v-list-item-title>修改密码</v-list-item-title></v-list-item>
               <v-list-item @click="serverVolumeDialog.open(item)"><v-list-item-title>卷管理</v-list-item-title></v-list-item>
@@ -133,36 +132,97 @@
     </v-col>
     <NewServerDialog :show.sync="openNewServer" />
     <ServerTopology :show.sync="openServerTopology" />
+    <ServerMigrateDialog :show.sync="showServerMigrateDialog" :servers="table.selected" />
+    <ServerResetStateDialog :show.sync="showServerResetStateDialog" :servers="table.selected" @completed="table.refresh()"/>
+    <ChangeServerNameDialog :show.sync="showChangePassowrdDialog" :server="selectedServer" @completed="updateServer()" />
+    <ServerActionDialog :show.sync="showServerActionDialog" :server="selectedServer" />
+    <ServerConsoleLogDialog :show.sync="showServerConsoleLogDialog" :server="selectedServer" />
   </v-row>
 </template>
 
 <script>
 import i18n from '@/assets/app/i18n';
 import BtnIcon from '@/components/plugins/BtnIcon'
+import API from '@/assets/app/api';
 
 import { ServerDataTable } from '@/assets/app/tables.js';
 
 import NewServerDialog from './dialogs/NewServerDialog';
 import ServerTopology from './dialogs/ServerTopology.vue';
 
+import ChangeServerNameDialog from './dialogs/ChangeServerNameDialog.vue';
+import ServerActionDialog from './dialogs/ServerActionDialog.vue';
+import ServerMigrateDialog from './dialogs/ServerMigrateDialog.vue';
+import ServerResetStateDialog from './dialogs/ServerResetStateDialog.vue';
+import ServerConsoleLogDialog from './dialogs/ServerConsoleLogDialog.vue';
+
 export default {
   props: {
     show: Boolean,
   },
   components: {
-    BtnIcon, NewServerDialog, ServerTopology
+    BtnIcon, NewServerDialog, ServerTopology,
+    ServerMigrateDialog, ServerResetStateDialog,
+    ChangeServerNameDialog,
+    ServerActionDialog,
+    ServerConsoleLogDialog,
   },
 
   data: () => ({
     i18n: i18n,
     deleted: false,
     table: new ServerDataTable(),
+    selectedServer: {},
     openNewServer: false,
     openServerTopology: false,
+    showServerMigrateDialog: false,
+    showServerResetStateDialog: false,
+    showServerActionDialog: false,
+    showServerConsoleLogDialog: false,
+    showChangePassowrdDialog: false,
+    showRenameDialog: false,
+    showServerVolumesDialog: false,
+    showServerInterfaecsDialog: false,
+    showUpdateServerSGDialog: false,
+    showServerResizeSGDialog: false,
   }),
   methods: {
     refreshTable: function () {
       this.table.refresh();
+    },
+    updateServer: async function(){
+      if (! this.selectedServer.id){
+            console.warn('server id is null');
+            return;
+        }
+        let newServer = (await API.server.show(this.selectedServer.id)).server;
+        for (let i in this.table.items){
+            if (this.table.items[i].id == this.selectedServer.id){
+                for (let key in this.table.items[i]){
+                  if (!newServer[key]) {
+                    continue;
+                  }
+                  this.table.items[i][key] = newServer[key];
+                }
+                break;
+            }
+        }
+    },
+    loginVnc: async function (server) {
+      let body = await API.server.getVncConsole(server.id);
+      window.open(body.remote_console.url, '_blank');
+    },
+    openChangeServerNameDialog: async function(server){
+      this.selectedServer = server;
+      this.showChangePassowrdDialog = !this.showChangePassowrdDialog;
+    },
+    openServerActionDialog: async function(server){
+      this.selectedServer = server;
+      this.showServerActionDialog = !this.showServerActionDialog;
+    },
+    openServerConsoleLogDialog: async function(server){
+      this.selectedServer = server;
+      this.showServerConsoleLogDialog = !this.showServerConsoleLogDialog;
     }
   },
   created() {

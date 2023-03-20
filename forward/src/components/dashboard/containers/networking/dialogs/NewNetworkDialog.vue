@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="display" width="800">
         <v-card>
-            <v-card-title class="headline grey lighten-2" primary-title>新建网络</v-card-title>
+            <v-card-title class="headline primary lighten-2" primary-title>新建网络</v-card-title>
             <v-card-text>
                 <v-row>
                     <v-col>

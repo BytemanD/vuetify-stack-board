@@ -1,5 +1,5 @@
 <template>
-<v-dialog v-model="display" width="760">
+<v-dialog v-model="display" width="760" scrollable>
     <v-card>
       <v-card-title class="info" primary-title>新建卷</v-card-title>
       <v-card-text>
