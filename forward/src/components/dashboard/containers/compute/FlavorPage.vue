@@ -2,7 +2,7 @@
     <v-row>
         <v-col>
             <v-btn x-small fab color="primary" class="mr-1" @click="openNewFlavorDialog = true"><v-icon small>mdi-plus</v-icon></v-btn>
-            <v-btn small color="error" @click="table.deleteSelected()">删除</v-btn>
+            <v-btn small color="error" :disabled="table.selected.length == 0" @click="table.deleteSelected()">删除</v-btn>
         </v-col>
         <v-col cols="2" class="text-center">
             <v-switch dense class="my-auto" hide-details v-model="table.isPublic" label="共享"
@@ -16,7 +16,7 @@
             <v-btn fab x-small color="info" v-on:click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
         </v-col>
         <v-col cols="12">
-            <v-data-table show-select show-expand single-expand dense :headers="table.headers" :items="table.items"
+            <v-data-table show-select show-expand single-expand dense :loading="table.loading" :headers="table.headers" :items="table.items"
                 :items-per-page="table.itemsPerPage" :search="table.search" v-model="table.selected">
                 <template v-slot:[`item.ram`]="{ item }">{{ Utils.humanRam(item.ram) }}</template>
                 <template v-slot:expanded-item="{ headers, item }">
@@ -39,7 +39,7 @@
 import { FlavorDataTable } from '@/assets/app/tables.js';
 import { Utils } from '@/assets/app/lib.js';
 
-import NewFlavorDialog from '../dialogs/NewFlavorDialog.vue';
+import NewFlavorDialog from './dialogs/NewFlavorDialog.vue';
 
 
 export default {

@@ -15,7 +15,7 @@
         </v-col>
 
         <v-col cols="12">
-            <v-data-table show-expand single-expand show-select dense :headers="table.headers" :items="table.items"
+            <v-data-table show-expand single-expand show-select dense :loading="table.loading" :headers="table.headers" :items="table.items"
                 :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1" v-model="table.selected" >
                 <template v-slot:[`item.status_bootable_multi`]="{ item }">
                     <v-icon v-if="item.status == 'available'">mdi-link-variant-off</v-icon>

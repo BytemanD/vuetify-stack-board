@@ -138,9 +138,10 @@
 
 <script>
 import i18n from '@/assets/app/i18n';
+import BtnIcon from '@/components/plugins/BtnIcon'
+
 import { ServerDataTable } from '@/assets/app/tables.js';
 
-import BtnIcon from '@/components/plugins/BtnIcon'
 import NewServerDialog from './dialogs/NewServerDialog';
 import ServerTopology from './dialogs/ServerTopology.vue';
 

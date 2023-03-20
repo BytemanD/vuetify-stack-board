@@ -11,7 +11,7 @@
             <v-btn fab x-small color="info" @click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
         </v-col>
         <v-col cols="12">
-            <v-data-table show-select show-expand single-expand dense :headers="table.headers" :items="table.items"
+            <v-data-table show-select show-expand single-expand dense :loading="table.loading" :headers="table.headers" :items="table.items"
                 :items-per-page="table.itemsPerPage" :search="table.search" v-model="table.selected">
                 <template v-slot:[`item.status`]="{ item }">
                     <v-icon v-if="item.status == 'ACTIVE'" color="success">mdi-emoticon-happy</v-icon>

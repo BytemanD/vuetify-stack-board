@@ -53,7 +53,7 @@ class BaseReqHandler(web.RequestHandler, GetContext):
         self.set_header('Access-Control-Allow-Headers', '*')
         self.set_header('Access-Control-Allow-Max-Age', 1000)
         self.set_header('Access-Control-Allow-Methods',
-                        'GET, POST, PUT, DELETE, OPTIONS')
+                        'GET, POST, PUT, DELETE, PATCH, OPTIONS')
 
     def options(self, *args, **kwargs):
         LOG.debug('options request')
@@ -247,7 +247,6 @@ class OpenstackProxyBase(BaseReqHandler):
             resp = self.get_proxy_method(cluster_proxy)(
                 method=method, url=url, data=self._request_body(),
                 headers=proxy_headers)
-
             return resp.status_code, resp.content
         except exceptions.EndpointNotFound as e:
             return 404, self.finish({'error': str(e)})
@@ -268,6 +267,7 @@ class OpenstackProxyBase(BaseReqHandler):
     def delete(self, url):
         return self.do_proxy('DELETE', url)
 
+    @utils.with_response()
     def patch(self, url):
         return self.do_proxy('PATCH', url)
 

@@ -25,6 +25,7 @@ openstack_options = [
     cfg.BooleanOption('fetch_max_version', default=True),
     cfg.MapOption('api_version', default={}),
     cfg.Option('cinder_api_version', default='v2'),
+    cfg.Option('default_region', default='RegionOne'),
 ]
 
 configs_itesm_in_db = [

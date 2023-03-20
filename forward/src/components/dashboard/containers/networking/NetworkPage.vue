@@ -4,7 +4,7 @@
             <v-btn x-small fab class="mr-1" color="primary" @click="openNewNetworkDialog = true">
                 <v-icon>mdi-plus</v-icon>
             </v-btn>
-            <v-btn small color="error" v-on:click="table.deleteSelected()">删除</v-btn>
+            <v-btn small color="error" :disabled="table.selected.length == 0" v-on:click="table.deleteSelected()">删除</v-btn>
         </v-col>
         <v-col>
             <v-text-field small dense v-model="table.search" append-icon="mdi-magnify" label="搜索" single-line

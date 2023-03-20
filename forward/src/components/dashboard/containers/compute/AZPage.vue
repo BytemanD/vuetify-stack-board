@@ -21,8 +21,8 @@
             </v-row>
         </v-col>
         <v-col cols="12">
-            <v-data-table :hidden="displayType != 0" :headers="table.headers" :items="table.azMap[table.zoneName].hosts"
-                :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1" dense show-select
+            <v-data-table dense show-select :loading="table.loading" :hidden="displayType != 0" :headers="table.headers" :items="table.azMap[table.zoneName].hosts"
+                :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1" 
                 v-model="table.selected">
                 <template v-slot:[`item.active`]="{ item }">
                     <v-icon v-if="item.active" color="success">mdi-emoticon-happy</v-icon>

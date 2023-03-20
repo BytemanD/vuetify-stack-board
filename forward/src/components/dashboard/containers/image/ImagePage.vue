@@ -18,7 +18,7 @@
       <v-btn x-small fab color="primary" @click="table.tasksDialog.open()"><v-icon>mdi-progress-upload</v-icon></v-btn>
     </v-col>
     <v-col cols="12">
-      <v-data-table dense show-select show-expand single-expand :headers="table.headers" :items="table.items"
+      <v-data-table dense show-select show-expand single-expand :loading="table.loading" :headers="table.headers" :items="table.items"
         :items-per-page="table.itemsPerPage" :search="table.search" v-model="table.selected">
 
         <template v-slot:[`item.status`]="{ item }">
@@ -67,9 +67,9 @@
 
 <script>
 import { ImageDataTable } from '@/assets/app/tables';
-import NewImageVue from './image/dialogs/NewImage.vue';
+import NewImageVue from './dialogs/NewImage.vue';
 
-import ImageDeleteSmartDialog from './image/dialogs/ImageDeleteSmartDialog.vue';
+import ImageDeleteSmartDialog from './dialogs/ImageDeleteSmartDialog.vue';
 
 export default {
   components: {

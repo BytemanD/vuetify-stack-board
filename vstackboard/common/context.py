@@ -1,11 +1,15 @@
 from vstackboard.db import api
 
+from vstackboard.common import conf
+
+CONF = conf.CONF
+
 
 class ClusterContext(object):
 
     def __init__(self, cluster_id, region=None):
         self.cluster_id = cluster_id
-        self.region = region
+        self.region = region or CONF.openstack.default_region
         self._cluster = None
 
     @property

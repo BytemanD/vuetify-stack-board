@@ -20,11 +20,11 @@
 </template>
 
 <script>
-import NetworkPage from './networking/NetworkPage.vue';
-import RouterPage from './networking/RouterPage.vue';
-import PortPage from './networking/PortPage.vue';
-import SGPage from './networking/SGPage.vue';
-import QosPolicyPage from './networking/QosPolicyPage.vue';
+import NetworkPage from './NetworkPage.vue';
+import RouterPage from './RouterPage.vue';
+import PortPage from './PortPage.vue';
+import SGPage from './SGPage.vue';
+import QosPolicyPage from './QosPolicyPage.vue';
 
 export default {
   components: {

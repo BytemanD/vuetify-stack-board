@@ -1,7 +1,9 @@
 <template>
   <v-row>
     <v-col>
-      <v-btn small color="primary" @click="table.newItemDialog.open()"><v-icon>mdi-plus</v-icon></v-btn>
+      <v-btn x-small fab class="mr-1" color="primary" @click="showNewEndpointDialog = !showNewEndpointDialog">
+        <v-icon>mdi-plus</v-icon>
+      </v-btn>
       <v-btn small color="error" @click="table.deleteSelected()"><v-icon>mdi-trash-can</v-icon></v-btn>
     </v-col>
     <v-col>
@@ -23,6 +25,7 @@
         <template v-slot:[`item.service_type`]="{ item }">{{ serviceMap[item.service_id].type }}</template>
       </v-data-table>
     </v-col>
+    <NewEndpointDialog :show.sync="showNewEndpointDialog" @completed="table.refresh()" />
   </v-row>
 </template>
 
@@ -31,14 +34,17 @@ import API from '@/assets/app/api';
 import I18N from '@/assets/app/i18n';
 import { EndpointTable } from '@/assets/app/tables';
 
+import NewEndpointDialog from './dialogs/NewEndpointDialog.vue';
 
 export default {
   components: {
+    NewEndpointDialog,
   },
 
   data: () => ({
     I18N: I18N,
     table: new EndpointTable(),
+    showNewEndpointDialog: false,
     serviceMap: {},
   }),
   methods: {

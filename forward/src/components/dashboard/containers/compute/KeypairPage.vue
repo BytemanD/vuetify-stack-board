@@ -2,7 +2,7 @@
     <v-row>
         <v-col>
             <v-btn x-small fab color="primary" class="mr-1" @click="openNewKeypairDialog = true"><v-icon small>mdi-plus</v-icon></v-btn>
-            <v-btn small color="error" @click="table.deleteSelected()">删除</v-btn>
+            <v-btn small color="error" :disabled="table.selected.length == 0" @click="table.deleteSelected()">删除</v-btn>
         </v-col>
 
         <v-col cols="6">
@@ -12,7 +12,7 @@
             <v-btn fab x-small color="info" v-on:click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
         </v-col>
         <v-col cols="12">
-            <v-data-table show-select dense show-expand single-expand :headers="table.headers" item-key="name" :items="table.items"
+            <v-data-table show-select dense show-expand single-expand :loading="table.loading" :headers="table.headers" item-key="name" :items="table.items"
                 :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1" v-model="table.selected">
 
                 <template v-slot:[`item.name`]="{ item }">
@@ -37,7 +37,7 @@
 import { KeypairDataTable } from '@/assets/app/tables.js';
 import { Utils } from '@/assets/app/lib.js';
 
-import NewKeypairDialog from '../dialogs/NewKeypairDialog .vue';
+import NewKeypairDialog from './dialogs/NewKeypairDialog .vue';
 
 export default {
     components: {

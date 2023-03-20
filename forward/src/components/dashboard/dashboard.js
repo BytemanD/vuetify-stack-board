@@ -5,15 +5,17 @@ import axios from 'axios';
 
 import vuetify from '../../plugins/vuetify'
 import DashBoard from './DashBoard.vue';
-import ServersPage from './containers/ServerPage';
-import HypervisorPage from './containers/HypervisorPage';
-import ComputePage from './containers/ComputePage';
-import StoragePage from './containers/StoragePage';
-import ImagePage from './containers/ImagePage'
-import NetworkPage from './containers/NetworkPage';
-import EndpointPage from './containers/EndpointPage';
-import ProjectPage from './containers/ProjectPage';
-import DomainPage from './containers/DomainPage';
+
+import HypervisorPage from './containers/overview/HypervisorPage';
+import ServersPage from './containers/compute/ServerPage';
+import ComputePage from './containers/compute/ComputePage';
+import StoragePage from './containers/storage/StoragePage';
+import ImagePage from './containers/image/ImagePage'
+import NetworkPage from './containers/networking/NetPage';
+
+import EndpointPage from './containers/identity/EndpointPage';
+import ProjectPage from './containers/identity/ProjectPage';
+import DomainPage from './containers/identity/DomainPage';
 
 import FlavorPage from './containers/compute/FlavorPage';
 

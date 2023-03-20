@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <v-col>
-      <v-btn small color="primary" @click="table.openNewItemDialog()">创建</v-btn>
+      <v-btn x-small fab class="mr-1" color="primary" @click="showNewDoaminDialog = !showNewDoaminDialog"><v-icon>mdi-plus</v-icon></v-btn>
       <v-btn small color="error" @click="table.deleteSelected()">删除</v-btn>
     </v-col>
     <v-col>
@@ -12,30 +12,32 @@
       <v-btn fab x-small color="info" v-on:click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
     </v-col>
     <v-col cols="12">
-      <v-data-table dense show-select :headers="table.headers" :items="table.items" :items-per-page="table.itemsPerPage"
+      <v-data-table dense show-select :loading="table.loading" :headers="table.headers" :items="table.items" :items-per-page="table.itemsPerPage"
         :search="table.search" v-model="table.selected">
 
         <template v-slot:[`item.enabled`]="{ item }">
-          <v-switch class="my-auto" v-model="item.enabled" hide-details @click="table.toggleEnabled(item)"></v-switch>
+          <v-switch class="my-auto" :disabled="item.id=='default'" v-model="item.enabled" hide-details @click="table.toggleEnabled(item)"></v-switch>
         </template>
 
       </v-data-table>
     </v-col>
+    <NewDomainDialog :show.sync="showNewDoaminDialog" @completed="table.refresh()" />
   </v-row>
 </template>
 
 <script>
-import I18N from '@/assets/app/i18n';
 import { DomainTable } from '@/assets/app/tables';
 
+import NewDomainDialog from './dialogs/NewDomainDialog.vue';
 
 export default {
   components: {
+    NewDomainDialog,
   },
 
   data: () => ({
-    I18N: I18N,
     table: new DomainTable(),
+    showNewDoaminDialog: false,
   }),
   methods: {
     async refresh() {

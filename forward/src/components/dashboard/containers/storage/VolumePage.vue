@@ -15,7 +15,7 @@
         </v-col>
 
         <v-col cols="12">
-            <v-data-table show-expand single-expand show-select dense :headers="table.headers" :items="table.items"
+            <v-data-table show-expand single-expand show-select dense :loading="table.loading" :headers="table.headers" :items="table.items"
                 :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1" v-model="table.selected" >
                 <template v-slot:[`item.status_bootable_multi`]="{ item }">
                     <span>
@@ -66,8 +66,8 @@
 import { VolumeDataTable } from '@/assets/app/tables.js';
 import { Utils } from '@/assets/app/lib.js';
 
-import NewVolumeVue from '../dialogs/NewVolume.vue';
-import VolumeStatusResetDialog from '../dialogs/VolumeStatusResetDialog.vue';
+import NewVolumeVue from './dialogs/NewVolume.vue';
+import VolumeStatusResetDialog from './dialogs/VolumeStatusResetDialog.vue';
 
 
 export default {

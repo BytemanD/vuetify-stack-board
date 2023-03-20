@@ -31,7 +31,7 @@
         <v-list-item-group v-model="navigation.itemIndex" color="primary">
           <template v-for="group in navigation.group">
             <v-subheader v-bind:key="group.name">
-              <h3> {{ group.name }}</h3><v-divider></v-divider>
+              <h3>{{ group.name }}</h3><v-divider></v-divider>
             </v-subheader>
             <v-list-item v-for="item in group.items" v-bind:key="item.router"
               :disabled="navigation.selectedItem.router == item.router"

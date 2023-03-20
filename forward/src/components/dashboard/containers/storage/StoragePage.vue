@@ -20,11 +20,11 @@
 </template>
 
 <script>
-import VolumePage from './storage/VolumePage.vue';
-import SnapshotPage from './storage/SnapshotPage';
-import BackupPage from './storage/BackupPage';
-import TypePage from './storage/TypePage';
-import ServicePage from './storage/ServicePage';
+import VolumePage from './VolumePage.vue';
+import SnapshotPage from './SnapshotPage';
+import BackupPage from './BackupPage';
+import TypePage from './TypePage';
+import ServicePage from './ServicePage';
 
 export default {
   components: {

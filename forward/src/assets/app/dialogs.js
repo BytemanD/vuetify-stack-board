@@ -140,16 +140,9 @@ export class NewUserDialog extends Dialog {
 export class NewDomainDialog extends Dialog {
     constructor() {
         super();
-        this.name = '';
+        this.resource = 'domain';
         this.enabled = true;
         this.description = null;
-    }
-    randomName() {
-        this.name = Utils.getRandomName('domain');
-    }
-    async open() {
-        this.randomName();
-        super.open();
     }
     async commit() {
         if (!this.name) { Notify.warning(`Domain名不能为空`); return; }
@@ -1081,9 +1074,9 @@ export class NewEndpoingDialog extends Dialog {
         this.region = null;
         this.schema = this.SCHEMAS[0];
     }
-    async open() {
+    async init() {
+        super.init();
         this.services = (await API.service.list()).services;
-        super.open();
     }
 
     async commit() {
@@ -1393,7 +1386,8 @@ export class VolumeStateResetDialog extends Dialog {
         if (this.attachStatus) { data.attach_status = this.attachStatus }
         if (this.resetMigrateStatus) { data.migration_status = null }
         if (Object.keys(data).length == 0) {
-            throw Error('请至少指定一个要重置的属性。')
+            Notify.error('请至少指定一个要重置的属性。');
+            throw Error('请至少指定一个要重置的属性。');
         }
         for (let i in volumes) {
             let volume = volumes[i];
@@ -1610,18 +1604,11 @@ export class UpdatePort extends Dialog {
 }
 export class NewQosPolicyDialog extends Dialog {
     constructor() {
-        super()
-        this.name = null;
+        super();
+        this.resource = 'qosQolicy';
         this.isDefault = false;
         this.shared = false;
         this.description = null;
-    }
-    randomName() {
-        this.name = Utils.getRandomName('qosPolicy');
-    }
-    open() {
-        this.randomName();
-        super.open();
     }
     async commit() {
         if (!this.name) {

@@ -3,8 +3,9 @@
         <v-col>
             <v-btn x-small fab class="mr-1" color="primary"
                 @click="openNewAggDialog = true"><v-icon>mdi-plus</v-icon></v-btn>
-            <v-btn small color="error" @click="table.deleteSelected()" :disabled="table.selected.length == 0"><v-icon
-                    small>mdi-trash-can</v-icon> 删除</v-btn>
+            <v-btn small color="error" @click="table.deleteSelected()" :disabled="table.selected.length == 0">
+                <v-icon>mdi-trash-can</v-icon>删除
+            </v-btn>
             <!-- <v-btn small color="warning" @click="">节点管理</v-btn> -->
         </v-col>
         <v-col>
@@ -15,8 +16,9 @@
             <v-btn fab x-small color="info" v-on:click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
         </v-col>
         <v-col cols="12">
-            <v-data-table dense show-select show-expand single-expand :headers="table.headers" :items="table.items"
-                :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1" v-model="table.selected">
+            <v-data-table dense show-select show-expand single-expand :loading="table.loading" :headers="table.headers"
+                :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1"
+                v-model="table.selected">
 
                 <template v-slot:[`item.host_num`]="{ item }">
                     <v-btn small text color="info" @click="editAggHosts(item)">{{ item.hosts.length }}</v-btn>
@@ -45,8 +47,8 @@
 import { AggDataTable } from '@/assets/app/tables.js';
 import { Utils } from '@/assets/app/lib.js';
 
-import NewAggDialog from '../dialogs/NewAggDialog.vue';
-import AggHostDialog from '../dialogs/AggHostsDialog';
+import NewAggDialog from './dialogs/NewAggDialog.vue';
+import AggHostDialog from './dialogs/AggHostsDialog';
 
 
 export default {
@@ -62,7 +64,7 @@ export default {
         table: new AggDataTable()
     }),
     methods: {
-        editAggHosts: function(agg){
+        editAggHosts: function (agg) {
             this.editAgg = agg;
             this.openAggHostsDialog = true;
         }
