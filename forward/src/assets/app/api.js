@@ -28,7 +28,8 @@ class Restfulclient {
         return queryParams.join('&');
     }
     _getErrorMsg(response) {
-        let errorData = response.data;
+        console.error(response)
+        let errorData = response ? response.data : {};
         if (errorData.badRequest && errorData.badRequest.message) {
             return errorData.badRequest.message
         } else {
@@ -59,6 +60,7 @@ class Restfulclient {
                 reqUrl, body, { headers: this.getHeaders() });
             return resp.data
         } catch (e) {
+            console.error(e);
             Notify.error(this._getErrorMsg(e.response))
             throw e
         }
@@ -323,23 +325,22 @@ class Server extends VstackboardApi {
     }
 
     async attachVolume(id, volumeId) {
-        let resp = await this.post(`${id}/os-volume_attachments`,
-            { volumeAttachment: { volumeId: volumeId } });
-        return resp.data;
+        return await this.post(
+            { volumeAttachment: { volumeId: volumeId } },
+            `${id}/os-volume_attachments`);
     }
     async volumeAttachments(id) {
         return this.get(`${id}/os-volume_attachments`);
     }
     async volumeDetach(id, volumeId) {
-        let resp = await axios.delete(`${this.baseUrl}/${id}/os-volume_attachments/${volumeId}`);
-        return resp.data;
+        return await this.delete(`${id}/os-volume_attachments/${volumeId}`);
     }
     async interfaceList(id) {
-        return await this.get(`${this.baseUrl}/${id}/os-interface`);
+        return await this.get(`${id}/os-interface`);
     }
     async interfaceAttach(id, vif) {
         // NOTE vif e.g. {net_id: <netId>} or {port_id: <portId>}
-        await axios.post(`${this.baseUrl}/${id}/os-interface`, { 'interfaceAttachment': vif });
+        await this.post({ 'interfaceAttachment': vif }, `${id}/os-interface`);
     }
     async interfaceDetach(id, portId) {
         let resp = await axios.delete(`${this.baseUrl}/${id}/os-interface/${portId}`);

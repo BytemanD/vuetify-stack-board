@@ -354,7 +354,11 @@ export class NewRouterkDialog extends Dialog {
 
 export class ServerVolumeDialog extends Dialog {
     constructor() {
-        super({ server: {}, attachments: [], volumes: [], selectedVolumes: [] })
+        super();
+        this.server = {};
+        this.attachments = [];
+        this.volumes = [];
+        this.selectedVolumes = [];
         this.headers = [
             { value: 'device', text: '设备' },
             { value: 'id', text: 'ID' },
@@ -365,52 +369,50 @@ export class ServerVolumeDialog extends Dialog {
     }
 
     async refreshAttachments() {
-        this.params.attachments = (
-            await API.server.volumeAttachments(this.params.server.id)
+        this.attachments = (
+            await API.server.volumeAttachments(this.server.id)
         ).volumeAttachments;
     }
     async refreshAvailableVolumes() {
-        this.params.volumes = (
+        this.volumes = (
             await API.volume.detail({ status: 'available' })
         ).volumes;
     }
-    open(server) {
-        this.params.server = server;
-        this.params.volumes = []
-        this.params.selectedVolumes = [];
+    init(server) {
+        this.server = server;
+        this.volumes = []
+        this.selectedVolumes = [];
         this.refreshAttachments();
         this.refreshAvailableVolumes();
-        super.open();
     }
     async detach(attachment) {
-        await API.server.volumeDetach(this.params.server.id, attachment.volumeId)
+        await API.server.volumeDetach(this.server.id, attachment.volumeId)
         Notify.info(`卷 ${attachment.volumeId} 卸载中 ...`);
         await this.waitVolumeStatus(attachment.volumeId, ['available', 'error']);
         Notify.success(`卷 ${attachment.volumeId} 卸载成功`);
         this.refreshAttachments();
     }
     async waitVolumeStatus(volume_id, expectStatus = ['available', 'error']) {
-        let body = {}
+        let body = {};
+        let status = null;
         do {
-            if (body.volume) {
-                await Utils.sleep(3);
-            }
-            body = await API.volume.show(volume_id);
-            let status = body.volume.status;
+            if (body.status) { await Utils.sleep(3); }
+            body = (await API.volume.show(volume_id)).volume;
+            status = body.status;
             LOG.debug(`wait volume ${volume_id} status to be ${expectStatus}, now: ${status}`)
         } while (expectStatus.indexOf(status) < 0)
         return body
     }
     async attachSelected() {
-        for (let i in this.params.selectedVolumes) {
-            let volume_id = this.params.selectedVolumes[i];
-            await API.server.attachVolume(this.params.server.id, volume_id)
+        for (let i in this.selectedVolumes) {
+            let volume_id = this.selectedVolumes[i];
+            await API.server.attachVolume(this.server.id, volume_id)
             Notify.info(`卷 ${volume_id} 挂载中 ...`);
             await this.waitVolumeStatus(volume_id, ['in-use', 'error']);
             Notify.success(`卷 ${volume_id} 挂载成功`);
             this.refreshAttachments();
         }
-        this.params.selectedVolumes = [];
+        this.selectedVolumes = [];
     }
 }
 
@@ -510,21 +512,22 @@ export class ServerInterfaceDialog extends Dialog {
 
 export class ChangePasswordDialog extends Dialog {
     constructor() {
-        super({ password: '', userName: '' });
+        super();
+        this.password = '';
+        this.userName = ''
         this.server = {};
     }
-    open(server) {
+    init(server) {
+        super.init();
         this.server = server;
-        super.open()
     }
     async commit() {
-        if (!this.params.password.trim()) {
+        if (!this.password.trim()) {
             Notify.error(`密码不能为空`)
             return;
         }
-        await API.server.changePassword(this.server.id, this.params.password.trim(), this.params.userName)
+        await API.server.changePassword(this.server.id, this.password.trim(), this.params.userName)
         Notify.success(`${this.server.name} 密码修改成功`)
-        this.hide()
     }
 }
 
@@ -612,12 +615,12 @@ export class MigrateDialog extends Dialog {
         Notify.success(`虚拟机 ${server.id} 迁移完成`);
         // serverTable.refresh();
     }
-    isValidLiveMigrateStatus(server){
-        return ['ACTIVE', 'PAUSE'].indexOf(server.status.toUpperCase()) >= 0 ;
+    isValidLiveMigrateStatus(server) {
+        return ['ACTIVE', 'PAUSE'].indexOf(server.status.toUpperCase()) >= 0;
     }
-    canLiveMigrate(server){
-        if (this.smart){
-            return this.isValidLiveMigrateStatus(server) ;
+    canLiveMigrate(server) {
+        if (this.smart) {
+            return this.isValidLiveMigrateStatus(server);
         }
         if (this.liveMigrate && this.isValidLiveMigrateStatus(server)) {
             return true;
@@ -634,8 +637,8 @@ export class MigrateDialog extends Dialog {
                 continue
             }
             try {
-                if (this.canLiveMigrate(server)){
-                    this.liveMigrateAndWait(server); 
+                if (this.canLiveMigrate(server)) {
+                    this.liveMigrateAndWait(server);
                 } else {
                     this.migrateAndWait(server)
                 }
@@ -1543,7 +1546,7 @@ export class NewPortDialog extends Dialog {
         this.refreshName();
         this.refreshNetwork();
     }
-    async refreshSecurityGroups(){
+    async refreshSecurityGroups() {
         this.securityGroups = (await API.sg.list()).security_groups;
     }
     async refreshNetwork() {
@@ -2173,8 +2176,8 @@ export class ServerConsoleLogDialog extends Dialog {
         }
         this.refreshing = false;
     }
-    async toggleAutoRefresh(){
-        if (this.interval){
+    async toggleAutoRefresh() {
+        if (this.interval) {
             clearInterval(this.interval);
             this.interval = null;
             return;
@@ -2186,7 +2189,7 @@ export class ServerConsoleLogDialog extends Dialog {
         }
     }
     async refresh() {
-        if (!this.show){
+        if (!this.show) {
             return
         }
         await this.refreshConsoleLog(this.length);

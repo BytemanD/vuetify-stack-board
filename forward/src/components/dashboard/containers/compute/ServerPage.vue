@@ -106,8 +106,8 @@
               <v-list-item
                 @click="openServerConsoleLogDialog(item)"><v-list-item-title>控制台日志</v-list-item-title></v-list-item>
               <v-list-item
-                @click="changePasswordDialog.open(item)"><v-list-item-title>修改密码</v-list-item-title></v-list-item>
-              <v-list-item @click="serverVolumeDialog.open(item)"><v-list-item-title>卷管理</v-list-item-title></v-list-item>
+                @click="openChangeServerPasswordDialog(item)"><v-list-item-title>修改密码</v-list-item-title></v-list-item>
+              <v-list-item @click="openServerVolumesDialog(item)"><v-list-item-title>卷管理</v-list-item-title></v-list-item>
               <v-list-item
                 @click="serverInterfaceDialog.open(item)"><v-list-item-title>网卡管理</v-list-item-title></v-list-item>
               <v-list-item small
@@ -134,9 +134,11 @@
     <ServerTopology :show.sync="openServerTopology" />
     <ServerMigrateDialog :show.sync="showServerMigrateDialog" :servers="table.selected" />
     <ServerResetStateDialog :show.sync="showServerResetStateDialog" :servers="table.selected" @completed="table.refresh()"/>
-    <ChangeServerNameDialog :show.sync="showChangePassowrdDialog" :server="selectedServer" @completed="updateServer()" />
+    <ChangeServerNameDialog :show.sync="showChangeNameDialog" :server="selectedServer" @completed="updateServer()" />
     <ServerActionDialog :show.sync="showServerActionDialog" :server="selectedServer" />
     <ServerConsoleLogDialog :show.sync="showServerConsoleLogDialog" :server="selectedServer" />
+    <ServerChangePassword :show.sync="showChangePassowrdDialog" :server="selectedServer" />
+    <ServerVolumes :show.sync="showServerVolumesDialog" :server="selectedServer" />
   </v-row>
 </template>
 
@@ -155,6 +157,8 @@ import ServerActionDialog from './dialogs/ServerActionDialog.vue';
 import ServerMigrateDialog from './dialogs/ServerMigrateDialog.vue';
 import ServerResetStateDialog from './dialogs/ServerResetStateDialog.vue';
 import ServerConsoleLogDialog from './dialogs/ServerConsoleLogDialog.vue';
+import ServerChangePassword from './dialogs/ServerChangePassword.vue';
+import ServerVolumes from './dialogs/ServerVolumes.vue';
 
 export default {
   props: {
@@ -166,6 +170,8 @@ export default {
     ChangeServerNameDialog,
     ServerActionDialog,
     ServerConsoleLogDialog,
+    ServerChangePassword,
+    ServerVolumes,
   },
 
   data: () => ({
@@ -179,6 +185,7 @@ export default {
     showServerResetStateDialog: false,
     showServerActionDialog: false,
     showServerConsoleLogDialog: false,
+    showChangeNameDialog: false,
     showChangePassowrdDialog: false,
     showRenameDialog: false,
     showServerVolumesDialog: false,
@@ -214,7 +221,7 @@ export default {
     },
     openChangeServerNameDialog: async function(server){
       this.selectedServer = server;
-      this.showChangePassowrdDialog = !this.showChangePassowrdDialog;
+      this.showServerResetStateDialog = !this.showServerResetStateDialog;
     },
     openServerActionDialog: async function(server){
       this.selectedServer = server;
@@ -223,7 +230,15 @@ export default {
     openServerConsoleLogDialog: async function(server){
       this.selectedServer = server;
       this.showServerConsoleLogDialog = !this.showServerConsoleLogDialog;
-    }
+    },
+    openChangeServerPasswordDialog: async function(server){
+      this.selectedServer = server;
+      this.showChangePassowrdDialog = !this.showChangePassowrdDialog;
+    },
+    openServerVolumesDialog: async function(server){
+      this.selectedServer = server;
+      this.showServerVolumesDialog = !this.showServerVolumesDialog;
+    },
   },
   created() {
     this.table.refresh();
