@@ -1,13 +1,14 @@
 import logging
 import mimetypes
 import os
+import pathlib
 import sys
 import subprocess
+from urllib import parse
 
 import bs4
-import requests
-from urllib import parse
 from jinja2 import PackageLoader, Environment
+import requests
 
 from easy2use.downloader.urllib import driver
 from easy2use.globals import cli
@@ -195,31 +196,39 @@ class VstackboardApp(application.TornadoApp):
 class Serve(cli.SubCli):
     NAME = 'serve'
     ARGUMENTS = log.get_args() + [
-        cli.Arg('-p', '--port', type=int,
-                help=_("Run serve with specified port")),
+        cli.Arg('-p', '--port', type=int, default=8081,
+                help=_("Run serve with specified port. Default: 8081")),
         cli.Arg('--develop', action='store_true',
                 help=_("Run serve with develop mode")),
+        cli.Arg('--static', default='forward/dist/static',
+                help=_("Run serve with docker container")),
+        cli.Arg('--template', default='forward/dist',
+                help=_("Run serve with docker container")),
         cli.Arg('--container', action='store_true',
                 help=_("Run serve with docker container")),
+        cli.Arg('-c', '--enale-cross-domain', action='store_true',
+                help=_("Enable cross domain")),
     ]
 
     def __call__(self, args):
-
         if system.OS.is_windows():
             # NOTE(fjboy) For windows host, MIME type of .js file is
             # 'text/plain', so add this type before start http server.
             mimetypes.add_type('application/javascript', '.js')
 
         conf.load_configs()
+        if args.enale_cross_domain:
+            CONF.enable_cross_domain = True
 
-        template_path = os.path.join(ROOT, 'templates')
-        static_path = os.path.join(ROOT, 'static')
+        if not pathlib.Path(args.static).exists():
+            LOG.warning('static path %s not exists.', args.static)
+        if not pathlib.Path(args.template).exists():
+            LOG.warning('template path %s not exists.', args.template)
 
         views.RUN_AS_CONTAINER = args.container
-
         app = VstackboardApp(views.get_routes(), develop=args.develop,
-                             template_path=template_path,
-                             static_path=static_path)
+                             static_path=args.static,
+                             template_path=args.template)
         app.start(port=args.port or CONF.port,
                   num_processes=CONF.workers)
 

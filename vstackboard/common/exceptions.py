@@ -19,3 +19,7 @@ class EndpointNotFound(exs.BaseException):
 
 class PipInstallFailed(exs.BaseException):
     _msg = 'Install {package} failed, cmd={}'
+
+
+class StaticPathNotExists(exs.BaseException):
+    _msg = 'Static path {path} is not exists'

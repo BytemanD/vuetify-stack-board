@@ -11,12 +11,13 @@ module.exports = defineConfig({
   //     }
   //   }
   // },
+  assetsDir: './static',
   pages: {
     welcome: {
       entry: './src/components/welcome/welcome.js',
-      template: './public/index.html',
+      template: './public/welcome.html',
       title: 'welcome',
-      filename: 'index.html'
+      filename: 'welcome.html'
     },
     dashboard: {
       entry: './src/components/dashboard/dashboard.js',

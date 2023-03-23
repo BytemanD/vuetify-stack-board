@@ -4,8 +4,9 @@ import VueRouter from 'vue-router';
 import axios from 'axios';
 
 import vuetify from '../../plugins/vuetify'
-import DashBoard from './DashBoard.vue';
 
+import ErrorPage from '../ErrorPage.vue'
+import DashBoard from './DashBoard.vue';
 import HypervisorPage from './containers/overview/HypervisorPage';
 import ServersPage from './containers/compute/ServerPage';
 import ComputePage from './containers/compute/ComputePage';
@@ -18,9 +19,6 @@ import ProjectPage from './containers/identity/ProjectPage';
 import DomainPage from './containers/identity/DomainPage';
 
 import FlavorPage from './containers/compute/FlavorPage';
-
-
-axios.defaults.baseURL = 'http://vstackboard.local';
 
 Vue.use(VueRouter)
 
@@ -40,11 +38,27 @@ let router = new VueRouter({
     ]
 })
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
-new Vue({
-    vuetify,
-    VueI18n,
-    router,
-    render: h => h(DashBoard),
-}).$mount('#app')
+const CONFIG = 'config.json'
+
+axios.get(CONFIG).then((resp) => {
+    axios.defaults.baseURL = resp.data.backend_url;
+
+    new Vue({
+        vuetify,
+        VueI18n,
+        router,
+        render: h => h(DashBoard),
+    }).$mount('#app')
+}).catch((error) => {
+    let propsData = {
+        title: `无法获取服务配置 ${CONFIG}`,
+        error: error,
+    };
+    new Vue({
+        vuetify,
+        VueI18n,
+        render: h => h(ErrorPage, {props: propsData}),
+    }).$mount('#app')
+});

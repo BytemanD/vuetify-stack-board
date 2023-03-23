@@ -1,7 +1,7 @@
 <template>
     <v-dialog scrollable v-model="display" width="900">
         <v-card>
-            <v-card-title class="headline grey lighten-2" primary-title>卷管理</v-card-title>
+            <v-card-title class="headline primary lighten-2" primary-title>卷管理</v-card-title>
             <v-card-text>
                 <br>
                 <v-row>
@@ -16,11 +16,13 @@
                         </v-data-table>
                     </v-col>
                     <v-col cols="10">
-                        <v-select :items="dialog.volumes" label="可用卷" item-value="id" item-text="name"
-                            multiple chips outlined v-model="dialog.selectedVolumes">
+                        <v-select multiple chips outlined hide-details :items="dialog.volumes" label="可用卷" item-value="id" item-text="name"
+                            v-model="dialog.selectedVolumes">
                         </v-select>
                     </v-col>
-                    <v-col cols="2"><v-btn class="my-auto" color="primary" @click="dialog.attachSelected()">挂载</v-btn></v-col>
+                    <v-col cols="2" class="my-auto">
+                        <v-btn color="primary" @click="dialog.attachSelected()">挂载</v-btn>
+                    </v-col>
                 </v-row>
             </v-card-text>
         </v-card>

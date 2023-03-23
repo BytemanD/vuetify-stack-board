@@ -75,8 +75,8 @@ export default {
       this.table.refresh();
     },
     openProjectUserDialog: function (project) {
-      this.showProjectUserDialog = true;
       this.selectProject = project;
+      this.showProjectUserDialog = ! this.showProjectUserDialog;
     }
   },
   created() {

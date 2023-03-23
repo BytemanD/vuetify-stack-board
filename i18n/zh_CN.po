@@ -56,3 +56,6 @@ msgstr "检查镜像版本"
 
 msgid "Image API"
 msgstr "镜像API"
+
+msgid "Enable cross domain"
+msgstr "允许跨域访问"

@@ -343,7 +343,7 @@ class Server extends VstackboardApi {
         await this.post({ 'interfaceAttachment': vif }, `${id}/os-interface`);
     }
     async interfaceDetach(id, portId) {
-        let resp = await axios.delete(`${this.baseUrl}/${id}/os-interface/${portId}`);
+        let resp = await this.delete(`${id}/os-interface/${portId}`);
         return resp.data;
     }
     async changePassword(id, password, userName = null) {
@@ -757,7 +757,6 @@ export class OpenstackProxyApi {
         return hosts
     }
 }
-
 
 const API = new OpenstackProxyApi();
 

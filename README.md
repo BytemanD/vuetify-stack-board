@@ -34,7 +34,7 @@ Openstack Dashboard with Vuetify
    ```shell
    IMAGE=vstackboard:<VERSION>
    mkdir -p /var/log/vstackboard
-   docker run -itd --p 80:80 --name vstackboard ${IMAGE}
+   docker run -itd -p 80:80 --name vstackboard ${IMAGE}
    ```
 
 ### 2.3 直接运行（开发者模式）
@@ -45,7 +45,10 @@ Openstack Dashboard with Vuetify
    + cmd: `set PYTHONPATH=./`
    + shell: `export PYTHONPATH=./`
 
-2. 执行文件 vsb.py： `python .\vstackboard\cmd\vsb.py`
+2. 启动后端服务: `python .\vstackboard\cmd\vsb.py --dev`
+2. 启动前端服务: `npm run serve`
+
+
 
 *更多用法参考帮助信息。*
 

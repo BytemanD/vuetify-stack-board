@@ -74,7 +74,7 @@ export default {
       console.log('headers', headers)
       axios.get('/identity', { headers: headers }).then(() => {
         localStorage.setItem('clusterId', cluster.id);
-        window.open('/dashboard', '_self');
+        window.open('/dashboard.html', '_self');
       }).catch(error => {
         console.error(error);
         Notify.error(`连接 ${cluster.name} 失败`)

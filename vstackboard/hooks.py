@@ -47,7 +47,7 @@ def setup_hook(config):
         scheme['data'] = scheme['purelib']
 
     static_path = os.path.join('vstackboard', 'static')
-    _copy_and_unzip_cdn(static_path)
+    # _copy_and_unzip_cdn(static_path)
     _copy_vsm(static_path)
 
     msgfmt.make_i18n(VSTACKBOARD, I18N_DIR)

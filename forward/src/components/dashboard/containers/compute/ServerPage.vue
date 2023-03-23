@@ -101,21 +101,30 @@
               <v-btn icon color="purple" v-bind="attrs" v-on="on"><v-icon small>mdi-dots-vertical</v-icon></v-btn>
             </template>
             <v-list dense>
-              <v-list-item
-                @click="openServerActionDialog(item)"><v-list-item-title>操作记录</v-list-item-title></v-list-item>
-              <v-list-item
-                @click="openServerConsoleLogDialog(item)"><v-list-item-title>控制台日志</v-list-item-title></v-list-item>
-              <v-list-item
-                @click="openChangeServerPasswordDialog(item)"><v-list-item-title>修改密码</v-list-item-title></v-list-item>
-              <v-list-item @click="openServerVolumesDialog(item)"><v-list-item-title>卷管理</v-list-item-title></v-list-item>
-              <v-list-item
-                @click="serverInterfaceDialog.open(item)"><v-list-item-title>网卡管理</v-list-item-title></v-list-item>
-              <v-list-item small
-                @click="computing.updateServerSG.open(item)"><v-list-item-title>更新安全组</v-list-item-title></v-list-item>
-              <v-list-item small @click="resizeDialog.open(item)"><v-list-item-title><span
-                    class="orange--text">规格变更</span></v-list-item-title></v-list-item>
-              <v-list-item small @click="rebuildDialog.open(item)"><v-list-item-title><span
-                    class="orange--text">重建</span></v-list-item-title></v-list-item>
+              <v-list-item @click="openServerActionDialog(item)">
+                <v-list-item-title>操作记录</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="openServerConsoleLogDialog(item)">
+                <v-list-item-title>控制台日志</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="openChangeServerPasswordDialog(item)">
+                  <v-list-item-title>修改密码</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="openServerVolumesDialog(item)">
+                <v-list-item-title>卷管理</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="openServerInterfacesDialog(item)">
+                <v-list-item-title>网卡管理</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="openServerUpdateSGDialog(item)">
+                <v-list-item-title>更新安全组</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="openServerResizeDialog(item)">
+                <v-list-item-title class="orange--text">规格变更</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="openServerRebuildDialog(item)">
+                <v-list-item-title class="orange--text">重建</v-list-item-title>
+              </v-list-item>
             </v-list>
           </v-menu>
         </template>
@@ -139,6 +148,10 @@
     <ServerConsoleLogDialog :show.sync="showServerConsoleLogDialog" :server="selectedServer" />
     <ServerChangePassword :show.sync="showChangePassowrdDialog" :server="selectedServer" />
     <ServerVolumes :show.sync="showServerVolumesDialog" :server="selectedServer" />
+    <ServerInterfaces :show.sync="showServerInterfacesDialog" :server="selectedServer" @completed="table.refresh()" />
+    <ServerUpdateSG :show.sync="showServerUpdateSGDialog" :server="selectedServer" />
+    <ServerResize :show.sync="showServerResizeDialog" :server="selectedServer" @completed="table.refresh()" />
+    <ServerRebuild :show.sync="showServerRebuildDialog" :server="selectedServer" @completed="table.refresh()" />
   </v-row>
 </template>
 
@@ -159,6 +172,10 @@ import ServerResetStateDialog from './dialogs/ServerResetStateDialog.vue';
 import ServerConsoleLogDialog from './dialogs/ServerConsoleLogDialog.vue';
 import ServerChangePassword from './dialogs/ServerChangePassword.vue';
 import ServerVolumes from './dialogs/ServerVolumes.vue';
+import ServerInterfaces from './dialogs/ServerInterfaces.vue';
+import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
+import ServerResize from './dialogs/ServerResize.vue';
+import ServerRebuild from './dialogs/ServerRebuild.vue';
 
 export default {
   props: {
@@ -171,7 +188,8 @@ export default {
     ServerActionDialog,
     ServerConsoleLogDialog,
     ServerChangePassword,
-    ServerVolumes,
+    ServerVolumes, ServerInterfaces,
+    ServerUpdateSG, ServerResize, ServerRebuild,
   },
 
   data: () => ({
@@ -189,9 +207,10 @@ export default {
     showChangePassowrdDialog: false,
     showRenameDialog: false,
     showServerVolumesDialog: false,
-    showServerInterfaecsDialog: false,
-    showUpdateServerSGDialog: false,
-    showServerResizeSGDialog: false,
+    showServerInterfacesDialog: false,
+    showServerUpdateSGDialog: false,
+    showServerResizeDialog: false,
+    showServerRebuildDialog: false,
   }),
   methods: {
     refreshTable: function () {
@@ -239,6 +258,22 @@ export default {
       this.selectedServer = server;
       this.showServerVolumesDialog = !this.showServerVolumesDialog;
     },
+    openServerInterfacesDialog: async function(server){
+      this.selectedServer = server;
+      this.showServerInterfacesDialog = !this.showServerInterfacesDialog;
+    },
+    openServerUpdateSGDialog: async function(server){
+      this.selectedServer = server;
+      this.showServerUpdateSGDialog = !this.showServerUpdateSGDialog;
+    },
+    openServerResizeDialog: async function(server){
+      this.selectedServer = server;
+      this.showServerResizeDialog = !this.showServerResizeDialog;
+    },
+    openServerRebuildDialog: async function(server){
+      this.selectedServer = server;
+      this.showServerRebuildDialog = !this.showServerRebuildDialog;
+    }
   },
   created() {
     this.table.refresh();

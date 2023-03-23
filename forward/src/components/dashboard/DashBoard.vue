@@ -2,7 +2,6 @@
   <v-app>
     <v-app-bar app dense>
       <v-app-bar-nav-icon @click="navigation.mini = !navigation.mini"></v-app-bar-nav-icon>
-      <!-- <v-app-bar-nav-icon ></v-app-bar-nav-icon> -->
       <v-toolbar-title style="width: 20%">
         <v-select solo-inverted flat hide-details :prefix='"cluster" + ":"' item-text="name" class="rounded-0"
           append-icon="mdi-map" v-model="clusterTable.selected" :items="clusterTable.items">

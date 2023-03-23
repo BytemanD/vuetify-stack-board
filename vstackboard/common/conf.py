@@ -17,6 +17,7 @@ default_options = [
     cfg.IntOption('workers', default=None),
     cfg.BooleanOption('use_cdn', default=False),
     cfg.Option('data_path', default='/etc/vstackboard'),
+    cfg.BooleanOption('enable_cross_domain', default=False),
 ]
 
 openstack_options = [

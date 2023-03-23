@@ -26,12 +26,6 @@ UPLOADING_THREADS = {}
 RUN_AS_CONTAINER = False
 
 
-class Index(web.RequestHandler):
-
-    def get(self):
-        self.redirect('/welcome')
-
-
 class GetContext(object):
 
     def _get_context(self):
@@ -49,11 +43,12 @@ class BaseReqHandler(web.RequestHandler, GetContext):
 
     def set_default_headers(self):
         super().set_default_headers()
-        self.set_header('Access-Control-Allow-Origin', '*')
-        self.set_header('Access-Control-Allow-Headers', '*')
-        self.set_header('Access-Control-Allow-Max-Age', 1000)
-        self.set_header('Access-Control-Allow-Methods',
-                        'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+        if CONF.enable_cross_domain:
+            self.set_header('Access-Control-Allow-Origin', '*')
+            self.set_header('Access-Control-Allow-Headers', '*')
+            self.set_header('Access-Control-Allow-Max-Age', 1000)
+            self.set_header('Access-Control-Allow-Methods',
+                            'GET, POST, PUT, DELETE, PATCH, OPTIONS')
 
     def options(self, *args, **kwargs):
         LOG.debug('options request')
@@ -93,15 +88,6 @@ class Dashboard(BaseReqHandler):
         self.render('dashboard.html', name=constants.BRAND, cdn=cdn,
                     cluster=ctxt.cluster.name)
 
-
-class Welcome(BaseReqHandler):
-
-    def get(self):
-        if CONF.use_cdn:
-            cdn = constants.CDN
-        else:
-            cdn = {k: '/static/cdn' for k in constants.CDN}
-        self.render('welcome.html', cdn=cdn, version=utils.get_version())
 
 class Version(BaseReqHandler):
 
@@ -368,8 +354,24 @@ class Actions(web.RequestHandler, GetContext):
             self.check_update()
 
 
+class Html(BaseReqHandler):
+
+    def get(self):
+        LOG.info('get html: %s', self.request.path)
+        self.render(self.request.path[1:])
+
+
+class ConfigJson(BaseReqHandler):
+
+    @utils.with_response(return_code=202)
+    def get(self):
+        self.render(self.request.path[1:])
+
+
 def get_routes():
     return [
+        (r'/.+\.html', Html),
+        (r'/config.json', ConfigJson),
         (r'/dashboard', Dashboard),
         (r'/version', Version),
         (r'/configs', Configs),

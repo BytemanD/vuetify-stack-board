@@ -6,8 +6,8 @@
                 <v-row class="mt-1">
                     <v-col>
                         <v-btn x-small fab class="mr-1 mt-1" color="primary"
-                            @click="showNewUserDialog = !showNewUserDialog"><v-icon>mdi-plus</v-icon></v-btn>
-                            <NewUserDialog :show.sync="showNewUserDialog" :project="project" />
+                            @click="showNewUserDialog = !showNewUserDialog"><v-icon>mdi-plus</v-icon>
+                        </v-btn>
                         <v-btn small color="error" @click="dialog.deleteSelected()"
                             :disabled="dialog.userTable.selected.length == 0">删除</v-btn>
                     </v-col>
@@ -22,17 +22,17 @@
                 </v-data-table>
             </v-card-text>
         </v-card>
-        
+        <NewUserDialogPage :show.sync="showNewUserDialog" :project="project" />
     </v-dialog>
 </template>
 
 <script>
 import { ProjectUserDialog } from '@/assets/app/dialogs';
-import { NewUserDialog } from './NewUserDialog'
+import NewUserDialogPage from './NewUserDialogPage.vue';
 
 export default {
     components: {
-        NewUserDialog,
+        NewUserDialogPage,
     },
     props: {
         show: Boolean,

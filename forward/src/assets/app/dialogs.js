@@ -447,14 +447,12 @@ export class ServerInterfaceDialog extends Dialog {
         this.netSelected = [];
         this.ports = (await API.port.list({ device_id: '+' })).ports
     }
-    async open(server) {
+    async init(server) {
         this.server = server;
         this.selected = [];
         this.refreshInterfaces();
         this.refreshPorts();
-        super.open();
         this.networks = (await API.network.list()).networks;
-        console.log(this.networks)
     }
     async detach(item) {
         await API.server.interfaceDetach(this.server.id, item.port_id);
@@ -467,7 +465,10 @@ export class ServerInterfaceDialog extends Dialog {
                     detached = false;
                 }
             }
-        } while (detached)
+            if (!detached){
+                Utils.sleep(5)
+            }
+        } while (!detached)
 
         Notify.success(`网卡 ${item.port_id} 卸载成功`);
         await this.refreshPorts();
@@ -477,7 +478,6 @@ export class ServerInterfaceDialog extends Dialog {
                 break;
             }
         }
-        // serverTable.refresh();
     }
     async attachSelected() {
         for (let i in this.selected) {
@@ -487,8 +487,8 @@ export class ServerInterfaceDialog extends Dialog {
             Notify.success(`网卡 ${item} 挂载成功`);
             this.refreshInterfaces();
         }
+        this.refreshInterfaces();
         this.refreshPorts();
-        // serverTable.refresh();
     }
     async attachSelectedNets() {
         for (let i in this.netSelected) {
@@ -498,7 +498,6 @@ export class ServerInterfaceDialog extends Dialog {
             Notify.success(`网卡 ${item} 挂载成功`);
             this.refreshInterfaces();
         }
-        // serverTable.refresh();
     }
     parseFixedIps(item) {
         let ips = []
@@ -557,12 +556,11 @@ export class ResizeDialog extends Dialog {
         this.oldFlavorRef = ''
         this.flavorRef = '';
     }
-    async open(server) {
+    async init(server) {
         this.server = server;
         this.oldFlavorRef = this.server.flavor.original_name;
         this.flavors = [];
         let body = await API.flavor.detail();
-        super.open();
         for (let i in body.flavors) {
             let item = body.flavors[i];
             if (item.name != this.server.flavor.original_name) {
@@ -605,15 +603,14 @@ export class MigrateDialog extends Dialog {
         await API.server.liveMigrate(server.id, this.host)
         Notify.info(`热迁移 ${server.name} ...`)
         // await serverTable.waitServerStatus(server.id);
-        Notify.success(`虚拟机 ${server.id} 迁移完成`);
+        // Notify.success(`虚拟机 ${server.id} 迁移完成`);
     }
     async migrateAndWait(server) {
         await API.server.migrate(server.id, this.host);
         Notify.info(`冷迁移 ${server.name} ...`)
         // TODO:
         // await serverTable.waitServerStatus(server.id, ['SHUTOFF', 'ERROR'])
-        Notify.success(`虚拟机 ${server.id} 迁移完成`);
-        // serverTable.refresh();
+        // Notify.success(`虚拟机 ${server.id} 迁移完成`);
     }
     isValidLiveMigrateStatus(server) {
         return ['ACTIVE', 'PAUSE'].indexOf(server.status.toUpperCase()) >= 0;
@@ -1181,34 +1178,33 @@ export class RebuildDialog extends Dialog {
         super();
         this.server = {};
         this.images = [];
-        this.data = { imageRef: '', description: '' }
+        this.imageRef = '',
+        this.description = '';
     }
-    randomName() {
-        return Utils.getRandomName('keypair').replace(/:/g, '');
-    }
-    async open(server) {
+    async init(server) {
         this.server = server;
         this.images = [];
-        this.data.imageRef = ''
+        this.imageRef = ''
         this.images = (await API.image.listActive()).images;
-        super.open();
     }
     async commit() {
-        await API.server.rebuild(this.server.id, this.data)
+        await API.server.rebuild(
+            this.server.id,
+            { imageRef: this.imageRef, description: this.description }
+        );
         Notify.info(`虚拟机${this.server.name}重建中`)
-        super.hide();
         // await serverTable.waitServerStatus(this.server.id);
-        Notify.success(`虚拟机${this.server.name}重建成功`)
+        // Notify.success(`虚拟机${this.server.name}重建成功`)
     }
 }
 export class UpdateServerSG extends Dialog {
     constructor() {
         super();
         this.interfaceHeaders = [
-            { text: 'name', value: 'name' },
-            { text: 'mac_address', value: 'mac_address' },
-            { text: 'fixed_ips', value: 'fixed_ips' },
-            { text: 'security_groups', value: 'security_groups' },
+            { text: 'ID或名字', value: 'id' },
+            { text: 'MAC地址', value: 'mac_address' },
+            { text: 'IP地址', value: 'fixed_ips' },
+            { text: '安全组', value: 'security_groups' },
         ]
         this.itemsPerPage = 10;
         this.server = {};
@@ -1218,12 +1214,8 @@ export class UpdateServerSG extends Dialog {
         this.selectedInterfaces = [];
         this._authInfo = null;
     }
-    randomName() {
-        return Utils.getRandomName('keypair').replace(/:/g, '');
-    }
-    async open(server) {
+    async init(server) {
         this.server = server;
-        super.open();
         this.interfaces = (await API.port.list({ device_id: this.server.id })).ports;
         if (!this._authInfo) {
             this._authInfo = await API.authInfo.get();
@@ -1232,13 +1224,13 @@ export class UpdateServerSG extends Dialog {
     }
     async commit() {
         for (let i in this.selectedInterfaces) {
-            let port = this.interfaces[i];
+            let port = this.selectedInterfaces[i];
             try {
                 await API.port.put(port.id, { port: { security_groups: this.securityGroup } });
                 Notify.success(`端口${port.name || port.id}更新成功.`);
             } catch {
                 Notify.error(`端口${port.name || port.id}更新失败.`);
-                return
+                throw Error(`端口${port.name || port.id}更新失败.`)
             }
         }
         this.interfaces = (await API.port.list({ device_id: this.server.id })).ports;

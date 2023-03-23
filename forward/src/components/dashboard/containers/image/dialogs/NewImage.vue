@@ -43,7 +43,7 @@
                         </v-sheet>
                     </v-col>
                     <v-col cols="4">
-                        <v-switch dense hidden-details class="my-auto" label="保护" v-model="dialog.protected"></v-switch>
+                        <v-switch dense hide-details class="my-auto" label="保护" v-model="dialog.protected"></v-switch>
                     </v-col>
                 </v-row>
             </v-card-text>

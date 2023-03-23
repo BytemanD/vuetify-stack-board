@@ -14,7 +14,7 @@
 export default {
     methods: {
         onclickCallback: function () {
-            window.open('/welcome', '_self');
+            window.open('/welcome.html', '_self');
         }
     },
 };
