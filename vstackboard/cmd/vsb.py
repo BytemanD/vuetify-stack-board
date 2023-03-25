@@ -4,11 +4,6 @@ import os
 import pathlib
 import sys
 import subprocess
-from urllib import parse
-
-import bs4
-from jinja2 import PackageLoader, Environment
-import requests
 
 from easy2use.downloader.urllib import driver
 from easy2use.globals import cli

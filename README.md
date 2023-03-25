@@ -9,10 +9,24 @@ Openstack Dashboard with Vuetify
 ## 1 环境要求
 
 + python >= 3.9
++ npm
 
-## 2 安装
+## 2 构建
 
-### 2.1 安装wheel包
+构建后端项目
+```
+python3 -m pip wheel --prefer-binary  --wheel-dir=dist ./ --no-dep
+```
+
+构建前端项目
+```
+num run install
+num run build
+```
+
+## 3 安装
+
+### 3.1 安装wheel包
 
 1. 安装gettext：
    + Ubuntu：`apt get-install gettext`
@@ -23,9 +37,9 @@ Openstack Dashboard with Vuetify
 
 *安装成功后，可执行 `vastackboard --help` 命令查看帮助信息*
 
-### 2.2 在docker容器中运行
+### 3.2 在docker容器中运行
 
-1. 构建wheel包：`python3 setup.py bdist_wheel`
+1. 构建后端项目
 
 2. 构建镜像 `python .\install\build.py dist/<THE_PATH_OF_WHEEL_FILE>`
 
@@ -33,11 +47,10 @@ Openstack Dashboard with Vuetify
    
    ```shell
    IMAGE=vstackboard:<VERSION>
-   mkdir -p /var/log/vstackboard
-   docker run -itd -p 80:80 --name vstackboard ${IMAGE}
+   docker run -itd -p 8081:8081 --name vstackboard ${IMAGE}
    ```
 
-### 2.3 直接运行（开发者模式）
+### 3.3 直接运行（开发者模式）
 
 1. 进入项目目录，设置环境变量
    
@@ -46,9 +59,7 @@ Openstack Dashboard with Vuetify
    + shell: `export PYTHONPATH=./`
 
 2. 启动后端服务: `python .\vstackboard\cmd\vsb.py --dev`
-2. 启动前端服务: `npm run serve`
-
-
+3. 启动前端服务: `cd forward; npm run serve`
 
 *更多用法参考帮助信息。*
 

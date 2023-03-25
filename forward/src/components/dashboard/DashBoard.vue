@@ -107,7 +107,7 @@ export default {
     },
     navigation: {
       group: navigationGroup,
-      selectedItem: navigationGroup[0].items[0],
+      selectedItem: {},
       mini: false,
     },
     context: {
@@ -137,15 +137,16 @@ export default {
     },
   },
   created() {
-    if (this.$route.path == '/') {
-        console.log(navigationGroup[0])
-        this.selectItem(navigationGroup[0].items[0]);
-    }
     this.$vuetify.theme.dark = SETTINGS.getItem('themeDark').getValue();
+    if (this.$route.path == '/') {
+      let localItem = localStorage.getItem('navigationSelectedItem');
+      if (localItem){
+        this.selectItem(JSON.parse(localItem));
+      } else {
+        this.selectItem(navigationGroup[0].items[0]);
+      }
+    }
     this.clusterTable.selected = {};
-
-    let navigationSelectedItem = localStorage.getItem('navigationSelectedItem');
-    this.selectItem(navigationSelectedItem && JSON.parse(navigationSelectedItem) || this.navigation.selectedItem);
     this.refresh();
   }
 };
