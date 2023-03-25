@@ -107,7 +107,7 @@ export default {
     },
     navigation: {
       group: navigationGroup,
-      selectedItem: navigationGroup[0],
+      selectedItem: navigationGroup[0].items[0],
       mini: false,
     },
     context: {
@@ -137,6 +137,10 @@ export default {
     },
   },
   created() {
+    if (this.$route.path == '/') {
+        console.log(navigationGroup[0])
+        this.selectItem(navigationGroup[0].items[0]);
+    }
     this.$vuetify.theme.dark = SETTINGS.getItem('themeDark').getValue();
     this.clusterTable.selected = {};
 

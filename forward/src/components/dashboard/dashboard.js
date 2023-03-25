@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router';
 import axios from 'axios';
+import { Notify } from 'vuetify-message-snackbar';
 
 import vuetify from '../../plugins/vuetify'
 
@@ -41,6 +42,12 @@ let router = new VueRouter({
 Vue.config.productionTip = false;
 
 const CONFIG = 'config.json'
+
+if (localStorage.getItem('clusterId') == null){
+  console.warn('即将跳转到欢迎页面');
+  Notify.warning('即将跳转到欢迎页面');
+  window.open('/welcome.html', '_self');
+}
 
 axios.get(CONFIG).then((resp) => {
     axios.defaults.baseURL = resp.data.backend_url;

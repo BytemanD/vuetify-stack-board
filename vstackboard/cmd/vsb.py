@@ -33,64 +33,6 @@ CONF = conf.CONF
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def download_statics_for_cdn():
-
-    LOG.info('Check cdn static files')
-    LOG.info('========================')
-    env = Environment(loader=PackageLoader('vstackboard', 'templates'))
-    template = env.get_template('requires.html')
-    html = template.render(cdn=constants.CDN)
-    links = []
-    bs_html = bs4.BeautifulSoup(html, features="html.parser")
-    for script in bs_html.find_all(name='script'):
-        src = script.get('src')
-        if not src or not src.startswith('http') or not src.endswith('.js'):
-            continue
-        links.extend((src, '{}.map'.format(src)))
-
-    for script in bs_html.find_all(name='link'):
-        src = script.get('href')
-        if not src or not src.startswith('http'):
-            continue
-        if src.endswith('.css'):
-            links.extend((src, '{}.map'.format(src)))
-    for link in links:
-        save_static_content(link)
-    LOG.info('========================')
-
-
-def save_static_content(link):
-    home = os.path.abspath(os.path.dirname(os.path.pardir))
-    url = parse.urlparse(link)
-    local_path = os.path.join(home, 'static', 'cdn', url.path[1:])
-    if os.path.exists(local_path):
-        LOG.info('file exists: %s', local_path)
-        return
-
-    save_path = os.path.dirname(local_path)
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    LOG.info('Download cdn src %s to %s', link, os.path.abspath(local_path))
-    resp = requests.get(link)
-    try:
-        resp.raise_for_status()
-    except requests.exceptions.HTTPError:
-        if resp.status_code == 404 and link.endswith('.map'):
-            LOG.warning('%s not found, mybe it is no need.', link)
-            return
-
-    with open(local_path, 'w') as f:
-        data = resp.text if isinstance(resp.content, bytes) else resp.content
-        f.write(data)
-
-
-class StaticDownload(cli.SubCli):
-    NAME = 'static-download'
-
-    def __call__(self, args):
-        download_statics_for_cdn()
-
-
 class Version(cli.SubCli):
     NAME = 'version'
 
@@ -236,7 +178,7 @@ class Serve(cli.SubCli):
 def main():
     cli_parser = cli.SubCliParser(_('VStackBoard Command Line'),
                                   title=_('Subcommands'))
-    cli_parser.register_clis(Version, Upgrade, Serve, StaticDownload)
+    cli_parser.register_clis(Version, Upgrade, Serve)
     cli_parser.call()
 
 

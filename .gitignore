@@ -142,3 +142,6 @@ etc/vstackboard.conf
 i18n/locale
 i18n/*.mo
 vstackboard/locale
+install/forward
+install/requirements.txt
+install/*.whl

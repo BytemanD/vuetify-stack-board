@@ -71,7 +71,6 @@ export default {
       let headers = {
         'X-Cluster-Id': cluster.id,
       };
-      console.log('headers', headers)
       axios.get('/identity', { headers: headers }).then(() => {
         localStorage.setItem('clusterId', cluster.id);
         window.open('/dashboard.html', '_self');

@@ -354,10 +354,19 @@ class Actions(web.RequestHandler, GetContext):
             self.check_update()
 
 
+class Index(BaseReqHandler):
+
+    def get(self):
+        if CONF.index_redirect:
+            self.redirect(CONF.index_redirect)
+        else:
+            self.redirect('index.html')
+
+
 class Html(BaseReqHandler):
 
     def get(self):
-        LOG.info('get html: %s', self.request.path)
+        LOG.debug('get html: %s', self.request.path)
         self.render(self.request.path[1:])
 
 
@@ -370,6 +379,7 @@ class ConfigJson(BaseReqHandler):
 
 def get_routes():
     return [
+        (r'/', Index),
         (r'/.+\.html', Html),
         (r'/config.json', ConfigJson),
         (r'/dashboard', Dashboard),
