@@ -29,12 +29,12 @@
         </v-list>
       </v-menu>
       <v-btn small color="warning" class="mr-1" @click="showServerMigrateDialog = !showServerMigrateDialog" :disabled="table.selected.length == 0">迁移</v-btn>
-      <v-btn small color="warning" class="mr-1" @click="evacuateDialog.open()"
+      <v-btn small color="warning" class="mr-1" @click="showServerEventDiallog = !showServerEventDiallog"
         :disabled="table.selected.length == 0">疏散</v-btn>
       <v-btn small color="warning" class="mr-1" @click="showServerResetStateDialog = !showServerResetStateDialog"
         :disabled="table.selected.length == 0">状态重置</v-btn>
       <v-btn small color="error" @click="table.deleteSelected()" :disabled="table.selected.length == 0">
-        <v-icon small>mdi-trash-can</v-icon>删除
+        <v-icon>mdi-trash-can</v-icon>
       </v-btn>
     </v-col>
     <v-col cols="2">
@@ -142,6 +142,7 @@
     <NewServerDialog :show.sync="openNewServer" />
     <ServerTopology :show.sync="openServerTopology" />
     <ServerMigrateDialog :show.sync="showServerMigrateDialog" :servers="table.selected" />
+    <ServerEvacuateDialog :show.sync="showServerEventDiallog" :servers="table.selected" />
     <ServerResetStateDialog :show.sync="showServerResetStateDialog" :servers="table.selected" @completed="table.refresh()"/>
     <ChangeServerNameDialog :show.sync="showChangeNameDialog" :server="selectedServer" @completed="updateServer()" />
     <ServerActionDialog :show.sync="showServerActionDialog" :server="selectedServer" />
@@ -176,6 +177,7 @@ import ServerInterfaces from './dialogs/ServerInterfaces.vue';
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
 import ServerResize from './dialogs/ServerResize.vue';
 import ServerRebuild from './dialogs/ServerRebuild.vue';
+import ServerEvacuateDialog from './dialogs/ServerEvacuateDialog.vue';
 
 export default {
   props: {
@@ -183,7 +185,7 @@ export default {
   },
   components: {
     BtnIcon, NewServerDialog, ServerTopology,
-    ServerMigrateDialog, ServerResetStateDialog,
+    ServerMigrateDialog, ServerEvacuateDialog, ServerResetStateDialog,
     ChangeServerNameDialog,
     ServerActionDialog,
     ServerConsoleLogDialog,
@@ -211,6 +213,7 @@ export default {
     showServerUpdateSGDialog: false,
     showServerResizeDialog: false,
     showServerRebuildDialog: false,
+    showServerEventDiallog: false,
   }),
   methods: {
     refreshTable: function () {

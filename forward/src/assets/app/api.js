@@ -138,11 +138,10 @@ class Flavor extends VstackboardApi {
         return await this.get(`${id}/os-extra_specs`);
     }
     async updateExtras(id, extras) {
-        let resp = await this.post({ 'extra_specs': extras }, `${id}/os-extra_specs`,)
-        return resp.data;
+        return (await this.post({ 'extra_specs': extras }, `${id}/os-extra_specs`)).data;
     }
     async deleteExtra(id, key) {
-        return (await this.delete(`${this.baseUrl}/${id}/os-extra_specs/${key}`)).data;
+        return (await this.delete(`${id}/os-extra_specs/${key}`)).data;
     }
 
     parseExtras(content) {
@@ -544,31 +543,18 @@ class QosPolicy extends Restfulclient {
         return await this.delete(`${id}/bandwidth_limit_rules/${ruleId}`)
     }
     async addBpsRule(id, direction, params) {
-        console.debug(direction);
         let data = { direction: direction }
-        console.debug(data);
         if (params.maxKbps != null) { data.max_kbps = parseInt(params.maxKbps) }
         if (params.maxBurstKbps != null) { data.max_burst_kbps = parseInt(params.maxBurstKbps) }
-        console.debug(data);
-        if (Object.keys(data).length == 1) {
-            return;
-        }
-        let resp = await axios.post(
-            `${this.baseUrl}/${id}/bandwidth_limit_rules`,
-            { bandwidth_limit_rule: data });
-        return resp.data;
+        let resp = await this.post({ bandwidth_limit_rule: data }, `${id}/bandwidth_limit_rules`);
+        return resp;
     }
     async addPpsRule(id, direction, params) {
         let data = { direction: direction }
         if (params.maxKpps != null) { data.max_kpps = parseInt(params.maxKpps) }
         if (params.maxBurstKpps != null) { data.max_burst_kpps = parseInt(params.maxBurstKpps) }
-        if (Object.keys(data).length == 1) {
-            return;
-        }
-        let resp = await axios.post(
-            `${this.baseUrl}/${id}/packet_rate_limit_rules`,
-            { packet_rate_limit_rule: data });
-        return resp.data;
+        let resp = await this.post({ packet_rate_limit_rule: data }, `${id}/packet_rate_limit_rules`);
+        return resp;
     }
     async deletePpsRule(id, ruleId) {
         return await this.delete(`${id}/packet_rate_limit_rules/${ruleId}`)

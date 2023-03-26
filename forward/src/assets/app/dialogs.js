@@ -654,13 +654,12 @@ export class EvacuateDialog extends Dialog {
         this.nodes = [];
         this.host = null;
     }
-    async open() {
-        // this.servers = serverTable.selected;
+    async init(servers) {
+        this.servers = servers;
         this.nodes = [];
-        super.open();
     }
     async refreshHosts() {
-        this.nodes = await serverTable.getAvailableMoveHosts();
+        this.nodes = await API.getMigratableHosts(this.servers);
     }
     async evacuateServer(server) {
         let hostServices = (await API.computeService.list({ host: server['OS-EXT-SRV-ATTR:host'] })).services;
@@ -673,24 +672,17 @@ export class EvacuateDialog extends Dialog {
         }
         if (computeService == null) {
             // just in case
-            Notify.warning(`该节点无 ${CONST.NOVA_COMPUTE} 服务`)
-            return;
+            throw Error(`该节点无 ${CONST.NOVA_COMPUTE} 服务`)
         }
-
         if (computeService.state == 'up') {
-            Notify.warning(`节点 ${computeService.host} 正在使用中，无法疏散。`)
-            return;
+            throw Error(`节点 ${computeService.host} 正在使用中，无法疏散。`)
         }
         try {
             await API.server.evacuate(server.id, { host: this.host, force: this.force });
-            // await serverTable.waitServerMoved(server);
+            Notify.info(`疏散 ${server.name} ...`);
         } catch (e) {
-            Notify.error(`虚拟机 ${server.name}疏散失败`)
-            return
+            throw Error(`虚拟机 ${server.name}疏散失败`)
         }
-        Notify.info(`疏散 ${server.name} ...`);
-        Notify.success(`虚拟机 ${server.name} 疏散完成`);
-        // serverTable.refresh();
     }
     async commit() {
         for (let i in this.servers) {
@@ -699,7 +691,7 @@ export class EvacuateDialog extends Dialog {
                 Notify.warning(`虚拟机 ${item.name} 状态异常，无法疏散`, 1)
                 continue
             }
-            this.evacuateServer(item);
+            await this.evacuateServer(item);
         }
     }
 }
@@ -974,20 +966,18 @@ export class FlavorExtraDialog extends Dialog {
         await API.flavor.deleteExtra(this.flavor.id, key);
         Notify.success(`属性 ${key} 删除成功`);
         Vue.delete(this.extraSpecs, key);
-        // flavorTable.refresh();
     }
     async addExtra(item) {
         if (Object.keys(this.extraSpecs).indexOf(item.key) >= 0 && this.extraSpecs[item.key] == item.value) {
             Notify.error(`属性 ${item.key} 已经存在`)
             return
-        } else {
-            let extraSpecs = {}
-            extraSpecs[item.key] = item.value;
-            await API.flavor.updateExtras(this.flavor.id, extraSpecs);
-            Notify.success(`属性 ${item.key} 添加成功`);
-            Vue.set(this.extraSpecs, item.key, item.value);
-            // flavorTable.refresh();
-        }
+        } 
+        let extraSpecs = {}
+        extraSpecs[item.key] = item.value;
+        console.log(this.flavor)
+        await API.flavor.updateExtras(this.flavor.id, extraSpecs);
+        Notify.success(`属性 ${item.key} 添加成功`);
+        Vue.set(this.extraSpecs, item.key, item.value);
     }
     async addNewExtraSpecs() {
         let extraSpecs = API.flavor.parseExtras(this.newExtraSpecs);
@@ -999,12 +989,10 @@ export class FlavorExtraDialog extends Dialog {
         for (let key in extraSpecs) {
             Vue.set(this.extraSpecs, key, extraSpecs[key])
         }
-        // flavorTable.refresh();
     }
-    async open(item) {
+    async init(item) {
         this.flavor = item;
         let body = await API.flavor.getExtraSpecs(item.id);
-        super.open();
         this.extraSpecs = body.extra_specs;
     }
     async commit() {
@@ -1492,10 +1480,9 @@ export class RouterInterfacesDialog extends Dialog {
             }
         })
     }
-    open(router) {
+    init(router) {
         this.router = router;
         this.selected = [];
-        super.open();
         this.refreshInterfaces();
     }
     async remove(item) {
@@ -1566,7 +1553,7 @@ export class NewPortDialog extends Dialog {
         this.hide();
     }
 }
-export class UpdatePort extends Dialog {
+export class UpdatePortDialog extends Dialog {
     constructor() {
         super()
         this.securityGroups = [];
@@ -1576,12 +1563,10 @@ export class UpdatePort extends Dialog {
         this.portSGs = [];
         this.portQosPolicy = null;
     }
-    async open(port) {
+    async init(port) {
         this.port = port;
         this.portSGs = this.port.security_groups;
         this.portQosPolicy = this.port.qos_policy_id;
-
-        super.open();
         let authInfo = await API.authInfo.get();
         this.securityGroups = (await API.sg.list({ tenant_id: authInfo.project.id })).security_groups;
         this.qosPolicies = (await API.qosPolicy.list()).policies;
@@ -1664,11 +1649,15 @@ export class QosPolicyRules extends Dialog {
         }
         this.selected = [];
     }
-    async open(qosPolicy) {
+    async init(qosPolicy) {
         this.qosPolicy = qosPolicy;
-        super.open();
+        this.refresh();
+    }
+    async refresh(){
+        this.selected = [];
         this.qosPolicy = (await API.qosPolicy.show(this.qosPolicy.id)).policy;
     }
+
 }
 export class NewQosPolicyRule extends Dialog {
     constructor() {
@@ -1678,7 +1667,7 @@ export class NewQosPolicyRule extends Dialog {
         this.INGRESS = 'ingress';
         this.EGRESS = 'egress';
 
-        this.qosPolicyRulesDialog = {};
+        this.qosPolicy = {};
         this.directions = ['ingress', 'egress'];
         this.types = [this.BPS];
         this.maxKbps = null;
@@ -1686,51 +1675,55 @@ export class NewQosPolicyRule extends Dialog {
         this.maxKpps = null;
         this.maxBurstKpps = null;
     }
-    getQosPolicyId() {
-        return this.qosPolicyRulesDialog.qosPolicy.id;
-    }
+
     async createBpsRule() {
-        if (this.types.indexOf(this.BPS) < 0) {
-            return;
-        }
         if (this.maxKbps > 2147483647 || this.maxBurstKbps > 2147483647) {
             Notify.warning(`kbps值不能大于 2147483647`)
             return;
         }
         for (let i in this.directions) {
+            if (Utils.isEmpty(this.maxKbps) && Utils.isEmpty(this.maxBurstKbps)){
+                continue
+            }
             try {
                 await API.qosPolicy.addBpsRule(
-                    this.getQosPolicyId(), this.directions[i],
+                    this.qosPolicy.id, this.directions[i],
                     { maxKbps: this.maxKbps, maxBurstKbps: this.maxBurstKbps });
                 Notify.success(`规则 ${this.BPS} ${this.directions[i]} 创建成功`);
             } catch {
-                Notify.error(`规则 ${this.BPS} ${this.directions[i]} 创建失败`);
+                throw Error(`规则 ${this.BPS} ${this.directions[i]} 创建失败`);
             }
         }
     }
     async createPpsRule() {
-        if (this.types.indexOf(this.PPS) < 0) {
-            return;
-        }
         for (let i in this.directions) {
+            if (Utils.isEmpty(this.maxKpps) && Utils.isEmpty(this.maxBurstKpps)){
+                continue
+            }
             try {
                 await API.qosPolicy.addPpsRule(
-                    this.getQosPolicyId(), this.directions[i],
+                    this.qosPolicy.id, this.directions[i],
                     { maxKpps: this.maxKpps, maxBurstKbps: this.maxBurstKpps })
                 Notify.success(`规则 ${this.PPS} ${this.directions[i]} 创建成功`);
             } catch (e) {
-                Notify.error(`规则 ${this.PPS} ${this.directions[i]} 创建失败`);
+                throw Error(`规则 ${this.PPS} ${this.directions[i]} 创建失败`);
             }
         }
     }
     async commit() {
-        await this.createBpsRule();
-        await this.createPpsRule();
-        this.qosPolicyRulesDialog.qosPolicy = (await API.qosPolicy.show(this.getQosPolicyId())).policy;
+        if (! this.maxKbps || this.maxKbps == '') {
+            throw Error('请设置 max kbps');
+        }
+        if (this.types.indexOf(this.BPS) < 0) {
+            await this.createBpsRule();
+        }
+        if (this.types.indexOf(this.PPS) >= 0) {
+            await this.createPpsRule();
+        }
+        this.qosPolicy = (await API.qosPolicy.show(this.qosPolicy.id)).policy;
     }
-    async open(qosPolicyRulesDialog) {
-        this.qosPolicyRulesDialog = qosPolicyRulesDialog;
-        super.open();
+    async init(qosPolicy) {
+        this.qosPolicy = qosPolicy;
     }
 }
 export class NewSGDialog extends Dialog {
@@ -1773,21 +1766,16 @@ export class NewSGRuleDialog extends Dialog {
             'ipv6-opts', 'ipv6-route', 'ospf', 'pgm', 'rsvp', 'sctp',
             'udp', 'udplite', 'vrrp'
         ]
+        this.securityGroup = {};
         // and integer representations [0-255];
 
     }
-    open(sgRulesDialog) {
-        this.sgRulesDialog = sgRulesDialog;
-        super.open();
+    init(securityGroup) {
+        this.securityGroup = securityGroup;
     }
     async commit() {
-        console.log(this.sgRulesDialog.securityGroup);
-        if (!this.sgRulesDialog.securityGroup) {
-            Notify.error(`规格添加失败`)
-            return
-        }
         let data = {
-            security_group_id: this.sgRulesDialog.securityGroup.id,
+            security_group_id: this.securityGroup.id,
             protocol: this.protocol,
             direction: this.direction,
             ethertype: this.ethertype,
@@ -1806,9 +1794,8 @@ export class NewSGRuleDialog extends Dialog {
         }
         await API.sgRule.create(data);
         Notify.success(`规则创建成功`);
-        let newSG = (await API.sg.show(this.sgRulesDialog.securityGroup.id)).security_group;
-        this.sgRulesDialog.securityGroup = newSG;
-        this.hide();
+        let newSG = (await API.sg.show(this.securityGroup.id)).security_group;
+        this.securityGroup = newSG;
     }
 }
 export class SGRulesDialog extends Dialog {
@@ -1834,11 +1821,9 @@ export class SGRulesDialog extends Dialog {
 
         ]
     }
-    async open(securityGroup) {
+    async init(securityGroup) {
         this.securityGroup = securityGroup;
-        this.selected = [];
-        super.open();
-        this.securityGroup = await this.getSecurityGroup(this.securityGroup.id);
+        this.refresh()
     }
     async getSecurityGroup(sgId) {
         return (await API.sg.show(sgId)).security_group;
@@ -1850,6 +1835,10 @@ export class SGRulesDialog extends Dialog {
         }
         this.selected = [];
         Notify.success(`规则删除成功`);
+        this.securityGroup = await this.getSecurityGroup(this.securityGroup.id);
+    }
+    async refresh(){
+        this.selected = [];
         this.securityGroup = await this.getSecurityGroup(this.securityGroup.id);
     }
 }
@@ -2123,10 +2112,9 @@ export class ServerActionEventsDialog extends Dialog {
         this.requestId = null;
         this.instanceAction = {};
     }
-    async open(server, requestId) {
+    async init(server, requestId) {
         this.server = server;
         this.requestId = requestId;
-        super.open();
         this.instanceAction = await API.server.actionShow(this.server.id, this.requestId);
     }
 

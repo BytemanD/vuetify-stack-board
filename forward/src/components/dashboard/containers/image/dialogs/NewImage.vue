@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="display" width="900" scrollable>
         <v-card>
-            <v-card-text>
+            <v-card-text class="mt-4">
                 <v-row>
                     <v-col cols="10">
                         <v-text-field hide-details label="*名字" placeholder="请输入镜像名" v-model="dialog.name"
@@ -14,9 +14,8 @@
                         <v-file-input hide-details show-size label="镜像文件" v-model="dialog.file"
                             v-on:change="dialog.setName()"></v-file-input>
                     </v-col>
-                    <v-col cols="6">
-                        正在缓存：{{ dialog.process }}%
-                        <v-progress-linear hide-details height="20" :value="dialog.process"></v-progress-linear>
+                    <v-col cols="4">
+                        <v-switch hide-details class="my-auto" label="保护" v-model="dialog.protected"></v-switch>
                     </v-col>
                     <v-col cols="4">
                         <v-sheet rounded elevation="2" class="pa-3" height="100%">
@@ -29,21 +28,22 @@
                         </v-sheet>
                     </v-col>
                     <v-col cols="4">
-                        <v-sheet elevation="2" class="pa-3" height="100%">
+                        <v-sheet rounded elevation="2" class="pa-3" height="100%">
                             <v-text-field label="架构" placeholder="请输入架构名称" v-model="dialog.architecture"></v-text-field>
-                            <v-text-field label="操纵系统发行名" placeholder="请输入操纵系统发行名" v-model="dialog.osDistro"></v-text-field>
-                            <v-text-field label="操纵系统版本" placeholder="请输入操纵系统版本" v-model="dialog.osVersion"></v-text-field>
+                            <v-text-field label="操作系统系统发行名" placeholder="请输入操纵系统发行名" v-model="dialog.osDistro"></v-text-field>
+                            <v-text-field label="操作系统版本" placeholder="请输入操纵系统版本" v-model="dialog.osVersion"></v-text-field>
 
                         </v-sheet>
                     </v-col>
                     <v-col cols="4">
-                        <v-sheet elevation="2" class="pa-3" height="100%">
+                        <v-sheet rounded elevation="2" class="pa-3" height="100%">
                             <v-text-field dense label="最小内存" placeholder="请设置最小内存" v-model="dialog.minRam"></v-text-field>
                             <v-text-field dense label="最小磁盘" placeholder="请设置最小磁盘" v-model="dialog.minDisk"></v-text-field>
                         </v-sheet>
                     </v-col>
-                    <v-col cols="4">
-                        <v-switch dense hide-details class="my-auto" label="保护" v-model="dialog.protected"></v-switch>
+                    <v-col cols="12">
+                        缓存进度：{{ dialog.process }}%
+                        <v-progress-linear hide-details height="20" :value="dialog.process"></v-progress-linear>
                     </v-col>
                 </v-row>
             </v-card-text>

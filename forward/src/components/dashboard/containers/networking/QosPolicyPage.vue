@@ -15,7 +15,7 @@
             <v-data-table show-select show-expand single-expand dense :loading="table.loading" :headers="table.headers"
                 :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search" v-model="table.selected">
                 <template v-slot:[`item.actions`]="{ item }">
-                    <v-btn small text color="purple" @click="networking.qosPolicyRulesDialog.open(item)">规则管理</v-btn>
+                    <v-btn small text color="purple" @click="openQosPolicyRulesDialog(item)">规则管理</v-btn>
                 </template>
                 <template v-slot:[`item.is_default`]="{ item }">
                     <v-switch hide-details class="my-auto" v-model="item.is_default"
@@ -41,9 +41,8 @@
                 </template>
             </v-data-table>
         </v-col>
-        <v-col>
-            <NewQosPolicyDialog :show.sync="showNewQosPolicyDialog" @completed="table.refresh()" />
-        </v-col>
+        <NewQosPolicyDialog :show.sync="showNewQosPolicyDialog" @completed="table.refresh()" />
+        <QosPolicyRulesDialog :show.sync="showQosPolicyRulesDialog" :qos-policy="selectedQosPolicy" @completed="table.refresh()" />
     </v-row>
 </template>
 
@@ -51,17 +50,23 @@
 import { QosPolicyDataTable } from '@/assets/app/tables';
 
 import NewQosPolicyDialog from './dialogs/NewQosPolicyDialog.vue';
+import QosPolicyRulesDialog from './dialogs/QosPolicyRulesDialog.vue';
 
 export default {
     components: {
-        NewQosPolicyDialog,
+        NewQosPolicyDialog, QosPolicyRulesDialog,
     },
     data: () => ({
         table: new QosPolicyDataTable(),
-        showNewQosPolicyDialog: false
+        showNewQosPolicyDialog: false,
+        showQosPolicyRulesDialog: false,
+        selectedQosPolicy: {}
     }),
     methods: {
-
+        openQosPolicyRulesDialog(qosPolicy){
+            this.selectedQosPolicy = qosPolicy;
+            this.showQosPolicyRulesDialog = !this.showQosPolicyRulesDialog;
+        }
     },
     created() {
         this.table.refresh();

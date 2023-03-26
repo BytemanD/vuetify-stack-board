@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <v-col>
-      <v-btn x-small fab class="mr-1" color="primary" @click="openNewImageDialog = true"><v-icon>mdi-plus</v-icon></v-btn>
+      <v-btn x-small fab class="mr-1" color="primary" @click="openNewImageDialog = !openNewImageDialog"><v-icon>mdi-plus</v-icon></v-btn>
       <v-btn small color="error" @click="openImageDeleteSmartDialog = true" :disabled="table.selected.length == 0">
         <v-icon small>mdi-trash-can</v-icon>删除
       </v-btn>

@@ -25,7 +25,7 @@
                         @click="table.adminStateDown(item)"></v-switch>
                 </template>
                 <template v-slot:[`item.actions`]="{ item }">
-                    <v-btn text small color="purple" @click="table.open(item)">更新</v-btn>
+                    <v-btn text small color="purple" @click="openUpdatePortDialog(item)">更新</v-btn>
                 </template>
                 <template v-slot:expanded-item="{ headers, item }">
                     <td></td>
@@ -42,7 +42,8 @@
                 </template>
             </v-data-table>
         </v-col>
-        <v-col><NewPortDialog :show.sync="openNewPortDialog" @completed="table.refresh()"/></v-col>
+        <NewPortDialog :show.sync="openNewPortDialog" @completed="table.refresh()"/>
+        <UpdatePortDialog :show.sync="showUpdatePortDialog" :port="selectedPort" @completed="table.refresh()"/>
     </v-row>
 </template>
 
@@ -50,18 +51,24 @@
 import { PortDataTable } from '@/assets/app/tables';
 
 import NewPortDialog from './dialogs/NewPortDialog.vue';
+import UpdatePortDialog from './dialogs/UpdatePortDialog.vue';
 
 export default {
     components: {
-        NewPortDialog,
+        NewPortDialog, UpdatePortDialog,
     },
 
     data: () => ({
         table: new PortDataTable(),
-        openNewPortDialog: false
+        openNewPortDialog: false,
+        showUpdatePortDialog: false,
+        selectedPort: {}
     }),
     methods: {
-
+        openUpdatePortDialog(port){
+            this.selectedPort = port;
+            this.showUpdatePortDialog = !this.showUpdatePortDialog;
+        }
     },
     created() {
         this.table.refresh();

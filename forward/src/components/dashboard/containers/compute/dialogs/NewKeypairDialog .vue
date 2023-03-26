@@ -1,18 +1,18 @@
 <template>
     <v-dialog v-model="display" width="800" scrollable>
         <v-card>
-            <v-card-title class="headline grey" primary-title>
-                新建密钥对<v-spacer></v-spacer><v-btn color="primary" @click="commit()">创建</v-btn>
-            </v-card-title>
+            <v-card-title class="headline primary" primary-title>新建密钥对</v-card-title>
             <v-card-text>
                 <v-row>
-                    <v-col cols="10"><v-text-field label="名字" placeholder="请输入密钥对名"
-                            v-model="dialog.newKeypair.name"></v-text-field></v-col>
+                    <v-col cols="10">
+                        <v-text-field hide-details label="名字" placeholder="请输入密钥对名"
+                            v-model="dialog.newKeypair.name"></v-text-field>
+                    </v-col>
                     <v-col cols="2" class="my-auto">
                         <v-btn text color="primary" @click="dialog.randomName()">随机名字</v-btn>
                     </v-col>
-                    <v-col cols="10">
-                        <v-select :items="dialog.keyTypes" label="类型" dense outlined hide-details
+                    <v-col cols="4">
+                        <v-select dense outlined hide-details :items="dialog.keyTypes" label="类型"
                             v-model="dialog.newKeypair.type">
                         </v-select>
                     </v-col>
@@ -21,6 +21,10 @@
                     </v-col>
                 </v-row>
             </v-card-text>
+            <v-divider></v-divider>
+            <v-card-actions>
+                <v-spacer></v-spacer><v-btn color="primary" @click="commit()">创建</v-btn>
+            </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
@@ -42,7 +46,6 @@ export default {
     methods: {
         commit: async function () {
             await this.dialog.commit();
-            this.display = false;
             this.$emit('completed');
         }
     },

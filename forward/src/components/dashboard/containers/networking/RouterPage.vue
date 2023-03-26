@@ -16,7 +16,7 @@
                 :items-per-page="table.itemsPerPage" :search="table.search" v-model="table.selected">
                 <template v-slot:[`item.name`]="{ item }">
                     {{ item.name || item.id }}
-                    <v-btn icon @click="routerInterfacesDialog.open(item)"><v-icon>mdi-serial-port</v-icon></v-btn>
+                    <v-btn icon @click="openRouterInterfaceDialog(item)"><v-icon>mdi-serial-port</v-icon></v-btn>
                 </template>
                 <template v-slot:[`item.status`]="{ item }">
                     <v-icon v-if="item.status == 'ACTIVE'" color="success">mdi-emoticon-happy</v-icon>
@@ -41,9 +41,8 @@
                 </template>
             </v-data-table>
         </v-col>
-        <v-col cols=12>
-            <NewRouterDialog :show.sync="showNewRouterDialog" @completed="table.refresh()"/>
-        </v-col>
+        <NewRouterDialog :show.sync="showNewRouterDialog" @completed="table.refresh()"/>
+        <RouterInterfacesDialog :show.sync="showRouterInterfaceDialog" :router="selectedRouter" @completed="table.refresh()"/>
     </v-row>
 </template>
 
@@ -51,17 +50,23 @@
 import { RouterDataTable } from '@/assets/app/tables';
 
 import NewRouterDialog from './dialogs/NewRouterDialog.vue';
+import RouterInterfacesDialog from './dialogs/RouterInterfacesDialog.vue';
 
 export default {
     components: {
-        NewRouterDialog,
+        NewRouterDialog, RouterInterfacesDialog
     },
     data: () => ({
         table: new RouterDataTable(),
         showNewRouterDialog: false,
+        showRouterInterfaceDialog: false,
+        selectedRouter: {}
     }),
     methods: {
-
+        openRouterInterfaceDialog(router){
+            this.selectedRouter = router;
+            this.showRouterInterfaceDialog = !this.showRouterInterfaceDialog;
+        }
     },
     created() {
         this.table.refresh();

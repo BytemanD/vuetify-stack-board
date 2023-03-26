@@ -21,7 +21,7 @@
                 <template v-slot:[`item.ram`]="{ item }">{{ Utils.humanRam(item.ram) }}</template>
                 <template v-slot:expanded-item="{ headers, item }">
                     <td><v-btn icon class="my-auto"
-                            @click="flavorExtraDialog.open(item)"><v-icon>mdi-pencil</v-icon></v-btn></td>
+                            @click="openFlavorExtraDialog(item)"><v-icon>mdi-pencil</v-icon></v-btn></td>
                     <td :colspan="headers.length - 1">
                         <v-chip small label class="mt-1 mb-1 mr-1" v-for="(value, key) in table.extraSpecsMap[item.id]"
                             v-bind:key="key">{{ key }}={{ value }}</v-chip>
@@ -29,9 +29,8 @@
                 </template>
             </v-data-table>
         </v-col>
-        <v-col cols="12">
-            <NewFlavorDialog :show.sync="openNewFlavorDialog" @completed="table.refresh()"/>
-        </v-col>
+        <NewFlavorDialog :show.sync="openNewFlavorDialog" @completed="table.refresh()"/>
+        <FlavorExtraDialog :show.sync="showFlavorExtraDialog" :flavor="selectedFlavor" @completed="table.refresh()"/>
     </v-row>
 </template>
     
@@ -40,20 +39,26 @@ import { FlavorDataTable } from '@/assets/app/tables.js';
 import { Utils } from '@/assets/app/lib.js';
 
 import NewFlavorDialog from './dialogs/NewFlavorDialog.vue';
+import FlavorExtraDialog from './dialogs/FlavorExtraDialog.vue';
 
 
 export default {
     components: {
-        NewFlavorDialog,
+        NewFlavorDialog, FlavorExtraDialog
     },
 
     data: () => ({
         Utils: Utils,
         openNewFlavorDialog: false,
+        showFlavorExtraDialog: false,
+        selectedFlavor: {},
         table: new FlavorDataTable()
     }),
     methods: {
-
+        openFlavorExtraDialog(item){
+            this.selectedFlavor = item;
+            this.showFlavorExtraDialog = !this.showFlavorExtraDialog;
+        }
     },
     created() {
         this.table.refresh();

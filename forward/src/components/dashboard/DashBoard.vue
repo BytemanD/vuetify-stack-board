@@ -34,9 +34,7 @@
                 <h3 class="primary--text">{{ group.name }}</h3><v-divider></v-divider>
               </v-subheader>
               <v-list-item v-for="item in group.items" v-bind:key="item.router"
-                :disabled="navigation.selectedItem.router == item.router"
-                v-bind:class="{ 'v-list-item--active': navigation.selectedItem.router == item.router }"
-                @click="selectItem(item)">
+                :disabled="navigation.selectedItem.router == item.router" @click="selectItem(item)">
                 <v-list-item-icon><v-icon>{{ item.icon }}</v-icon></v-list-item-icon>
                 <v-list-item-content>
                   <v-list-item-title>{{ item.title }}</v-list-item-title>
@@ -109,6 +107,7 @@ export default {
       group: navigationGroup,
       selectedItem: {},
       mini: false,
+      itemIndex: 0,
     },
     context: {
       clusterId: localStorage.getItem('clusterId'),
@@ -135,19 +134,35 @@ export default {
       }
       this.region = localStorage.getItem('region');
     },
+    initItem() {
+      let itemIndex = -1;
+      for (let groupIndex in this.navigation.group) {
+        let group = this.navigation.group[groupIndex];
+        for (let itemIndx in group.items) {
+          let item = group.items[itemIndx];
+          itemIndex += 1;
+          if (this.$route.path != item.router) { continue }
+          this.selectItem(item);
+          this.navigation.itemIndex = itemIndex;
+          return;
+        }
+      }
+    },
   },
   created() {
     this.$vuetify.theme.dark = SETTINGS.getItem('themeDark').getValue();
     if (this.$route.path == '/') {
       let localItem = localStorage.getItem('navigationSelectedItem');
-      if (localItem){
+      if (localItem) {
         this.selectItem(JSON.parse(localItem));
       } else {
         this.selectItem(navigationGroup[0].items[0]);
       }
+    } else {
+      this.initItem();
     }
     this.clusterTable.selected = {};
     this.refresh();
   }
-};
+}
 </script>

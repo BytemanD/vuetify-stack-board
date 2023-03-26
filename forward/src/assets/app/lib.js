@@ -135,6 +135,9 @@ export class Utils {
             Notify.success(message);
         }
     }
+    static isEmpty(value) {
+        return ! value || value == '' || value == {} || value == [];
+    }
 }
 
 //             error  warning info debug

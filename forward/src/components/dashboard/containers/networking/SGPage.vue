@@ -16,7 +16,7 @@
                 :items-per-page="table.itemsPerPage" :search="table.search" v-model="table.selected">
                 <template v-slot:[`item.actions`]="{ item }">
                     <!-- TODO -->
-                    <v-btn text small color="purple" @click="networking.sgRulesDialog.open(item)">规则管理</v-btn>
+                    <v-btn text small color="purple" @click="openSGRulesDialog(item)">规则管理</v-btn>
                 </template>
                 <template v-slot:expanded-item="{ headers, item }">
                     <td></td>
@@ -32,7 +32,8 @@
                 </template>
             </v-data-table>
         </v-col>
-        <v-col><NewSecurityGroup :show.sync="openNewSGDialog" @completed="table.refresh()"/></v-col>
+        <NewSecurityGroup :show.sync="openNewSGDialog" @completed="table.refresh()"/>
+        <SGRulesDialog :show.sync="showSGRulesDialog" :securityGroup="selectedSG"/>
     </v-row>
 </template>
 
@@ -40,16 +41,23 @@
 import { SecurityGroupDataTable } from '@/assets/app/tables';
 
 import NewSecurityGroup from './dialogs/NewSecurityGroup.vue';
+import SGRulesDialog from './dialogs/SGRulesDialog.vue';
 
 export default {
     components: {
-        NewSecurityGroup,
+        NewSecurityGroup, SGRulesDialog
     },
     data: () => ({
         table: new SecurityGroupDataTable(),
         openNewSGDialog: false,
+        showSGRulesDialog: false,
+        selectedSG: {},
     }),
     methods: {
+        openSGRulesDialog(sg){
+            this.selectedSG = sg;
+            this.showSGRulesDialog = ! this.showSGRulesDialog;
+        }
     },
     created() {
         this.table.refresh();
