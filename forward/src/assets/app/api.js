@@ -83,10 +83,8 @@ class Restfulclient {
     }
     async patch(id, body, headers = {}) {
         let config = { headers: this.getHeaders() };
-        if (headers) {
-            for (let key in headers) {
-                config[key] = headers[key];
-            }
+        for (let key in headers) {
+            config.headers[key] = headers[key];
         }
         let resp = await axios.patch(`${this.baseUrl}/${id}`, body, config);
         return resp.data
@@ -188,15 +186,15 @@ class ComputeService extends Restfulclient {
     constructor() { super('/computing/os-services') }
 
     async forceDown(id, down = true) {
-        let resp = await axios.put(`${this.baseUrl}/${id}`, { forced_down: down });
+        let resp = await this.put(`${id}`, { forced_down: down });
         return resp.data;
     }
     async disable(id) {
-        let resp = await axios.put(`${this.baseUrl}/${id}`, { status: 'disabled' });
+        let resp = await this.put(`${id}`, { status: 'disabled' });
         return resp.data;
     }
     async enable(id) {
-        let resp = await axios.put(`${this.baseUrl}/${id}`, { status: 'enabled' });
+        let resp = await this.put(`${id}`, { status: 'enabled' });
         return resp.data;
     }
     async getNovaComputeServices() {

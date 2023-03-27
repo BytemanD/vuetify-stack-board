@@ -32,7 +32,7 @@
 
         <template v-slot:[`item.size`]="{ item }"><span class="blue--text">{{ table.humanSize(item) }}</span></template>
         <template v-slot:[`item.actions`]="{ item }">
-          <v-btn small text color="purple" @click="imagePropertiesDialog.open(item)">设置属性</v-btn>
+          <v-btn small text color="purple" @click="openImagePropertiesDialog(item)">设置属性</v-btn>
         </template>
 
         <template v-slot:expanded-item="{ headers, item }">
@@ -46,7 +46,7 @@
                 </tr>
               </template>
               <tr>
-                <td><strong>Properties</strong></td>
+                <td class="info--text">Properties</td>
                 <td>
                   <template v-for="(value, key) in item">
                     <v-chip x-small label v-bind:key="key" v-if="key.startsWith('hw')" class="mr-2">{{ key }}={{ value }}</v-chip>
@@ -58,10 +58,8 @@
         </template>
       </v-data-table>
     </v-col>
-    <v-col cols=12>
-      <NewImageVue :show.sync="openNewImageDialog" :images="table.selected" @completed="table.resetSelected(); table.refresh()" />
-      <!-- <ImageDeleteSmartDialog :show.sync="openImageDeleteSmartDialog" :images="table.selected" @completed="table.resetSelected(); table.refresh()" /> -->
-    </v-col>
+    <NewImageVue :show.sync="openNewImageDialog" :images="table.selected" @completed="table.resetSelected(); table.refresh()" />
+    <ImagePropertiesDialog :show.sync="showImagePropertiesDialog" :image="selectedImage" @completed="table.refresh()" />
   </v-row>
 </template>
 
@@ -70,19 +68,25 @@ import { ImageDataTable } from '@/assets/app/tables';
 import NewImageVue from './dialogs/NewImage.vue';
 
 import ImageDeleteSmartDialog from './dialogs/ImageDeleteSmartDialog.vue';
+import ImagePropertiesDialog from './dialogs/ImagePropertiesDialog.vue';
 
 export default {
   components: {
-    NewImageVue, ImageDeleteSmartDialog,
+    NewImageVue, ImageDeleteSmartDialog, ImagePropertiesDialog
   },
 
   data: () => ({
     openNewImageDialog: false,
     openImageDeleteSmartDialog: false,
-    table: new ImageDataTable()
+    showImagePropertiesDialog: false,
+    selectedImage: {},
+    table: new ImageDataTable(),
   }),
   methods: {
-
+    openImagePropertiesDialog(image){
+      this.selectedImage = image;
+      this.showImagePropertiesDialog = !this.showImagePropertiesDialog;
+    }
   },
   created() {
     this.table.refresh()

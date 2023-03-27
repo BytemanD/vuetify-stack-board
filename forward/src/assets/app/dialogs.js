@@ -2289,8 +2289,13 @@ export class ImagePropertiesDialog extends Dialog {
         this.image = {};
         this.properties = {};
         this.propertyContent = null;
+        this.customizeProperties = [
+            {key: 'hw_qemu_guest_agent', value: 'true'},
+            {key: 'hw_disk_bus', value: 'scsi'},
+            {key: 'hw_disk_bus', value: 'virtio'},
+        ];
     }
-    async open(image) {
+    async init(image) {
         this.image = image;
         let imageData = await API.image.show(this.image.id)
         this.properties = {};
@@ -2304,9 +2309,16 @@ export class ImagePropertiesDialog extends Dialog {
     async removeProperty(key) {
         await API.image.removeProperties(this.image.id, [key]);
         Vue.delete(this.properties, key);
+        Notify.success(`属性 ${key} 删除成功`);
+    }
+    async addProperty(key, value) {
+        let properties = {};
+        properties[key] = value;
+        await API.image.addProperties(this.image.id, properties);
+        Vue.set(this.properties, key, value)
+        Notify.success(`属性 ${key} 添加成功`);
     }
     async addProperties() {
-        console.log(this.propertyContent)
         if (!this.propertyContent) {
             return;
         }
@@ -2317,14 +2329,12 @@ export class ImagePropertiesDialog extends Dialog {
             if (line.trim() == '') { continue; }
             let kv = line.split('=');
             if (kv.length != 2) {
-                Notify.error(`输入内容有误: ${line}`)
-                return;
+                throw Error(`输入内容有误: ${line}`)
             }
             let key = kv[0].trim();
             let value = kv[1].trim();
             if (key == '' || !key.startsWith('hw_') || value == '') {
-                Notify.error(`输入内容有误: ${line}`)
-                return;
+                throw Error(`输入内容有误: ${line}`)
             }
             properties[key] = value;
         }

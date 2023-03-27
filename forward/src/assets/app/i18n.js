@@ -27,6 +27,7 @@ const MESSAGES = {
         usedAndTotalCPU: 'used/total CPU',
         ipAddress: 'IP address',
         hypervisorVersion: 'hypervisor version',
+        hypervisorType: 'hypervisor type',
 
         cpu: 'CPU',
         memory: 'memory',
@@ -72,7 +73,8 @@ const MESSAGES = {
         usedAndTotalMemory: '已用内存/总内存',
         usedAndTotalCPU: '已用CPU/总CPU',
         ipAddress: 'IP地址',
-        hypervisorVersion: '虚拟机版本',
+        hypervisorVersion: '虚拟机化版本',
+        hypervisorType: '虚拟化类型',
 
         cpu: 'CPU',
         memory: '内存',

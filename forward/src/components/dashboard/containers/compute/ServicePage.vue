@@ -13,8 +13,8 @@
             <v-data-table dense show-select :loading="table.loading" :headers="table.headers" :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search"
                 class="elevation-1" v-model="table.selected">
                 <template v-slot:[`item.status`]="{ item }">
-                    <v-switch class="my-auto"  hide-details v-model="item.status" color="success"
-                        :disabled="item.binary != 'nova-compute'" @click="table.enable(item)"></v-switch>
+                    <v-switch class="my-auto"  hide-details color="success" true-value="enabled" false-value="disabled" :input-value="item.status"
+                        :disabled="item.binary != 'nova-compute'" @click="table.toggleEnable(item)"></v-switch>
                 </template>
                 <template v-slot:[`item.forced_down`]="{ item }">
                     <v-switch class="my-auto" v-model="item.forced_down" hide-details color="warning"

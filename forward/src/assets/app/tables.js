@@ -673,7 +673,7 @@ export class ComputeServiceTable extends DataTable {
         }
         this.refresh();
     }
-    enable(service) {
+    toggleEnable(service) {
         let status = service.status;
         if (status == 'enabled') {
             service.status = 'disabled';
@@ -1107,6 +1107,7 @@ export class HypervisortTable extends DataTable {
             { text: I18N.t('usedAndTotalCPU'), value: 'vcpus', class: 'blue--text' },
             { text: I18N.t('status'), value: 'status', class: 'blue--text' },
             { text: I18N.t('ipAddress'), value: 'host_ip', class: 'blue--text' },
+            { text: I18N.t('hypervisorType'), value: 'hypervisor_type', class: 'blue--text' },
             { text: I18N.t('hypervisorVersion'), value: 'hypervisor_version', class: 'blue--text' },
         ], API.hypervisor, 'hypervisors')
         this.statistics = {};

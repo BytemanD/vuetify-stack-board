@@ -1,65 +1,65 @@
 <template>
   <v-row>
-    <v-col cols="6" lg="2" md="4" sm="4">
+    <v-col>
       <v-sheet elevation="2" class="pa-2 text-center">
+        <h4>{{ I18N.t('memory') }}</h4>
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
-            <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="120" width="20"
-              :value="table._memUsedPercent" :color="table._memUsedPercent < 80 ? 'teal lighten-2' : 'orange lighten-2'">
-              {{ I18N.t('memory') }}
+            <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="120" width="60"
+              :value="table._memUsedPercent" :color="table._memUsedPercent < 80 ? 'green lighten-1' : 'orange lighten-1'">
             </v-progress-circular>
           </template>
-          <span>百分比: {{ table._memUsedPercent }}%<br>剩余: {{ table.statistics.free_ram_mb }}</span>
+          百分比: {{ table._memUsedPercent }}%<br>剩余: {{ table.statistics.free_ram_mb }}
         </v-tooltip>
       </v-sheet>
     </v-col>
-    <v-col cols="6" lg="2" md="4" sm="4">
+    <v-col>
       <v-sheet elevation="2" class="pa-2 text-center">
+        <h4>{{ I18N.t('cpu') }}</h4>
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
-            <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="120" width="20"
-              :value="table._vcpuUsedPercent"
-              :color="table._vcpuUsedPercent < 80 ? 'teal lighten-2' : 'orange lighten-2'">
-              {{ I18N.t('cpu') }}
+            <v-progress-circular v-bind="attrs" v-on="on" size="120" width="60"
+              :value="table._vcpuUsedPercent" :color="table._vcpuUsedPercent < 80 ? 'green lighten-1' : 'orange lighten-1'">
             </v-progress-circular>
           </template>
-          <span>百分比: {{ table._vcpuUsedPercent }}%<br>剩余: {{ table.statistics.vcpus - table.statistics.vcpus_used }}</span>
+          百分比: {{ table._vcpuUsedPercent }}%<br>剩余: {{ table.statistics.vcpus - table.statistics.vcpus_used }}
         </v-tooltip>
       </v-sheet>
     </v-col>
-    <v-col cols="6" lg="2" md="4" sm="4">
+    <v-col>
       <v-sheet elevation="2" class="pa-2 text-center">
+        <h4>{{ I18N.t('disk') }}</h4>
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
-            <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="120" width="20"
-              :value="table._diskUsedPercent"
-              :color="table._diskUsedPercent < 80 ? 'teal lighten-2' : 'orange lighten-2'">
-              {{ I18N.t('disk') }}
+            <v-progress-circular v-bind="attrs" v-on="on" size="120" width="60"
+              :value="table._diskUsedPercent" :color="table._diskUsedPercent < 80 ? 'green lighten-1' : 'orange lighten-1'">
             </v-progress-circular>
           </template>
-          <span>百分比: {{ table._diskUsedPercent }}%<br>剩余: {{ table.statistics.local_gb - table.statistics.local_gb_used
-          }}</span>
+          百分比: {{ table._diskUsedPercent }}%<br>剩余: {{ table.statistics.local_gb - table.statistics.local_gb_used }}
         </v-tooltip>
       </v-sheet>
     </v-col>
-    <v-col cols="6" lg="2" md="4" sm="4">
+    <v-col>
       <v-sheet elevation="2" class="pa-2 text-center">
-        <v-progress-circular size="120" width="20" :value="table.statistics.count * 100 / table.items.length"
-          color="teal lighten-2">
-          {{ I18N.t('node') }}<br>{{ table.statistics.count }}/{{ table.items.length }}
-        </v-progress-circular>
+        <h4>{{ I18N.t('node') }}</h4>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-progress-circular size="120" width="60" v-bind="attrs" v-on="on"
+              :value="table.statistics.count * 100 / table.items.length" color="green lighten-1">
+            </v-progress-circular>
+          </template>
+          {{ table.statistics.count }}/{{ table.items.length }}<br>
+        </v-tooltip>
       </v-sheet>
     </v-col>
-    <v-col cols="6" lg="2" md="4" sm="4">
+    <v-col >
       <v-sheet elevation="2" class="pa-2 text-center" height="100%">
-        <v-avatar size="110"> <span class="teal--text">{{ I18N.t('instance') }}<br>{{ table.statistics.running_vms }}</span>
-        </v-avatar>
-      </v-sheet>
-    </v-col>
-    <v-col cols="6" lg="2" md="4" sm="2">
-      <v-sheet elevation="2" class="pa-2 text-center" height="100%">
-        <v-avatar size="110"> <span
-            class="teal--text">{{ I18N.t('workload') }}<br>{{ table.statistics.current_workload }}</span> </v-avatar>
+        <div class="mt-10 my-auto">
+          <strong>
+            {{ I18N.t('instance') }}:{{ table.statistics.running_vms }} <br>
+            {{ I18N.t('workload') }}:{{ table.statistics.current_workload }} <br>
+          </strong>
+        </div>
       </v-sheet>
     </v-col>
 
