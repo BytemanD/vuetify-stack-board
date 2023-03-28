@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="display" width="500">
         <v-card>
-            <v-card-title class="headline warning lighten-2" primary-title>迁移</v-card-title>
+            <v-card-title class="headline warning" primary-title>迁移</v-card-title>
             <v-card-text>
                 <v-switch persistent-hint v-model="dialog.smart" label="智能模式" hint=智能模式根据虚拟机状态选择冷迁移还是热迁移></v-switch>
                 <v-switch hide-details v-model="dialog.liveMigrate" label="热迁移" :disabled="dialog.smart"></v-switch>

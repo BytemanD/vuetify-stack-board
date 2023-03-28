@@ -6,7 +6,7 @@
                 <v-row class="mt-1">
                     <v-col>
                         <v-btn x-small fab class='mr-1' color="primary"
-                            @click="showRoleDialog = !showRoleDialog"><v-icon>mdi-plus</v-icon></v-btn>
+                            @click="showNewRoleDialog = !showNewRoleDialog"><v-icon>mdi-plus</v-icon></v-btn>
                         <v-btn small color="error" @click="table.deleteSelected()"
                             :disabled="table.selected.length == 0">删除</v-btn>
                     </v-col>
@@ -24,6 +24,7 @@
                 </v-data-table>
             </v-card-text>
         </v-card>
+        <NewRoleDialog :show.sync="showNewRoleDialog" @completed="table.refresh()"/>
     </v-dialog>
 </template>
     
@@ -31,7 +32,12 @@
 import { RoleTable } from '@/assets/app/tables';
 import { RolesDialog } from '@/assets/app/dialogs';
 
+import NewRoleDialog from './NewRoleDialog.vue';
+
 export default {
+    components: {
+        NewRoleDialog
+    },
     props: {
         show: Boolean,
     },
@@ -39,7 +45,7 @@ export default {
         display: false,
         table: new RoleTable(),
         dialog: new RolesDialog(),
-        showRoleDialog: false,
+        showNewRoleDialog: false,
     }),
     methods: {
         commit: async function () {

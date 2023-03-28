@@ -193,7 +193,7 @@ class OpenstackV3AuthProxy(object):
                                 headers=proxy_headers)
 
     def proxy_cinder(self, method='GET', url=None, data=None, headers=None):
-        proxy_url = '{}{}'.format(self._get_endpoint('cinderv2'), url or '/')
+        proxy_url = f"{self._get_endpoint('cinderv2')}{url or '/'}"
         proxy_headers = self.get_header()
         if headers:
             proxy_headers.update(headers)

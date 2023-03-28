@@ -3,12 +3,12 @@
     <v-app-bar app dense>
       <v-app-bar-nav-icon @click="navigation.mini = !navigation.mini"></v-app-bar-nav-icon>
       <v-toolbar-title style="width: 20%">
-        <v-select solo-inverted flat hide-details :prefix='"cluster" + ":"' item-text="name" class="rounded-0"
+        <v-select solo-inverted flat hide-details :prefix='`${I18N.t("cluster")}:`' item-text="name" class="rounded-0"
           append-icon="mdi-map" v-model="clusterTable.selected" :items="clusterTable.items">
         </v-select>
       </v-toolbar-title>
       <v-toolbar-title class="ml-1" style="width: 20%">
-        <v-select solo-inverted flat hide-details clearable :prefix='"region" + ":"' class="rounded-0"
+        <v-select solo-inverted flat hide-details clearable :prefix='`${I18N.t("region")}:`' class="rounded-0"
           append-icon="mdi-map-marker" v-model="context.region" item-text="id" item-name="id">
         </v-select>
       </v-toolbar-title>
@@ -59,6 +59,7 @@ import { SETTINGS } from '@/assets/app/settings';
 
 import BtnTheme from '../plugins/BtnTheme.vue';
 import BtnHome from '../plugins/BtnHome.vue';
+import i18n from '@/assets/app/i18n';
 
 const navigationGroup = [
   {
@@ -99,6 +100,7 @@ export default {
   },
 
   data: () => ({
+    I18N: i18n,
     name: 'Forward',
     ui: {
       navigationWidth: '200px'

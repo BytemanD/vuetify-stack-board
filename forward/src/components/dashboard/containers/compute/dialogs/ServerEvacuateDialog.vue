@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="display" width="500">
         <v-card>
-            <v-card-title class="headline warning lighten-2" primary-title>虚拟机疏散</v-card-title>
+            <v-card-title class="headline warning" primary-title>虚拟机疏散</v-card-title>
             <v-card-text>
                 <v-select clearable hide-details :items="dialog.nodes" label="目标节点" v-model="dialog.host"
                     @click="dialog.refreshHosts()"></v-select>

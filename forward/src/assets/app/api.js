@@ -4,12 +4,12 @@ import { Notify } from "vuetify-message-snackbar";
 import { LOG, Utils } from "./lib.js";
 
 class Restfulclient {
-    constructor(baseUrl) {
+    constructor(baseUrl, async=false) {
+        this.async = async;
         this.baseUrl = baseUrl;
         this.clusterId = localStorage.getItem('clusterId');
     }
     getHeaders() {
-        console.info('Restfulclient.getHeaders')
         return null;
     }
     _parseToQueryString(filters) {
@@ -210,7 +210,7 @@ class Migrations extends Restfulclient {
 }
 
 class Server extends VstackboardApi {
-    constructor() { super('/computing/servers') }
+    constructor() { super('/computing/servers', true) }
     async detail(filters = {}) {
         filters.all_tenants = 1
         return await super.detail(filters)
@@ -453,53 +453,34 @@ class Image extends Restfulclient {
         let end = 0;
         while (end < size) {
             end = Math.min(start + maxSize, size);
-            console.log(`send ${size} data [${start}, ${end}]`)
+            console.debug(`send ${size} data [${start}, ${end}]`)
+            let startTime = new Date();
             await this.upload(id, binary.slice(start, end), size)
+            let usedTime = (new Date() - startTime) / 1000;
             if (uploadCallback) {
-                uploadCallback(end, size)
+                uploadCallback(end, size, (end - start) /usedTime)
             }
             start += maxSize;
         }
     }
-    async upload(id, binary, size, uploadCallback = null) {
+    async upload(id, binary, size, uploadCallback = null){
         let self = this;
         let headers = this.getHeaders();
-        return new Promise(function (resolve, reject) {
-            var xhr = new XMLHttpRequest();
-            xhr.onload = () => {
-                if (xhr.status == 204) {
-                    resolve(xhr)
-                } else {
-                    reject(xhr)
+        headers['Content-Type'] = 'application/octet-stream';
+        headers['x-image-meta-size'] = size;
+        return axios({
+            method: 'PUT',
+            url: `${self.baseUrl}/${id}/file`,
+            headers: headers,
+            data: binary,
+            onUploadProgress: function (progressEvent) {
+                if (uploadCallback) {
+                    uploadCallback(progressEvent.loaded, progressEvent.total)
                 }
-            }
-            xhr.onerror = () => {
-                console.error(xhr)
-                reject(xhr)
-            }
-            xhr.open("PUT", `${self.baseUrl}/${id}/file`, true);
-            xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-            for (let key in headers) {
-                xhr.setRequestHeader(key, headers[key]);
-            }
-            if (size) {
-                xhr.setRequestHeader('x-image-meta-size', size);
-            }
-            xhr.upload.addEventListener('progress', function (e) {
-                if (e.lengthComputable) {
-                    if (uploadCallback) {
-                        uploadCallback(e.loaded, e.total);
-                    }
-                }
-            });
-            if (xhr.sendAsBinary) {
-                xhr.sendAsBinary(binary)
-            } else {
-                xhr.send(binary);
-            }
+            },
         })
     }
-    uploadLarge(id, file, uploadCallback = null) {
+    uploadSmall(id, file, uploadCallback = null) {
         let self = this
         let formData = new FormData();
         formData.append('file', file);
@@ -572,7 +553,7 @@ class Router extends Restfulclient {
     }
 }
 class Volume extends VstackboardApi {
-    constructor() { super('/volume/volumes') }
+    constructor() { super('/volume/volumes', true) }
     async create(data) { return this.post({ volume: data }) }
 
     async waitVolumeStatus(volume_id, expectStatus = ['available', 'error']) {

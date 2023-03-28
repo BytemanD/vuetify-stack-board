@@ -215,15 +215,13 @@ export class NewRoleDialog extends Dialog {
     randomName() {
         this.name = Utils.getRandomName('role');
     }
-    async open() {
-        this.randomName();
+    async init() {
+        super.init();
         this.domains = (await API.domain.list()).domains;
-        super.open();
     }
     async commit() {
         if (!this.name) {
-            Notify.warning(`角色名必须指定`)
-            return;
+           throw Error('角色名必须指定')
         }
         let data = { name: this.name }
         if (this.domainId) {
@@ -2372,11 +2370,14 @@ export class NewImageDialog extends Dialog {
         this.containerFormats = ['None', 'ami', 'ari', 'aki', 'bare', 'ovf', 'ova', 'docker'];
 
         this.file = null;
-        this.process = '0';
+        this.process = 0;
+        this.speed = 0;
+        this.message = '';
     }
     async init() {
         super.init();
-        this.process = '0';
+        this.process = 0;
+        this.speed = 0;
         this.file = null;
         super.open();
     }
@@ -2407,23 +2408,22 @@ export class NewImageDialog extends Dialog {
     async upload(id) {
         let self = this;
         let reader = await this.readImage(this.file);
-        Notify.info('开始上传镜像...')
+        this.message = '开始上传镜像 ...';
         await API.image.uploadSlice(
             id, reader.result, this.file.size,
-            (loaded, total) => { self.process = (loaded * 100 / total).toFixed(3); }
+            (loaded, total, speed) => {
+                self.speed = speed;
+                self.process = loaded * 100 / total;
+            }
         )
-        Notify.success('镜像缓存成功，等待上传，点击右上角查看任务进度。')
-        imageTable.refresh();
-        self.hide();
+        this.message = '镜像缓存成功,等待后端上传,点击右上角查看任务进度。';
     }
     async commit() {
         if (!this.name) { Notify.error(`请输入镜像名`); return; }
         let data = { name: this.name, disk_format: this.diskFormat, container_format: this.containerFormat };
         if (this.visibility) { data.visibility = this.visibility }
-
         let image = await API.image.post(data);
-        Notify.success(`镜像创建成功`)
-
+        this.message = `镜像创建成功。`;
         if (this.file) {
             await this.upload(image.id);
         }

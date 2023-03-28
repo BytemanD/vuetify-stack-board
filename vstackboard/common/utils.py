@@ -8,6 +8,7 @@ import requests
 from easy2use.common import pkg
 
 from vstackboard.common import constants
+from vstackboard.common import exceptions
 from vstackboard.common.i18n import _
 from vstackboard.db import api
 
@@ -116,6 +117,8 @@ def with_response(return_code=200):
         def wrapper(self, *args, **kwargs):
             try:
                 resp = func(self, *args, **kwargs)
+            except exceptions.ApiException:
+                raise
             except Exception as e:
                 LOG.exception(e)
                 resp = 500, f'Internal Server error: {str(e)}'

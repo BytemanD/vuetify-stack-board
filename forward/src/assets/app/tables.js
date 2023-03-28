@@ -37,11 +37,15 @@ class DataTable {
         if (this.selected.length == 0) {
             return;
         }
-        Notify.info(`${this.name} 删除中`)
         for (let i in this.selected) {
             let item = this.selected[i];
             try {
                 await this.api.delete(item.id || item.name);
+                if (this.api.async){
+                    Notify.info(`${this.name} 删除中`)
+                } else {
+                   Notify.success(`${this.name} 删除成功`);
+                }
                 this.waitDeleted(item.id || item.name);
             } catch {
                 Notify.error(`删除 ${this.name} ${item.id} 失败`)

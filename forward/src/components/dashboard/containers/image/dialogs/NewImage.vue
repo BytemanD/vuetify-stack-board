@@ -41,10 +41,13 @@
                             <v-text-field dense label="最小磁盘" placeholder="请设置最小磁盘" v-model="dialog.minDisk"></v-text-field>
                         </v-sheet>
                     </v-col>
-                    <v-col cols="12">
-                        缓存进度：{{ dialog.process }}%
-                        <v-progress-linear hide-details height="20" :value="dialog.process"></v-progress-linear>
+                    <v-col cols="10">
+                        <v-progress-linear hide-details height="20" :value="dialog.process">
+                            <span class="white--text">速度: {{ (dialog.speed /1024 /1024).toFixed(2) }} Mb/s</span>
+                        </v-progress-linear>
+                        详情: {{ dialog.message }}
                     </v-col>
+                    <v-col cols="2">进度: {{ dialog.process.toFixed(2) }}%</v-col>
                 </v-row>
             </v-card-text>
             <v-divider></v-divider>
@@ -74,7 +77,7 @@ export default {
         commit: async function () {
             try {
                 await this.dialog.commit()
-                this.display = false;
+                // this.display = false;
                 this.$emit('completed');
             } catch (error) {
                 console.error(error)

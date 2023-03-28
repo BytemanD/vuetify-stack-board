@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="display" width="500">
         <v-card>
-            <v-card-title class="headline primary lighten-2" primary-title>重置状态</v-card-title>
+            <v-card-title class="headline warning" primary-title>重置状态</v-card-title>
             <v-card-text>
                 <v-radio-group v-model="dialog.active" hide-details>
                     <v-radio label="active" :value="true"></v-radio>
