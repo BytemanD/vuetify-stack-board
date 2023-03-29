@@ -102,9 +102,11 @@ class Restfulclient {
 }
 
 Restfulclient.prototype.getHeaders = function () {
-    return {
-        'X-Cluster-Id': localStorage.getItem('clusterId'),
+    let headers = {'X-Cluster-Id': localStorage.getItem('clusterId')};
+    if (sessionStorage.getItem('region')){
+        headers['X-Region'] = sessionStorage.getItem('region');
     }
+    return headers;
 }
 
 class VstackboardApi extends Restfulclient {
@@ -175,7 +177,7 @@ class Aggregates extends Restfulclient {
         return await this.postAction(aggId, 'remove_host', { host: host });
     }
     async addHost(aggId, host) {
-        return await axios.postAction(aggId, 'add_host', { host: host });
+        return await this.postAction(aggId, 'add_host', { host: host });
     }
 }
 

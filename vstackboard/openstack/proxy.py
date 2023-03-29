@@ -59,10 +59,9 @@ class OpenstackV3AuthProxy(object):
             return False
 
     def update_auth_token(self):
-        LOG.info('auth body: %s', json.dumps(self.auth_body))
-        resp = requests.post('{}/v3/auth/tokens'.format(self.auth_url),
-                             json=self.auth_body,
-                             timeout=60)
+        LOG.debug('auth body: %s', json.dumps(self.auth_body))
+        resp = requests.post(f'{self.auth_url}/v3/auth/tokens',
+                             json=self.auth_body, timeout=60)
         token = json.loads(resp.content).get('token', {})
         self.auth_token = {
             'token': resp.headers.get('x-subject-token', None),
@@ -201,7 +200,7 @@ class OpenstackV3AuthProxy(object):
                                 headers=proxy_headers)
 
 
-def get_proxy(ctxt: context.ClusterContext) -> OpenstackV3AuthProxy:
+def get_proxy(ctxt: context.RequestContext) -> OpenstackV3AuthProxy:
     global PROXY_MAP
 
     if ctxt.cluster_id not in PROXY_MAP or \

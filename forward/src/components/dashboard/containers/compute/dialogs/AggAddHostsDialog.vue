@@ -1,15 +1,17 @@
 <template>
     <v-dialog v-model="display" width="800">
         <v-card>
-            <v-card-title class="headline primary lighten-2" primary-title>节点管理</v-card-title>
+            <v-card-title class="headline primary lighten-2" primary-title>添加节点</v-card-title>
             <v-card-text class="mt-1">
-                <v-data-table dense class="mt-1" :headers="dialog.headers" item-key="name" :items="dialog.hosts" :items-per-page="itemsPerPage"
-                    :search="dialog.search" v-model="dialog.selected">
-                    <template v-slot:[`item.actions`]="{ item }">
-                        <v-btn icon color="error" @click="removeHost(item.name)"><v-icon>mdi-close</v-icon></v-btn>
-                    </template>
-                </v-data-table>
-            </v-card-text>
+                <v-data-table dense show-select class="mt-1" :headers="dialog.headers" :items="dialog.hosts" :items-per-page="dialog.hypervisorTable.itemsPerPage"
+                :search="dialog.hypervisorTable.search" v-model="dialog.hypervisorTable.selected">
+            </v-data-table>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+            <v-spacer></v-spacer>
+                <v-btn color="primary" @click="addHosts()">添加</v-btn>
+            </v-card-actions>
         </v-card>
     </v-dialog>
 </template>
@@ -17,7 +19,7 @@
 import i18n from '@/assets/app/i18n';
 import { Utils } from '@/assets/app/lib';
 
-import { AggHostsDialog } from '@/assets/app/dialogs';
+import { AggAddHostsDialog } from '@/assets/app/dialogs';
 
 export default {
     props: {
@@ -28,13 +30,14 @@ export default {
         Utils: Utils,
         display: false,
         itemsPerPage: 10,
-        dialog: new AggHostsDialog(),
+        dialog: new AggAddHostsDialog(),
     }),
     methods: {
-        removeHost: async function(host){
-            await this.dialog.removeHost(host);
+        addHosts: async function() {
+            await this.dialog.addHosts();
+            // this.display = false;
             this.$emit('completed');
-        }
+        },
     },
     created() {
     },

@@ -57,6 +57,7 @@ export class Settings {
             volumeSizeDefault: new Setting(40, { 'choises': ['1', '10', '20', '30', '40', '50'] }),
             volumeSizeMin: new Setting(40, { 'choises': ['1', '10', '20', '30', '40', '50'] }),
             themeDark: new BooleanSetting(false),
+            defaultRegion: new Setting('RegionOne'),
         }
         this.load();
     }

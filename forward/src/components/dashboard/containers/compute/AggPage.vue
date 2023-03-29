@@ -22,6 +22,7 @@
 
                 <template v-slot:[`item.host_num`]="{ item }">
                     <v-btn small text color="info" @click="editAggHosts(item)">{{ item.hosts.length }}</v-btn>
+                    <v-btn small icon color="primary" @click="openAggAddHostsDialog(item)"><v-icon>mdi-plus</v-icon></v-btn>
                 </template>
                 <template v-slot:expanded-item="{ headers, item }">
                     <td></td>
@@ -36,10 +37,9 @@
                 </template>
             </v-data-table>
         </v-col>
-        <v-col cols="12">
-            <NewAggDialog :show.sync="openNewAggDialog" @completed="table.refresh()"></NewAggDialog>
-            <AggHostDialog :show.sync="openAggHostsDialog" :aggregate="editAgg"></AggHostDialog>
-        </v-col>
+        <NewAggDialog :show.sync="openNewAggDialog" @completed="table.refresh()" />
+        <AggHostDialog :show.sync="openAggHostsDialog" :aggregate="editAgg" @completed="table.refresh()" />
+        <AggAddHostsDialog :show.sync="showAggAddHostsDialog" :aggregate="editAgg" @completed="table.refresh()" />
     </v-row>
 </template>
 
@@ -49,24 +49,29 @@ import { Utils } from '@/assets/app/lib.js';
 
 import NewAggDialog from './dialogs/NewAggDialog.vue';
 import AggHostDialog from './dialogs/AggHostsDialog';
-
+import AggAddHostsDialog from './dialogs/AggAddHostsDialog.vue';
 
 export default {
     components: {
-        NewAggDialog, AggHostDialog
+        NewAggDialog, AggHostDialog, AggAddHostsDialog
     },
 
     data: () => ({
         Utils: Utils,
         openNewAggDialog: false,
         openAggHostsDialog: false,
+        showAggAddHostsDialog: false,
         editAgg: null,
         table: new AggDataTable()
     }),
     methods: {
         editAggHosts: function (agg) {
             this.editAgg = agg;
-            this.openAggHostsDialog = true;
+            this.openAggHostsDialog = !this.openAggHostsDialog;
+        },
+        openAggAddHostsDialog: function(agg){
+            this.editAgg = agg;
+            this.showAggAddHostsDialog = !this.showAggAddHostsDialog;
         }
     },
     created() {

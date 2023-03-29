@@ -9,7 +9,8 @@
       </v-toolbar-title>
       <v-toolbar-title class="ml-1" style="width: 20%">
         <v-select solo-inverted flat hide-details clearable :prefix='`${I18N.t("region")}:`' class="rounded-0"
-          append-icon="mdi-map-marker" v-model="context.region" item-text="id" item-name="id">
+          append-icon="mdi-map-marker" v-model="context.region" item-text="id" item-name="id" :items="regionTable.items"
+          @change="changeRegion()">
         </v-select>
       </v-toolbar-title>
 
@@ -19,7 +20,7 @@
       <v-btn icon><v-icon>mdi-cog</v-icon></v-btn>
     </v-app-bar>
 
-    <v-navigation-drawer app :mini-variant="navigation.mini" :expand-on-hover="navigation.mini">
+    <v-navigation-drawer app :mini-variant="navigation.mini" :expand-on-hover="navigation.mini" width="200">
       <v-list-item two-line class="px-2">
         <v-list-item-avatar class="ml-0" tile><img src="../../../public/favicon.svg"></v-list-item-avatar>
         <v-list-item-content>
@@ -54,7 +55,7 @@
 </template>
 
 <script>
-import { ClusterTable } from '@/assets/app/tables';
+import { ClusterTable, RegionTable } from '@/assets/app/tables';
 import { SETTINGS } from '@/assets/app/settings';
 
 import BtnTheme from '../plugins/BtnTheme.vue';
@@ -113,9 +114,10 @@ export default {
     },
     context: {
       clusterId: localStorage.getItem('clusterId'),
-      region: null,
+      region: {},
     },
     clusterTable: new ClusterTable(),
+    regionTable: new RegionTable(),
   }),
   methods: {
     selectItem(item) {
@@ -126,6 +128,11 @@ export default {
       }
     },
     async refresh() {
+      this.context.region = sessionStorage.getItem('region');
+      if (!this.context.region) {
+        this.context.region = SETTINGS.getItem('defaultRegion').getValue();
+        sessionStorage.setItem('region', this.context.region)
+      }
       await this.clusterTable.refresh();
       for (let i in this.clusterTable.items) {
         if (parseInt(this.context.clusterId) != this.clusterTable.items[i].id) {
@@ -134,7 +141,7 @@ export default {
         this.clusterTable.selected = this.clusterTable.items[i];
         break;
       }
-      this.region = localStorage.getItem('region');
+      await this.regionTable.refresh();
     },
     initItem() {
       let itemIndex = -1;
@@ -150,6 +157,10 @@ export default {
         }
       }
     },
+    changeRegion(){
+      sessionStorage.setItem('region', this.context.region);
+      location.reload();
+    }
   },
   created() {
     this.$vuetify.theme.dark = SETTINGS.getItem('themeDark').getValue();

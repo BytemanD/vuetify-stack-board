@@ -29,11 +29,11 @@ RUN_AS_CONTAINER = False
 class GetContext(object):
 
     def _get_context(self):
-        req_context = context.ClusterContext(
+        req_context = context.RequestContext(
             self._get_header('X-Cluster-Id'),
             region=self._get_header('X-Region')
         )
-        LOG.info('X-Cluster-ID: %s', req_context.cluster_id)
+        LOG.debug('context: %s', req_context)
         if not req_context.cluster_id:
             raise exceptions.ApiException(
                 400, 'cluster id is none')

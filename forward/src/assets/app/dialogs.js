@@ -6,7 +6,7 @@ import API from './api.js';
 import I18N from './i18n.js';
 import { SETTINGS } from './settings.js';
 import { Utils, LOG, ServerTasks, CONST } from './lib.js';
-import { BackupTable, VolumeDataTable, UserTable, RegionDataTable, ServiceTable, } from './tables.js';
+import { BackupTable, VolumeDataTable, UserTable, RegionDataTable, ServiceTable, HypervisortTable, } from './tables.js';
 import {
     serverTable, imageTable,
     snapshotTable,
@@ -1119,7 +1119,10 @@ export class AggHostsDialog extends Dialog {
         this.agg = {};
         this.selected = [];
         this.hosts = [];
-        this.headers = [{ text: '节点', value: 'name' }];
+        this.headers = [
+            { text: '节点', value: 'name' },
+            { text: '操作', value: 'actions' }
+        ];
     }
     refresh() {
         this.hosts = [];
@@ -1145,20 +1148,64 @@ export class AggHostsDialog extends Dialog {
         this.agg = (await API.agg.show(this.agg.id)).aggregate;
         this.refresh();
     }
-    async addHosts() {
-        for (let i in this.selected) {
-            try {
-                await API.agg.addHost(this.agg.id, this.selected[i].name);
-                Notify.success(`节点${this.selected[i].name}添加成功`);
-            } catch {
-                Notify.success(`节点${this.selected[i].name}添加失败`);
-            }
+    async removeHost(host) {
+        try {
+            await API.agg.removeHost(this.agg.id, host);
+        } catch {
+            Notify.error(`节点 ${host} 移除失败`);
+            return;
         }
-        this.selected = [];
-        this.agg = await API.agg.show(this.agg.id).aggregate;
+        Notify.success(`节点${host}移除成功`);
+        this.agg = (await API.agg.show(this.agg.id)).aggregate;
         this.refresh();
     }
 }
+export class AggAddHostsDialog extends Dialog {
+    constructor() {
+        super();
+        this.agg = {};
+        this.hypervisorTable = new HypervisortTable();
+        this.headers = [
+            { text: I18N.t('hostName'), value: 'hypervisor_hostname',},
+            { text: I18N.t('status'), value: 'status'},
+            { text: I18N.t('ipAddress'), value: 'host_ip'},
+        ]
+        this.hosts = [];
+    }
+    async init(agg){
+        this.agg = agg;
+        this.refresh();
+    }
+    async refresh(){
+        await this.hypervisorTable.refresh();
+        this.hosts = [];
+        for (let i in this.hypervisorTable.items){
+            let hypervisor = this.hypervisorTable.items[i];
+            if (this.agg.hosts.indexOf(hypervisor.hypervisor_hostname) >= 0){
+                continue;
+            }
+            this.hosts.push(hypervisor);
+        }
+    }
+    async addHosts() {
+        if (this.hypervisorTable.selected.length == 0){
+            return;
+        }
+        for (let i in this.hypervisorTable.selected) {
+            let host = this.hypervisorTable.selected[i].hypervisor_hostname;
+            try {
+                await API.agg.addHost(this.agg.id, host);
+                Notify.success(`节点 ${host} 添加成功`);
+            } catch {
+                Notify.error(`节点 ${host} 添加失败`);
+            }
+        }
+        this.hypervisorTable.selected = [];
+        this.agg = (await API.agg.show(this.agg.id)).aggregate;
+        this.refresh();
+    }
+}
+
 export class RebuildDialog extends Dialog {
     constructor() {
         super();

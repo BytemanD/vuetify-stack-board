@@ -1133,7 +1133,7 @@ export class HypervisortTable extends DataTable {
         this._diskUsedPercent = (this.statistics.local_gb_used * 100 / this.statistics.local_gb).toFixed(2);
     }
     async refresh() {
-        super.refresh();
+        await super.refresh();
         // await this.refreshStatics();
         // this.getMemUsedPercent();
     }
