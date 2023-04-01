@@ -1,8 +1,8 @@
 <template>
     <v-row>
         <v-col>
-            <v-btn small color="primary" @click="newVolumeDialog.open()"><v-icon small>mdi-plus</v-icon>新建</v-btn>
-            <v-btn small color="warning" @click="volumeResetStateDialog.open()" :disabled="table.selected.length == 0">状态重置</v-btn>
+            <v-btn fab x-small color="primary" class="mr-1" @click="showNewBackupDialog = !showNewBackupDialog"><v-icon small>mdi-plus</v-icon></v-btn>
+            <v-btn small color="warning" class="mr-1" @click="showBackupStateResetDialog = !showBackupStateResetDialog" :disabled="table.selected.length == 0">状态重置</v-btn>
             <v-btn small color="error" @click="table.deleteSelected()" :disabled="table.selected.length == 0">
                 <v-icon small>mdi-trash-can</v-icon>删除</v-btn>
         </v-col>
@@ -44,20 +44,27 @@
                 </template>
             </v-data-table>
         </v-col>
+        <NewBackupVue :show.sync="showNewBackupDialog"  @completed="table.refresh()" />
+        <BackupStatusResetDialog :show.sync="showBackupStateResetDialog" :backups="table.selected" @completed="table.refresh()" />
     </v-row>
 </template>
 
 <script>
 import { BackupTable } from '@/assets/app/tables.js';
 
+import NewBackupVue from './dialogs/NewBackup.vue';
+import BackupStatusResetDialog from './dialogs/BackupStatusResetDialog.vue';
+
 export default {
     components: {
-
+        NewBackupVue,
+        BackupStatusResetDialog,
     },
 
     data: () => ({
-        table: new BackupTable()
-        // miniVariant: false,
+        table: new BackupTable(),
+        showBackupStateResetDialog: false,
+        showNewBackupDialog: false,
     }),
     methods: {
 

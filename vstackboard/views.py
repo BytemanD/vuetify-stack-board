@@ -60,39 +60,6 @@ class BaseReqHandler(web.RequestHandler, GetContext):
         self.finish()
 
 
-class Dashboard(BaseReqHandler):
-
-    def get(self):
-        ctxt = self._get_context()
-        if not ctxt.cluster_id:
-            self.redirect('/welcome')
-            return
-
-        if not ctxt.cluster:
-            LOG.debug('cluster %s is not exists', ctxt.cluster_id)
-            self.redirect('/welcome')
-
-        LOG.info('region is %s', ctxt.region)
-        try:
-            cluster_proxy = proxy.OpenstackV3AuthProxy(
-                ctxt.cluster.auth_url, ctxt.cluster.auth_project,
-                ctxt.cluster.auth_user, ctxt.cluster.auth_password,
-                region=ctxt.region)
-            if not cluster_proxy.is_connectable():
-                LOG.warn('Connect to cluster %s failed', ctxt.cluster_id)
-                self.redirect('/welcome')
-        except Exception as e:
-            LOG.exception(e)
-            self.set_status(500)
-            self.finish({'error': e})
-            return
-
-        cdn = CONF.use_cdn and constants.CDN or {
-            k: '/static/cdn' for k in constants.CDN}
-        self.render('dashboard.html', name=constants.BRAND, cdn=cdn,
-                    cluster=ctxt.cluster.name)
-
-
 class Version(BaseReqHandler):
 
     def get(self):
@@ -239,7 +206,7 @@ class OpenstackProxyBase(BaseReqHandler):
                 headers=proxy_headers)
             return resp.status_code, resp.content
         except exceptions.EndpointNotFound as e:
-            return 404, self.finish({'error': str(e)})
+            return 404, {'error': str(e)}
 
     @utils.with_response()
     def get(self, url):
@@ -371,7 +338,11 @@ class Html(BaseReqHandler):
 
     def get(self):
         LOG.debug('get html: %s', self.request.path)
-        self.render(self.request.path[1:])
+        try:
+            self.render(self.request.path[1:])
+        except FileNotFoundError:
+            self.set_status(404)
+            self.finish({'error', f'{self.request.path[1:]} not found'})
 
 
 class ConfigJson(BaseReqHandler):
@@ -386,7 +357,6 @@ def get_routes():
         (r'/', Index),
         (r'/.+\.html', Html),
         (r'/config.json', ConfigJson),
-        (r'/dashboard', Dashboard),
         (r'/version', Version),
         (r'/configs', Configs),
         (r'/cluster', Cluster),

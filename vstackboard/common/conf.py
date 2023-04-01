@@ -15,7 +15,6 @@ default_options = [
     cfg.Option('log_file', default=None),
     cfg.IntOption('port', default=8081),
     cfg.IntOption('workers', default=None),
-    cfg.BooleanOption('use_cdn', default=False),
     cfg.Option('data_path', default='/etc/vstackboard'),
     cfg.BooleanOption('enable_cross_domain', default=False),
     cfg.Option('index_redirect', default='/welcome.html'),

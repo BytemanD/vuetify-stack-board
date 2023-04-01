@@ -775,10 +775,15 @@ export class VolumeTypeTable extends DataTable {
 export class SnapshotTable extends DataTable {
     constructor() {
         super([{ text: '名字', value: 'name' },
-        { text: '状态', value: 'status' },
-        { text: '大小', value: 'size' },
-        { text: '卷ID', value: 'volume_id' },
-        ], API.snapshot, 'snapshots', '快照')
+            { text: '状态', value: 'status' },
+            { text: '大小', value: 'size' },
+            { text: '卷ID', value: 'volume_id' },
+        ], API.snapshot, 'snapshots', '快照');
+        this.extendItems = [
+            { text: '描述', value: 'description' },
+            { text: 'created_at', value: 'created_at' },
+            { text: 'updated_at', value: 'updated_at' },
+        ]
     }
     async waitSnapshotCreated(snapshot_id) {
         let snapshot = {};

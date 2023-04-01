@@ -1321,6 +1321,7 @@ export class NewVolumeDialog extends Dialog {
 export class NewSnapshotDialog extends Dialog {
     constructor() {
         super();
+        this.resource = 'snapshot';
         this.name = '';
         this.volume_id = '';
         this.volumes = [];
@@ -1349,16 +1350,15 @@ export class NewSnapshotDialog extends Dialog {
         await snapshotTable.waitSnapshotCreated(body.snapshot.id)
         Notify.success(`快照 ${this.name} 创建成功`);
     }
-    async open() {
-        this.randomName();
-        super.open();
-        let body = await API.volume.list();
-        this.volumes = body.volumes;
+    async init() {
+        super.init();
+        this.volumes = (await API.volume.list()).volumes;
     }
 }
 export class NewBackupDialog extends Dialog {
     constructor() {
         super();
+        this.resource = 'backup';
         this.name = '';
         this.volume_id = '';
         this.snapshot_id = ''
@@ -1393,9 +1393,8 @@ export class NewBackupDialog extends Dialog {
             Notify.success(`备份 ${this.name} 创建成功`);
         }
     }
-    async open() {
-        this.randomName();
-        super.open();
+    async init() {
+        super.init();
         this.volumes = (await API.volume.list()).volumes;
     }
 }
@@ -1434,13 +1433,12 @@ export class BackupResetStateDialog extends Dialog {
         this.statusList = ['available', 'error']
         this.backupTable = new BackupTable();
     }
-    async commit() {
-        for (let i in this.backupTable.selected) {
-            let backup = this.backupTable.selected[i];
+    async commit(backups) {
+        for (let i in backups) {
+            let backup = backups[i];
             await API.backup.resetState(backup.id, this.status);
             await this.backupTable.waitBackupStatus(backup.id, this.status);
             Notify.success(`备份 ${backup.name || backup.id} 状态重置成功`);
-            this.snapshotTable.refresh();
         }
     }
 }
@@ -1450,12 +1448,11 @@ export class SnapshotResetStateDialog extends Dialog {
         this.status = 'available';
         this.statusList = ["available", "error", "creating", "deleting", "error_deleting"]
     }
-    async commit() {
-        for (let i in snapshotTable.selected) {
-            let snapshot = snapshotTable.selected[i];
+    async commit(snapshots) {
+        for (let i in snapshots) {
+            let snapshot = snapshots[i];
             await API.snapshot.resetState(snapshot.id, this.status);
             Notify.success(`快照 ${snapshot.name || snapshot.id} 状态重置成功`);
-            snapshotTable.refresh();
         }
     }
 }

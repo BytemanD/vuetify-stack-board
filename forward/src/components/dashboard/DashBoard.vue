@@ -128,11 +128,6 @@ export default {
       }
     },
     async refresh() {
-      this.context.region = sessionStorage.getItem('region');
-      if (!this.context.region) {
-        this.context.region = SETTINGS.getItem('defaultRegion').getValue();
-        sessionStorage.setItem('region', this.context.region)
-      }
       await this.clusterTable.refresh();
       for (let i in this.clusterTable.items) {
         if (parseInt(this.context.clusterId) != this.clusterTable.items[i].id) {
@@ -142,6 +137,13 @@ export default {
         break;
       }
       await this.regionTable.refresh();
+    },
+    initRegion(){
+      this.context.region = sessionStorage.getItem('region');
+      if (!this.context.region) {
+        this.context.region = SETTINGS.getItem('defaultRegion').getValue();
+        sessionStorage.setItem('region', this.context.region)
+      }
     },
     initItem() {
       let itemIndex = -1;
@@ -164,6 +166,7 @@ export default {
   },
   created() {
     this.$vuetify.theme.dark = SETTINGS.getItem('themeDark').getValue();
+    this.initRegion();
     if (this.$route.path == '/') {
       let localItem = localStorage.getItem('navigationSelectedItem');
       if (localItem) {
