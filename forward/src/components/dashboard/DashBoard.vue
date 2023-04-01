@@ -17,7 +17,7 @@
       <v-spacer></v-spacer>
       <BtnTheme />
       <BtnHome />
-      <v-btn icon><v-icon>mdi-cog</v-icon></v-btn>
+      <v-btn icon @click="showSettingSheet = !showSettingSheet"><v-icon>mdi-cog</v-icon></v-btn>
     </v-app-bar>
 
     <v-navigation-drawer app :mini-variant="navigation.mini" :expand-on-hover="navigation.mini" width="200">
@@ -51,16 +51,20 @@
         <router-view></router-view>
       </v-container>
     </v-main>
+    <v-bottom-sheet v-model="showSettingSheet">
+      <SettingSheet />
+    </v-bottom-sheet>
   </v-app>
 </template>
 
 <script>
 import { ClusterTable, RegionTable } from '@/assets/app/tables';
-import { SETTINGS } from '@/assets/app/settings';
+import SETTINGS from '@/assets/app/settings';
 
 import BtnTheme from '../plugins/BtnTheme.vue';
 import BtnHome from '../plugins/BtnHome.vue';
 import i18n from '@/assets/app/i18n';
+import SettingSheet from './SettingSheet.vue';
 
 const navigationGroup = [
   {
@@ -97,12 +101,14 @@ const navigationGroup = [
 
 export default {
   components: {
-    BtnTheme, BtnHome
+    BtnTheme, BtnHome,
+    SettingSheet,
   },
 
   data: () => ({
     I18N: i18n,
     name: 'Forward',
+    showSettingSheet: false,
     ui: {
       navigationWidth: '200px'
     },
@@ -141,7 +147,7 @@ export default {
     initRegion(){
       this.context.region = sessionStorage.getItem('region');
       if (!this.context.region) {
-        this.context.region = SETTINGS.getItem('defaultRegion').getValue();
+        this.context.region = SETTINGS.openstack.getItem('defaultRegion').value;
         sessionStorage.setItem('region', this.context.region)
       }
     },
@@ -165,7 +171,8 @@ export default {
     }
   },
   created() {
-    this.$vuetify.theme.dark = SETTINGS.getItem('themeDark').getValue();
+    SETTINGS.load();
+    this.$vuetify.theme.dark = SETTINGS.ui.getItem('themeDark').value;
     this.initRegion();
     if (this.$route.path == '/') {
       let localItem = localStorage.getItem('navigationSelectedItem');

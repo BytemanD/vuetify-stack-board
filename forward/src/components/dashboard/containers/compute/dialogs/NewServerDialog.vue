@@ -103,8 +103,8 @@ export default {
     data: () => ({
         i18n: i18n,
         display: false,
+        Utils: Utils,
         dialog: new NewServerDialog(),
-        Utils: Utils
     }),
     methods: {
 

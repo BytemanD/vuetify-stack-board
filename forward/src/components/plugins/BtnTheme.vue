@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { SETTINGS } from '@/assets/app/settings';
+import SETTINGS from '@/assets/app/settings';
 
 let itemThemeDark = 'themeDark';
 
@@ -19,12 +19,12 @@ export default {
     methods: {
         onclickCallback: function () {
             this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
-            SETTINGS.setItem(itemThemeDark, this.$vuetify.theme.dark);
-            SETTINGS.save(itemThemeDark);
+            SETTINGS.ui.setItem(itemThemeDark, this.$vuetify.theme.dark);
+            SETTINGS.ui.save(itemThemeDark);
         }
     },
     created() {
-        this.$vuetify.theme.dark = SETTINGS.getItem(itemThemeDark).getValue();
+        this.$vuetify.theme.dark = SETTINGS.ui.getItem(itemThemeDark).getValue();
     }
 
 };

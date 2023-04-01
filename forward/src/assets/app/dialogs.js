@@ -4,7 +4,7 @@ import { Notify } from "vuetify-message-snackbar";
 
 import API from './api.js';
 import I18N from './i18n.js';
-import { SETTINGS } from './settings.js';
+import SETTINGS from './settings.js';
 import { Utils, LOG, ServerTasks, CONST } from './lib.js';
 import { BackupTable, VolumeDataTable, UserTable, RegionDataTable, ServiceTable, HypervisortTable, } from './tables.js';
 import {
@@ -729,10 +729,10 @@ export class NewServerDialog extends Dialog {
     constructor() {
         super({
             name: '', flavor: '', image: '', netId: '',
-            useBdm: true, volumeSize: SETTINGS.getItem('volumeSizeDefault').getValue(),
+            useBdm: true, volumeSize: SETTINGS.openstack.getItem('volumeSizeDefault').getValue(),
             nums: 1, az: '', host: '',
             password: ''
-        })
+        });
         this.portId = null;
         this.flavors = [];
         this.images = [];
@@ -748,7 +748,7 @@ export class NewServerDialog extends Dialog {
         this.volumeTypes = [];
         this.securityGroups = [];
         this.authInfo = null;
-        this.volumeSizeMin = SETTINGS.getItem('volumeSizeMin');
+        this.volumeSizeMin = SETTINGS.openstack.getItem('volumeSizeMin');
     }
     async refresPorts() {
         let ports = (await API.port.list()).ports;

@@ -1,17 +1,18 @@
-// import { I18N } from "../i18n.js";
+import I18N from "./i18n";
 
 const NOTIFY_POSITION = ['top-left', 'top', 'top-right', 'bottom-left', 'bottom', 'bottom-right'];
-// const LANGUAGE = ['en-US', 'zh-CN'];
+const LANGUAGE = ['en-US', 'zh-CN'];
 
-export class Setting {
+class Setting {
     constructor(defaultValue, kwargs = {}) {
+        this.type = String;
         this.default = defaultValue;
         this.choises = kwargs.choises;
         this.value = null;
         this.onChangeCallback = kwargs.onChangeCallback;
     }
-    onChange(value){
-        if (! this.onChangeCallback){
+    onChange(value) {
+        if (!this.onChangeCallback) {
             return
         }
         this.onChangeCallback(value)
@@ -25,8 +26,8 @@ class NullSetting extends Setting {
     constructor() {
         super('');
     }
-    onChange(){
-        
+    onChange() {
+
     }
     getValue() {
         return null;
@@ -35,60 +36,52 @@ class NullSetting extends Setting {
 class BooleanSetting extends Setting {
     constructor() {
         super(false);
+        this.type = Boolean;
     }
-    onChange(){
-        
-    }
-    getValue() {
-        return super.getValue() == 'true';
+    onChange() {
+
     }
 }
 
-
-export class Settings {
-    constructor() {
-        this.show = false;
-        this.items = {
-            // language: new Setting(navigator.language, { choises: LANGUAGE, onChangeCallback: I18N.setDisplayLang }),
-            theme: new Setting('dark', { 'choises': ['light', 'dark'] }),
-            navigatorWidth: new Setting('200', { 'choises': ['200', '220', '240', '260', '280', '300'] }),
-            messagePosition: new Setting('bottom-right', { 'choises': NOTIFY_POSITION }),
-            alertPosition: new Setting('bottom', { 'choises': NOTIFY_POSITION }),
-            volumeSizeDefault: new Setting(40, { 'choises': ['1', '10', '20', '30', '40', '50'] }),
-            volumeSizeMin: new Setting(40, { 'choises': ['1', '10', '20', '30', '40', '50'] }),
-            themeDark: new BooleanSetting(false),
-            defaultRegion: new Setting('RegionOne'),
-        }
-        this.load();
+export class SettingGroup {
+    constructor(name, items = {}) {
+        this.name = name;
+        this.items = items || {};
     }
     getItem(item) {
-        if (Object.hasOwn(this.items, item)){
+        if (Object.hasOwn(this.items, item)) {
             return this.items[item];
         }
         return NullSetting();
     }
-    setItem(item, value){
-        if (Object.hasOwn(this.items, item)){
+    setItem(item, value) {
+        if (Object.hasOwn(this.items, item)) {
             this.items[item].value = value;
             this.save();
-        }else {
+        } else {
             console.error(`配置 ${item} 不存在。`)
         }
     }
     load() {
         for (let key in this.items) {
             let value = localStorage.getItem(key);
-            this.items[key].value = value ? value : this.items[key].default;
+            if (value)
+                if (this.items[key].type == Boolean){
+                    value = value == 'true';
+                } else if (this.items[key].type == Number){
+                    value = Number(value)
+                }
+            this.items[key].value = value == null ? this.items[key].default : value;
         }
     }
-    save(item=null) {
+    save(item = null) {
         for (let key in this.items) {
-            if(item == null || Object.hasOwn(this.items, item)){
+            if (item == null || Object.hasOwn(this.items, item)) {
                 localStorage.setItem(key, this.items[key].value);
             }
         }
     }
-    reset(){
+    reset() {
         for (let key in this.items) {
             localStorage.removeItem(key);
             this.items[key].value = this.items[key].default;
@@ -96,4 +89,42 @@ export class Settings {
     }
 }
 
-export const SETTINGS = new Settings();
+export class AppSettings {
+    constructor() {
+        this.ui = new SettingGroup(
+            'UI',
+            {
+                language: new Setting(navigator.language, { choises: LANGUAGE, onChangeCallback: I18N.setDisplayLang }),
+                navigatorWidth: new Setting('200', { 'choises': ['200', '220', '240', '260', '280', '300'] }),
+                messagePosition: new Setting('bottom-right', { 'choises': NOTIFY_POSITION }),
+                themeDark: new BooleanSetting(false),
+                alertPosition: new Setting('bottom', { 'choises': NOTIFY_POSITION }),
+            }
+        );
+        this.openstack = new SettingGroup(
+            'opensack',
+            {
+                defaultRegion: new Setting('RegionOne'),
+                volumeSizeDefault: new Setting(40, { 'choises': [1, 10, 20, 30, 40, 50] }),
+                volumeSizeMin: new Setting(40, { 'choises': [1, 10, 20, 30, 40, 50] }),
+            }
+        )
+    }
+    save(){
+        for(let group in this){
+            this[group].save();
+        }
+    }
+    load(){
+        for(let group in this){
+            this[group].load();
+        }
+    }
+    reset(){
+        for(let group in this){
+            this[group].reset();
+        }
+    }
+}
+
+export default new AppSettings();
