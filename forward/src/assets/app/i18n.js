@@ -49,6 +49,11 @@ const MESSAGES = {
         new: 'new',
         workload: 'Workload',
         serverTopology: 'Server Topology',
+        defaultRegion: 'Default regoin',
+        imageUploadBlockSize: 'Size of image block to upload',
+        uiSettings: 'UI Settings',
+        openstackSettings: 'UI Settings',
+        refreshAfterChanged: 'Please refresh page after changed',
     },
     'zh-CN': {
         language: '语言',
@@ -97,6 +102,11 @@ const MESSAGES = {
         new: '新建',
         workload: '负载',
         serverTopology: '虚拟机拓扑',
+        defaultRegion: '默认地区',
+        imageUploadBlockSize: '镜像分块上传的大小',
+        uiSettings: '界面配置',
+        openstackSettings: 'OpenStack 配置',
+        refreshAfterChanged: '修改后请刷新页面',
     },
 };
 

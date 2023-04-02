@@ -1,4 +1,5 @@
 import I18N from "./i18n";
+import { Notify } from "vuetify-message-snackbar";
 
 const NOTIFY_POSITION = ['top-left', 'top', 'top-right', 'bottom-left', 'bottom', 'bottom-right'];
 const LANGUAGE = ['en-US', 'zh-CN'];
@@ -10,6 +11,7 @@ class Setting {
         this.choises = kwargs.choises;
         this.value = null;
         this.onChangeCallback = kwargs.onChangeCallback;
+        this.message = kwargs.message;
     }
     onChange(value) {
         if (!this.onChangeCallback) {
@@ -34,12 +36,15 @@ class NullSetting extends Setting {
     }
 }
 class BooleanSetting extends Setting {
-    constructor() {
-        super(false);
+    constructor(defaultValue, kwargs={}) {
+        super(defaultValue, kwargs);
         this.type = Boolean;
     }
-    onChange() {
-
+}
+class NumberSetting extends Setting {
+    constructor(defaultValue, kwargs = {}) {
+        super(defaultValue, kwargs);
+        this.type = Number;
     }
 }
 
@@ -69,7 +74,7 @@ export class SettingGroup {
                 if (this.items[key].type == Boolean){
                     value = value == 'true';
                 } else if (this.items[key].type == Number){
-                    value = Number(value)
+                    value = Number(value);
                 }
             this.items[key].value = value == null ? this.items[key].default : value;
         }
@@ -89,24 +94,27 @@ export class SettingGroup {
     }
 }
 
+const refreshAfterChanged = I18N.t('refreshAfterChanged');
+
 export class AppSettings {
     constructor() {
         this.ui = new SettingGroup(
-            'UI',
+            I18N.t('uiSettings'),
             {
-                language: new Setting(navigator.language, { choises: LANGUAGE, onChangeCallback: I18N.setDisplayLang }),
-                navigatorWidth: new Setting('200', { 'choises': ['200', '220', '240', '260', '280', '300'] }),
-                messagePosition: new Setting('bottom-right', { 'choises': NOTIFY_POSITION }),
-                themeDark: new BooleanSetting(false),
-                alertPosition: new Setting('bottom', { 'choises': NOTIFY_POSITION }),
+                language: new Setting(navigator.language, { choises: LANGUAGE, onChangeCallback: I18N.setDisplayLang, message: refreshAfterChanged }),
+                themeDark: new BooleanSetting(false, {message: refreshAfterChanged}),
+                navigatorWidth: new NumberSetting(200, { choises: [200, 220, 240, 260, 280, 300], message: refreshAfterChanged }),
+                messagePosition: new Setting('bottom-right', { choises: NOTIFY_POSITION }),
+                alertPosition: new Setting('bottom', { choises: NOTIFY_POSITION }),
             }
         );
         this.openstack = new SettingGroup(
-            'opensack',
+            I18N.t('openstackSettings'),
             {
                 defaultRegion: new Setting('RegionOne'),
-                volumeSizeDefault: new Setting(40, { 'choises': [1, 10, 20, 30, 40, 50] }),
-                volumeSizeMin: new Setting(40, { 'choises': [1, 10, 20, 30, 40, 50] }),
+                volumeSizeDefault: new NumberSetting(40, { 'choises': [1, 10, 20, 30, 40, 50] }),
+                volumeSizeMin: new NumberSetting(40, { 'choises': [1, 10, 20, 30, 40, 50] }),
+                imageUploadBlockSize: new NumberSetting(10, { 'choises': [1, 5, 10, 20, 40, 80, 160] }),
             }
         )
     }
@@ -114,6 +122,7 @@ export class AppSettings {
         for(let group in this){
             this[group].save();
         }
+        Notify.success('保存成功');
     }
     load(){
         for(let group in this){
@@ -124,6 +133,7 @@ export class AppSettings {
         for(let group in this){
             this[group].reset();
         }
+        Notify.success('重置成功');
     }
 }
 

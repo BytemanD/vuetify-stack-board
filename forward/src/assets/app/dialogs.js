@@ -2455,6 +2455,7 @@ export class NewImageDialog extends Dialog {
         this.message = '开始上传镜像 ...';
         await API.image.uploadSlice(
             id, reader.result, this.file.size,
+            SETTINGS.openstack.getItem('imageUploadBlockSize').value,
             (loaded, total, speed) => {
                 self.speed = speed;
                 self.process = loaded * 100 / total;
@@ -2493,12 +2494,9 @@ export class TasksDialog extends Dialog {
             Notify.error(`删除失败`)
         }
     }
-    async open() {
+    async init() {
         let self = this;
-
-        this.refresh();
-        super.open()
-
+        await this.refresh();
         if (!this.interval) {
             this.interval = setInterval(() => {
                 self.refresh()

@@ -433,7 +433,9 @@ class RoleAssignments extends Restfulclient {
 }
 
 class Image extends Restfulclient {
-    constructor() { super('/image/v2/images') }
+    constructor() {
+        super('/image/v2/images');
+    }
     async removeProperties(id, properties) {
         let data = [];
         for (let i in properties) {
@@ -448,9 +450,9 @@ class Image extends Restfulclient {
         }
         return await this.patch(id, data, { 'Content-Type': 'application/openstack-images-v2.1-json-patch' })
     }
-    async uploadSlice(id, binary, size, uploadCallback = null) {
+    async uploadSlice(id, binary, size, blockSize, uploadCallback = null) {
         // TODO: What is the right maxSize
-        let maxSize = 1024 * 1024 * 10;
+        let maxSize = 1024 * 1024 * parseInt(blockSize);
         let start = 0;
         let end = 0;
         while (end < size) {

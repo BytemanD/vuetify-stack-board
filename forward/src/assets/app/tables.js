@@ -940,9 +940,6 @@ export class ClusterTable extends DataTable {
     constructor() {
         super([], API.cluster, 'clusters', '集群');
         this.selected = null;
-        this.regions = [
-            'default', 'RegionOne', 'Suzhou', 'Wuxi'
-        ]
         this.region = ''
     }
     async delete(item) {

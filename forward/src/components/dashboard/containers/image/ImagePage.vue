@@ -15,7 +15,7 @@
       <v-btn fab x-small color="info" v-on:click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
     </v-col>
     <v-col cols="1" class="text-right">
-      <v-btn x-small fab color="primary" @click="table.tasksDialog.open()"><v-icon>mdi-progress-upload</v-icon></v-btn>
+      <v-btn x-small fab color="primary" @click="showTasksDialog = !showTasksDialog"><v-icon>mdi-progress-upload</v-icon></v-btn>
     </v-col>
     <v-col cols="12">
       <v-data-table dense show-select show-expand single-expand :loading="table.loading" :headers="table.headers" :items="table.items"
@@ -60,6 +60,7 @@
     </v-col>
     <NewImageVue :show.sync="openNewImageDialog" :images="table.selected" @completed="table.resetSelected(); table.refresh()" />
     <ImagePropertiesDialog :show.sync="showImagePropertiesDialog" :image="selectedImage" @completed="table.refresh()" />
+    <TasksDialog :show.sync="showTasksDialog" />
   </v-row>
 </template>
 
@@ -69,18 +70,21 @@ import NewImageVue from './dialogs/NewImage.vue';
 
 import ImageDeleteSmartDialog from './dialogs/ImageDeleteSmartDialog.vue';
 import ImagePropertiesDialog from './dialogs/ImagePropertiesDialog.vue';
+import TasksDialog from './dialogs/TasksDialog.vue';
 
 export default {
   components: {
-    NewImageVue, ImageDeleteSmartDialog, ImagePropertiesDialog
+    NewImageVue, ImageDeleteSmartDialog, ImagePropertiesDialog,
+    TasksDialog,
   },
 
   data: () => ({
+    selectedImage: {},
+    table: new ImageDataTable(),
     openNewImageDialog: false,
     openImageDeleteSmartDialog: false,
     showImagePropertiesDialog: false,
-    selectedImage: {},
-    table: new ImageDataTable(),
+    showTasksDialog: false,
   }),
   methods: {
     openImagePropertiesDialog(image){
