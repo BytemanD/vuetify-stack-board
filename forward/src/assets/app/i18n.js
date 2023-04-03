@@ -50,12 +50,15 @@ const MESSAGES = {
         new: 'new',
         workload: 'Workload',
         serverTopology: 'Server Topology',
+        // 配置项解释
+        uiSettings: 'UI Settings',
+        openstackSettings: 'OpenStack Settings',
         defaultRegion: 'Default regoin',
         imageUploadBlockSize: 'Size of image block to upload',
-        uiSettings: 'UI Settings',
-        openstackSettings: 'UI Settings',
         refreshAfterChanged: 'Please refresh page after changed',
-        consoleLogWidth: 'Width of console log dialog'
+        consoleLogWidth: 'Width of console log dialog',
+        resourceWarningPercent: 'Resource warning percent',
+        bootWithVolume: 'Boot with volume',
     },
     'zh-CN': {
         language: '语言',
@@ -81,7 +84,7 @@ const MESSAGES = {
         hostName: '主机名',
         usedAndTotalMemory: '已用内存/总内存(MB)',
         usedAndTotalCPU: '已用CPU/总CPU',
-        usedAndTotalDisk: '已用CPU/总磁盘空间(GB)',
+        usedAndTotalDisk: '已用磁盘/总磁盘空间(GB)',
         ipAddress: 'IP地址',
         hypervisorVersion: '虚拟机化版本',
         hypervisorType: '虚拟化类型',
@@ -105,13 +108,15 @@ const MESSAGES = {
         new: '新建',
         workload: '负载',
         serverTopology: '虚拟机拓扑',
-        defaultRegion: '默认地区',
-        imageUploadBlockSize: '镜像分块上传的大小',
+        // 配置项解释
         uiSettings: '界面配置',
         openstackSettings: 'OpenStack 配置',
+        defaultRegion: '默认地区',
+        imageUploadBlockSize: '镜像分块上传的大小',
         refreshAfterChanged: '修改后请刷新页面',
-        consoleLogWidth: '控制台日志对话框长度'
-
+        consoleLogWidth: '控制台日志对话框长度',
+        resourceWarningPercent: '资源警告阈值(%)',
+        bootWithVolume: '使用云盘创建实例',
     },
 };
 

@@ -6,7 +6,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="120" width="60"
-              :value="table._memUsedPercent" :color="table._memUsedPercent < 80 ? 'green lighten-1' : 'orange lighten-1'">
+              :value="table._memUsedPercent" :color="table._memUsedPercent < resourceWarningPercent.value ? 'green lighten-1' : 'orange lighten-1'">
             </v-progress-circular>
           </template>
           百分比: {{ table._memUsedPercent }}%<br>剩余: {{ table.statistics.free_ram_mb }}
@@ -19,7 +19,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-progress-circular v-bind="attrs" v-on="on" size="120" width="60"
-              :value="table._vcpuUsedPercent" :color="table._vcpuUsedPercent < 80 ? 'green lighten-1' : 'orange lighten-1'">
+              :value="table._vcpuUsedPercent" :color="table._vcpuUsedPercent < resourceWarningPercent.value ? 'green lighten-1' : 'orange lighten-1'">
             </v-progress-circular>
           </template>
           百分比: {{ table._vcpuUsedPercent }}%<br>剩余: {{ table.statistics.vcpus - table.statistics.vcpus_used }}
@@ -32,7 +32,7 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-progress-circular v-bind="attrs" v-on="on" size="120" width="60"
-              :value="table._diskUsedPercent" :color="table._diskUsedPercent < 80 ? 'green lighten-1' : 'orange lighten-1'">
+              :value="table._diskUsedPercent" :color="table._diskUsedPercent < resourceWarningPercent.value ? 'green lighten-1' : 'orange lighten-1'">
             </v-progress-circular>
           </template>
           百分比: {{ table._diskUsedPercent }}%<br>剩余: {{ table.statistics.local_gb - table.statistics.local_gb_used }}
@@ -131,6 +131,7 @@ import { HypervisortTable } from '@/assets/app/tables';
 import { TenantUsageDialog } from '@/assets/app/dialogs';
 
 import UsageDialog from './dialogs/TenantUsageDialog.vue';
+import SETTINGS from '@/assets/app/settings';
 
 export default {
   components: {
@@ -142,6 +143,7 @@ export default {
     I18N: I18N,
     table: new HypervisortTable(),
     tenantUsageDialog: new TenantUsageDialog(),
+    resourceWarningPercent: SETTINGS.ui.getItem('resourceWarningPercent'),
     showUsageDialog: false,
   }),
   methods: {

@@ -5,10 +5,10 @@
                 <h4 class="info--text">{{ I18N.t(SETTINGS.ui.name) }}</h4>
                 <v-divider class="mb-4"></v-divider>
                 <template v-for="(item, key) in SETTINGS.ui.items">
-                    <v-select dense outlined class="mb-0 mt-0" v-bind:key="key" v-if="item.choises" :label="I18N.t(key)" :items="item.choises"
+                    <v-select dense outlined class="my-0" v-bind:key="key" v-if="item.choises" :label="I18N.t(key)" :items="item.choises"
                         v-model="item.value" v-on:change="SETTINGS.ui.save(item.value)">
                     </v-select>
-                    <v-switch class="mb-4 mt-0" dense v-else-if="item.type == Boolean" v-bind:key="key" :label="I18N.t(key)"
+                    <v-switch class="my-0" dense v-else-if="item.type == Boolean" v-bind:key="key" :label="I18N.t(key)"
                         v-model="item.value" v-on:change="SETTINGS.ui.save(key)"></v-switch>
                     <v-text-field v-else v-bind:key="key" :label="I18N.t(key)" v-model="item.value"
                         v-on:change="SETTINGS.ui.save(key)">{{ item.value }}</v-text-field>
@@ -18,10 +18,10 @@
                 <h4 class="info--text">{{ I18N.t(SETTINGS.openstack.name) }}</h4>
                 <v-divider class="mb-4"></v-divider>
                 <template v-for="(item, key) in SETTINGS.openstack.items">
-                    <v-select dense outlined v-bind:key="key" v-if="item.choises" :label="I18N.t(key)" :items="item.choises"
+                    <v-select dense outlined class="mb-0 mt-0" v-bind:key="key" v-if="item.choises" :label="I18N.t(key)" :items="item.choises"
                         v-model="item.value" v-on:change="SETTINGS.openstack.save(key)">
                     </v-select>
-                    <v-switch class="ma-0" dense v-else-if="item.type == Boolean" v-bind:key="key" :label="I18N.t(key)"
+                    <v-switch class="my-0" dense v-else-if="item.type == Boolean" v-bind:key="key" :label="I18N.t(key)"
                         v-model="item.value" v-on:change="SETTINGS.openstack.save(key)"></v-switch>
                     <v-text-field outlined dense v-else v-bind:key="key" :label="I18N.t(key)" v-model="item.value"
                         v-on:change="SETTINGS.openstack.save(key)">{{ item.value }}</v-text-field>

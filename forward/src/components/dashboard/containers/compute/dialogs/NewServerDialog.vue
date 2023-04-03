@@ -32,18 +32,18 @@
                                 </v-select>
                             </v-col>
                             <v-col cols="2">
-                                <v-switch v-model="dialog.params.useBdm" label="创建卷" class="my-auto"
+                                <v-switch v-model="dialog.useBdm" label="创建卷" class="my-auto"
                                     hide-details></v-switch>
                             </v-col>
                             <v-col cols="4">
-                                <v-select hide-details :disabled="!dialog.params.useBdm" :items="dialog.volumeTypes"
+                                <v-select hide-details :disabled="!dialog.useBdm" :items="dialog.volumeTypes"
                                     clearable label="卷类型" dense item-text="name" item-value="id"
                                     @click="dialog.refreshVolumeTypes()" v-model="dialog.volumeType">
                                     <template v-slot:selection="{ item }"> {{ item.name }} </template>
                                 </v-select>
                             </v-col>
                             <v-col cols="12">
-                                <v-slider :disabled="!dialog.params.useBdm" hide-details v-model="dialog.volumeSize"
+                                <v-slider :disabled="!dialog.useBdm" hide-details v-model="dialog.volumeSize"
                                     ticks="always" label="系统卷大小" max="100" :min="dialog.volumeSizeMin" step="10">
                                     <template v-slot:append>
                                         <v-chip label small>{{ dialog.volumeSize }} GB</v-chip>

@@ -729,7 +729,6 @@ export class NewServerDialog extends Dialog {
     constructor() {
         super({
             name: '', flavor: '', image: '', netId: '',
-            useBdm: true,
             nums: 1, az: '', host: '',
             password: ''
         });
@@ -748,7 +747,8 @@ export class NewServerDialog extends Dialog {
         this.volumeTypes = [];
         this.securityGroups = [];
         this.authInfo = null;
-        this.volumeSize = SETTINGS.openstack.getItem('volumeSizeDefault').getValue();
+        this.useBdm = SETTINGS.openstack.getItem('bootWithVolume').value;
+        this.volumeSize = SETTINGS.openstack.getItem('volumeSizeDefault').value;
         this.volumeSizeMin = SETTINGS.openstack.getItem('volumeSizeMin').value;
     }
     async refresPorts() {
@@ -772,10 +772,14 @@ export class NewServerDialog extends Dialog {
         // 获取规格
         this.flavors = (await API.flavor.detail()).flavors;
         this.flavors.sort(function (flavor1, flavor2) { return flavor1.name.localeCompare(flavor2.name) })
-        if (this.flavors.length > 0) { this.params.flavor = this.flavors[0].id }
+        if (this.flavors.length > 0 && !this.params.flavor) {
+            this.params.flavor = this.flavors[0].id
+        }
         // 获取镜像
         this.images = (await API.image.listActive()).images;
-        if (this.images.length > 0) { this.params.image = this.images[0].id }
+        if (this.images.length > 0 && !this.params.image) {
+            this.params.image = this.images[0].id
+        }
     }
     async refreshVolumeTypes() {
         this.volumeTypes = (await API.volumeType.list()).volume_types;
@@ -816,7 +820,7 @@ export class NewServerDialog extends Dialog {
         if (this.params.netId) { networks.push({ uuid: this.params.netId }) }
         let data = {
             minCount: this.params.nums, maxCount: this.params.nums,
-            useBdm: this.params.useBdm, volumeSize: this.params.volumeSize,
+            useBdm: this.useBdm, volumeSize: this.volumeSize,
             networks: networks,
             az: this.params.az == '自动选择' ? null : this.params.az,
             host: this.params.host,
