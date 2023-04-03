@@ -19,7 +19,7 @@
       <BtnHome />
       <v-btn icon @click="showSettingSheet = !showSettingSheet"><v-icon>mdi-cog</v-icon></v-btn>
     </v-app-bar>
-    <v-navigation-drawer app :mini-variant="navigation.mini" :expand-on-hover="navigation.mini" :width="ui.navigationWidth">
+    <v-navigation-drawer app :mini-variant="navigation.mini" :expand-on-hover="navigation.mini" :width="ui.navigationWidth.value">
       <v-list-item two-line class="px-2">
         <v-list-item-avatar class="ml-0" tile><img src="../../../public/favicon.svg"></v-list-item-avatar>
         <v-list-item-content>
@@ -109,7 +109,7 @@ export default {
     name: 'Forward',
     showSettingSheet: false,
     ui: {
-      navigationWidth: 200,
+      navigationWidth: SETTINGS.ui.getItem('navigatorWidth'),
     },
     navigation: {
       group: navigationGroup,
@@ -173,7 +173,6 @@ export default {
     SETTINGS.load();
     this.$vuetify.theme.dark = SETTINGS.ui.getItem('themeDark').value;
     this.initRegion();
-    this.ui.navigationWidth = SETTINGS.ui.getItem('navigatorWidth').value;
     if (this.$route.path == '/') {
       let localItem = localStorage.getItem('navigationSelectedItem');
       if (localItem) {

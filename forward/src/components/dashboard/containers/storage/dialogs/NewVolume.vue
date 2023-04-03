@@ -13,19 +13,19 @@
         </v-row>
         <v-row>
           <v-col cols="4">
-            <v-text-field label="大小(GB)" placeholder="请输入卷大小" v-model="dialog.params.size" dense outlined></v-text-field>
-            <v-select :items="dialog.params.types" clearable label="卷类型" item-text="name" item-value="id" dense outlined
+            <v-text-field dense outlined label="大小(GB)" placeholder="请输入卷大小" v-model="dialog.params.size"></v-text-field>
+            <v-select dense outlined :items="dialog.params.types" clearable label="卷类型" item-text="name" item-value="id"
                 v-model="dialog.params.type">
                 <template v-slot:selection="{ item }"> {{ item.name }} </template>
             </v-select>
           <v-text-field label="数目" placeholder="请输入新建数量" v-model="dialog.params.nums" dense outlined> </v-text-field>
           </v-col>
           <v-col>
-            <v-select :items="dialog.params.images" clearable label="镜像" item-text="name" item-value="id" dense outlined
+            <v-select dense outlined :items="dialog.params.images" clearable label="镜像" item-text="name" item-value="id"
                       v-model="dialog.params.image">
               <template v-slot:selection="{ item }"> {{ item.name || item.id }} </template>
             </v-select>
-            <v-select :items="dialog.params.snapshots" clearable label="快照" item-text="name" item-value="id" dense outlined
+            <v-select dense outlined :items="dialog.params.snapshots" clearable label="快照" item-text="name" item-value="id"
                       v-model="dialog.params.snapshot">
               <template v-slot:selection="{ item }"> {{ item.name || item.id }} </template>
             </v-select>

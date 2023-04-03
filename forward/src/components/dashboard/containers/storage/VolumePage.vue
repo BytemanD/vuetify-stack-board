@@ -1,7 +1,7 @@
 <template>
     <v-row>
         <v-col>
-            <v-btn x-small fab class="mr-1" color="primary" @click="openNewVolumeDialog = true"><v-icon small>mdi-plus</v-icon></v-btn>
+            <v-btn x-small fab class="mr-1" color="primary" @click="openNewVolumeDialog = !openNewVolumeDialog"><v-icon small>mdi-plus</v-icon></v-btn>
             <v-btn small color="warning" class="mr-1" @click="openNewVolumeStatusResetDiaog = true" :disabled="table.selected.length == 0">状态重置</v-btn>
             <v-btn small color="error" @click="table.deleteSelected()" :disabled="table.selected.length == 0">
                 <v-icon small>mdi-trash-can</v-icon>删除</v-btn>

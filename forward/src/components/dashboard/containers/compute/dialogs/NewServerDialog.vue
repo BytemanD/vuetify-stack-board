@@ -43,10 +43,10 @@
                                 </v-select>
                             </v-col>
                             <v-col cols="12">
-                                <v-slider :disabled="!dialog.params.useBdm" hide-details v-model="dialog.params.volumeSize"
-                                    ticks="always" label="系统卷大小" max="100" :min="dialog.volumeSizeMin.getValue()" step="10">
+                                <v-slider :disabled="!dialog.params.useBdm" hide-details v-model="dialog.volumeSize"
+                                    ticks="always" label="系统卷大小" max="100" :min="dialog.volumeSizeMin" step="10">
                                     <template v-slot:append>
-                                        <v-chip label small>{{ dialog.params.volumeSize }} GB</v-chip>
+                                        <v-chip label small>{{ dialog.volumeSize }} GB</v-chip>
                                     </template>
                                 </v-slider>
                             </v-col>
@@ -95,7 +95,7 @@
 import i18n from '@/assets/app/i18n';
 import { NewServerDialog } from '@/assets/app/dialogs';
 import { Utils } from '@/assets/app/lib';
-
+import SETTINGS from '@/assets/app/settings';
 export default {
     props: {
         show: Boolean,
@@ -104,6 +104,7 @@ export default {
         i18n: i18n,
         display: false,
         Utils: Utils,
+        SETTINGS: SETTINGS,
         dialog: new NewServerDialog(),
     }),
     methods: {

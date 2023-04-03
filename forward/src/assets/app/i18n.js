@@ -24,8 +24,9 @@ const MESSAGES = {
 
         status: 'status',
         hostName: 'hostname',
-        usedAndTotalMemory: 'used/total Memory',
+        usedAndTotalMemory: 'used/total Memory(MB)',
         usedAndTotalCPU: 'used/total CPU',
+        usedAndTotalDisk: 'used/total disk(GB)',
         ipAddress: 'IP address',
         hypervisorVersion: 'hypervisor version',
         hypervisorType: 'hypervisor type',
@@ -54,6 +55,7 @@ const MESSAGES = {
         uiSettings: 'UI Settings',
         openstackSettings: 'UI Settings',
         refreshAfterChanged: 'Please refresh page after changed',
+        consoleLogWidth: 'Width of console log dialog'
     },
     'zh-CN': {
         language: '语言',
@@ -77,8 +79,9 @@ const MESSAGES = {
 
         status: '状态',
         hostName: '主机名',
-        usedAndTotalMemory: '已用内存/总内存',
+        usedAndTotalMemory: '已用内存/总内存(MB)',
         usedAndTotalCPU: '已用CPU/总CPU',
+        usedAndTotalDisk: '已用CPU/总磁盘空间(GB)',
         ipAddress: 'IP地址',
         hypervisorVersion: '虚拟机化版本',
         hypervisorType: '虚拟化类型',
@@ -107,6 +110,8 @@ const MESSAGES = {
         uiSettings: '界面配置',
         openstackSettings: 'OpenStack 配置',
         refreshAfterChanged: '修改后请刷新页面',
+        consoleLogWidth: '控制台日志对话框长度'
+
     },
 };
 

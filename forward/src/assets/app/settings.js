@@ -9,7 +9,7 @@ class Setting {
         this.type = String;
         this.default = defaultValue;
         this.choises = kwargs.choises;
-        this.value = null;
+        this.value = defaultValue;
         this.onChangeCallback = kwargs.onChangeCallback;
         this.message = kwargs.message;
     }
@@ -79,9 +79,11 @@ export class SettingGroup {
             this.items[key].value = value == null ? this.items[key].default : value;
         }
     }
-    save(item = null) {
-        for (let key in this.items) {
-            if (item == null || Object.hasOwn(this.items, item)) {
+    save(itemKey = null) {
+        if (itemKey && Object.hasOwn(this.items, itemKey)){
+            localStorage.setItem(itemKey, this.items[itemKey].value);
+        } else {
+            for (let key in this.items) {
                 localStorage.setItem(key, this.items[key].value);
             }
         }
@@ -99,17 +101,18 @@ const refreshAfterChanged = I18N.t('refreshAfterChanged');
 export class AppSettings {
     constructor() {
         this.ui = new SettingGroup(
-            I18N.t('uiSettings'),
+            'uiSettings',
             {
                 language: new Setting(navigator.language, { choises: LANGUAGE, onChangeCallback: I18N.setDisplayLang, message: refreshAfterChanged }),
                 themeDark: new BooleanSetting(false, {message: refreshAfterChanged}),
                 navigatorWidth: new NumberSetting(200, { choises: [200, 220, 240, 260, 280, 300], message: refreshAfterChanged }),
                 messagePosition: new Setting('bottom-right', { choises: NOTIFY_POSITION }),
                 alertPosition: new Setting('bottom', { choises: NOTIFY_POSITION }),
+                consoleLogWidth: new NumberSetting(1000, { choises: [800, 1000, 1200, 1400, 1600] }),
             }
         );
         this.openstack = new SettingGroup(
-            I18N.t('openstackSettings'),
+            'openstackSettings',
             {
                 defaultRegion: new Setting('RegionOne'),
                 volumeSizeDefault: new NumberSetting(40, { 'choises': [1, 10, 20, 30, 40, 50] }),

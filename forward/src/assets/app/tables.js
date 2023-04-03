@@ -749,7 +749,7 @@ export class VolumeDataTable extends DataTable {
         ];
         // TODO: 补充其他状态
         this.doingStatus = [
-            'creating', 'attaching', 'deleting'
+            'creating', 'downloading', 'attaching', 'deleting'
         ]
     }
     isDoing(item){
@@ -1111,6 +1111,7 @@ export class HypervisortTable extends DataTable {
             { text: I18N.t('hostName'), value: 'hypervisor_hostname', class: 'blue--text' },
             { text: I18N.t('usedAndTotalMemory'), value: 'memory_mb', class: 'blue--text' },
             { text: I18N.t('usedAndTotalCPU'), value: 'vcpus', class: 'blue--text' },
+            { text: I18N.t('usedAndTotalDisk'), value: 'local_gb', class: 'blue--text' },
             { text: I18N.t('status'), value: 'status', class: 'blue--text' },
             { text: I18N.t('ipAddress'), value: 'host_ip', class: 'blue--text' },
             { text: I18N.t('hypervisorType'), value: 'hypervisor_type', class: 'blue--text' },
@@ -1120,11 +1121,13 @@ export class HypervisortTable extends DataTable {
         this._memUsedPercent = 0;
         this._vcpuUsedPercent = 0;
         this.extendItems = [
-            // { text: 'extra_resources', value: 'extra_resources'},
             { text: 'numa_node_0_cpuset', value: 'numa_node_0_cpuset'},
             { text: 'numa_node_1_cpuset', value: 'numa_node_1_cpuset'},
             { text: 'numa_node_0_hugepages', value: 'numa_node_0_hugepages'},
             { text: 'numa_node_1_hugepages', value: 'numa_node_1_hugepages'},
+            { text: 'extra_resources', value: 'extra_resources'},
+            // { text: 'serial_number', value: 'serial_number'},
+            // { text: 'cpu_info', value: 'cpu_info'},
         ];
         // this.tenantUsageDialog = new TenantUsageDialog();
     }

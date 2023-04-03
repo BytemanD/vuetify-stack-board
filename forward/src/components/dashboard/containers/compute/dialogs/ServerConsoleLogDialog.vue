@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="display" width="1000" scrollable>
+    <v-dialog v-model="display" :width="dialogWidth.value" scrollable>
         <v-card>
             <v-card-title class="headline primary" primary-title>
                 <v-row>
@@ -21,7 +21,7 @@
                     </v-col>
                 </v-row>
             </v-card-title>
-            <v-card-text class="pa-0">
+            <v-card-text class="pa-0 grey darken-3">
                 <pre class="white--text grey darken-3 pa-4">{{ dialog.content }}</pre>
             </v-card-text>
         </v-card>
@@ -31,6 +31,7 @@
 import i18n from '@/assets/app/i18n';
 import { Utils } from '@/assets/app/lib';
 import { ServerConsoleLogDialog } from '@/assets/app/dialogs';
+import SETTINGS from '@/assets/app/settings';
 
 export default {
     props: {
@@ -41,6 +42,7 @@ export default {
         i18n: i18n,
         Utils: Utils,
         display: false,
+        dialogWidth: SETTINGS.ui.getItem('consoleLogWidth'),
         dialog: new ServerConsoleLogDialog(),
     }),
     methods: {

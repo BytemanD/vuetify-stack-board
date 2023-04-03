@@ -729,7 +729,7 @@ export class NewServerDialog extends Dialog {
     constructor() {
         super({
             name: '', flavor: '', image: '', netId: '',
-            useBdm: true, volumeSize: SETTINGS.openstack.getItem('volumeSizeDefault').getValue(),
+            useBdm: true,
             nums: 1, az: '', host: '',
             password: ''
         });
@@ -748,7 +748,8 @@ export class NewServerDialog extends Dialog {
         this.volumeTypes = [];
         this.securityGroups = [];
         this.authInfo = null;
-        this.volumeSizeMin = SETTINGS.openstack.getItem('volumeSizeMin');
+        this.volumeSize = SETTINGS.openstack.getItem('volumeSizeDefault').getValue();
+        this.volumeSizeMin = SETTINGS.openstack.getItem('volumeSizeMin').value;
     }
     async refresPorts() {
         let ports = (await API.port.list()).ports;
@@ -1277,8 +1278,12 @@ export class NewVolumeDialog extends Dialog {
         })
         this.resource = 'volume';
     }
-    init() {
-        this.refreshName();
+    async init() {
+        super.init();
+        let body = await API.snapshot.detail();
+        this.params.snapshots = body.snapshots;
+        this.params.images = (await API.image.list()).images;
+        this.params.types = (await API.volumeType.list()).volume_types;
     }
     async commit() {
         if (!this.name) {
@@ -1305,12 +1310,8 @@ export class NewVolumeDialog extends Dialog {
         }
     }
     async open() {
-        this.params.name = Utils.getRandomName('volume');
-        super.open();
-        let body = await API.snapshot.detail();
-        this.params.snapshots = body.snapshots;
-        this.params.images = (await API.image.list()).images;
-        this.params.types = (await API.volumeType.list()).volume_types;
+
+
     }
     cleanUpImageShapshot() {
         this.params.image = null;

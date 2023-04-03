@@ -101,7 +101,11 @@
             {{ item.vcpus_used }}/{{ item.vcpus }}
           </v-progress-linear>
         </template>
-
+        <template v-slot:[`item.local_gb`]="{ item }">
+          <v-progress-linear height="20" :value="item.local_gb_used * 100 / item.local_gb" color="cyan">
+            {{ item.local_gb_used }}/{{ item.local_gb }}
+          </v-progress-linear>
+        </template>
         <template v-slot:expanded-item="{ headers, item }">
           <td></td>
           <td :colspan="headers.length - 1">
