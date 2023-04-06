@@ -41,7 +41,18 @@
                 <template v-slot:[`item.image_name`]="{ item }">
                     <v-chip x-small label v-if="item.volume_image_metadata">{{ item.volume_image_metadata.image_name }}</v-chip>
                 </template>
-    
+                <template v-slot:[`item.actions`]="{ item }">
+                    <v-menu offset-y>
+                        <template v-slot:activator="{ on, attrs }">
+                        <v-btn icon color="purple" v-bind="attrs" v-on="on"><v-icon small>mdi-dots-vertical</v-icon></v-btn>
+                        </template>
+                        <v-list dense>
+                        <v-list-item @click="openResourceActionsDialog(item)" :disabled="!supportResourceAction">
+                            <v-list-item-title>操作记录</v-list-item-title>
+                        </v-list-item>
+                        </v-list>
+                    </v-menu>
+                </template>
                 <template v-slot:expanded-item="{ headers, item }">
                     <td></td>
                     <td :colspan="headers.length - 1">
@@ -58,6 +69,7 @@
         <v-col cols="12">
             <NewVolumeVue :show.sync="openNewVolumeDialog" @completed="table.refresh()"/>
             <VolumeStatusResetDialog :volumes="table.selected" :show.sync="openNewVolumeStatusResetDiaog" @completed="table.refresh()"/>
+            <ResourceActionsDialog :show.sync="showResourceActionsDialog" :resource="selectedVolume"></ResourceActionsDialog>
         </v-col>
     </v-row>
 </template>
@@ -65,24 +77,33 @@
 <script>
 import { VolumeDataTable } from '@/assets/app/tables.js';
 import { Utils } from '@/assets/app/lib.js';
+import SETTINGS from '@/assets/app/settings';
 
 import NewVolumeVue from './dialogs/NewVolume.vue';
 import VolumeStatusResetDialog from './dialogs/VolumeStatusResetDialog.vue';
-
+import ResourceActionsDialog from './dialogs/ResourceActionsDialog.vue';
 
 export default {
     components: {
         NewVolumeVue, VolumeStatusResetDialog,
+        ResourceActionsDialog,
     },
 
     data: () => ({
         Utils: Utils,
         openNewVolumeDialog: false,
         openNewVolumeStatusResetDiaog: false,
+        showResourceActionsDialog: false,
+        selectedVolume: {},
+        supportResourceAction: SETTINGS.openstack.getItem('supportResourceAction').value,
         table: new VolumeDataTable(),
+
     }),
     methods: {
-
+        openResourceActionsDialog(item){
+            this.selectedVolume = item;
+            this.showResourceActionsDialog = !this.showResourceActionsDialog;
+        }
     },
     created() {
         this.table.refresh();

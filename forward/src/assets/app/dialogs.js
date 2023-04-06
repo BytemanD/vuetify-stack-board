@@ -845,6 +845,17 @@ export class NewServerDialog extends Dialog {
         }
     }
 }
+export class ServerGroupDialog extends Dialog {
+    constructor() {
+        super();
+        this.server = {};
+        this.serverGroup = {}
+    }
+    async init(server){
+        this.server = server;
+        this.serverGroup = await API.server.getServerGroup(this.server.id);
+    }
+}
 
 export class NewFlavorDialog extends Dialog {
     constructor() {
@@ -1307,8 +1318,12 @@ export class NewVolumeDialog extends Dialog {
         MESSAGE.info(`卷 ${this.name} 创建中`);
         for (let i in creatingVolumes) {
             let volume = creatingVolumes[i];
-            await API.volume.waitVolumeStatus(volume.id);
-            MESSAGE.success(`卷 ${volume.name || volume.id} 创建完成`);
+            let volumeBody = await API.volume.waitVolumeStatus(volume.id);
+            if (volumeBody.status == 'available'){
+                MESSAGE.success(`卷 ${volume.name || volume.id} 创建成功`);
+            }else {
+                MESSAGE.error(`卷 ${volume.name || volume.id} 创建失败`);
+            }
         }
     }
     async open() {
@@ -1493,6 +1508,52 @@ export class NewVolumeTypeDialog extends Dialog {
     }
     async init() {
         super.init();
+    }
+}
+export class ResourceActionsDialog extends Dialog {
+    constructor() {
+        super();
+        this.resource = {};
+        this.actions = [];
+    }
+    async init(resource) {
+        this.resource = resource;
+        this.actions = [];
+        this.actions = (await API.volume.actionList(this.resource.id)).reverse();
+    }
+    isActionError(action) {
+        if (action.message && action.message.toLowerCase().includes('error')) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    async getserverAction(reqId) {
+        let action = (await API.server.actionShow(this.server.id, reqId));
+        console.log(action.events);
+    }
+}
+export class ResourceActionEventsDialog extends Dialog {
+    constructor() {
+        super();
+        this.resource = {};
+        this.requestId = null;
+        this.resourceAction = {};
+    }
+    async init(resource, requestId) {
+        this.resource = resource;
+        this.requestId = requestId;
+        this.resourceAction = await API.volume.actionShow(this.resource.id, this.requestId);
+    }
+
+    isEventError(event) {
+        if (event.result && event.result.toLowerCase().includes('error')) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }
 

@@ -663,12 +663,23 @@ export class ComputeServiceTable extends DataTable {
         }
     }
 }
-
+export class ServerGroupTable extends DataTable{
+    constructor() {
+        super([
+            { text: 'ID', value: 'id' },
+            { text: '名字', value: 'name' },
+            { text: '策略', value: 'policies' },
+            { text: '自定义', value: 'custom' },
+            { text: '成员', value: 'members' },
+        ], API.serverGroup, 'server_groups', '群组');
+    }
+}
 export class UsageTable extends DataTable {
     constructor() {
-        super([{ text: '租户ID', value: 'tenant_id' },
-        { text: '总内存使用', value: 'total_memory_mb_usage' },
-        { text: '总cpu使用', value: 'total_vcpus_usage' },
+        super([
+            { text: '租户ID', value: 'tenant_id' },
+            { text: '总内存使用', value: 'total_memory_mb_usage' },
+            { text: '总cpu使用', value: 'total_vcpus_usage' },
             //    { text: '实例使用', value: 'server_usages' },
         ], API.usage, 'tenant_usages', 'Usage');
         this.start = '';
@@ -698,6 +709,7 @@ export class VolumeDataTable extends DataTable {
             { text: '大小', value: 'size' },
             { text: '卷类型', value: 'volume_type' },
             { text: '镜像名', value: 'image_name' },
+            { text: '操作', value: 'actions' },
         ], API.volume, 'volumes', '卷');
         this.extendItems = [
             { text: 'description', value: 'description' },

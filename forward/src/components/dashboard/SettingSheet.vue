@@ -1,32 +1,21 @@
 <template>
     <v-sheet>
         <v-row class="pa-4">
-            <v-col cols="12" lg="2" md="3" sm="12" class="text-center">
-                <h4 class="info--text">{{ I18N.t(SETTINGS.ui.name) }}</h4>
-                <v-divider class="mb-4"></v-divider>
-                <template v-for="(item, key) in SETTINGS.ui.items">
-                    <v-select dense outlined class="my-0" v-bind:key="key" v-if="item.choises" :label="I18N.t(key)" :items="item.choises"
-                        v-model="item.value" v-on:change="SETTINGS.ui.save(item.value)">
-                    </v-select>
-                    <v-switch class="my-0" dense v-else-if="item.type == Boolean" v-bind:key="key" :label="I18N.t(key)"
-                        v-model="item.value" v-on:change="SETTINGS.ui.save(key)"></v-switch>
-                    <v-text-field v-else v-bind:key="key" :label="I18N.t(key)" v-model="item.value"
-                        v-on:change="SETTINGS.ui.save(key)">{{ item.value }}</v-text-field>
-                </template>
-            </v-col>
-            <v-col cols="12" lg="2" md="3" sm="12" class="text-center">
-                <h4 class="info--text">{{ I18N.t(SETTINGS.openstack.name) }}</h4>
-                <v-divider class="mb-4"></v-divider>
-                <template v-for="(item, key) in SETTINGS.openstack.items">
-                    <v-select dense outlined class="mb-0 mt-0" v-bind:key="key" v-if="item.choises" :label="I18N.t(key)" :items="item.choises"
-                        v-model="item.value" v-on:change="SETTINGS.openstack.save(key)">
-                    </v-select>
-                    <v-switch class="my-0" dense v-else-if="item.type == Boolean" v-bind:key="key" :label="I18N.t(key)"
-                        v-model="item.value" v-on:change="SETTINGS.openstack.save(key)"></v-switch>
-                    <v-text-field outlined dense v-else v-bind:key="key" :label="I18N.t(key)" v-model="item.value"
-                        v-on:change="SETTINGS.openstack.save(key)">{{ item.value }}</v-text-field>
-                </template>
-            </v-col>
+            <template v-for="group in SETTINGS">
+                <v-col cols="12" lg="2" md="3" sm="12" class="text-center" v-bind:key="group.name">
+                    <h4 class="info--text">{{ I18N.t(group.name) }}</h4>
+                    <v-divider class="mb-4"></v-divider>
+                    <template v-for="(item, key) in group.items">
+                        <v-select dense outlined class="my-0" v-bind:key="key" v-if="item.choises" :label="I18N.t(key)" :items="item.choises"
+                            v-model="item.value" v-on:change="group.save(item.value)">
+                        </v-select>
+                        <v-switch class="my-0" dense v-else-if="item.type == Boolean" v-bind:key="key" :label="I18N.t(key)"
+                            v-model="item.value" v-on:change="group.save(key)"></v-switch>
+                        <v-text-field outlined dense v-else v-bind:key="key" :label="I18N.t(key)" v-model="item.value"
+                            v-on:change="group.save(key)">{{ item.value }}</v-text-field>
+                    </template>
+                </v-col>
+            </template>
             <v-col cols='12' class="pt-0">
                 <v-row>
                     <v-col></v-col>

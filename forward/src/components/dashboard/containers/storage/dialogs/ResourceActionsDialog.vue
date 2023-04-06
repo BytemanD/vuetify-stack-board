@@ -1,19 +1,19 @@
 <template>
     <v-dialog v-model="display" width="1000" scrollable>
         <v-card>
-            <v-card-title primary-title class="headline primary lighten-2">
-                虚拟机操作记录({{ dialog.actions.length }})
+            <v-card-title primary-title class="headline primary">
+                资源操作记录({{ dialog.actions.length }})
             </v-card-title>
             <v-card-text class="mp-0">
                 <v-timeline dense>
                     <v-timeline-item small right class="py-1" v-for="item in dialog.actions"
                         :color="dialog.isActionError(item) == true ? 'error' : 'success'" v-bind:key="item.request_id">
                         <v-row>
-                            <v-col class="text-left" cols="3">
+                            <v-col class="text-left" cols="3" >
                                 {{ dialog.formatTime(item.start_time) }}</v-col>
                             <v-col cols="3"><strong>{{ item.action }}</strong></v-col>
                             <v-col>
-                                <a @click="openServerActionEventsDialog(item.request_id)">{{
+                                <a @click="openResourceActionEventsDialog(item.request_id)">{{
                                     item.request_id }}</a>
                             </v-col>
                         </v-row>
@@ -21,38 +21,38 @@
                 </v-timeline>
             </v-card-text>
         </v-card>
-        <ServerActionEventsDialog :show.sync="showServerActionEventsDialog" :server="server" :requestId="actionRequestId"/>
+        <ResourceActionEvents :show.sync="showResourcectionEventsDialog" :resource="resource" :request-id="actionRequestId" />
     </v-dialog>
 </template>
 <script>
 import i18n from '@/assets/app/i18n';
 import { Utils } from '@/assets/app/lib';
-import { ServerActionsDialog } from '@/assets/app/dialogs';
+import { ResourceActionsDialog } from '@/assets/app/dialogs';
 
-import ServerActionEventsDialog from './ServerActionEventsDialog.vue';
+import ResourceActionEvents from './ResourceActionEvents.vue';
+
 
 export default {
-    components:{
-        ServerActionEventsDialog
+    components: {
+        ResourceActionEvents,
     },
     props: {
         show: Boolean,
-        server: Object,
+        resource: Object,
     },
     data: () => ({
         i18n: i18n,
         Utils: Utils,
         display: false,
-        dialog: new ServerActionsDialog(),
-        showServerActionEventsDialog: false,
+        dialog: new ResourceActionsDialog(),
+        showResourcectionEventsDialog: false,
         actionRequestId: null
     }),
     methods: {
-        openServerActionEventsDialog(requestId) {
+        openResourceActionEventsDialog(requestId){
             this.actionRequestId = requestId;
-            this.showServerActionEventsDialog = !this.showServerActionEventsDialog;
+            this.showResourcectionEventsDialog = !this.showResourcectionEventsDialog;
         }
-
     },
     created() {
 
@@ -61,7 +61,7 @@ export default {
         show(newVal) {
             this.display = newVal;
             if (this.display) {
-                this.dialog.init(this.server);
+                this.dialog.init(this.resource);
             }
         },
         display(newVal) {

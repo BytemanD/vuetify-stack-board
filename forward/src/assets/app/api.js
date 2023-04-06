@@ -65,7 +65,14 @@ class Restfulclient {
         }
     }
     async get(url = null) {
-        let reqUrl = url ? `${this.baseUrl}/${url}` : this.baseUrl;
+        let reqUrl = this.baseUrl;
+        if (url) {
+            if (url.startsWith('/')) {
+                reqUrl = url;
+            } else {
+                reqUrl = `${this.baseUrl}/${url}`;
+            }
+        }
         let resp = await axios.get(reqUrl, { headers: this.getHeaders() });
         return resp.data
     }
@@ -97,7 +104,7 @@ class Restfulclient {
         let resp = await axios.put(`${this.baseUrl}/${id}`, body, { headers: this.getHeaders() });
         return resp.data
     }
-    async show(id, filters = {}) {
+    async show(id, filters = null) {
         let url = filters ? `${id}?${this._parseToQueryString(filters)}` : id;
         let data = await this.get(`${url}`, { headers: this.getHeaders() });
         return data
@@ -240,7 +247,7 @@ class Migrations extends Restfulclient {
 }
 
 class Server extends VstackboardApi {
-    constructor() { super('/computing/servers', true) }
+    constructor() { super('/computing/servers') }
     async detail(filters = {}) {
         filters.all_tenants = 1
         return await super.detail(filters)
@@ -407,10 +414,10 @@ class Server extends VstackboardApi {
         return this.doAction(id, { rebuild: data })
     }
     async actionList(id) {
-        return (await this.get(`/${id}/os-instance-actions`)).instanceActions
+        return (await this.get(`${id}/os-instance-actions`)).instanceActions
     }
     async actionShow(id, reqId) {
-        return (await this.get(`/${id}/os-instance-actions/${reqId}`)).instanceAction
+        return (await this.get(`${id}/os-instance-actions/${reqId}`)).instanceAction
     }
     async getConsoleLog(id, length = null) {
         return (await this.doAction(id, { 'os-getConsoleOutput': { length: length } })).output
@@ -418,8 +425,13 @@ class Server extends VstackboardApi {
     async resetState(id, active = false) {
         return (await this.doAction(id, { 'os-resetState': { state: active ? 'active' : 'error' } }))
     }
+    async getServerGroup(id){
+        return (await this.get(`${id}/server-group`)).server.server_group;
+    }
 }
-
+class ServerGroup extends Restfulclient {
+    constructor() { super('/computing/os-server-groups') }
+}
 class Endpoint extends Restfulclient {
     constructor() { super('/identity/endpoints') }
     // interface=public
@@ -604,10 +616,16 @@ class Volume extends VstackboardApi {
                 await Utils.sleep(5);
             }
         } while (expectStatus.indexOf(status) < 0)
-        return body
+        return body.volume
     }
     async resetState(id, data) {
         return await this.doAction(id, { 'os-reset_status': data })
+    }
+    async actionList(resourceId) {
+        return (await this.get(`/volume/os-resource-actions/${resourceId}`)).resourceActions
+    }
+    async actionShow(resourceId, requestId){
+        return (await this.get(`/volume/os-resource-actions/${resourceId}/get_events?req_id=${requestId}`)).resourceAction;
     }
 }
 class Snapshot extends VstackboardApi {
@@ -735,6 +753,7 @@ export class OpenstackProxyApi {
         this.usage = new Usage();
         this.keypair = new Keypair();
         this.migration = new Migrations();
+        this.serverGroup = new ServerGroup();
         // glance
         this.image = new Image();
         // neutron

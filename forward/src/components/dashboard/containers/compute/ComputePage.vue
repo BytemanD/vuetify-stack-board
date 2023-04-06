@@ -8,6 +8,7 @@
                 <v-tab><v-icon>mdi-alpha-z-box</v-icon> AZ </v-tab>
                 <v-tab><v-icon>mdi-alpha-a-box</v-icon> 聚合 </v-tab>
                 <v-tab><v-icon>mdi-alpha-m-box</v-icon> 迁移记录 </v-tab>
+                <v-tab><v-icon>mdi-alpha-g-box</v-icon> 群组 </v-tab>
                 <v-tabs-items v-model="tabIndex">
                     <v-tab-item> <FlavorPage /> </v-tab-item>
                     <v-tab-item> <KeypairPage /> </v-tab-item>
@@ -15,6 +16,7 @@
                     <v-tab-item> <AZPage /> </v-tab-item>
                     <v-tab-item> <AggPage /> </v-tab-item>
                     <v-tab-item> <MigrationPage /> </v-tab-item>
+                    <v-tab-item> <ServerGroupPage /> </v-tab-item>
                 </v-tabs-items>
             </v-tabs>
         </v-col>
@@ -28,10 +30,12 @@ import ServicePage from './ServicePage.vue';
 import AZPage from './AZPage.vue';
 import AggPage from './AggPage.vue';
 import MigrationPage from './MigrationPage.vue';
+import ServerGroupPage from './ServerGroupPage.vue';
 
 export default {
   components: {
     FlavorPage, KeypairPage, AZPage, ServicePage, AggPage, MigrationPage,
+    ServerGroupPage,
   },
   
   data: () => ({

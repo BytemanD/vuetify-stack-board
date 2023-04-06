@@ -16,6 +16,8 @@
 - [x] hypervisor 显示 disk 使用情况
 - [x] ConsoleLog 页面宽度可调整
 - [x] 增加配置: 资源使用警告阈值、默认创建实例时是否使用云盘
+- [X] 显示 server group
+- [X] 查看 volume action
 
 ## v0.0.9
 - [X] 前后端分离

@@ -59,6 +59,7 @@ const MESSAGES = {
         consoleLogWidth: 'Width of console log dialog',
         resourceWarningPercent: 'Resource warning percent',
         bootWithVolume: 'Boot with volume',
+        supportResourceAction: 'Cinder support query resource actions',
     },
     'zh-CN': {
         language: '语言',
@@ -117,6 +118,7 @@ const MESSAGES = {
         consoleLogWidth: '控制台日志对话框长度',
         resourceWarningPercent: '资源警告阈值(%)',
         bootWithVolume: '使用云盘创建实例',
+        supportResourceAction: 'Cinder支持查询资源操作记录',
     },
 };
 

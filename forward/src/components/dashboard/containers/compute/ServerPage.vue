@@ -119,6 +119,9 @@
               <v-list-item @click="openServerUpdateSGDialog(item)">
                 <v-list-item-title>更新安全组</v-list-item-title>
               </v-list-item>
+              <v-list-item @click="openServerGroupDialog(item)">
+                <v-list-item-title>查看群组</v-list-item-title>
+              </v-list-item>
               <v-list-item @click="openServerResizeDialog(item)">
                 <v-list-item-title class="orange--text">规格变更</v-list-item-title>
               </v-list-item>
@@ -153,7 +156,8 @@
     <ServerUpdateSG :show.sync="showServerUpdateSGDialog" :server="selectedServer" />
     <ServerResize :show.sync="showServerResizeDialog" :server="selectedServer" @completed="table.refresh()" />
     <ServerRebuild :show.sync="showServerRebuildDialog" :server="selectedServer" @completed="table.refresh()" />
-  </v-row>
+    <ServerGroupDialog :show.sync="showServerGroupDialog" :server="selectedServer" />
+</v-row>
 </template>
 
 <script>
@@ -178,6 +182,7 @@ import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
 import ServerResize from './dialogs/ServerResize.vue';
 import ServerRebuild from './dialogs/ServerRebuild.vue';
 import ServerEvacuateDialog from './dialogs/ServerEvacuateDialog.vue';
+import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 
 export default {
   props: {
@@ -192,6 +197,7 @@ export default {
     ServerChangePassword,
     ServerVolumes, ServerInterfaces,
     ServerUpdateSG, ServerResize, ServerRebuild,
+    ServerGroupDialog,
   },
 
   data: () => ({
@@ -214,6 +220,7 @@ export default {
     showServerResizeDialog: false,
     showServerRebuildDialog: false,
     showServerEventDiallog: false,
+    showServerGroupDialog: false
   }),
   methods: {
     refreshTable: function () {
@@ -276,6 +283,10 @@ export default {
     openServerRebuildDialog: async function(server){
       this.selectedServer = server;
       this.showServerRebuildDialog = !this.showServerRebuildDialog;
+    },
+    openServerGroupDialog: function(server){
+      this.selectedServer = server;
+      this.showServerGroupDialog = !this.showServerGroupDialog;
     }
   },
   created() {
