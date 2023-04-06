@@ -1,10 +1,9 @@
 import Vue from 'vue';
 import * as Echarts from 'echarts';
-import { Notify } from "vuetify-message-snackbar";
 
 import API from './api.js'
 import I18N from './i18n.js';
-import { LOG, ServerTasks, Utils } from './lib.js'
+import { LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
 
 
 class DataTable {
@@ -37,32 +36,19 @@ class DataTable {
         if (this.selected.length == 0) {
             return;
         }
+        MESSAGE.info(`开始删除`);
         for (let i in this.selected) {
             let item = this.selected[i];
             try {
                 await this.api.delete(item.id || item.name);
-                if (this.api.async){
-                    Notify.info(`${this.name} 删除中`)
-                } else {
-                   Notify.success(`${this.name} 删除成功`);
-                }
-                this.waitDeleted(item.id || item.name);
+                await this.api.waitDeleted(item);
+                MESSAGE.success(`${item.name || item.id} 删除成功`);
             } catch {
-                Notify.error(`删除 ${this.name} ${item.id} 失败`)
+                MESSAGE.error(`删除 ${item.name} ${item.id} 失败`)
             }
         }
         this.refresh();
         this.resetSelected();
-    }
-    async waitDeleted(id) {
-        let body = null;
-        do {
-            body = await this.api.list({ id: id });
-            if (body[this.bodyKey].length != 0) {
-                await Utils.sleep(5);
-            }
-        } while(body[this.bodyKey].length != 0);
-        Notify.success(`${this.name} ${id} 删除成功`, 2);
     }
     resetSelected() {
         this.selected = [];
@@ -88,7 +74,7 @@ class DataTable {
                 result = await this.api.list(filters)
             }
         } catch {
-            Notify.error(`${this.name || '资源'} 查询失败`)
+            MESSAGE.error(`${this.name || '资源'} 查询失败`)
             return;
         } finally {
             this.loading = false;
@@ -123,10 +109,8 @@ export class Server {
             return null;
         }
         let rootDeviceName = this.getRootDeviceName();
-        console.debug('rootDeviceName', rootDeviceName)
         let attachments = (await API.server.volumeAttachments(this.serverObj['id'])).volumeAttachments;
         for (let i in attachments){
-            console.debug('attachment', attachments[i])
             if (attachments[i].device == rootDeviceName){
                 return attachments[i];
             }
@@ -157,9 +141,9 @@ export class RouterDataTable extends DataTable {
     adminStateDown(item) {
         API.router.put(item.id, { router: { admin_state_up: item.admin_state_up } }).then(() => {
             if (item.admin_state_up) {
-                Notify.success(`路由 ${item.name} 已设置为 UP`)
+                MESSAGE.success(`路由 ${item.name} 已设置为 UP`)
             } else {
-                Notify.success(`路由 ${item.name} 已设置为 DOWN`)
+                MESSAGE.success(`路由 ${item.name} 已设置为 DOWN`)
             }
         })
     }
@@ -203,26 +187,26 @@ export class NetDataTable extends DataTable {
         try {
             await API.subnet.delete(subnet_id)
         } catch(error) {
-            Notify.error(`子网 ${subnet.cidr} 删除失败， ${error.response.data.NeutronError.Notify}`)
+            MESSAGE.error(`子网 ${subnet.cidr} 删除失败， ${error.response.data.NeutronError.MESSAGE}`)
             return;
         }
-        Notify.success(`子网 ${subnet.cidr} 删除成功`)
+        MESSAGE.success(`子网 ${subnet.cidr} 删除成功`);
         // netTable.refresh();
     }
     async adminStateDown(item) {
         await API.network.put(item.id, { network: { admin_state_up: item.admin_state_up } })
         if (item.admin_state_up) {
-            Notify.success(`网络 ${item.name} 已设置为 UP`)
+            MESSAGE.success(`网络 ${item.name} 已设置为 UP`)
         } else {
-            Notify.success(`网络 ${item.name} 已设置为 down`)
+            MESSAGE.success(`网络 ${item.name} 已设置为 down`)
         }
     }
     async shared(item) {
         await API.network.put(item.id, { network: { shared: item.shared } })
         if (item.shared) {
-            Notify.success(`网络 ${item.name} 已设置为共享`)
+            MESSAGE.success(`网络 ${item.name} 已设置为共享`)
         } else {
-            Notify.success(`网络 ${item.name} 已取消共享`)
+            MESSAGE.success(`网络 ${item.name} 已取消共享`)
         }
     }
 }
@@ -256,13 +240,13 @@ export class PortDataTable extends DataTable {
     adminStateDown(item) {
         API.port.put(item.id, { port: { admin_state_up: item.admin_state_up } }).then(() => {
             if (item.admin_state_up) {
-                Notify.success(`端口 ${item.name || item.id} 已设置为 UP`)
+                MESSAGE.success(`端口 ${item.name || item.id} 已设置为 UP`)
             } else {
-                Notify.success(`端口 ${item.name || item.id} 已设置为 DOWN`)
+                MESSAGE.success(`端口 ${item.name || item.id} 已设置为 DOWN`)
             }
         }).catch(error => {
             console.error(error);
-            Notify.error(`端口 ${item.name} 更新失败`);
+            MESSAGE.error(`端口 ${item.name} 更新失败`);
             item.admin_state_up = !item.admin_state_up;
         })
     }
@@ -305,12 +289,12 @@ export class QosPolicyDataTable extends DataTable {
     async updateDefault(item){
         let data = {is_default: item.is_default}
         await API.qosPolicy.put(item.id, {policy: data});
-        Notify.success(`限速规则 ${item.name || item.id } 更新成功`)
+        MESSAGE.success(`限速规则 ${item.name || item.id } 更新成功`)
     }
     async updateShared(item){
         let data = {shared: item.shared}
         await API.qosPolicy.put(item.id, {policy: data});
-        Notify.success(`限速规则 ${item.name || item.id } 更新成功`)
+        MESSAGE.success(`限速规则 ${item.name || item.id } 更新成功`)
     }
 }
 export class FlavorDataTable extends DataTable {
@@ -325,20 +309,6 @@ export class FlavorDataTable extends DataTable {
         ], API.flavor, 'flavors');
         this.extraSpecsMap = {};
         this.isPublic = true;
-    }
-    waitDeleted(id) {
-        Notify.success(`${this.name || this.bodyKey } ${id} 删除成功`);
-    }
-    async deleteSelected() {
-        if (this.selected.length == 0) {
-            return;
-        }
-        for (let i in this.selected) {
-            let item = this.selected[i];
-            await this.api.delete(item.id);
-        }
-        this.refresh();
-        this.resetSelected();
     }
     async refreshExtraSpecs() {
         for (let i in this.items) {
@@ -364,11 +334,7 @@ export class KeypairDataTable extends DataTable {
     }
     static copyPublicKey(item) {
         Utils.copyToClipboard(item.public_key)
-        Notify.success(`公钥内容已复制`);
-    }
-    waitDeleted(id) {
-        Notify.success(`${name} ${id} 删除成功`, 1)
-        return
+        MESSAGE.success(`公钥内容已复制`);
     }
     async refresh(filters = {}) {
         let body = null
@@ -408,7 +374,7 @@ export class ServerDataTable extends DataTable {
         ];
         this.imageMap = {};
         this.rootBdmMap = {};
-        this.errorNotify = {};
+        this.errorMESSAGE = {};
         this.deleted = false;
     }
     refresh(filters={}){
@@ -498,7 +464,7 @@ export class ServerDataTable extends DataTable {
                 let item = servers[i];
                 API.server.stop(item.id);
                 this.waitServerStatus(item.id, 'SHUTOFF').then(() => {
-                    Notify.success(`虚拟机 ${item.name}已关机`);
+                    MESSAGE.success(`虚拟机 ${item.name}已关机`);
                     stopped += 1;
                     if (stopped == servers.length){
                         resolve();
@@ -518,11 +484,11 @@ export class ServerDataTable extends DataTable {
             statusMap.active.push(item);
         }
         if (statusMap.active.length != 0){
-            Notify.info(`开始关机: ${statusMap.active.map((item) => {return item.name})} `);
+            MESSAGE.info(`开始关机: ${statusMap.active.map((item) => {return item.name})} `);
             await this.stopServers(statusMap.active)
         }
         if (statusMap.inactive.length != 0){
-            Notify.warning(`虚拟机不是运行状态: ${statusMap.inactive.map((item) => {return item.name})}`);
+            MESSAGE.warning(`虚拟机不是运行状态: ${statusMap.inactive.map((item) => {return item.name})}`);
         }
     }
     async startServesr(servers) {
@@ -530,7 +496,7 @@ export class ServerDataTable extends DataTable {
             let item = servers[i];
             await this.api.start(item.id)
             this.waitServerStatus(item.id, 'ACTIVE').then(() => {
-                Notify.success(`虚拟机 ${item.name}已开机`);
+                MESSAGE.success(`虚拟机 ${item.name}已开机`);
             });
         }
     }
@@ -546,11 +512,11 @@ export class ServerDataTable extends DataTable {
             statusMap.shutoff.push(item);
         }
         if (statusMap.shutoff.length != 0){
-            Notify.info(`开始开机: ${statusMap.shutoff.map((item) => {return item.name})} `);
+            MESSAGE.info(`开始开机: ${statusMap.shutoff.map((item) => {return item.name})} `);
             await this.startServesr(statusMap.shutoff);
         }
         if (statusMap.notShutoff.length != 0) {
-            Notify.warning(`虚拟机不是关机状态: ${statusMap.notShutoff.map((item) => {return item.name})}`);
+            MESSAGE.warning(`虚拟机不是关机状态: ${statusMap.notShutoff.map((item) => {return item.name})}`);
         }
     }
     async pauseSelected() {
@@ -559,12 +525,12 @@ export class ServerDataTable extends DataTable {
         for (let i in this.selected) {
             let item = this.selected[i];
             if (item.status.toUpperCase() != 'ACTIVE') {
-                Notify.warning(`虚拟机 ${item.name} 不是运行状态`)
+                MESSAGE.warning(`虚拟机 ${item.name} 不是运行状态`)
                 continue;
             }
             await self.api.pause(item.id);
             self.waitServerStatus(item.id, 'PAUSED').then(() => {
-                Notify.success(`虚拟机 ${item.name}已暂停`)
+                MESSAGE.success(`虚拟机 ${item.name}已暂停`)
             });
         }
     }
@@ -573,12 +539,12 @@ export class ServerDataTable extends DataTable {
         for (let i in this.selected) {
             let item = this.selected[i];
             if (item.status.toUpperCase() != 'PAUSED') {
-                Notify.warning(`虚拟机 ${item.name} 不是暂停状态`)
+                MESSAGE.warning(`虚拟机 ${item.name} 不是暂停状态`)
                 continue;
             }
             await self.api.unpause(item.id);
             self.waitServerStatus(item.id, 'ACTIVE').then(() => {
-                Notify.success(`虚拟机 ${item.name}已开启`);
+                MESSAGE.success(`虚拟机 ${item.name}已开启`);
             });
         }
     }
@@ -586,12 +552,12 @@ export class ServerDataTable extends DataTable {
         for (let i in this.selected) {
             let item = this.selected[i];
             if (type == 'SOFT' && item.status.toUpperCase() != 'ACTIVE') {
-                Notify.warning(`虚拟机 ${item.name} 不是运行状态`, 1)
+                MESSAGE.warning(`虚拟机 ${item.name} 不是运行状态`, 1)
                 continue;
             }
             await this.api.reboot(item.id, type)
             this.waitServerStatus(item.id, 'ACTIVE').then(() => {
-                Notify.success(`虚拟机 ${item.name}已重启`)
+                MESSAGE.success(`虚拟机 ${item.name}已重启`)
             });
         }
         this.refresh();
@@ -625,13 +591,13 @@ export class ServerDataTable extends DataTable {
         return this.rootBdmMap[serverObj.getId()];
     }
     getErrorMesage(server){
-        if (server.fault && server.fault.Notify) {
-            return server.fault.Notify;
+        if (server.fault && server.fault.MESSAGE) {
+            return server.fault.MESSAGE;
         }
         API.server.show(server.id).then(resp => {
-            Vue.set(this.errorNotify, server.id, resp.server.fault && resp.server.fault.Notify);
+            Vue.set(this.errorMESSAGE, server.id, resp.server.fault && resp.server.fault.MESSAGE);
         });
-        return this.errorNotify[server.id];
+        return this.errorMESSAGE[server.id];
     }
     parseAddresses(server){
         let addressMap = {};
@@ -658,20 +624,17 @@ export class ComputeServiceTable extends DataTable {
         { text: '更新时间', value: 'updated_at' },
         ], API.computeService, 'services')
     }
-    async waitDeleted(id) {
-        Notify.success(`${this.name} ${id} 删除成功`, 2);
-    }
     async forceDown(service) {
         let down = service.forced_down;
         try {
             await API.computeService.forceDown(service.id, down)
             if (down) {
-                Notify.success(`${service.host}:${service.binary} 已强制设为 Down`)
+                MESSAGE.success(`${service.host}:${service.binary} 已强制设为 Down`)
             } else {
-                Notify.success(`${service.host}:${service.binary} 已取消强制 Down`)
+                MESSAGE.success(`${service.host}:${service.binary} 已取消强制 Down`)
             }
         } catch (error) {
-            Notify.error(`${service.host}:${service.binary} 设置强制down失败`)
+            MESSAGE.error(`${service.host}:${service.binary} 设置强制down失败`)
             service.forced_down = !down;
             return;
         }
@@ -682,18 +645,18 @@ export class ComputeServiceTable extends DataTable {
         if (status == 'enabled') {
             service.status = 'disabled';
             API.computeService.disable(service.id).then(() => {
-                Notify.success(`${service.host}:${service.binary} 已设置为不可用`)
+                MESSAGE.success(`${service.host}:${service.binary} 已设置为不可用`)
             }).catch(error => {
                 console.error(error);
-                Notify.error(`${service.host}:${service.binary} 设置不可用失败`)
+                MESSAGE.error(`${service.host}:${service.binary} 设置不可用失败`)
                 service.status = 'enabled';
             });
         } else {
             service.status = 'enabled';
             API.computeService.enable(service.id).then(() => {
-                Notify.success(`${service.host}:${service.binary} 已设置为可用`)
+                MESSAGE.success(`${service.host}:${service.binary} 已设置为可用`)
             }).catch(error => {
-                Notify.error(`${service.host}:${service.binary} 设置可用失败`)
+                MESSAGE.error(`${service.host}:${service.binary} 设置可用失败`)
                 service.status = 'enabled';
                 console.error(error)
             });
@@ -820,10 +783,6 @@ export class BackupTable extends DataTable {
             { text: 'description', value: 'description' },
         ];
     }
-
-    async waitDeleted(backupId) {
-        await this.waitBackupDeleted(backupId)
-    }
     async waitBackupCreated(backupId) {
         let backup = {};
         let expectStatus = ['available', 'error'];
@@ -838,28 +797,6 @@ export class BackupTable extends DataTable {
             if (expectStatus.indexOf(backup.status) < 0) {
                 await Utils.sleep(3);
             }
-        }
-        return backup
-    }
-    async waitBackupDeleted(backupId) {
-        let backup = {};
-        do{
-            if(backup.status){
-                await Utils.sleep(3);
-            }
-            try {
-                LOG.debug(`wait backup ${backupId} to be deleted`)
-                backup = (await API.backup.get(backupId)).backup;
-            } catch (error) {
-                console.log(error);
-                Notify.success(`备份 ${backupId} 删除成功`);
-                break
-            }
-        }while(backup.status == 'error')
-        if (backup.status == 'error') {
-            Notify.error(`备份 ${backupId} 删除失败`);
-        } else {
-            this.refresh();
         }
         return backup
     }
@@ -918,7 +855,7 @@ export class VolumeServiceTable extends DataTable {
             case 'enabled':
                 body = await API.volumeService.disable(item.binary, item.host);
                 if (body.status == 'disabled') {
-                    Notify.success(`${this.name} ${item.binary}:${item.host} 已设为不可用`)
+                    MESSAGE.success(`${this.name} ${item.binary}:${item.host} 已设为不可用`)
                     this.refresh();
                 } else {
                     item.status == 'enabled'
@@ -927,7 +864,7 @@ export class VolumeServiceTable extends DataTable {
             case 'disabled':
                 body = await API.volumeService.enable(item.binary, item.host);
                 if (body.status == 'enabled') {
-                    Notify.success(`${this.name} ${item.binary}:${item.host} 已设为可用`)
+                    MESSAGE.success(`${this.name} ${item.binary}:${item.host} 已设为可用`)
                     this.refresh();
                 } else {
                     item.status == 'diabled'
@@ -945,10 +882,10 @@ export class ClusterTable extends DataTable {
     async delete(item) {
         try {
             await API.cluster.delete(item.id)
-            Notify.success(`集群 ${item.name || item.id} 删除成功`);
+            MESSAGE.success(`集群 ${item.name || item.id} 删除成功`);
         } catch (error){
             console.error('集群删除失败', error);
-            Notify.error(`集群 ${item.name} 删除失败`);
+            MESSAGE.error(`集群 ${item.name} 删除失败`);
             throw error;
         }
     }
@@ -1007,25 +944,24 @@ export class DomainTable extends DataTable {
         for (let i in this.selected) {
             let domain = this.selected[i];
             if (domain.enabled) {
-                Notify.warning(`Domin ${domain.name} 处于enabled状态，请先disable再删除`);
-                continue;
+                MESSAGE.warning(`Domin ${domain.name} 处于enabled状态, 请先设置disable后再删除`);
+                return;
             }
             await API.domain.delete(domain.id);
         }
-        this.refresh();
-        this.selected = [];
+        super.deleteSelected();
     }
     async toggleEnabled(domain){
         try {
             if (domain.enabled){
                 await API.domain.enable(domain.id)
-                Notify.success(`Domain ${domain.name} 已启用`)
+                MESSAGE.success(`Domain ${domain.name} 已启用`)
             } else {
                 await API.domain.disable(domain.id)
-                Notify.success(`Domain ${domain.name} 已关闭`)
+                MESSAGE.success(`Domain ${domain.name} 已关闭`)
             }
         } catch {
-            Notify.success(`Domain ${domain.name} 操作失败`)
+            MESSAGE.success(`Domain ${domain.name} 操作失败`)
             domain.enabled = ! domain.enabled;
         }
     }

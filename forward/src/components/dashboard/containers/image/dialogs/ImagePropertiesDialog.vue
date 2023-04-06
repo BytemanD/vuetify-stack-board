@@ -33,9 +33,8 @@
     </v-dialog>
 </template>
 <script>
-import { Notify } from 'vuetify-message-snackbar';
 import i18n from '@/assets/app/i18n';
-import { Utils } from '@/assets/app/lib';
+import { Utils, MESSAGE } from '@/assets/app/lib';
 
 import { ImagePropertiesDialog } from '@/assets/app/dialogs';
 
@@ -57,7 +56,7 @@ export default {
                 await this.dialog.addProperty(key, value);
                 this.$emit('completed');
             } catch (error) {
-                Notify.error(error.message)
+                MESSAGE.error(error.message)
             }
         },
         async addProperties() {
@@ -65,7 +64,7 @@ export default {
                 await this.dialog.addProperties();
                 this.$emit('completed');
             } catch (error) {
-                Notify.error(error.message)
+                MESSAGE.error(error.message)
             }
         },
         async removeProperty(key) {

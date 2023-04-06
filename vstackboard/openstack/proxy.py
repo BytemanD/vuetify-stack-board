@@ -80,6 +80,8 @@ class OpenstackV3AuthProxy(object):
                 self.get_compute_max_version()
 
     def _get_endpoint(self, service):
+        # sourcery skip: reintroduce-else, swap-if-else-branches,
+        # use-named-expression
         endpoint = self.endpoints.get(service)
         if not endpoint:
             raise exceptions.EndpointNotFound(service=service,
@@ -119,8 +121,7 @@ class OpenstackV3AuthProxy(object):
         }
 
     def _request_uri(self, request):
-        return '{}{}'.format(
-            self.proxy_to, request.uri.split(self.url_replace, 1)[1])
+        return f'{self.proxy_to}{request.uri.split(self.url_replace, 1)[1]}'
 
     def _request_body(self, request):
         return None if request.method.upper() in ['DELETE', 'GET'] else \
@@ -128,9 +129,9 @@ class OpenstackV3AuthProxy(object):
 
     def _get_api_version(self):
         if not self._api_version:
-            self._api_version = ','.join([
-                '{} {}'.format(k, v) for k, v in
-                CONF.openstack.api_version.items()])
+            self._api_version = ','.join(
+                [f'{k} {v}' for k, v in CONF.openstack.api_version.items()]
+            )
 
             LOG.info('api version: %s', self._api_version)
         return self._api_version
@@ -149,7 +150,7 @@ class OpenstackV3AuthProxy(object):
                 'OpenStack-API-Version': self._get_api_version()}
 
     def proxy_keystone(self, method='GET', url=None, data=None, headers=None):
-        proxy_url = '{}{}'.format(self._get_endpoint('keystone'), url or '/')
+        proxy_url = f"{self._get_endpoint('keystone')}{url or '/'}"
         proxy_headers = self.get_header()
         if headers:
             proxy_headers.update(headers)
@@ -157,7 +158,7 @@ class OpenstackV3AuthProxy(object):
                                 headers=proxy_headers)
 
     def proxy_nova(self, method='GET', url=None, data=None, headers=None):
-        proxy_url = '{}{}'.format(self._get_endpoint('nova'), url or '/')
+        proxy_url = f"{self._get_endpoint('nova')}{url or '/'}"
         proxy_headers = self.get_header()
         if headers:
             proxy_headers.update(headers)
@@ -169,14 +170,13 @@ class OpenstackV3AuthProxy(object):
         headers.update({'Content-Type': 'application/octet-stream'})
 
         LOG.info('uploading image %s', url)
-        resp = requests.put(
-            '{}{}'.format(self._get_endpoint('glance'), url or '/'),
-            headers=headers, data=image_chunk)
+        resp = requests.put(f"{self._get_endpoint('glance')}{url or '/'}",
+                            headers=headers, data=image_chunk)
         LOG.info('uploaded image %s', url)
         return resp
 
     def proxy_glance(self, method='GET', url=None, data=None, headers=None):
-        proxy_url = '{}{}'.format(self._get_endpoint('glance'), url or '/')
+        proxy_url = f"{self._get_endpoint('glance')}{url or '/'}"
         proxy_headers = self.get_header()
         if headers:
             proxy_headers.update(headers)
@@ -184,7 +184,7 @@ class OpenstackV3AuthProxy(object):
                                 headers=proxy_headers)
 
     def proxy_neutron(self, method='GET', url=None, data=None, headers=None):
-        proxy_url = '{}{}'.format(self._get_endpoint('neutron'), url or '/')
+        proxy_url = f"{self._get_endpoint('neutron')}{url or '/'}"
         proxy_headers = self.get_header()
         if headers:
             proxy_headers.update(headers)

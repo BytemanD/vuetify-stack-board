@@ -1,7 +1,32 @@
 import axios from 'axios';
-import { Notify } from "vuetify-message-snackbar";
 
-import { LOG, Utils } from "./lib.js";
+import { LOG, Utils, MESSAGE } from "./lib.js";
+
+async function waitDeletedByList(api, bodyKey, item){
+    let items = [];
+    do {
+        console.debug(new Date().toLocaleString(), `wait ${item.name || item.id} to be deleted`);
+        items = (await api.list({ id: item.id }))[bodyKey];
+        if (items.length != 0) {
+            await Utils.sleep(5);
+        }
+    } while(items.length != 0);
+}
+async function waitDeletedByGet(api, bodyKey, item) {
+    let itemBody = {};
+    let deleted = false;
+    do{
+        try {
+            console.debug(new Date().toLocaleString(), `wait ${item.name || item.id} to be deleted`);
+            itemBody = (await api.get(item.id))[bodyKey];
+            await Utils.sleep(3);
+        } catch (error) {
+            MESSAGE.success(`${item.id || item.name} 删除成功`);
+            deleted = true;
+        }
+    }while(!deleted);
+    return itemBody
+}
 
 class Restfulclient {
     constructor(baseUrl, async=false) {
@@ -26,6 +51,9 @@ class Restfulclient {
             }
         }
         return queryParams.join('&');
+    }
+    async waitDeleted() {
+
     }
     _getErrorMsg(response) {
         console.error(response)
@@ -61,7 +89,7 @@ class Restfulclient {
             return resp.data
         } catch (e) {
             console.error(e);
-            Notify.error(this._getErrorMsg(e.response))
+            MESSAGE.error(this._getErrorMsg(e.response))
             throw e
         }
     }
@@ -152,13 +180,13 @@ class Flavor extends VstackboardApi {
             if (line.trim() == '') { continue; }
             let kv = line.split('=');
             if (kv.length != 2) {
-                Notify.error(`输入内容有误: ${line}`)
+                MESSAGE.error(`输入内容有误: ${line}`)
                 return;
             }
             let key = kv[0].trim();
             let value = kv[1].trim();
             if (key == '' || value == '') {
-                Notify.error(`输入内容有误: ${line}`)
+                MESSAGE.error(`输入内容有误: ${line}`)
                 return;
             }
             extras[key] = value;
@@ -216,6 +244,9 @@ class Server extends VstackboardApi {
     async detail(filters = {}) {
         filters.all_tenants = 1
         return await super.detail(filters)
+    }
+    async waitDeleted(item) {
+        await waitDeletedByList(API.server, 'servers', item);
     }
     async list(filters = {}) {
         filters.all_tenants = 1
@@ -559,7 +590,9 @@ class Router extends Restfulclient {
 class Volume extends VstackboardApi {
     constructor() { super('/volume/volumes', true) }
     async create(data) { return this.post({ volume: data }) }
-
+    async waitDeleted(item) {
+        await waitDeletedByList(API.volume, 'volumes', item);
+    }
     async waitVolumeStatus(volume_id, expectStatus = ['available', 'error']) {
         let body = {}
         let status = null;
@@ -580,7 +613,9 @@ class Volume extends VstackboardApi {
 class Snapshot extends VstackboardApi {
     constructor() { super('/volume/snapshots') }
     async create(data) { return this.post({ snapshot: data }) }
-
+    async waitDeleted(item) {
+        await waitDeletedByList(API.snapshot, 'snpashots', item);
+    }
     async waitSnapshotStatus(snapshot_id, expectStatus = ['available', 'error']) {
         let snapshot = {};
         while (expectStatus.indexOf(snapshot.status) < 0) {
@@ -598,6 +633,27 @@ class Snapshot extends VstackboardApi {
 }
 class Backup extends VstackboardApi {
     constructor() { super('/volume/backups') }
+    async waitDeleted(item) {
+        await waitDeletedByGet(API.backup, 'backup', item);
+    }
+    async waitBackupDeleted(backup) {
+        let backupBody = {};
+        LOG.debug(`wait backup ${backup.id} to be deleted`)
+        do{
+            try {
+                backupBody = (await API.backup.get(backup.id)).backup;
+            } catch (error) {
+                MESSAGE.success(`备份 ${backup.id} 删除成功`);
+                break;
+            }
+            await Utils.sleep(3);
+        }while(backupBody.status == 'error');
+
+        if (backupBody.status == 'error') {
+            MESSAGE.error(`备份 ${backup.id} 删除失败`);
+        }
+        return backupBody
+    }
     async detail(filters = {}) {
         filters.all_tenants = 1
         return await super.detail(filters)

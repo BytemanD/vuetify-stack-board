@@ -18,7 +18,7 @@ def init():
     global DB_FILE, ENGINE, SESSION
 
     DB_FILE = os.path.join(CONF.data_path, 'vstackboard.db')
-    ENGINE = create_engine('sqlite:///{}'.format(DB_FILE))
+    ENGINE = create_engine(f'sqlite:///{DB_FILE}')
     SESSION = scoped_session(sessionmaker(bind=ENGINE))
 
     LOG.info('database file is %s', DB_FILE)

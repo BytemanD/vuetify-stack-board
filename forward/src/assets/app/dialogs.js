@@ -1,11 +1,10 @@
 import Vue from 'vue';
 import * as Echarts from 'echarts';
-import { Notify } from "vuetify-message-snackbar";
 
 import API from './api.js';
 import I18N from './i18n.js';
 import SETTINGS from './settings.js';
-import { Utils, LOG, ServerTasks, CONST } from './lib.js';
+import { Utils, LOG, ServerTasks, CONST, MESSAGE } from './lib.js';
 import { BackupTable, VolumeDataTable, UserTable, RegionDataTable, ServiceTable, HypervisortTable, } from './tables.js';
 import {
     serverTable, imageTable,
@@ -13,14 +12,13 @@ import {
     qosPolicyTable, portTable, sgTable,
 } from './objects.js'
 
-
 class Dialog {
     constructor(params) {
         this.name = null;
         this.resource = 'resource';
         this.show = false;
         this.params = params || {};
-        this.errorNotify = null;
+        this.errorMESSAGE = null;
     }
     refreshName() {
         this.name = this.randomName();
@@ -29,7 +27,7 @@ class Dialog {
         return Utils.getRandomName(this.resource);
     }
     open() {
-        this.errorNotify = null;
+        this.errorMESSAGE = null;
         this.display()
     }
     init() {
@@ -93,7 +91,7 @@ export class ProjectUserDialog extends Dialog {
             await API.user.delete(user.id);
         }
         this.userTable.selected = [];
-        Notify.success(`用户删除成功`);
+        MESSAGE.success(`用户删除成功`);
         this.refresh(false);
     }
 
@@ -112,8 +110,8 @@ export class NewUserDialog extends Dialog {
         this.roles = (await API.role.list()).roles;
     }
     async commit() {
-        if (!this.name) { Notify.warning(`用户名必须指定`); return; }
-        if (!this.userRole) { Notify.warning(`用户角色不能为空`); return; }
+        if (!this.name) { MESSAGE.warning(`用户名必须指定`); return; }
+        if (!this.userRole) { MESSAGE.warning(`用户角色不能为空`); return; }
         let data = {
             name: this.name,
             project_id: this.project.id,
@@ -124,11 +122,11 @@ export class NewUserDialog extends Dialog {
             if (this.userRole) {
                 await API.project.addUser(this.project.id, user.id, this.userRole);
             }
-            Notify.success(`用户 ${this.name} 创建成功`)
+            MESSAGE.success(`用户 ${this.name} 创建成功`)
             // projectUserDialog.refresh();
             super.hide();
         } catch {
-            Notify.error(`用户 ${this.name} 创建失败`)
+            MESSAGE.error(`用户 ${this.name} 创建失败`)
         }
     }
     checkUserRole(value) {
@@ -143,16 +141,16 @@ export class NewDomainDialog extends Dialog {
         this.description = null;
     }
     async commit() {
-        if (!this.name) { Notify.warning(`Domain名不能为空`); return; }
+        if (!this.name) { MESSAGE.warning(`Domain名不能为空`); return; }
         let data = { name: this.name, enabled: this.enabled }
         if (this.description) { data.description = this.description }
         try {
             await API.domain.post({ domain: data })
-            Notify.success(`域 ${this.name} 创建成功`)
+            MESSAGE.success(`域 ${this.name} 创建成功`)
             super.hide();
             return true;
         } catch {
-            Notify.error(`域 ${this.name} 创建失败`)
+            MESSAGE.error(`域 ${this.name} 创建失败`)
             return false;
         }
     }
@@ -173,17 +171,17 @@ export class NewProjectDialog extends Dialog {
         super.open();
     }
     async commit() {
-        if (!this.name) { Notify.warning(`租户名不能为空`); return; }
+        if (!this.name) { MESSAGE.warning(`租户名不能为空`); return; }
         let data = { name: this.name, enabled: this.enabled }
         if (this.description) { data.description = this.description }
         if (this.domainId) { data.domain_id = this.domainId }
         try {
             await API.project.post({ project: data })
-            Notify.success(`租户 ${this.name} 创建成功`)
+            MESSAGE.success(`租户 ${this.name} 创建成功`)
             super.hide();
             return true;
         } catch {
-            Notify.error(`租户 ${this.name} 创建失败`)
+            MESSAGE.error(`租户 ${this.name} 创建失败`)
             return false;
         }
     }
@@ -229,10 +227,10 @@ export class NewRoleDialog extends Dialog {
         }
         try {
             await API.role.post({ role: data });
-            Notify.success(`角色 ${this.name} 创建成功`);
+            MESSAGE.success(`角色 ${this.name} 创建成功`);
             super.hide();
         } catch {
-            Notify.error(`角色 ${this.name} 创建失败`)
+            MESSAGE.error(`角色 ${this.name} 创建失败`)
         }
     }
 }
@@ -271,10 +269,10 @@ export class NewNetworkDialog extends Dialog {
 
         try {
             await API.network.post({ network: data })
-            Notify.success(`网络 ${this.name} 创建成功`)
+            MESSAGE.success(`网络 ${this.name} 创建成功`)
         } catch (error) {
             console.error(error.response)
-            Notify.error(`网络 ${this.name} 创建失败, ${error.response.data.NeutronError}`)
+            MESSAGE.error(`网络 ${this.name} 创建失败, ${error.response.data.NeutronError}`)
             throw error
         }
     }
@@ -317,14 +315,14 @@ export class NewSubnetDialog extends Dialog {
             enable_dhcp: this.enableDhcp,
         }
         if (this.gateway) { data.gateway = this.gateway }
-        this.errorNotify = null;
+        this.errorMESSAGE = null;
         try {
             await API.subnet.post({ subnet: data });
-            Notify.success(`子网 ${this.params.name} 创建成功`);
+            MESSAGE.success(`子网 ${this.params.name} 创建成功`);
             this.su
         } catch (error) {
-            this.errorNotify = error.response.data.NeutronError;
-            Notify.error(`子网 ${this.name} 创建失败.`)
+            this.errorMESSAGE = error.response.data.NeutronError;
+            MESSAGE.error(`子网 ${this.name} 创建失败.`)
             throw error;
         }
     }
@@ -341,10 +339,10 @@ export class NewRouterkDialog extends Dialog {
         if (this.azHint != '') { data.availability_zone_hints = [this.azHint] }
         try {
             await API.router.post({ router: data });
-            Notify.success(`路由 ${this.params.name} 创建成功`)
+            MESSAGE.success(`路由 ${this.params.name} 创建成功`)
         } catch (error) {
             console.error(error)
-            Notify.error(`路由 ${this.params.name} 创建失败`)
+            MESSAGE.error(`路由 ${this.params.name} 创建失败`)
             throw error;
         }
     }
@@ -385,9 +383,9 @@ export class ServerVolumeDialog extends Dialog {
     }
     async detach(attachment) {
         await API.server.volumeDetach(this.server.id, attachment.volumeId)
-        Notify.info(`卷 ${attachment.volumeId} 卸载中 ...`);
+        MESSAGE.info(`卷 ${attachment.volumeId} 卸载中 ...`);
         await this.waitVolumeStatus(attachment.volumeId, ['available', 'error']);
-        Notify.success(`卷 ${attachment.volumeId} 卸载成功`);
+        MESSAGE.success(`卷 ${attachment.volumeId} 卸载成功`);
         this.refreshAttachments();
     }
     async waitVolumeStatus(volume_id, expectStatus = ['available', 'error']) {
@@ -405,9 +403,9 @@ export class ServerVolumeDialog extends Dialog {
         for (let i in this.selectedVolumes) {
             let volume_id = this.selectedVolumes[i];
             await API.server.attachVolume(this.server.id, volume_id)
-            Notify.info(`卷 ${volume_id} 挂载中 ...`);
+            MESSAGE.info(`卷 ${volume_id} 挂载中 ...`);
             await this.waitVolumeStatus(volume_id, ['in-use', 'error']);
-            Notify.success(`卷 ${volume_id} 挂载成功`);
+            MESSAGE.success(`卷 ${volume_id} 挂载成功`);
             this.refreshAttachments();
         }
         this.selectedVolumes = [];
@@ -454,7 +452,7 @@ export class ServerInterfaceDialog extends Dialog {
     }
     async detach(item) {
         await API.server.interfaceDetach(this.server.id, item.port_id);
-        Notify.info(`网卡 ${item.port_id} 卸载中 ...`);
+        MESSAGE.info(`网卡 ${item.port_id} 卸载中 ...`);
         let detached = true;
         do {
             let interfaces = await API.server.interfaceList(this.server.id);
@@ -468,7 +466,7 @@ export class ServerInterfaceDialog extends Dialog {
             }
         } while (!detached)
 
-        Notify.success(`网卡 ${item.port_id} 卸载成功`);
+        MESSAGE.success(`网卡 ${item.port_id} 卸载成功`);
         await this.refreshPorts();
         for (let i in this.attachments) {
             if (this.attachments[i].port_id == item.port_id) {
@@ -480,9 +478,9 @@ export class ServerInterfaceDialog extends Dialog {
     async attachSelected() {
         for (let i in this.selected) {
             let item = this.selected[i];
-            Notify.info(`网卡 ${item} 挂载中`);
+            MESSAGE.info(`网卡 ${item} 挂载中`);
             await API.server.interfaceAttach(this.server.id, { port_id: item })
-            Notify.success(`网卡 ${item} 挂载成功`);
+            MESSAGE.success(`网卡 ${item} 挂载成功`);
             this.refreshInterfaces();
         }
         this.refreshInterfaces();
@@ -491,9 +489,9 @@ export class ServerInterfaceDialog extends Dialog {
     async attachSelectedNets() {
         for (let i in this.netSelected) {
             let item = this.netSelected[i];
-            Notify.info(`网卡 ${item} 挂载中`);
+            MESSAGE.info(`网卡 ${item} 挂载中`);
             await API.server.interfaceAttach(this.server.id, { net_id: item })
-            Notify.success(`网卡 ${item} 挂载成功`);
+            MESSAGE.success(`网卡 ${item} 挂载成功`);
             this.refreshInterfaces();
         }
     }
@@ -520,11 +518,11 @@ export class ChangePasswordDialog extends Dialog {
     }
     async commit() {
         if (!this.password.trim()) {
-            Notify.error(`密码不能为空`)
+            MESSAGE.error(`密码不能为空`)
             return;
         }
         await API.server.changePassword(this.server.id, this.password.trim(), this.params.userName)
-        Notify.success(`${this.server.name} 密码修改成功`)
+        MESSAGE.success(`${this.server.name} 密码修改成功`)
     }
 }
 
@@ -540,7 +538,7 @@ export class ChangeServerNameDialog extends Dialog {
     }
     async commit() {
         await API.server.update(this.server.id, { name: this.newName });
-        Notify.success('实例名修改成功');
+        MESSAGE.success('实例名修改成功');
         this.hide();
     }
 }
@@ -568,13 +566,13 @@ export class ResizeDialog extends Dialog {
     }
     async commit() {
         await API.server.resize(this.server.id, this.flavorRef)
-        Notify.info(`虚拟机 ${this.server.id} 变更中...`);
+        MESSAGE.info(`虚拟机 ${this.server.id} 变更中...`);
         this.hide();
         let newServer = await serverTable.waitServerStatus(this.server.id);
         if (newServer.flavor.original_name == this.oldFlavorRef) {
-            Notify.error(`虚拟机 ${this.server.id} 变更失败`);
+            MESSAGE.error(`虚拟机 ${this.server.id} 变更失败`);
         } else {
-            Notify.success(`虚拟机 ${this.server.id} 变更成功`);
+            MESSAGE.success(`虚拟机 ${this.server.id} 变更成功`);
         }
         // serverTable.refresh();
     }
@@ -599,16 +597,16 @@ export class MigrateDialog extends Dialog {
     }
     async liveMigrateAndWait(server) {
         await API.server.liveMigrate(server.id, this.host)
-        Notify.info(`热迁移 ${server.name} ...`)
+        MESSAGE.info(`热迁移 ${server.name} ...`)
         // await serverTable.waitServerStatus(server.id);
-        // Notify.success(`虚拟机 ${server.id} 迁移完成`);
+        // MESSAGE.success(`虚拟机 ${server.id} 迁移完成`);
     }
     async migrateAndWait(server) {
         await API.server.migrate(server.id, this.host);
-        Notify.info(`冷迁移 ${server.name} ...`)
+        MESSAGE.info(`冷迁移 ${server.name} ...`)
         // TODO:
         // await serverTable.waitServerStatus(server.id, ['SHUTOFF', 'ERROR'])
-        // Notify.success(`虚拟机 ${server.id} 迁移完成`);
+        // MESSAGE.success(`虚拟机 ${server.id} 迁移完成`);
     }
     isValidLiveMigrateStatus(server) {
         return ['ACTIVE', 'PAUSE'].indexOf(server.status.toUpperCase()) >= 0;
@@ -638,7 +636,7 @@ export class MigrateDialog extends Dialog {
                     this.migrateAndWait(server)
                 }
             } catch (error) {
-                Notify.warning(error);
+                MESSAGE.warning(error);
             }
         }
     }
@@ -677,7 +675,7 @@ export class EvacuateDialog extends Dialog {
         }
         try {
             await API.server.evacuate(server.id, { host: this.host, force: this.force });
-            Notify.info(`疏散 ${server.name} ...`);
+            MESSAGE.info(`疏散 ${server.name} ...`);
         } catch (e) {
             throw Error(`虚拟机 ${server.name}疏散失败`)
         }
@@ -686,7 +684,7 @@ export class EvacuateDialog extends Dialog {
         for (let i in this.servers) {
             let item = this.servers[i];
             if (['ACTIVE', 'SHUTOFF', 'ERROR'].indexOf(item.status) < 0) {
-                Notify.warning(`虚拟机 ${item.name} 状态异常，无法疏散`, 1)
+                MESSAGE.warning(`虚拟机 ${item.name} 状态异常，无法疏散`, 1)
                 continue
             }
             await this.evacuateServer(item);
@@ -702,7 +700,7 @@ export class NewClusterDialog extends Dialog {
         this.hidePassword = true;
     }
     async commit() {
-        if (!this.params.name) { Notify.error(`环境名不能为空`); return; }
+        if (!this.params.name) { MESSAGE.error(`环境名不能为空`); return; }
 
         let data = {
             name: this.params.name,
@@ -715,11 +713,11 @@ export class NewClusterDialog extends Dialog {
             data.name = data.name.slice(0, -1);
         }
         try {
-            await API.cluster.add(data)
-            Notify.success(`环境 ${this.params.name} 添加成功`);
+            await API.cluster.add(data);
+            MESSAGE.success(`环境 ${this.params.name} 添加成功`);
         } catch (error) {
             console.error(error);
-            Notify.error(`环境 ${this.params.name} 添加失败`)
+            MESSAGE.error(`环境 ${this.params.name} 添加失败`)
         }
     }
 
@@ -804,12 +802,12 @@ export class NewServerDialog extends Dialog {
         this.securityGroups = (await API.sg.list({ tenant_id: this.authInfo.project.id })).security_groups;
     }
     async commit() {
-        if (!this.params.name) { Notify.error(`实例名不能为空`); return; }
-        if (!this.params.flavor) { Notify.error(`请选择规格`); return; }
-        if (!this.params.image) { Notify.error(`请选择镜像`); return; }
+        if (!this.params.name) { MESSAGE.error(`实例名不能为空`); return; }
+        if (!this.params.flavor) { MESSAGE.error(`请选择规格`); return; }
+        if (!this.params.image) { MESSAGE.error(`请选择镜像`); return; }
 
         if (!this.params.name) {
-            Notify.error(`实例名字不能为空`);
+            MESSAGE.error(`实例名字不能为空`);
             return;
         }
         let networks = [];
@@ -832,7 +830,7 @@ export class NewServerDialog extends Dialog {
             data.securityGroup = [{ name: this.securityGroup }];
         }
         let body = await API.server.boot(this.params.name, this.params.flavor, this.params.image, data)
-        Notify.info(`实例 ${this.params.name} 创建中...`);
+        MESSAGE.info(`实例 ${this.params.name} 创建中...`);
         let serverTasks = new ServerTasks();
         serverTasks.add(body.server.id, 'building')
         this.hide();
@@ -841,9 +839,9 @@ export class NewServerDialog extends Dialog {
         let result = await serverTable.waitServerStatus(body.server.id);
         serverTasks.delete(body.server.id)
         if (result.status.toUpperCase() == 'ERROR') {
-            Notify.error(`实例 ${this.params.name} 创建失败`);
+            MESSAGE.error(`实例 ${this.params.name} 创建失败`);
         } else {
-            Notify.success(`实例 ${this.params.name} 创建成功`);
+            MESSAGE.success(`实例 ${this.params.name} 创建成功`);
         }
     }
 }
@@ -913,7 +911,7 @@ export class NewFlavorDialog extends Dialog {
     async commit() {
         let checkResult = this.checkNameNotNull(this.params.name);
         if (checkResult == true) { this.checkExtrasValid(this.params.extrasContent); }
-        if (checkResult != true) { Notify.error(checkResult); return; }
+        if (checkResult != true) { MESSAGE.error(checkResult); return; }
 
         this.checkExtrasValid(this.params.extrasContent);
         let data = {
@@ -927,7 +925,7 @@ export class NewFlavorDialog extends Dialog {
         if (Object.keys(this.extraSpcs).length > 0) {
             await API.flavor.updateExtras(flavor.id, this.extraSpcs);
         }
-        Notify.success(`规格 ${this.params.name} 创建成功`);
+        MESSAGE.success(`规格 ${this.params.name} 创建成功`);
     }
 
     checkExtras() {
@@ -967,19 +965,19 @@ export class FlavorExtraDialog extends Dialog {
     }
     async deleteExtra(key) {
         await API.flavor.deleteExtra(this.flavor.id, key);
-        Notify.success(`属性 ${key} 删除成功`);
+        MESSAGE.success(`属性 ${key} 删除成功`);
         Vue.delete(this.extraSpecs, key);
     }
     async addExtra(item) {
         if (Object.keys(this.extraSpecs).indexOf(item.key) >= 0 && this.extraSpecs[item.key] == item.value) {
-            Notify.error(`属性 ${item.key} 已经存在`)
+            MESSAGE.error(`属性 ${item.key} 已经存在`)
             return
         } 
         let extraSpecs = {}
         extraSpecs[item.key] = item.value;
         console.log(this.flavor)
         await API.flavor.updateExtras(this.flavor.id, extraSpecs);
-        Notify.success(`属性 ${item.key} 添加成功`);
+        MESSAGE.success(`属性 ${item.key} 添加成功`);
         Vue.set(this.extraSpecs, item.key, item.value);
     }
     async addNewExtraSpecs() {
@@ -988,7 +986,7 @@ export class FlavorExtraDialog extends Dialog {
             return;
         }
         await API.flavor.updateExtras(this.flavor.id, extraSpecs);
-        Notify.success(`属性添加成功`);
+        MESSAGE.success(`属性添加成功`);
         for (let key in extraSpecs) {
             Vue.set(this.extraSpecs, key, extraSpecs[key])
         }
@@ -1023,12 +1021,12 @@ export class NewKeypairDialog extends Dialog {
     }
     async commit() {
         if (!this.newKeypair.name) {
-            Notify.error(`密钥对名字不能为空`);
+            MESSAGE.error(`密钥对名字不能为空`);
             return;
         }
         this.newKeypair.name = this.newKeypair.name.trim();
         let body = await API.keypair.post({ keypair: this.newKeypair })
-        Notify.success(`密钥对创建成功`)
+        MESSAGE.success(`密钥对创建成功`);
         this.privateKey = body.keypair.private_key;
         // keypairTable.refresh()
     }
@@ -1045,13 +1043,13 @@ export class NewAggDialog extends Dialog {
     }
     async commit() {
         if (!this.name) {
-            Notify.error(`聚合名字不能为空`);
+            MESSAGE.error(`聚合名字不能为空`);
             return;
         }
         let data = { name: this.name }
         if (this.az) { data.availability_zone = this.az }
         await API.agg.post({ aggregate: data })
-        Notify.success(`聚合${this.name}创建成功`)
+        MESSAGE.success(`聚合${this.name}创建成功`)
         this.hide()
     }
 }
@@ -1080,7 +1078,7 @@ export class NewEndpoingDialog extends Dialog {
             this.checkNotEmpty(this.url, '请输入URL');
             this.checkNotEmpty(this.region, '请输入Region');
         } catch (e) {
-            Notify.error(e.message);
+            MESSAGE.error(e.message);
             return
         }
         let url = `${this.schema}://${this.url}`
@@ -1095,7 +1093,7 @@ export class NewEndpoingDialog extends Dialog {
         for (let i in endpoints) {
             await API.endpoint.post({ endpoint: endpoints[i] })
         }
-        Notify.success(`Endpoint 创建成功`)
+        MESSAGE.success(`Endpoint 创建成功`)
     }
 }
 export class ServiceDialog extends Dialog {
@@ -1144,9 +1142,9 @@ export class AggHostsDialog extends Dialog {
         for (let i in this.selected) {
             try {
                 await API.agg.removeHost(this.agg.id, this.selected[i].name);
-                Notify.success(`节点${this.selected[i].name}移除成功`);
+                MESSAGE.success(`节点${this.selected[i].name}移除成功`);
             } catch {
-                Notify.success(`节点${this.selected[i].name}移除失败`);
+                MESSAGE.success(`节点${this.selected[i].name}移除失败`);
             }
         }
         this.selected = [];
@@ -1157,10 +1155,10 @@ export class AggHostsDialog extends Dialog {
         try {
             await API.agg.removeHost(this.agg.id, host);
         } catch {
-            Notify.error(`节点 ${host} 移除失败`);
+            MESSAGE.error(`节点 ${host} 移除失败`);
             return;
         }
-        Notify.success(`节点${host}移除成功`);
+        MESSAGE.success(`节点${host}移除成功`);
         this.agg = (await API.agg.show(this.agg.id)).aggregate;
         this.refresh();
     }
@@ -1200,9 +1198,9 @@ export class AggAddHostsDialog extends Dialog {
             let host = this.hypervisorTable.selected[i].hypervisor_hostname;
             try {
                 await API.agg.addHost(this.agg.id, host);
-                Notify.success(`节点 ${host} 添加成功`);
+                MESSAGE.success(`节点 ${host} 添加成功`);
             } catch {
-                Notify.error(`节点 ${host} 添加失败`);
+                MESSAGE.error(`节点 ${host} 添加失败`);
             }
         }
         this.hypervisorTable.selected = [];
@@ -1230,9 +1228,9 @@ export class RebuildDialog extends Dialog {
             this.server.id,
             { imageRef: this.imageRef, description: this.description }
         );
-        Notify.info(`虚拟机${this.server.name}重建中`)
+        MESSAGE.info(`虚拟机${this.server.name}重建中`)
         // await serverTable.waitServerStatus(this.server.id);
-        // Notify.success(`虚拟机${this.server.name}重建成功`)
+        // MESSAGE.success(`虚拟机${this.server.name}重建成功`)
     }
 }
 export class UpdateServerSG extends Dialog {
@@ -1265,9 +1263,9 @@ export class UpdateServerSG extends Dialog {
             let port = this.selectedInterfaces[i];
             try {
                 await API.port.put(port.id, { port: { security_groups: this.securityGroup } });
-                Notify.success(`端口${port.name || port.id}更新成功.`);
+                MESSAGE.success(`端口${port.name || port.id}更新成功.`);
             } catch {
-                Notify.error(`端口${port.name || port.id}更新失败.`);
+                MESSAGE.error(`端口${port.name || port.id}更新失败.`);
                 throw Error(`端口${port.name || port.id}更新失败.`)
             }
         }
@@ -1291,7 +1289,7 @@ export class NewVolumeDialog extends Dialog {
     }
     async commit() {
         if (!this.name) {
-            Notify.warning('卷名字不能为空');
+            MESSAGE.warning('卷名字不能为空');
             return;
         }
         let creatingVolumes = [];
@@ -1306,11 +1304,11 @@ export class NewVolumeDialog extends Dialog {
             let body = await API.volume.create(data)
             creatingVolumes.push(body.volume)
         }
-        Notify.info(`卷 ${this.name} 创建中`);
+        MESSAGE.info(`卷 ${this.name} 创建中`);
         for (let i in creatingVolumes) {
             let volume = creatingVolumes[i];
             await API.volume.waitVolumeStatus(volume.id);
-            Notify.success(`卷 ${volume.name || volume.id} 创建完成`);
+            MESSAGE.success(`卷 ${volume.name || volume.id} 创建完成`);
         }
     }
     async open() {
@@ -1338,8 +1336,8 @@ export class NewSnapshotDialog extends Dialog {
         return this.name = Utils.getRandomName('snapshot');
     }
     async commit() {
-        if (!this.name) { Notify.error(`快照名不能为空`); return; }
-        if (!this.volume_id) { Notify.error(`请选择一个卷`); return; }
+        if (!this.name) { MESSAGE.error(`快照名不能为空`); return; }
+        if (!this.volume_id) { MESSAGE.error(`请选择一个卷`); return; }
         let data = {
             name: this.name,
             volume_id: this.volume_id,
@@ -1350,10 +1348,10 @@ export class NewSnapshotDialog extends Dialog {
             data.description = this.description
         }
         let body = await API.snapshot.create(data);
-        Notify.info(`快照 ${this.name} 创建中`);
+        MESSAGE.info(`快照 ${this.name} 创建中`);
         this.hide();
         await snapshotTable.waitSnapshotCreated(body.snapshot.id)
-        Notify.success(`快照 ${this.name} 创建成功`);
+        MESSAGE.success(`快照 ${this.name} 创建成功`);
     }
     async init() {
         super.init();
@@ -1376,8 +1374,8 @@ export class NewBackupDialog extends Dialog {
         return this.name = Utils.getRandomName('backup');
     }
     async commit() {
-        if (!this.name) { Notify.error(`备份名不能为空`); return; }
-        if (!this.volume_id) { Notify.error(`请选择一个卷`); return; }
+        if (!this.name) { MESSAGE.error(`备份名不能为空`); return; }
+        if (!this.volume_id) { MESSAGE.error(`请选择一个卷`); return; }
         let data = {
             name: this.name,
             incremental: this.incremental,
@@ -1388,14 +1386,14 @@ export class NewBackupDialog extends Dialog {
             data.description = this.description
         }
         let backup = (await API.backup.create(data)).backup;
-        Notify.info(`备份 ${this.name} 创建中`);
+        MESSAGE.info(`备份 ${this.name} 创建中`);
         this.hide();
         let backupTable = new BackupTable()
         let result = await backupTable.waitBackupCreated(backup.id);
         if (result.status == 'error') {
-            Notify.error(`备份 ${this.name} 创建失败`);
+            MESSAGE.error(`备份 ${this.name} 创建失败`);
         } else {
-            Notify.success(`备份 ${this.name} 创建成功`);
+            MESSAGE.success(`备份 ${this.name} 创建成功`);
         }
     }
     async init() {
@@ -1421,13 +1419,13 @@ export class VolumeStateResetDialog extends Dialog {
         if (this.attachStatus) { data.attach_status = this.attachStatus }
         if (this.resetMigrateStatus) { data.migration_status = null }
         if (Object.keys(data).length == 0) {
-            Notify.error('请至少指定一个要重置的属性。');
+            MESSAGE.error('请至少指定一个要重置的属性。');
             throw Error('请至少指定一个要重置的属性。');
         }
         for (let i in volumes) {
             let volume = volumes[i];
             await API.volume.resetState(volume.id, data);
-            Notify.success(`卷 ${volume.name || volume.id} 状态重置成功`);
+            MESSAGE.success(`卷 ${volume.name || volume.id} 状态重置成功`);
         }
     }
 }
@@ -1443,7 +1441,7 @@ export class BackupResetStateDialog extends Dialog {
             let backup = backups[i];
             await API.backup.resetState(backup.id, this.status);
             await this.backupTable.waitBackupStatus(backup.id, this.status);
-            Notify.success(`备份 ${backup.name || backup.id} 状态重置成功`);
+            MESSAGE.success(`备份 ${backup.name || backup.id} 状态重置成功`);
         }
     }
 }
@@ -1457,7 +1455,7 @@ export class SnapshotResetStateDialog extends Dialog {
         for (let i in snapshots) {
             let snapshot = snapshots[i];
             await API.snapshot.resetState(snapshot.id, this.status);
-            Notify.success(`快照 ${snapshot.name || snapshot.id} 状态重置成功`);
+            MESSAGE.success(`快照 ${snapshot.name || snapshot.id} 状态重置成功`);
         }
     }
 }
@@ -1473,7 +1471,7 @@ export class NewVolumeTypeDialog extends Dialog {
     async commit() {
         let extraSpecs = {};
         if (!this.name) {
-            Notify.error('名字不能为空');
+            MESSAGE.error('名字不能为空');
             throw Error('名字不能为空');
         }
         let data = {
@@ -1491,7 +1489,7 @@ export class NewVolumeTypeDialog extends Dialog {
         }
         LOG.debug(`Create volume type ${JSON.stringify(data)}`);
         await API.volumeType.create(data);
-        Notify.success(`卷类型 ${this.name} 创建成功`);
+        MESSAGE.success(`卷类型 ${this.name} 创建成功`);
     }
     async init() {
         super.init();
@@ -1534,17 +1532,17 @@ export class RouterInterfacesDialog extends Dialog {
     }
     async remove(item) {
         let subneId = item.fixed_ips[0].subnet_id;
-        Notify.info(`子网 ${subneId} 移除中`);
+        MESSAGE.info(`子网 ${subneId} 移除中`);
         await API.router.removeSubnet(this.router.id, subneId)
-        Notify.success(`子网 ${subneId} 移除成功`);
+        MESSAGE.success(`子网 ${subneId} 移除成功`);
         this.refreshInterfaces();
     }
     async attachSelected() {
-        Notify.info(`子网添加中`);
+        MESSAGE.info(`子网添加中`);
         for (let i in this.selected) {
             let item = this.selected[i];
             await API.router.addInterface(this.router.id, item)
-            Notify.success(`子网 ${item} 添加成功`);
+            MESSAGE.success(`子网 ${item} 添加成功`);
             this.refreshInterfaces();
         }
     }
@@ -1580,10 +1578,10 @@ export class NewPortDialog extends Dialog {
     }
     async commit() {
         if (!this.networkId) {
-            Notify.error(`请选择网络`);
+            MESSAGE.error(`请选择网络`);
             return;
         }
-        Notify.info(`端口 ${this.name} 创建中`);
+        MESSAGE.info(`端口 ${this.name} 创建中`);
         for (var i = 1; i <= this.nums; i++) {
             let data = {
                 name: this.nums > 1 ? `${this.name}-${i}` : this.name,
@@ -1595,7 +1593,7 @@ export class NewPortDialog extends Dialog {
             if (this.portSecurityEnabled) { data.port_security_enabled = this.portSecurityEnabled; }
             if (this.portSecurityGroups.length > 0) { data.security_groups = this.portSecurityGroups; }
             await API.port.post({ port: data })
-            Notify.success(`端口 ${this.name} 创建成功`);
+            MESSAGE.success(`端口 ${this.name} 创建成功`);
         }
         this.hide();
     }
@@ -1623,11 +1621,11 @@ export class UpdatePortDialog extends Dialog {
         if (this.portSGs != this.port.security_groups) { data.security_groups = this.portSGs; }
         if (this.portQosPolicy != this.port.qos_policy_id) { data.qos_policy_id = this.portQosPolicy; }
         if (!data) {
-            Notify.warning(`端口属性没有变化`)
+            MESSAGE.warning(`端口属性没有变化`)
             return;
         }
         await API.port.put(this.port.id, { port: data });
-        Notify.success(`端口 ${this.port.name || this.port.name} 更新成功`)
+        MESSAGE.success(`端口 ${this.port.name || this.port.name} 更新成功`)
         portTable.refresh();
     }
 
@@ -1642,7 +1640,7 @@ export class NewQosPolicyDialog extends Dialog {
     }
     async commit() {
         if (!this.name) {
-            Notify.error(`请输入名字`);
+            MESSAGE.error(`请输入名字`);
             return;
         }
 
@@ -1655,7 +1653,7 @@ export class NewQosPolicyDialog extends Dialog {
             data.description = this.description;
         }
         await API.qosPolicy.post({ policy: data })
-        Notify.success(`限速策略 ${this.name} 创建成功`);
+        MESSAGE.success(`限速策略 ${this.name} 创建成功`);
         qosPolicyTable.refresh();
         this.hide();
     }
@@ -1688,10 +1686,10 @@ export class QosPolicyRules extends Dialog {
                 } else {
                     await API.qosPolicy.deletePpsRule(this.qosPolicy.id, rule.id);
                 }
-                Notify.success(`规则 ${rule.id} 删除成功`);
+                MESSAGE.success(`规则 ${rule.id} 删除成功`);
                 this.qosPolicy = (await API.qosPolicy.show(this.qosPolicy.id)).policy;
             } catch (e) {
-                Notify.error(`规则 ${rule.id} 删除失败`);
+                MESSAGE.error(`规则 ${rule.id} 删除失败`);
             }
         }
         this.selected = [];
@@ -1725,7 +1723,7 @@ export class NewQosPolicyRule extends Dialog {
 
     async createBpsRule() {
         if (this.maxKbps > 2147483647 || this.maxBurstKbps > 2147483647) {
-            Notify.warning(`kbps值不能大于 2147483647`)
+            MESSAGE.warning(`kbps值不能大于 2147483647`)
             return;
         }
         for (let i in this.directions) {
@@ -1736,7 +1734,7 @@ export class NewQosPolicyRule extends Dialog {
                 await API.qosPolicy.addBpsRule(
                     this.qosPolicy.id, this.directions[i],
                     { maxKbps: this.maxKbps, maxBurstKbps: this.maxBurstKbps });
-                Notify.success(`规则 ${this.BPS} ${this.directions[i]} 创建成功`);
+                MESSAGE.success(`规则 ${this.BPS} ${this.directions[i]} 创建成功`);
             } catch {
                 throw Error(`规则 ${this.BPS} ${this.directions[i]} 创建失败`);
             }
@@ -1751,7 +1749,7 @@ export class NewQosPolicyRule extends Dialog {
                 await API.qosPolicy.addPpsRule(
                     this.qosPolicy.id, this.directions[i],
                     { maxKpps: this.maxKpps, maxBurstKbps: this.maxBurstKpps })
-                Notify.success(`规则 ${this.PPS} ${this.directions[i]} 创建成功`);
+                MESSAGE.success(`规则 ${this.PPS} ${this.directions[i]} 创建成功`);
             } catch (e) {
                 throw Error(`规则 ${this.PPS} ${this.directions[i]} 创建失败`);
             }
@@ -1781,13 +1779,13 @@ export class NewSGDialog extends Dialog {
     }
     async commit() {
         if (!this.name) {
-            Notify.error(`请输入安全组名`);
+            MESSAGE.error(`请输入安全组名`);
             return;
         }
         let data = { name: this.name };
         if (this.description) { data['description'] = this.description }
         await API.sg.post({ security_group: data });
-        Notify.success(`安全组 ${this.name} 创建成功`);
+        MESSAGE.success(`安全组 ${this.name} 创建成功`);
         sgTable.refresh();
         this.hide();
     }
@@ -1828,7 +1826,7 @@ export class NewSGRuleDialog extends Dialog {
             ethertype: this.ethertype,
         }
         if (this.remoteIp && this.remoteGroup) {
-            Notify.warning(`对端IP和对端安全组不能同时设置`);
+            MESSAGE.warning(`对端IP和对端安全组不能同时设置`);
             return;
         }
         if (this.remoteIp) { data['remote_ip_prefix'] = this.remoteIp }
@@ -1836,11 +1834,11 @@ export class NewSGRuleDialog extends Dialog {
         if (this.dstPortMin) { data['port_range_min'] = this.dstPortMin; }
         if (this.dstPortMax) { data['port_range_max'] = this.dstPortMax; }
         if (this.dstPortMin && this.dstPortMax && this.dstPortMin > this.dstPortMax) {
-            Notify.error(`开始端口必须小于结束端口，请输入正确的端口范围。`);
+            MESSAGE.error(`开始端口必须小于结束端口，请输入正确的端口范围。`);
             return;
         }
         await API.sgRule.create(data);
-        Notify.success(`规则创建成功`);
+        MESSAGE.success(`规则创建成功`);
         let newSG = (await API.sg.show(this.securityGroup.id)).security_group;
         this.securityGroup = newSG;
     }
@@ -1881,7 +1879,7 @@ export class SGRulesDialog extends Dialog {
             await API.sgRule.delete(sgRule.id);
         }
         this.selected = [];
-        Notify.success(`规则删除成功`);
+        MESSAGE.success(`规则删除成功`);
         this.securityGroup = await this.getSecurityGroup(this.securityGroup.id);
     }
     async refresh(){
@@ -2191,14 +2189,14 @@ export class ServerConsoleLogDialog extends Dialog {
     }
     async refreshConsoleLog(length) {
         if (this.server['OS-EXT-SRV-ATTR:host'] == null) {
-            Notify.error(`虚拟机 ${this.server.name || this.server.id} 未创建`);
+            MESSAGE.error(`虚拟机 ${this.server.name || this.server.id} 未创建`);
             return
         }
         this.refreshing = true;
         try {
             this.content = (await API.server.getConsoleLog(this.server.id, length));
         } catch (e) {
-            Notify.error(`获取日志失败!`);
+            MESSAGE.error(`获取日志失败!`);
             console.error(e)
         }
         this.refreshing = false;
@@ -2248,9 +2246,9 @@ export class ServerResetStateDialog extends Dialog {
             let server = this.servers[i];
             try {
                 await API.server.resetState(server.id, this.active);
-                Notify.success(`虚拟机${server.name || server.name}状态重置成功`);
+                MESSAGE.success(`虚拟机${server.name || server.name}状态重置成功`);
             } catch {
-                Notify.error(`虚拟机${server.name || server.name}状态重置失败`);
+                MESSAGE.error(`虚拟机${server.name || server.name}状态重置失败`);
             }
         }
     }
@@ -2289,7 +2287,7 @@ export class ImageDeleteSmartDialog extends Dialog {
                 await imageTable.waitDeleted(image.id);
                 imageTable.refresh();
             } else {
-                Notify.error(`删除镜像 ${image.id} 失败 `)
+                MESSAGE.error(`删除镜像 ${image.id} 失败 `)
             }
         } else {
             console.warn(`image ${image.id} is instance backup, but bdm is null`)
@@ -2300,7 +2298,7 @@ export class ImageDeleteSmartDialog extends Dialog {
     }
 
     async commit(images) {
-        Notify.info('开始删除镜像');
+        MESSAGE.info('开始删除镜像');
         if (!this.smart) {
             for (let i in images) {
                 let image = images[i];
@@ -2326,7 +2324,7 @@ export class ImageDeleteSmartDialog extends Dialog {
                 await imageTable.waitDeleted(image.id);
                 continue;
             }
-            Notify.warning(`image type ${image.image_type} is unkown.`)
+            MESSAGE.warning(`image type ${image.image_type} is unkown.`)
         }
     }
 }
@@ -2356,14 +2354,14 @@ export class ImagePropertiesDialog extends Dialog {
     async removeProperty(key) {
         await API.image.removeProperties(this.image.id, [key]);
         Vue.delete(this.properties, key);
-        Notify.success(`属性 ${key} 删除成功`);
+        MESSAGE.success(`属性 ${key} 删除成功`);
     }
     async addProperty(key, value) {
         let properties = {};
         properties[key] = value;
         await API.image.addProperties(this.image.id, properties);
         Vue.set(this.properties, key, value)
-        Notify.success(`属性 ${key} 添加成功`);
+        MESSAGE.success(`属性 ${key} 添加成功`);
     }
     async addProperties() {
         if (!this.propertyContent) {
@@ -2387,7 +2385,7 @@ export class ImagePropertiesDialog extends Dialog {
         }
 
         await API.image.addProperties(this.image.id, properties)
-        Notify.success(`属性添加成功`);
+        MESSAGE.success(`属性添加成功`);
         for (let key in properties) {
             Vue.set(this.properties, key, properties[key])
         }
@@ -2435,7 +2433,7 @@ export class NewImageDialog extends Dialog {
             let reader = new FileReader();
             reader.onloadend = function () {
                 if (reader.error) {
-                    Notify.error('文件读取失败');
+                    MESSAGE.error('文件读取失败');
                     reject()
                 } else {
                     resolve(reader)
@@ -2469,7 +2467,7 @@ export class NewImageDialog extends Dialog {
         this.message = '镜像缓存成功,等待后端上传,点击右上角查看任务进度。';
     }
     async commit() {
-        if (!this.name) { Notify.error(`请输入镜像名`); return; }
+        if (!this.name) { MESSAGE.error(`请输入镜像名`); return; }
         let data = { name: this.name, disk_format: this.diskFormat, container_format: this.containerFormat };
         if (this.visibility) { data.visibility = this.visibility }
         let image = await API.image.post(data);
@@ -2496,7 +2494,7 @@ export class TasksDialog extends Dialog {
             await API.task.delete(task_id);
             this.refresh();
         } catch {
-            Notify.error(`删除失败`)
+            MESSAGE.error(`删除失败`)
         }
     }
     async init() {

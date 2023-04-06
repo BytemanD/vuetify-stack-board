@@ -1,7 +1,7 @@
 import I18N from "./i18n";
-import { Notify } from "vuetify-message-snackbar";
+import { MESSAGE } from "./lib";
 
-const NOTIFY_POSITION = ['top-left', 'top', 'top-right', 'bottom-left', 'bottom', 'bottom-right'];
+const NOTIFY_POSITION = ['bottom-right', 'bottom-left', 'bottom-center', 'top-left', 'top-center', 'top-right'];
 const LANGUAGE = ['en-US', 'zh-CN'];
 
 class Setting {
@@ -104,8 +104,7 @@ export class AppSettings {
                 language: new Setting(navigator.language, { choises: LANGUAGE, onChangeCallback: I18N.setDisplayLang }),
                 themeDark: new BooleanSetting(false),
                 navigatorWidth: new NumberSetting(200, { choises: [200, 220, 240, 260, 280, 300] }),
-                messagePosition: new Setting('bottom-right', { choises: NOTIFY_POSITION }),
-                alertPosition: new Setting('bottom', { choises: NOTIFY_POSITION }),
+                messagePosition: new Setting(NOTIFY_POSITION[0], { choises: NOTIFY_POSITION }),
                 consoleLogWidth: new NumberSetting(1000, { choises: [800, 1000, 1200, 1400, 1600] }),
                 resourceWarningPercent: new NumberSetting(80, { choises: [50, 60 , 70, 80, 90] }),
             }
@@ -125,9 +124,10 @@ export class AppSettings {
         for(let group in this){
             this[group].save();
         }
-        Notify.success('保存成功');
+        MESSAGE.success('保存成功');
     }
     load(){
+        console.debug('load settings');
         for(let group in this){
             this[group].load();
         }
@@ -136,8 +136,11 @@ export class AppSettings {
         for(let group in this){
             this[group].reset();
         }
-        Notify.success('重置成功');
+        MESSAGE.success('重置成功');
     }
 }
 
-export default new AppSettings();
+const SETTINGS = new AppSettings();
+SETTINGS.load();
+
+export default SETTINGS;

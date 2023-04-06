@@ -40,9 +40,8 @@
 </template>
 <script>
 import i18n from '@/assets/app/i18n';
-import { Notify } from 'vuetify-message-snackbar';
 
-import { Utils } from '@/assets/app/lib';
+import { Utils, MESSAGE } from '@/assets/app/lib';
 import { NewQosPolicyRule } from '@/assets/app/dialogs';
 
 export default {
@@ -62,7 +61,7 @@ export default {
                 this.display = false;
                 this.$emit('completed');
             } catch (error){
-                Notify.error(error.message);
+                MESSAGE.error(error.message);
             }
         }
     },

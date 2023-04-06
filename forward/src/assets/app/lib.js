@@ -1,7 +1,8 @@
-import API from "./api.js";
-import { Notify } from "vuetify-message-snackbar";
+import Vue from "vue";
 
+import API from "./api.js";
 import { CookieContext } from "./context.js";
+import SETTINGS from "./settings.js";
 
 const KB = 1024;
 const MB = KB * 1024;
@@ -9,7 +10,7 @@ const GB = MB * 1024;
 
 export class Utils {
 
-    static nowFormat(dateObject=null) {
+    static nowFormat(dateObject = null) {
         let date = dateObject ? dateObject : new Date();
         let month = date.getMonth() + 1;
         let day = date.getDate()
@@ -19,11 +20,11 @@ export class Utils {
         return `${date.getFullYear()}-${month >= 10 ? month : '0' + month}-${day >= 10 ? day : '0' + day} ` +
             `${hours >= 10 ? hours : '0' + hours}:${minutes >= 10 ? minutes : '0' + minutes}:${seconds >= 10 ? seconds : '0' + seconds}`;
     }
-    static parseUTCToLocal(utcString){
-        if (! utcString) {
+    static parseUTCToLocal(utcString) {
+        if (!utcString) {
             return '';
         }
-        if (! utcString.endsWith('Z')){
+        if (!utcString.endsWith('Z')) {
             utcString += 'Z'
         }
         return Utils.nowFormat(new Date(`${utcString}`))
@@ -36,10 +37,10 @@ export class Utils {
         API.volume.show(volume_id).then(resp => {
             let status = resp.data.volume.status;
             if (status == 'in-use') {
-                Notify.success(`卷 ${volume_id} 挂载成功`);
+                MESSAGE.success(`卷 ${volume_id} 挂载成功`);
                 return;
             } else if (status == 'error') {
-                Notify.error(`卷 ${volume_id} 挂载失败`);
+                MESSAGE.error(`卷 ${volume_id} 挂载失败`);
                 return;
             }
             setTimeout(function () {
@@ -51,10 +52,10 @@ export class Utils {
         API.volume.show(volume_id).then(resp => {
             let status = resp.data.volume.status;
             if (status == 'available') {
-                Notify.success(`卷 ${volume_id} 卸载成功`);
+                MESSAGE.success(`卷 ${volume_id} 卸载成功`);
                 return;
             } else if (status == 'error') {
-                Notify.error(`卷 ${volume_id} 卸载失败`);
+                MESSAGE.error(`卷 ${volume_id} 卸载失败`);
                 return;
             }
             setTimeout(function () {
@@ -69,7 +70,7 @@ export class Utils {
         return `${(size / 1024).toFixed(0)} GB`
     }
     static humanSize(size) {
-        if (size == null){
+        if (size == null) {
             return ''
         } else if (size <= KB) {
             return `${size} B`
@@ -101,12 +102,12 @@ export class Utils {
             document.body.removeAttribute(element);
         }
     }
-    static lastDateList(steps, nums){
+    static lastDateList(steps, nums) {
         // Get last n list of date
         // e.g. [timestamp1, timestamp2, ...]
         let endDate = new Date();
         let dateList = [];
-        for (let i = 0; i < nums; i++){
+        for (let i = 0; i < nums; i++) {
             for (let unit in steps) {
                 switch (unit) {
                     case 'hour':
@@ -129,14 +130,14 @@ export class Utils {
         }
         return dateList.reverse();
     }
-    static copyContent(content, message=null) {
+    static copyContent(content, message = null) {
         Utils.copyToClipboard(content)
         if (message) {
-            Notify.success(message);
+            MESSAGE.success(message);
         }
     }
     static isEmpty(value) {
-        return ! value || value == '' || value == {} || value == [];
+        return !value || value == '' || value == {} || value == [];
     }
 }
 
@@ -154,43 +155,43 @@ export class Logger {
         this.level = kwargs['level'] || Level.INFO;
     }
     debug(msg) {
-        if (this.level < Level.DEBUG){
+        if (this.level < Level.DEBUG) {
             return
         }
         console.debug(new Date().toLocaleString(), 'DEBUG', msg)
     }
     info(msg) {
-        if (this.level < Level.INFO){
+        if (this.level < Level.INFO) {
             return
         }
         console.info(`${new Date().toLocaleString()} INFO ${msg}`)
     }
     warn(msg) {
-        if (this.level < Level.WARNING){
+        if (this.level < Level.WARNING) {
             return
         }
         console.warn(`${new Date().toLocaleString()} WARN ${msg}`)
     }
     error(msg) {
         console.error(`${new Date().toLocaleString()} ERROR ${msg}`)
-        Notify.error(msg)
+        MESSAGE.error(msg)
     }
 }
 
 export class ContextLocalStorage {
-    constructor(){
+    constructor() {
         this.context = new CookieContext();
     }
-    domain(){
+    domain() {
         return `${this.context.getClusterId()}_${this.context.getRegion() || 'default'}`;
     }
-    getAll(name){
+    getAll(name) {
         let itemName = `${this.domain()}_${name}`
         LOG.debug(`localStorage get Item ${itemName}`)
         let data = localStorage.getItem(itemName)
-        return data ? JSON.parse(data): {};
+        return data ? JSON.parse(data) : {};
     }
-    get(name, key){
+    get(name, key) {
         let itemName = `${this.domain()}_${name}`
         return this.getAll(itemName)[key]
     }
@@ -212,7 +213,7 @@ export class ContextLocalStorage {
 
 export class ServerTasks extends ContextLocalStorage {
 
-    getAll(){
+    getAll() {
         return super.getAll('tasks');
     }
     add(serverId, task) {
@@ -244,29 +245,51 @@ export var CONST = {
 }
 
 export class UsageRange {
-    constructor(){
+    constructor() {
         this.range = CONST.USAGE_LAST_1_DAY
 
         this.dataList = [];
     }
-    getDataList(){
+    getDataList() {
         let dateList = []
         switch (this.range) {
             case CONST.USAGE_LAST_1_DAY:
-                dateList = Utils.lastDateList({hour: 1}, 25);
+                dateList = Utils.lastDateList({ hour: 1 }, 25);
                 break;
             case CONST.USAGE_LAST_7_DAY:
-                dateList = Utils.lastDateList({day: 1}, 8);
+                dateList = Utils.lastDateList({ day: 1 }, 8);
                 break;
             case CONST.USAGE_LAST_6_MONTHES:
-                dateList = Utils.lastDateList({month: 1}, 7);
+                dateList = Utils.lastDateList({ month: 1 }, 7);
                 break;
             case CONST.USAGE_LAST_1_YEAR:
-                dateList = Utils.lastDateList({month: 1}, 13);
+                dateList = Utils.lastDateList({ month: 1 }, 13);
                 break;
         }
         return dateList;
     }
 }
 
-export const LOG = new Logger({level: Level.DEBUG});
+export class Message {
+    constructor(position) {
+        let positionXY = position.split('-');
+        this.y = positionXY[0];
+        this.x = positionXY[1];
+        this.notify = Vue.prototype.$toast;
+    }
+    info(msg) {
+        this.notify(msg, { x: this.x, y: this.y, color: 'info', timeout: 1000, icon: 'mdi-information' });
+    }
+    success(msg) {
+        this.notify(msg, { x: this.x, y: this.y, color: 'success', timeout: 1000, icon: 'mdi-check-circle' });
+    }
+    warning(msg) {
+        this.notify(msg, { x: this.x, y: this.y, color: 'warning', icon: 'mdi-alert-circle' });
+    }
+    error(msg) {
+        this.notify(msg, { x: this.x, y: this.y, color: 'error', icon: 'mdi-close-circle' });
+    }
+}
+
+export const MESSAGE = new Message(SETTINGS.ui.getItem('messagePosition').value);
+export const LOG = new Logger({ level: Level.DEBUG });

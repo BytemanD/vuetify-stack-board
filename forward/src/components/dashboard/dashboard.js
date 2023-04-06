@@ -2,9 +2,9 @@ import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router';
 import axios from 'axios';
-import { Notify } from 'vuetify-message-snackbar';
 
 import vuetify from '../../plugins/vuetify'
+import { MESSAGE } from '@/assets/app/lib';
 
 import ErrorPage from '../ErrorPage.vue'
 import DashBoard from './DashBoard.vue';
@@ -45,7 +45,7 @@ const CONFIG = 'config.json'
 
 if (localStorage.getItem('clusterId') == null){
   console.warn('即将跳转到欢迎页面');
-  Notify.warning('即将跳转到欢迎页面');
+  MESSAGE.warning('即将跳转到欢迎页面');
   window.open('/welcome.html', '_self');
 }
 

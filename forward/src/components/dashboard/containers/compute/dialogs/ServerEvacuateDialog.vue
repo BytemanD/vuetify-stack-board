@@ -17,7 +17,7 @@
     </v-dialog>
 </template>
 <script>
-import { Notify } from 'vuetify-message-snackbar';
+import { MESSAGE } from '@/assets/app/lib';
 
 import i18n from '@/assets/app/i18n';
 import { Utils } from '@/assets/app/lib';
@@ -41,7 +41,7 @@ export default {
                 this.display = false;
                 this.$emit('completed');
             } catch (error) {
-                Notify.warning(error.message)
+                MESSAGE.warning(error.message)
             }
         }
     },

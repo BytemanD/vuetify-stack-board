@@ -86,6 +86,8 @@ class DBApi(object):
         return SESSION.query(Config).all()
 
     def get(self, name):
+        # sourcery skip: reintroduce-else, swap-if-else-branches,
+        # use-named-expression
         config = session.query(Config).filter_by(name=name).first()
         if not config:
             raise ValueError(f'option {name} is not exists')
@@ -124,7 +126,7 @@ def init(items, dbfile, engine=None, session=None, table_name=None):
     if not os.path.exists(dbfile_dir):
         os.makedirs(dbfile_dir)
 
-    ENGINE = engine or create_engine('sqlite:///{}'.format(DB_FILE))
+    ENGINE = engine or create_engine(f'sqlite:///{DB_FILE}')
     SESSION = session or sessionmaker(bind=ENGINE)()
 
     Base.metadata.create_all(ENGINE, checkfirst=True)

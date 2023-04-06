@@ -41,7 +41,7 @@
   
 <script>
 import axios from 'axios';
-import { Notify } from 'vuetify-message-snackbar';
+import { MESSAGE } from '@/assets/app/lib';
 
 import API from '@/assets/app/api';
 import { NewAggDialog } from '@/assets/app/dialogs';
@@ -76,7 +76,7 @@ export default {
         window.open('/dashboard.html', '_self');
       }).catch(error => {
         console.error(error);
-        Notify.error(`连接 ${cluster.name} 失败`)
+        MESSAGE.error(`连接 ${cluster.name} 失败`)
       })
     },
     checkLastVersion: async function () {

@@ -170,7 +170,7 @@ export default {
     }
   },
   created() {
-    SETTINGS.load();
+    // SETTINGS.load();
     this.$vuetify.theme.dark = SETTINGS.ui.getItem('themeDark').value;
     this.initRegion();
     if (this.$route.path == '/') {

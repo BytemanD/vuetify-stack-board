@@ -19,7 +19,7 @@
 </template>
     
 <script>
-import { Notify } from 'vuetify-message-snackbar';
+import { MESSAGE } from '@/assets/app/lib';
 
 import { NewRoleDialog } from '@/assets/app/dialogs';
 
@@ -39,7 +39,7 @@ export default {
                 this.display = false;
                 this.$emit('completed');
             } catch (error){
-                Notify.error(error.message);
+                MESSAGE.error(error.message);
             }
         }
     },
