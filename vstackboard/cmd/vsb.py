@@ -165,7 +165,8 @@ class Serve(cli.SubCli):
             LOG.warning('template path %s not exists.', args.template)
 
         views.RUN_AS_CONTAINER = args.container
-        application.init(enable_cross_domain=True)
+        application.init(enable_cross_domain=True,
+                         index_redirect=CONF.index_redirect)
         app = VstackboardApp(application.get_routes() + views.get_routes(),
                              develop=args.develop,
                              static_path=args.static,
