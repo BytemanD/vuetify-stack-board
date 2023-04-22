@@ -18,13 +18,14 @@
 </template>
 <script>
 import i18n from '@/assets/app/i18n';
-import { Utils } from '@/assets/app/lib';
+import { MESSAGE, Utils } from '@/assets/app/lib';
 import { ResizeDialog } from '@/assets/app/dialogs';
 
 export default {
     props: {
         show: Boolean,
         server: Object,
+        serverTable: Object,
     },
     data: () => ({
         i18n: i18n,
@@ -34,6 +35,10 @@ export default {
     }),
     methods: {
         commit: async function () {
+            if (Utils.isEmpty(this.dialog.flavorRef)){
+                MESSAGE.warning('请选择规格!');
+                return;
+            }
             await this.dialog.commit();
             this.display = false;
             this.$emit('completed');
@@ -45,7 +50,7 @@ export default {
         show(newVal) {
             this.display = newVal;
             if (this.display) {
-                this.dialog.init(this.server);
+                this.dialog.init(this.server, this.serverTable);
             }
         },
         display(newVal) {

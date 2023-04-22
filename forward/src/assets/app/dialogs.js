@@ -1,13 +1,13 @@
 import Vue from 'vue';
 import * as Echarts from 'echarts';
 
-import API from './api.js';
+import API, { ExpectServerCreated, ExpectServerMigrated, ExpectServerRebuild, ExpectServerResize } from './api.js';
 import I18N from './i18n.js';
 import SETTINGS from './settings.js';
-import { Utils, LOG, ServerTasks, CONST, MESSAGE } from './lib.js';
+import { Utils, LOG, CONST, MESSAGE } from './lib.js';
 import { BackupTable, VolumeDataTable, UserTable, RegionDataTable, ServiceTable, HypervisortTable, } from './tables.js';
 import {
-    serverTable, imageTable,
+    imageTable,
     snapshotTable,
     qosPolicyTable, portTable, sgTable,
 } from './objects.js'
@@ -551,9 +551,11 @@ export class ResizeDialog extends Dialog {
         this.flavors = [];
         this.oldFlavorRef = ''
         this.flavorRef = '';
+        this.serverTable = null;
     }
-    async init(server) {
+    async init(server, serverTable) {
         this.server = server;
+        this.serverTable = serverTable;
         this.oldFlavorRef = this.server.flavor.original_name;
         this.flavors = [];
         let body = await API.flavor.detail();
@@ -565,16 +567,14 @@ export class ResizeDialog extends Dialog {
         }
     }
     async commit() {
-        await API.server.resize(this.server.id, this.flavorRef)
-        MESSAGE.info(`虚拟机 ${this.server.id} 变更中...`);
-        this.hide();
-        let newServer = await serverTable.waitServerStatus(this.server.id);
-        if (newServer.flavor.original_name == this.oldFlavorRef) {
-            MESSAGE.error(`虚拟机 ${this.server.id} 变更失败`);
-        } else {
-            MESSAGE.success(`虚拟机 ${this.server.id} 变更成功`);
+        if (Utils.isEmpty(this.flavorRef)){
+            MESSAGE.warning('请选择规格');
+            return;
         }
-        // serverTable.refresh();
+        await API.server.resize(this.server.id, this.flavorRef);
+        MESSAGE.info(`虚拟机 ${this.server.id} 变更中...`);
+        let watcher = new ExpectServerResize(this.server, this.serverTable);
+        watcher.watch();
     }
 }
 export class MigrateDialog extends Dialog {
@@ -585,28 +585,17 @@ export class MigrateDialog extends Dialog {
         this.smart = true;
         this.nodes = [];
         this.host = null;
+        this.serverTable = null;
     }
 
-    async init(servers) {
+    async init(servers, serverTable) {
         this.servers = servers;
+        this.serverTable = serverTable;
         this.nodes = [];
         super.open();
     }
     async refreshHosts() {
         this.nodes = await API.getMigratableHosts(this.servers)
-    }
-    async liveMigrateAndWait(server) {
-        await API.server.liveMigrate(server.id, this.host)
-        MESSAGE.info(`热迁移 ${server.name} ...`)
-        // await serverTable.waitServerStatus(server.id);
-        // MESSAGE.success(`虚拟机 ${server.id} 迁移完成`);
-    }
-    async migrateAndWait(server) {
-        await API.server.migrate(server.id, this.host);
-        MESSAGE.info(`冷迁移 ${server.name} ...`)
-        // TODO:
-        // await serverTable.waitServerStatus(server.id, ['SHUTOFF', 'ERROR'])
-        // MESSAGE.success(`虚拟机 ${server.id} 迁移完成`);
     }
     isValidLiveMigrateStatus(server) {
         return ['ACTIVE', 'PAUSE'].indexOf(server.status.toUpperCase()) >= 0;
@@ -631,10 +620,14 @@ export class MigrateDialog extends Dialog {
             }
             try {
                 if (this.canLiveMigrate(server)) {
-                    this.liveMigrateAndWait(server);
+                    await API.server.liveMigrate(server.id, this.host);
+                    MESSAGE.info(`实例 ${server.name} 热迁移中`);
                 } else {
-                    this.migrateAndWait(server)
+                    await API.server.migrate(server.id, this.host);
+                    MESSAGE.info(`实例 ${server.name} 冷迁移中`)
                 }
+                let watcher = new ExpectServerMigrated(server, this.serverTable)
+                watcher.watch();
             } catch (error) {
                 MESSAGE.warning(error);
             }
@@ -724,12 +717,13 @@ export class NewClusterDialog extends Dialog {
 }
 
 export class NewServerDialog extends Dialog {
-    constructor() {
+    constructor(serverTable) {
         super({
             name: '', flavor: '', image: '', netId: '',
             nums: 1, az: '', host: '',
             password: ''
         });
+        this.serverTable = serverTable;
         this.portId = null;
         this.flavors = [];
         this.images = [];
@@ -831,18 +825,11 @@ export class NewServerDialog extends Dialog {
         }
         let body = await API.server.boot(this.params.name, this.params.flavor, this.params.image, data)
         MESSAGE.info(`实例 ${this.params.name} 创建中...`);
-        let serverTasks = new ServerTasks();
-        serverTasks.add(body.server.id, 'building')
-        this.hide();
-        // serverTable.refresh();
-        // TODO:
-        let result = await serverTable.waitServerStatus(body.server.id);
-        serverTasks.delete(body.server.id)
-        if (result.status.toUpperCase() == 'ERROR') {
-            MESSAGE.error(`实例 ${this.params.name} 创建失败`);
-        } else {
-            MESSAGE.success(`实例 ${this.params.name} 创建成功`);
-        }
+        // let serverTasks = new ServerTasks();
+        // serverTasks.add(body.server.id, 'building')
+        await this.serverTable.refresh();
+        let task = new ExpectServerCreated(body.server, this.serverTable);
+        task.watch();
     }
 }
 export class ServerGroupDialog extends Dialog {
@@ -1227,9 +1214,11 @@ export class RebuildDialog extends Dialog {
         this.images = [];
         this.imageRef = '',
         this.description = '';
+        this.serverTable = null;
     }
-    async init(server) {
+    async init(server, serverTable) {
         this.server = server;
+        this.serverTable = serverTable;
         this.images = [];
         this.imageRef = ''
         this.images = (await API.image.listActive()).images;
@@ -1240,8 +1229,8 @@ export class RebuildDialog extends Dialog {
             { imageRef: this.imageRef, description: this.description }
         );
         MESSAGE.info(`虚拟机${this.server.name}重建中`)
-        // await serverTable.waitServerStatus(this.server.id);
-        // MESSAGE.success(`虚拟机${this.server.name}重建成功`)
+        let watcher = new ExpectServerRebuild(this.server, this.serverTable);
+        watcher.watch();
     }
 }
 export class UpdateServerSG extends Dialog {

@@ -24,7 +24,7 @@ def init():
     LOG.info('database file is %s', DB_FILE)
     models.Base.metadata.create_all(ENGINE, checkfirst=True)
 
-    dbconf.init(conf.configs_itesm_in_db,
+    dbconf.init(conf.configs_items_in_db,
                 DB_FILE, engine=ENGINE, session=SESSION)
 
 

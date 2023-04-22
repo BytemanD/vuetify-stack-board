@@ -99,18 +99,20 @@ import SETTINGS from '@/assets/app/settings';
 export default {
     props: {
         show: Boolean,
+        table: Object,
     },
     data: () => ({
         i18n: i18n,
         display: false,
         Utils: Utils,
         SETTINGS: SETTINGS,
-        dialog: new NewServerDialog(),
+        dialog: null,
     }),
     methods: {
 
     },
     created() {
+        this.dialog = new NewServerDialog(this.table);
         this.dialog.init();
     },
     watch: {

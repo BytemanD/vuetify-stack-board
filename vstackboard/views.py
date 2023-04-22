@@ -6,6 +6,7 @@ import threading
 from urllib.parse import urlparse
 
 from tornado import web
+from easy2use.web import application
 
 from vstackboard.common import conf
 from vstackboard.common import constants
@@ -43,21 +44,8 @@ class GetContext(object):
         return self.request.headers.get(header)
 
 
-class BaseReqHandler(web.RequestHandler, GetContext):
-
-    def set_default_headers(self):
-        super().set_default_headers()
-        if CONF.enable_cross_domain:
-            self.set_header('Access-Control-Allow-Origin', '*')
-            self.set_header('Access-Control-Allow-Headers', '*')
-            self.set_header('Access-Control-Allow-Max-Age', 1000)
-            self.set_header('Access-Control-Allow-Methods',
-                            'GET, POST, PUT, DELETE, PATCH, OPTIONS')
-
-    def options(self, *args, **kwargs):
-        LOG.debug('options request')
-        self.set_status(204)
-        self.finish()
+class BaseReqHandler(application.BaseReqHandler, GetContext):
+    pass
 
 
 class Version(BaseReqHandler):
@@ -168,7 +156,7 @@ class AuthInfo(BaseReqHandler):
         })
 
 
-class OpenstackProxyBase(BaseReqHandler):
+class OpenstackProxyBase(BaseReqHandler, GetContext):
 
     def _request_body(self):
         return None if self.request.method.upper() in ['DELETE', 'GET'] else \
@@ -325,25 +313,6 @@ class Actions(web.RequestHandler, GetContext):
             self.check_update()
 
 
-class Index(BaseReqHandler):
-
-    def get(self):
-        if CONF.index_redirect:
-            self.redirect(CONF.index_redirect)
-        else:
-            self.redirect('index.html')
-
-
-class Html(BaseReqHandler):
-
-    def get(self):
-        LOG.debug('get html: %s', self.request.path)
-        try:
-            self.render(self.request.path[1:])
-        except FileNotFoundError:
-            self.set_status(404)
-            self.finish({'error', f'{self.request.path[1:]} not found'})
-
 
 class ConfigJson(BaseReqHandler):
 
@@ -354,8 +323,6 @@ class ConfigJson(BaseReqHandler):
 
 def get_routes():
     return [
-        (r'/', Index),
-        (r'/.+\.html', Html),
         (r'/config.json', ConfigJson),
         (r'/version', Version),
         (r'/configs', Configs),

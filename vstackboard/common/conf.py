@@ -29,7 +29,7 @@ openstack_options = [
     cfg.Option('default_region', default='RegionOne'),
 ]
 
-configs_itesm_in_db = [
+configs_items_in_db = [
     Item(name='domain_name', default='Default'),
     IntItem(name='expires_time', default=60 * 60),
     BoolItem(name='fetch_max_version', default=True),
@@ -38,8 +38,8 @@ configs_itesm_in_db = [
 
 
 def load_configs():
-    for file in ['/etc/vstackboard/vstackboard.conf',
-                 os.path.join('etc', 'vstackboard.conf')]:
+    for file in [os.path.join('etc', 'vstackboard.conf'),
+                 '/etc/vstackboard/vstackboard.conf']:
         if not os.path.exists(file):
             continue
         LOG.info('Load config file from %s', file)

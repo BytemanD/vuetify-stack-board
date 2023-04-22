@@ -291,5 +291,6 @@ export class Message {
     }
 }
 
+
 export const MESSAGE = new Message(SETTINGS.ui.getItem('messagePosition').value);
 export const LOG = new Logger({ level: Level.DEBUG });

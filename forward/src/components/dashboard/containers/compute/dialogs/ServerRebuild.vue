@@ -31,6 +31,7 @@ export default {
     props: {
         show: Boolean,
         server: Object,
+        serverTable: Object,
     },
     data: () => ({
         i18n: i18n,
@@ -51,7 +52,7 @@ export default {
         show(newVal) {
             this.display = newVal;
             if (this.display) {
-                this.dialog.init(this.server);
+                this.dialog.init(this.server, this.serverTable);
             }
         },
         display(newVal) {

@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import * as Echarts from 'echarts';
 
-import API from './api.js'
+import API, { ExpectServerPaused, ExpectServerRebooted, ExpectServerShutoff, ExpectServerStarted, ExpectServerUnpaused } from './api.js'
 import I18N from './i18n.js';
 import { LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
 
@@ -37,18 +37,23 @@ class DataTable {
             return;
         }
         MESSAGE.info(`开始删除`);
+        let deleting = [];
         for (let i in this.selected) {
             let item = this.selected[i];
             try {
                 await this.api.delete(item.id || item.name);
-                await this.api.waitDeleted(item);
-                MESSAGE.success(`${item.name || item.id} 删除成功`);
+                deleting.push(item);
             } catch {
                 MESSAGE.error(`删除 ${item.name} ${item.id} 失败`)
             }
         }
         this.refresh();
         this.resetSelected();
+        for (let i in deleting) {
+            let item = deleting[i];
+            await this.api.waitDeleted(item, this);
+        }
+        this.refresh();
     }
     resetSelected() {
         this.selected = [];
@@ -59,6 +64,9 @@ class DataTable {
                 continue;
             }
             for (var key in newItem) {
+                if (this.items[i][key] == newItem[key]){
+                    continue
+                }
                 this.items[i][key] = newItem[key];
             }
             break
@@ -371,6 +379,7 @@ export class ServerDataTable extends DataTable {
             { text: '租户ID', value: 'tenant_id' },
             { text: '用户ID', value: 'iduser_id' },
             { text: 'diskConfig', value: 'OS-DCF:diskConfig' },
+            { text: '错误信息', value: 'fault' },
         ];
         this.imageMap = {};
         this.rootBdmMap = {};
@@ -458,20 +467,12 @@ export class ServerDataTable extends DataTable {
         return currentServer
     }
     async stopServers(servers){
-        return new Promise((resolve) => {
-            let stopped = 0;
-            for (let i in servers){
-                let item = servers[i];
-                API.server.stop(item.id);
-                this.waitServerStatus(item.id, 'SHUTOFF').then(() => {
-                    MESSAGE.success(`虚拟机 ${item.name}已关机`);
-                    stopped += 1;
-                    if (stopped == servers.length){
-                        resolve();
-                    }
-                });
-            }
-        });
+        for (let i in servers){
+            let item = servers[i];
+            await API.server.stop(item.id);
+            let watcher = new ExpectServerShutoff(item, this);
+            watcher.watch();
+        }
     }
     async stopSelected() {
         let statusMap = {inactive: [], active: []};
@@ -485,19 +486,18 @@ export class ServerDataTable extends DataTable {
         }
         if (statusMap.active.length != 0){
             MESSAGE.info(`开始关机: ${statusMap.active.map((item) => {return item.name})} `);
-            await this.stopServers(statusMap.active)
+            this.stopServers(statusMap.active)
         }
         if (statusMap.inactive.length != 0){
             MESSAGE.warning(`虚拟机不是运行状态: ${statusMap.inactive.map((item) => {return item.name})}`);
         }
     }
-    async startServesr(servers) {
+    async startServers(servers) {
         for (let i in servers){
             let item = servers[i];
             await this.api.start(item.id)
-            this.waitServerStatus(item.id, 'ACTIVE').then(() => {
-                MESSAGE.success(`虚拟机 ${item.name}已开机`);
-            });
+            let watcher = new ExpectServerStarted(item, this);
+            watcher.watch();
         }
     }
     async startSelected() {
@@ -513,14 +513,14 @@ export class ServerDataTable extends DataTable {
         }
         if (statusMap.shutoff.length != 0){
             MESSAGE.info(`开始开机: ${statusMap.shutoff.map((item) => {return item.name})} `);
-            await this.startServesr(statusMap.shutoff);
+            await this.startServers(statusMap.shutoff);
         }
         if (statusMap.notShutoff.length != 0) {
             MESSAGE.warning(`虚拟机不是关机状态: ${statusMap.notShutoff.map((item) => {return item.name})}`);
         }
+        this.resetSelected();
     }
     async pauseSelected() {
-        // TODO: 待优化
         let self = this;
         for (let i in this.selected) {
             let item = this.selected[i];
@@ -529,10 +529,10 @@ export class ServerDataTable extends DataTable {
                 continue;
             }
             await self.api.pause(item.id);
-            self.waitServerStatus(item.id, 'PAUSED').then(() => {
-                MESSAGE.success(`虚拟机 ${item.name}已暂停`)
-            });
+            let watcher = new ExpectServerPaused(item, this);
+            watcher.watch();
         }
+        this.resetSelected();
     }
     async unpauseSelected() {
         let self = this;
@@ -543,10 +543,10 @@ export class ServerDataTable extends DataTable {
                 continue;
             }
             await self.api.unpause(item.id);
-            self.waitServerStatus(item.id, 'ACTIVE').then(() => {
-                MESSAGE.success(`虚拟机 ${item.name}已开启`);
-            });
+            let watcher = new ExpectServerUnpaused(item, this);
+            watcher.watch();
         }
+        this.resetSelected();
     }
     async rebootSelected(type = 'SOFT') {
         for (let i in this.selected) {
@@ -556,17 +556,15 @@ export class ServerDataTable extends DataTable {
                 continue;
             }
             await this.api.reboot(item.id, type)
-            this.waitServerStatus(item.id, 'ACTIVE').then(() => {
-                MESSAGE.success(`虚拟机 ${item.name}已重启`)
-            });
+            let watcher = new ExpectServerRebooted(item, this);
+            watcher.watch();
         }
-        this.refresh();
         this.resetSelected();
     }
 
     getImage(server) {
         let self = this;
-        let imageId = server.image.id;
+        let imageId = server.image && server.image.id;
         if (!imageId) {
             return {}
         }
@@ -581,6 +579,9 @@ export class ServerDataTable extends DataTable {
     }
     getRootBdm(server){
         let self = this;
+        if (! server['os-extended-volumes:volumes_attached']){
+            return null;
+        }
         let serverObj = new Server(server);
         if (Object.keys(this.rootBdmMap).indexOf(serverObj.getId()) < 0) {
             Vue.set(this.rootBdmMap, serverObj.getId(), {});
@@ -589,15 +590,6 @@ export class ServerDataTable extends DataTable {
             });
         }
         return this.rootBdmMap[serverObj.getId()];
-    }
-    getErrorMesage(server){
-        if (server.fault && server.fault.MESSAGE) {
-            return server.fault.MESSAGE;
-        }
-        API.server.show(server.id).then(resp => {
-            Vue.set(this.errorMESSAGE, server.id, resp.server.fault && resp.server.fault.MESSAGE);
-        });
-        return this.errorMESSAGE[server.id];
     }
     parseAddresses(server){
         let addressMap = {};

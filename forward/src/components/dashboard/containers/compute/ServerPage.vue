@@ -63,20 +63,19 @@
           <v-btn @click="loginVnc(item)" x-small icon><v-icon>mdi-console</v-icon></v-btn>
         </template>
         <template v-slot:[`item.status`]="{ item }">
-          <span v-if="item.status.toUpperCase() == 'DELETED'"> {{ item.status }}</span>
-          <v-icon v-else-if="item['OS-EXT-STS:vm_state'] == 'building' || item['OS-EXT-STS:task_state']" color="warning"
-            class="mdi-spin">mdi-rotate-right</v-icon>
-          <v-icon v-else-if="item['OS-EXT-STS:vm_state'] == 'active'" color="success">mdi-play-circle</v-icon>
-          <v-icon v-else-if="item['OS-EXT-STS:vm_state'] == 'stopped'" color="warning">mdi-stop-circle</v-icon>
-          <v-icon v-else-if="item['OS-EXT-STS:vm_state'] == 'paused'" color="warning">mdi-pause-circle</v-icon>
-          <v-tooltip top v-else-if="item['OS-EXT-STS:vm_state'] == 'error'">
-            <template v-slot:activator="{ on, attrs }">
-              <v-icon color="error">mdi-alpha-x-circle</v-icon>
-              <v-icon small v-bind="attrs" v-on="on">mdi-lightbulb-question</v-icon>
-            </template>
-            {{ table.getErrorMesage(item) }}
-          </v-tooltip>
-          {{ item['OS-EXT-STS:task_state'] }}
+          <template v-if="item.status">
+            <v-chip v-if="item.status.toUpperCase() == 'DELETED'" small label color="error">已删除</v-chip>
+            <v-icon v-else-if="item.status.toUpperCase() == 'ACTIVE'" color="success">mdi-play-circle</v-icon>
+            <v-icon v-else-if="item.status.toUpperCase() == 'SHUTOFF'" color="warning">mdi-stop-circle</v-icon>
+            <v-icon v-else-if="item.status.toUpperCase() == 'PAUSED'" color="warning">mdi-pause-circle</v-icon>
+            <v-icon v-else-if="item.status.toUpperCase() == 'ERROR'" color="error">mdi-alpha-x-circle</v-icon>
+            <v-icon v-else-if="item.status.toUpperCase() == 'HARD_REBOOT'" color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
+            <v-icon v-else-if="['REBOOT', 'BUILD', 'REBUILD', 'RESIZE', 'VERIFY_RESIZE', 'MIGRATING'].indexOf(item.status.toUpperCase()) >=0" color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
+            <span v-else>{{ item.status.toUpperCase() }}</span>
+          </template>
+          <template v-if="item['OS-EXT-STS:task_state'] && item['OS-EXT-STS:task_state'] != ''">
+            <v-chip x-small>{{ i18n.t(item['OS-EXT-STS:task_state']) }}</v-chip>
+          </template>
         </template>
         <template v-slot:[`item.power_state`]="{ item }">
           <v-icon v-if="item['OS-EXT-STS:power_state'] == 1" color="success">mdi-power-on</v-icon>
@@ -89,11 +88,10 @@
             {{ addresses.join(' | ') }}
           </v-chip>
         </template>
-        <template v-slot:[`item.flavor`]="{ item }"><span class="cyan--text">{{ item.flavor.original_name ||
-          item.flavor.original_name }}</span></template>
+        <template v-slot:[`item.flavor`]="{ item }"><span class="cyan--text">{{ item.flavor && item.flavor.original_name }}</span></template>
         <template v-slot:[`item.image`]="{ item }">
           <span class="blue--text">{{ table.getImage(item).name }}</span>
-          <v-icon small v-if="table.getRootBdm(item)">mdi-cloud</v-icon>
+          <v-icon small v-if="item['os-extended-volumes:volumes_attached'] && item['os-extended-volumes:volumes_attached'].length > 0"> mdi-cloud</v-icon>
         </template>
         <template v-slot:[`item.action`]="{ item }">
           <v-menu offset-y>
@@ -136,15 +134,16 @@
           <td :colspan="headers.length - 1">
             <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
               <td class="info--text">{{ extendItem.text }}:</td>
-              <td>{{ item[extendItem.value] }}</td>
+              <td v-if="extendItem.value == 'fault'" class="error--text">{{ item[extendItem.value] && item[extendItem.value].message }}</td>
+              <td v-else>{{ item[extendItem.value] }}</td>
             </tr>
           </td>
         </template>
       </v-data-table>
     </v-col>
-    <NewServerDialog :show.sync="openNewServer" />
+    <NewServerDialog :show.sync="openNewServer" :table.sync="table" />
     <ServerTopology :show.sync="openServerTopology" />
-    <ServerMigrateDialog :show.sync="showServerMigrateDialog" :servers="table.selected" />
+    <ServerMigrateDialog :show.sync="showServerMigrateDialog" :servers="table.selected" :server-table.sync="table" />
     <ServerEvacuateDialog :show.sync="showServerEventDiallog" :servers="table.selected" />
     <ServerResetStateDialog :show.sync="showServerResetStateDialog" :servers="table.selected" @completed="table.refresh()"/>
     <ChangeServerNameDialog :show.sync="showChangeNameDialog" :server="selectedServer" @completed="updateServer()" />
@@ -154,8 +153,8 @@
     <ServerVolumes :show.sync="showServerVolumesDialog" :server="selectedServer" />
     <ServerInterfaces :show.sync="showServerInterfacesDialog" :server="selectedServer" @completed="table.refresh()" />
     <ServerUpdateSG :show.sync="showServerUpdateSGDialog" :server="selectedServer" />
-    <ServerResize :show.sync="showServerResizeDialog" :server="selectedServer" @completed="table.refresh()" />
-    <ServerRebuild :show.sync="showServerRebuildDialog" :server="selectedServer" @completed="table.refresh()" />
+    <ServerResize :show.sync="showServerResizeDialog" :server="selectedServer" :server-table.sync="table" @completed="table.refresh()" />
+    <ServerRebuild :show.sync="showServerRebuildDialog" :server="selectedServer" :server-table.sync="table"  @completed="table.refresh()" />
     <ServerGroupDialog :show.sync="showServerGroupDialog" :server="selectedServer" />
 </v-row>
 </template>

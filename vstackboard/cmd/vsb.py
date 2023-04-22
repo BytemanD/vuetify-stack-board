@@ -124,9 +124,8 @@ class Upgrade(cli.SubCli):
 class VstackboardApp(application.TornadoApp):
 
     def start(self, **kwargs):
-        LOG.info('Staring server ...')
         db_api.init()
-        views.CONF_DB_API = dbconf.DBApi(conf.configs_itesm_in_db)
+        views.CONF_DB_API = dbconf.DBApi(conf.configs_items_in_db)
         super().start(**kwargs)
 
 
@@ -156,6 +155,9 @@ class Serve(cli.SubCli):
         conf.load_configs()
         if args.enale_cross_domain:
             CONF.enable_cross_domain = True
+        
+        if args.port:
+            CONF.port = args.port
 
         if not pathlib.Path(args.static).exists():
             LOG.warning('static path %s not exists.', args.static)
@@ -163,9 +165,11 @@ class Serve(cli.SubCli):
             LOG.warning('template path %s not exists.', args.template)
 
         views.RUN_AS_CONTAINER = args.container
-        app = VstackboardApp(views.get_routes(), develop=args.develop,
+        application.init(enable_cross_domain=True)
+        app = VstackboardApp(application.get_routes() + views.get_routes(),
+                             develop=args.develop,
                              static_path=args.static,
-                             template_path=args.template)
+                             template_path=args.template,)
         app.start(port=args.port or CONF.port,
                   num_processes=CONF.workers)
 
