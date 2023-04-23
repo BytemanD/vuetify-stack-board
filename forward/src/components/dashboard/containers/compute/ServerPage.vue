@@ -134,7 +134,9 @@
           <td :colspan="headers.length - 1">
             <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
               <td class="info--text">{{ extendItem.text }}:</td>
-              <td v-if="extendItem.value == 'fault'" class="error--text">{{ item[extendItem.value] && item[extendItem.value].message }}</td>
+              <td v-if="extendItem.value == 'created'">{{ Utils.parseUTCToLocal(item[extendItem.value]) }}</td>
+              <td v-else-if="extendItem.value == 'updated'">{{ Utils.parseUTCToLocal(item[extendItem.value]) }}</td>
+              <td v-else-if="extendItem.value == 'fault'" class="error--text">{{ item[extendItem.value] && item[extendItem.value].message }}</td>
               <td v-else>{{ item[extendItem.value] }}</td>
             </tr>
           </td>
@@ -163,6 +165,7 @@
 import i18n from '@/assets/app/i18n';
 import BtnIcon from '@/components/plugins/BtnIcon'
 import API from '@/assets/app/api';
+import { Utils } from '@/assets/app/lib';
 
 import { ServerDataTable } from '@/assets/app/tables.js';
 
@@ -200,6 +203,7 @@ export default {
   },
 
   data: () => ({
+    Utils: Utils,
     i18n: i18n,
     deleted: false,
     table: new ServerDataTable(),

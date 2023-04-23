@@ -27,7 +27,7 @@ export class Utils {
         if (!utcString.endsWith('Z')) {
             utcString += 'Z'
         }
-        return Utils.nowFormat(new Date(`${utcString}`))
+        return Utils.nowFormat(new Date(utcString))
     }
     static getRandomName(prefix = null) {
         let date = this.nowFormat()
@@ -139,6 +139,14 @@ export class Utils {
     static isEmpty(value) {
         return !value || value == '' || value == {} || value == [];
     }
+    static getNavigationSelectedItem(){
+        let localItem = localStorage.getItem('navigationSelectedItem');
+        return localItem ? JSON.parse(localItem): null;
+    }
+    static setNavigationSelectedItem(item){
+        localStorage.setItem('navigationSelectedItem', JSON.stringify(item));
+    }
+
 }
 
 //             error  warning info debug

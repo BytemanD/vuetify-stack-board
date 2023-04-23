@@ -19,7 +19,8 @@
       <BtnHome />
       <v-btn icon @click="showSettingSheet = !showSettingSheet"><v-icon>mdi-cog</v-icon></v-btn>
     </v-app-bar>
-    <v-navigation-drawer app :mini-variant="navigation.mini" :expand-on-hover="navigation.mini" :width="ui.navigationWidth.value">
+    <v-navigation-drawer app :mini-variant="navigation.mini" :expand-on-hover="navigation.mini"
+      :width="ui.navigationWidth.value">
       <v-list-item two-line class="px-2">
         <v-list-item-avatar class="ml-0" tile><img src="../../../public/favicon.svg"></v-list-item-avatar>
         <v-list-item-content>
@@ -64,6 +65,7 @@ import BtnTheme from '../plugins/BtnTheme.vue';
 import BtnHome from '../plugins/BtnHome.vue';
 import i18n from '@/assets/app/i18n';
 import SettingSheet from './SettingSheet.vue';
+import { Utils } from '@/assets/app/lib';
 
 const navigationGroup = [
   {
@@ -125,13 +127,6 @@ export default {
     regionTable: new RegionTable(),
   }),
   methods: {
-    selectItem(item) {
-      localStorage.setItem('navigationSelectedItem', JSON.stringify(item));
-      this.navigation.selectedItem = item;
-      if (this.$route.path == '/' || this.$route.path != item.router) {
-        this.$router.replace({ path: item.router });
-      }
-    },
     async refresh() {
       await this.clusterTable.refresh();
       for (let i in this.clusterTable.items) {
@@ -143,46 +138,68 @@ export default {
       }
       await this.regionTable.refresh();
     },
-    initRegion(){
+    initRegion() {
       this.context.region = sessionStorage.getItem('region');
       if (!this.context.region) {
         this.context.region = SETTINGS.openstack.getItem('defaultRegion').value;
         sessionStorage.setItem('region', this.context.region)
       }
     },
-    initItem() {
-      let itemIndex = -1;
+    selectItem(item) {
+      this.navigation.selectedItem = item;
+      Utils.setNavigationSelectedItem(item);
+      if (this.$route.path == '/' || this.$route.path != item.router) {
+        this.$router.replace({ path: item.router });
+      }
+    },
+    getItem() {
+      let localItem = Utils.getNavigationSelectedItem();
+
+      if (this.$route.path == '/' && ! localItem){
+        return { index: 0, item: this.navigation.group[0][0] };
+      }
+
+      let selectedItemIndex = -1;
       for (let groupIndex in this.navigation.group) {
         let group = this.navigation.group[groupIndex];
         for (let itemIndx in group.items) {
+          selectedItemIndex += 1;
           let item = group.items[itemIndx];
+          if (this.$route.path == item.router || (localItem && localItem.router == item.router)) {
+            return { index: selectedItemIndex, item: item }
+          }
+        }
+      }
+      return { index: 0, item: this.navigation.group[0][0] };
+    },
+    initItem() {
+      let selectedItem = this.getItem();
+      this.navigation.itemIndex = selectedItem.index;
+      this.selectItem(selectedItem.item);
+    },
+    getItemIndexByRoutePath(routePath) {
+      let itemIndex = -1;
+      for (let groupIndex in this.navigation.group) {
+        let group = this.navigation.group[groupIndex];
+        for (let index in group.items) {
+          let item = group.items[index];
           itemIndex += 1;
-          if (this.$route.path != item.router) { continue }
-          this.selectItem(item);
-          this.navigation.itemIndex = itemIndex;
-          return;
+          if (routePath == item.router) {
+            return itemIndex;
+          }
         }
       }
     },
-    changeRegion(){
+    changeRegion() {
       sessionStorage.setItem('region', this.context.region);
       location.reload();
     }
   },
   created() {
-    // SETTINGS.load();
+    this.initItem();
+
     this.$vuetify.theme.dark = SETTINGS.ui.getItem('themeDark').value;
     this.initRegion();
-    if (this.$route.path == '/') {
-      let localItem = localStorage.getItem('navigationSelectedItem');
-      if (localItem) {
-        this.selectItem(JSON.parse(localItem));
-      } else {
-        this.selectItem(navigationGroup[0].items[0]);
-      }
-    } else {
-      this.initItem();
-    }
     this.clusterTable.selected = {};
     this.refresh();
   }
