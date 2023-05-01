@@ -6,7 +6,8 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-progress-circular v-bind="attrs" v-on="on" rotate="360" size="120" width="60"
-              :value="table._memUsedPercent" :color="table._memUsedPercent < resourceWarningPercent.value ? 'green lighten-1' : 'orange lighten-1'">
+              :value="table._memUsedPercent"
+              :color="table._memUsedPercent < resourceWarningPercent.value ? 'green lighten-1' : 'orange lighten-1'">
             </v-progress-circular>
           </template>
           百分比: {{ table._memUsedPercent }}%<br>剩余: {{ table.statistics.free_ram_mb }}
@@ -18,8 +19,8 @@
         <h4>{{ I18N.t('cpu') }}</h4>
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
-            <v-progress-circular v-bind="attrs" v-on="on" size="120" width="60"
-              :value="table._vcpuUsedPercent" :color="table._vcpuUsedPercent < resourceWarningPercent.value ? 'green lighten-1' : 'orange lighten-1'">
+            <v-progress-circular v-bind="attrs" v-on="on" size="120" width="60" :value="table._vcpuUsedPercent"
+              :color="table._vcpuUsedPercent < resourceWarningPercent.value ? 'green lighten-1' : 'orange lighten-1'">
             </v-progress-circular>
           </template>
           百分比: {{ table._vcpuUsedPercent }}%<br>剩余: {{ table.statistics.vcpus - table.statistics.vcpus_used }}
@@ -31,8 +32,8 @@
         <h4>{{ I18N.t('disk') }}</h4>
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
-            <v-progress-circular v-bind="attrs" v-on="on" size="120" width="60"
-              :value="table._diskUsedPercent" :color="table._diskUsedPercent < resourceWarningPercent.value ? 'green lighten-1' : 'orange lighten-1'">
+            <v-progress-circular v-bind="attrs" v-on="on" size="120" width="60" :value="table._diskUsedPercent"
+              :color="table._diskUsedPercent < resourceWarningPercent.value ? 'green lighten-1' : 'orange lighten-1'">
             </v-progress-circular>
           </template>
           百分比: {{ table._diskUsedPercent }}%<br>剩余: {{ table.statistics.local_gb - table.statistics.local_gb_used }}
@@ -52,7 +53,7 @@
         </v-tooltip>
       </v-sheet>
     </v-col>
-    <v-col >
+    <v-col>
       <v-sheet elevation="2" class="pa-2 text-center" height="100%">
         <div class="mt-10 my-auto">
           <strong>
@@ -92,19 +93,38 @@
         </template>
 
         <template v-slot:[`item.memory_mb`]="{ item }">
-          <v-progress-linear height="20" :value="item.memory_mb_used * 100 / item.memory_mb" color="cyan">
-            {{ (item.memory_mb_used / 1024).toFixed(1) }}/{{ (item.memory_mb / 1024).toFixed(1) }}
-          </v-progress-linear>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-sheet color="grey lighten-1" v-bind="attrs" v-on="on">
+                <v-progress-linear height="20" class="white--text" :value="(item.memory_mb_used) * 100 / item.memory_mb"
+                  :buffer-value="(item.memory_mb - item.free_ram_mb) * 100 / item.memory_mb">
+                </v-progress-linear>
+              </v-sheet>
+            </template>
+            总量: {{ item.memory_mb }} <br>虚拟机使用: {{ item.memory_mb_used }} <br>可用: {{ item.free_ram_mb }} <br>
+          </v-tooltip>
         </template>
         <template v-slot:[`item.vcpus`]="{ item }">
-          <v-progress-linear height="20" :value="item.vcpus_used * 100 / item.vcpus" color="cyan">
-            {{ item.vcpus_used }}/{{ item.vcpus }}
-          </v-progress-linear>
+
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-sheet color="grey lighten-1" v-bind="attrs" v-on="on">
+                <v-progress-linear height="20" class="white--text" :value="item.vcpus_used * 100 / item.vcpus"></v-progress-linear>
+              </v-sheet>
+            </template>
+            总量: {{ item.vcpus }} <br>已使用: {{ item.vcpus_used }}
+          </v-tooltip>
+
         </template>
         <template v-slot:[`item.local_gb`]="{ item }">
-          <v-progress-linear height="20" :value="item.local_gb_used * 100 / item.local_gb" color="cyan">
-            {{ item.local_gb_used }}/{{ item.local_gb }}
-          </v-progress-linear>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-sheet color="grey lighten-1" v-bind="attrs" v-on="on">
+                <v-progress-linear height="20" class="white--text" :value="item.local_gb_used * 100 / item.local_gb"></v-progress-linear>
+              </v-sheet>
+            </template>
+            总量: {{ item.local_gb }} <br>已使用: {{ item.local_gb_used }}
+          </v-tooltip>
         </template>
         <template v-slot:expanded-item="{ headers, item }">
           <td></td>

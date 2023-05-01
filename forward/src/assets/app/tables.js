@@ -8,7 +8,7 @@ import { LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
 
 class DataTable {
     constructor(headers, api, bodyKey = null, name = '') {
-        this.headers = headers;
+        this.headers = headers || [];
         this.api = api;
         this.bodyKey = bodyKey;
         this.name = name;
@@ -20,6 +20,7 @@ class DataTable {
         this.extendItems = []
         this.newItemDialog = null;
         this.loading = false;
+        this.columns = this.headers.map((header) => {return header.value});
     }
     async openNewItemDialog(){
         if (this.newItemDialog){

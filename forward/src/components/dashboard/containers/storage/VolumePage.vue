@@ -22,6 +22,7 @@
                         <v-icon v-if="item.status == 'available'">mdi-link-variant-off</v-icon>
                         <v-icon v-else-if="item.status == 'in-use'" color="success">mdi-link-variant</v-icon>
                         <v-icon v-else-if="item.status == 'error'" color="error">mdi-close-circle</v-icon>
+                        <v-icon v-else-if="item.status == 'error_deleting'" color="error">mdi-delete-alert</v-icon>
                         <v-tooltip top v-else-if="table.isDoing(item)">
                             <template v-slot:activator="{ on, attrs }">
                                 <v-icon color="warning" class="mdi-spin" v-bind="attrs" v-on="on">mdi-rotate-right</v-icon>
@@ -30,7 +31,7 @@
                         </v-tooltip>
                         <v-tooltip top v-else>
                             <template v-slot:activator="{ on, attrs }">
-                                <v-icon color="error" v-bind="attrs" v-on="on">mdi-alert-outline</v-icon>
+                                <v-icon color="warning" v-bind="attrs" v-on="on">mdi-alert-circle</v-icon>
                             </template>
                             {{ item.status }}
                         </v-tooltip>
@@ -56,12 +57,18 @@
                 <template v-slot:expanded-item="{ headers, item }">
                     <td></td>
                     <td :colspan="headers.length - 1">
-                        <table>
-                            <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
-                                <td class="info--text">{{ extendItem.text }}:</td>
-                                <td>{{ item[extendItem.value] }}</td>
-                            </tr>
-                        </table>
+                        <v-simple-table dense>
+                            <template v-slot:default>
+                                <tbody>
+                                    <template v-for="extendItem in Object.keys(item)">
+                                        <tr  v-bind:key="extendItem" v-if="table.columns.indexOf(extendItem) < 0">
+                                            <td class="info--text">{{ extendItem }}:</td>
+                                            <td>{{ item[extendItem] }}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </template>
+                        </v-simple-table>
                     </td>
                 </template>
             </v-data-table>
