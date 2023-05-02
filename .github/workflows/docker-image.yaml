@@ -54,4 +54,4 @@ jobs:
       run: |
         export PYTHONPATH=./
         export WHEEL=$(ls dist/vstackboard-*.whl |tail -n1)
-        python3 install/build.py ${WHEEL} -lr registry.cn-hangzhou.aliyuncs.com/fjboy-ec
+        python3 install/build.py ${WHEEL} -lr registry.cn-hangzhou.aliyuncs.com/fjboy-ec -d

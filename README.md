@@ -15,7 +15,7 @@ Openstack Dashboard with Vuetify
 
 构建后端项目
 ```
-python3 -m pip wheel --prefer-binary  --wheel-dir=dist ./ --no-dep
+python3 -m pip wheel --prefer-binary  --wheel-dir=dist ./ --no-deps
 ```
 
 构建前端项目
