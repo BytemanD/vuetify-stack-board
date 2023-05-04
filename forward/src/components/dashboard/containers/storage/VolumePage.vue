@@ -61,7 +61,7 @@
                             <template v-slot:default>
                                 <tbody>
                                     <template v-for="extendItem in Object.keys(item)">
-                                        <tr  v-bind:key="extendItem" v-if="table.columns.indexOf(extendItem) < 0">
+                                        <tr v-bind:key="extendItem" v-if="table.columns.indexOf(extendItem) < 0">
                                             <td class="info--text">{{ extendItem }}:</td>
                                             <td>{{ item[extendItem] }}</td>
                                         </tr>

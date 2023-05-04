@@ -109,7 +109,8 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-sheet color="grey lighten-1" v-bind="attrs" v-on="on">
-                <v-progress-linear height="20" class="white--text" :value="item.vcpus_used * 100 / item.vcpus"></v-progress-linear>
+                <v-progress-linear height="20" class="white--text" :value="item.vcpus_used * 100 / item.vcpus"
+                  :buffer-value="item.vcpus_used * 100 / item.vcpus"></v-progress-linear>
               </v-sheet>
             </template>
             总量: {{ item.vcpus }} <br>已使用: {{ item.vcpus_used }}
@@ -120,7 +121,8 @@
           <v-tooltip bottom>
             <template v-slot:activator="{ on, attrs }">
               <v-sheet color="grey lighten-1" v-bind="attrs" v-on="on">
-                <v-progress-linear height="20" class="white--text" :value="item.local_gb_used * 100 / item.local_gb"></v-progress-linear>
+                <v-progress-linear height="20" class="white--text" :value="item.local_gb_used * 100 / item.local_gb"
+                :buffer-value="item.local_gb_used * 100 / item.local_gb"></v-progress-linear>
               </v-sheet>
             </template>
             总量: {{ item.local_gb }} <br>已使用: {{ item.local_gb_used }}

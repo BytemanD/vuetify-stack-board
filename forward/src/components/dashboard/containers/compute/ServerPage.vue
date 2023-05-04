@@ -28,7 +28,8 @@
             @click="table.rebootSelected('HARD')"><v-list-item-title>硬重启</v-list-item-title></v-list-item>
         </v-list>
       </v-menu>
-      <v-btn small color="warning" class="mr-1" @click="showServerMigrateDialog = !showServerMigrateDialog" :disabled="table.selected.length == 0">迁移</v-btn>
+      <v-btn small color="warning" class="mr-1" @click="showServerMigrateDialog = !showServerMigrateDialog"
+        :disabled="table.selected.length == 0">迁移</v-btn>
       <v-btn small color="warning" class="mr-1" @click="showServerEventDiallog = !showServerEventDiallog"
         :disabled="table.selected.length == 0">疏散</v-btn>
       <v-btn small color="warning" class="mr-1" @click="showServerResetStateDialog = !showServerResetStateDialog"
@@ -69,8 +70,11 @@
             <v-icon v-else-if="item.status.toUpperCase() == 'SHUTOFF'" color="warning">mdi-stop-circle</v-icon>
             <v-icon v-else-if="item.status.toUpperCase() == 'PAUSED'" color="warning">mdi-pause-circle</v-icon>
             <v-icon v-else-if="item.status.toUpperCase() == 'ERROR'" color="error">mdi-alpha-x-circle</v-icon>
-            <v-icon v-else-if="item.status.toUpperCase() == 'HARD_REBOOT'" color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
-            <v-icon v-else-if="['REBOOT', 'BUILD', 'REBUILD', 'RESIZE', 'VERIFY_RESIZE', 'MIGRATING'].indexOf(item.status.toUpperCase()) >=0" color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
+            <v-icon v-else-if="item.status.toUpperCase() == 'HARD_REBOOT'" color="warning"
+              class="mdi-spin">mdi-rotate-right</v-icon>
+            <v-icon
+              v-else-if="['REBOOT', 'BUILD', 'REBUILD', 'RESIZE', 'VERIFY_RESIZE', 'MIGRATING'].indexOf(item.status.toUpperCase()) >= 0"
+              color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
             <span v-else>{{ item.status.toUpperCase() }}</span>
           </template>
           <template v-if="item['OS-EXT-STS:task_state'] && item['OS-EXT-STS:task_state'] != ''">
@@ -84,14 +88,20 @@
           <v-icon v-else-if="item['OS-EXT-STS:power_state'] != 0" color="warning" class="mdi-spin">mdi-loading</v-icon>
         </template>
         <template v-slot:[`item.addresses`]="{ item }">
-          <v-chip label x-small v-for="(addresses, j) in table.parseAddresses(item)" class="mr-1 mb-1" v-bind:key="j">
-            {{ addresses.join(' | ') }}
-          </v-chip>
+          <template v-for="(addresses, j) in table.parseAddresses(item)">
+            <div v-bind:key="j">
+              <v-chip label x-small class="mr-1 mb-1">{{ addresses.join(' | ') }}</v-chip>
+              <br />
+            </div>
+          </template>
         </template>
-        <template v-slot:[`item.flavor`]="{ item }"><span class="cyan--text">{{ item.flavor && item.flavor.original_name }}</span></template>
+        <template v-slot:[`item.flavor`]="{ item }"><span class="cyan--text">{{ item.flavor && item.flavor.original_name
+        }}</span></template>
         <template v-slot:[`item.image`]="{ item }">
           <span class="blue--text">{{ table.getImage(item).name }}</span>
-          <v-icon small v-if="item['os-extended-volumes:volumes_attached'] && item['os-extended-volumes:volumes_attached'].length > 0"> mdi-cloud</v-icon>
+          <v-icon small
+            v-if="item['os-extended-volumes:volumes_attached'] && item['os-extended-volumes:volumes_attached'].length > 0">
+            mdi-cloud</v-icon>
         </template>
         <template v-slot:[`item.action`]="{ item }">
           <v-menu offset-y>
@@ -106,7 +116,7 @@
                 <v-list-item-title>控制台日志</v-list-item-title>
               </v-list-item>
               <v-list-item @click="openChangeServerPasswordDialog(item)">
-                  <v-list-item-title>修改密码</v-list-item-title>
+                <v-list-item-title>修改密码</v-list-item-title>
               </v-list-item>
               <v-list-item @click="openServerVolumesDialog(item)">
                 <v-list-item-title>卷管理</v-list-item-title>
@@ -132,13 +142,21 @@
         <template v-slot:expanded-item="{ headers, item }">
           <td></td>
           <td :colspan="headers.length - 1">
-            <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
-              <td class="info--text">{{ extendItem.text }}:</td>
-              <td v-if="extendItem.value == 'created'">{{ Utils.parseUTCToLocal(item[extendItem.value]) }}</td>
-              <td v-else-if="extendItem.value == 'updated'">{{ Utils.parseUTCToLocal(item[extendItem.value]) }}</td>
-              <td v-else-if="extendItem.value == 'fault'" class="error--text">{{ item[extendItem.value] && item[extendItem.value].message }}</td>
-              <td v-else>{{ item[extendItem.value] }}</td>
-            </tr>
+            <v-simple-table dense>
+              <template v-slot:default>
+                <tbody>
+                  <template v-for="extendItem in Object.keys(item)">
+                    <tr v-bind:key="extendItem" v-if="table.columns.indexOf(extendItem) < 0">
+                      <td class="info--text">{{ extendItem }}:</td>
+                      <td v-if="extendItem == 'created'">{{ Utils.parseUTCToLocal(item[extendItem]) }}</td>
+                      <td v-else-if="extendItem == 'updated'">{{ Utils.parseUTCToLocal(item[extendItem]) }}</td>
+                      <td v-else-if="extendItem == 'fault'" class="error--text">{{ item[extendItem] && item[extendItem].message }}</td>
+                      <td v-else>{{ item[extendItem] }}</td>
+                    </tr>
+                  </template>
+                </tbody>
+              </template>
+            </v-simple-table>
           </td>
         </template>
       </v-data-table>
@@ -147,7 +165,8 @@
     <ServerTopology :show.sync="openServerTopology" />
     <ServerMigrateDialog :show.sync="showServerMigrateDialog" :servers="table.selected" :server-table.sync="table" />
     <ServerEvacuateDialog :show.sync="showServerEventDiallog" :servers="table.selected" />
-    <ServerResetStateDialog :show.sync="showServerResetStateDialog" :servers="table.selected" @completed="table.refresh()"/>
+    <ServerResetStateDialog :show.sync="showServerResetStateDialog" :servers="table.selected"
+      @completed="table.refresh()" />
     <ChangeServerNameDialog :show.sync="showChangeNameDialog" :server="selectedServer" @completed="updateServer()" />
     <ServerActionDialog :show.sync="showServerActionDialog" :server="selectedServer" />
     <ServerConsoleLogDialog :show.sync="showServerConsoleLogDialog" :server="selectedServer" />
@@ -155,10 +174,12 @@
     <ServerVolumes :show.sync="showServerVolumesDialog" :server="selectedServer" />
     <ServerInterfaces :show.sync="showServerInterfacesDialog" :server="selectedServer" @completed="table.refresh()" />
     <ServerUpdateSG :show.sync="showServerUpdateSGDialog" :server="selectedServer" />
-    <ServerResize :show.sync="showServerResizeDialog" :server="selectedServer" :server-table.sync="table" @completed="table.refresh()" />
-    <ServerRebuild :show.sync="showServerRebuildDialog" :server="selectedServer" :server-table.sync="table"  @completed="table.refresh()" />
+    <ServerResize :show.sync="showServerResizeDialog" :server="selectedServer" :server-table.sync="table"
+      @completed="table.refresh()" />
+    <ServerRebuild :show.sync="showServerRebuildDialog" :server="selectedServer" :server-table.sync="table"
+      @completed="table.refresh()" />
     <ServerGroupDialog :show.sync="showServerGroupDialog" :server="selectedServer" />
-</v-row>
+  </v-row>
 </template>
 
 <script>
@@ -229,65 +250,65 @@ export default {
     refreshTable: function () {
       this.table.refresh();
     },
-    updateServer: async function(){
-      if (! this.selectedServer.id){
-            console.warn('server id is null');
-            return;
-        }
-        let newServer = (await API.server.show(this.selectedServer.id)).server;
-        for (let i in this.table.items){
-            if (this.table.items[i].id == this.selectedServer.id){
-                for (let key in this.table.items[i]){
-                  if (!newServer[key]) {
-                    continue;
-                  }
-                  this.table.items[i][key] = newServer[key];
-                }
-                break;
+    updateServer: async function () {
+      if (!this.selectedServer.id) {
+        console.warn('server id is null');
+        return;
+      }
+      let newServer = (await API.server.show(this.selectedServer.id)).server;
+      for (let i in this.table.items) {
+        if (this.table.items[i].id == this.selectedServer.id) {
+          for (let key in this.table.items[i]) {
+            if (!newServer[key]) {
+              continue;
             }
+            this.table.items[i][key] = newServer[key];
+          }
+          break;
         }
+      }
     },
     loginVnc: async function (server) {
       let body = await API.server.getVncConsole(server.id);
       window.open(body.remote_console.url, '_blank');
     },
-    openChangeServerNameDialog: async function(server){
+    openChangeServerNameDialog: async function (server) {
       this.selectedServer = server;
       this.showServerResetStateDialog = !this.showServerResetStateDialog;
     },
-    openServerActionDialog: async function(server){
+    openServerActionDialog: async function (server) {
       this.selectedServer = server;
       this.showServerActionDialog = !this.showServerActionDialog;
     },
-    openServerConsoleLogDialog: async function(server){
+    openServerConsoleLogDialog: async function (server) {
       this.selectedServer = server;
       this.showServerConsoleLogDialog = !this.showServerConsoleLogDialog;
     },
-    openChangeServerPasswordDialog: async function(server){
+    openChangeServerPasswordDialog: async function (server) {
       this.selectedServer = server;
       this.showChangePassowrdDialog = !this.showChangePassowrdDialog;
     },
-    openServerVolumesDialog: async function(server){
+    openServerVolumesDialog: async function (server) {
       this.selectedServer = server;
       this.showServerVolumesDialog = !this.showServerVolumesDialog;
     },
-    openServerInterfacesDialog: async function(server){
+    openServerInterfacesDialog: async function (server) {
       this.selectedServer = server;
       this.showServerInterfacesDialog = !this.showServerInterfacesDialog;
     },
-    openServerUpdateSGDialog: async function(server){
+    openServerUpdateSGDialog: async function (server) {
       this.selectedServer = server;
       this.showServerUpdateSGDialog = !this.showServerUpdateSGDialog;
     },
-    openServerResizeDialog: async function(server){
+    openServerResizeDialog: async function (server) {
       this.selectedServer = server;
       this.showServerResizeDialog = !this.showServerResizeDialog;
     },
-    openServerRebuildDialog: async function(server){
+    openServerRebuildDialog: async function (server) {
       this.selectedServer = server;
       this.showServerRebuildDialog = !this.showServerRebuildDialog;
     },
-    openServerGroupDialog: function(server){
+    openServerGroupDialog: function (server) {
       this.selectedServer = server;
       this.showServerGroupDialog = !this.showServerGroupDialog;
     }
