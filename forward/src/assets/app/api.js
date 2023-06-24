@@ -629,6 +629,12 @@ class Volume extends VstackboardApi {
         return (await this.get(`/volume/os-resource-actions/${resourceId}/get_events?req_id=${requestId}`)).resourceAction;
     }
 }
+class VolumePool extends VstackboardApi {
+    constructor() { super('/volume/scheduler-stats/get_pools') }
+    async detail(){
+        return await this.list({detail: true})
+    }
+}
 class Snapshot extends VstackboardApi {
     constructor() { super('/volume/snapshots') }
     async create(data) { return this.post({ snapshot: data }) }
@@ -771,6 +777,7 @@ export class OpenstackProxyApi {
         this.snapshot = new Snapshot();
         this.backup = new Backup();
         this.volumeService = new VolumeService();
+        this.volumePool = new VolumePool()
 
         this.cluster = new Cluster();
         this.authInfo = new AuthInfo();

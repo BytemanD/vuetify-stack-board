@@ -18,7 +18,10 @@
             </template>
             <v-col cols='12' class="pt-0">
                 <v-row>
-                    <v-col></v-col>
+                    <v-col>
+                        <v-alert text dense type="info">版本: {{ version }}</v-alert>
+                        
+                    </v-col>
                     <v-col cols="4">
                         <v-alert text dense type="warning">{{ I18N.t('refreshAfterChanged') }}</v-alert>
                         <v-col cols='12' class="text-right pt-0">
@@ -33,6 +36,7 @@
 </template>
   
 <script>
+import API from '@/assets/app/api';
 import I18N from '@/assets/app/i18n';
 import SETTINGS from '@/assets/app/settings';
 
@@ -43,13 +47,16 @@ export default {
     data: () => ({
         display: false,
         I18N: I18N,
-        SETTINGS: SETTINGS
+        SETTINGS: SETTINGS,
+        version: null
     }),
     methods: {
-
+        getVersion: async function () {
+            this.version = await (API.version.get());
+        },
     },
     created() {
-
+        this.getVersion();
     },
     watch: {
         show(newVal) {

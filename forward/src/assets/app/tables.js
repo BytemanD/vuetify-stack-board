@@ -878,6 +878,34 @@ export class VolumeServiceTable extends DataTable {
         }
     }
 }
+export class VolumePoolTable extends DataTable {
+    constructor() {
+        super([
+            { text: '名字', value: 'name' },
+            { text: '后端名', value: 'volume_backend_name' },
+            { text: '存储协议', value: 'storage_protocol' },
+            { text: '实际容量(GB)', value: 'capacity_gb' },
+            { text: '已置备', value: 'provisioned_capacity_gb' },
+            { text: '已分配', value: 'allocated_capacity_gb' },
+        ], API.volumePool, 'pools', '存储池');
+        this.extendItems = [
+            { text: 'capabilities', value: 'capabilities' },
+        ];
+    }
+    itemKey() {
+        return this.index;
+    }
+    async refresh(){
+        await super.refresh();
+        // NOTE: For volume services, no id in items, so add id to make
+        // v-data-table item-key works.
+        let index = 0;
+        for (let i in this.items) {
+            this.items[i].id = index ++;
+        }
+    }
+}
+
 export class ClusterTable extends DataTable {
     constructor() {
         super([], API.cluster, 'clusters', '集群');
