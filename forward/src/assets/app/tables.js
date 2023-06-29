@@ -723,6 +723,21 @@ export class VolumeDataTable extends DataTable {
     isDoing(item){
         return this.doingStatus.indexOf(item.status)>= 0;
     }
+    extendSelected(newSize){
+        if (this.selected.length == 0) {
+            return;
+        }
+        MESSAGE.info(`开始扩容`);
+        for (let i in this.selected) {
+            let item = this.selected[i];
+            try {
+                this.api.extend(item.id, newSize);
+            } catch {
+                MESSAGE.error(`扩容 ${item.name} ${item.id} 失败`)
+            }
+        }
+        this.refresh();
+    }
 }
 
 export class VolumeTypeTable extends DataTable {

@@ -628,6 +628,9 @@ class Volume extends VstackboardApi {
     async actionShow(resourceId, requestId){
         return (await this.get(`/volume/os-resource-actions/${resourceId}/get_events?req_id=${requestId}`)).resourceAction;
     }
+    async extend(id, newSize) {
+        return await this.doAction(id, {'os-extend': {new_size: newSize}})
+    }
 }
 class VolumePool extends VstackboardApi {
     constructor() { super('/volume/scheduler-stats/get_pools') }

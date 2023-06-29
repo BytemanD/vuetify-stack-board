@@ -146,7 +146,6 @@ export class Utils {
     static setNavigationSelectedItem(item){
         localStorage.setItem('navigationSelectedItem', JSON.stringify(item));
     }
-
 }
 
 //             error  warning info debug

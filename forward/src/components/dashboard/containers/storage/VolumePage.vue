@@ -2,7 +2,8 @@
     <v-row>
         <v-col>
             <v-btn x-small fab class="mr-1" color="primary" @click="openNewVolumeDialog = !openNewVolumeDialog"><v-icon small>mdi-plus</v-icon></v-btn>
-            <v-btn small color="warning" class="mr-1" @click="openNewVolumeStatusResetDiaog = true" :disabled="table.selected.length == 0">状态重置</v-btn>
+            <v-btn small color="info" class="mr-1" @click="openVolumeExtendDialog = true" :disabled="table.selected.length == 0">扩容</v-btn>
+            <v-btn small color="warning" class="mr-1" @click="openVolumeStatusResetDialog = true" :disabled="table.selected.length == 0">状态重置</v-btn>
             <v-btn small color="error" @click="table.deleteSelected()" :disabled="table.selected.length == 0">
                 <v-icon small>mdi-trash-can</v-icon>删除</v-btn>
         </v-col>
@@ -75,8 +76,9 @@
         </v-col>
         <v-col cols="12">
             <NewVolumeVue :show.sync="openNewVolumeDialog" @completed="table.refresh()"/>
-            <VolumeStatusResetDialog :volumes="table.selected" :show.sync="openNewVolumeStatusResetDiaog" @completed="table.refresh()"/>
+            <VolumeStatusResetDialog :volumes="table.selected" :show.sync="openVolumeStatusResetDialog" @completed="table.refresh()"/>
             <ResourceActionsDialog :show.sync="showResourceActionsDialog" :resource="selectedVolume"></ResourceActionsDialog>
+            <VolumeExtendVue :volumes="table.selected" :show.sync="openVolumeExtendDialog" @completed="table.refresh()"></VolumeExtendVue>
         </v-col>
     </v-row>
 </template>
@@ -88,18 +90,20 @@ import SETTINGS from '@/assets/app/settings';
 
 import NewVolumeVue from './dialogs/NewVolume.vue';
 import VolumeStatusResetDialog from './dialogs/VolumeStatusResetDialog.vue';
+import VolumeExtendVue from './dialogs/VolumeExtend.vue';
 import ResourceActionsDialog from './dialogs/ResourceActionsDialog.vue';
 
 export default {
     components: {
-        NewVolumeVue, VolumeStatusResetDialog,
-        ResourceActionsDialog,
+        NewVolumeVue, VolumeStatusResetDialog, VolumeExtendVue,
+        ResourceActionsDialog, 
     },
 
     data: () => ({
         Utils: Utils,
         openNewVolumeDialog: false,
-        openNewVolumeStatusResetDiaog: false,
+        openVolumeStatusResetDialog: false,
+        openVolumeExtendDialog: false,
         showResourceActionsDialog: false,
         selectedVolume: {},
         supportResourceAction: SETTINGS.openstack.getItem('supportResourceAction').value,
