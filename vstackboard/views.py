@@ -189,9 +189,18 @@ class OpenstackProxyBase(BaseReqHandler, GetContext):
             if query:
                 url += f'?{query}'
             proxy_headers = self._get_proxy_headers()
-            resp = self.get_proxy_method(cluster_proxy)(
-                method=method, url=url, data=self._request_body(),
-                headers=proxy_headers)
+            for i in range(2):
+                resp = self.get_proxy_method(cluster_proxy)(
+                    method=method, url=url, data=self._request_body(),
+                    headers=proxy_headers)
+                if resp.status_code == 401 and i == 0:
+                    logging.warning("Unauthorized, headers: %s, update auth "
+                                    "token", cluster_proxy.get_header())
+                    cluster_proxy.update_auth_token(fetch_max_version=False)
+                    logging.debug("new headers: %s",
+                                    cluster_proxy.get_header())
+                    continue
+                break
             return resp.status_code, resp.content
         except exceptions.EndpointNotFound as e:
             return 404, {'error': str(e)}

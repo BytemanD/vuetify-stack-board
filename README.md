@@ -20,8 +20,8 @@ python3 -m pip wheel --prefer-binary  --wheel-dir=dist ./ --no-deps
 
 构建前端项目
 ```
-num run install
-num run build
+npm run install
+npm run build
 ```
 
 ## 3 安装
@@ -40,9 +40,7 @@ num run build
 ### 3.2 在docker容器中运行
 
 1. 构建后端项目
-
 2. 构建镜像 `python .\install\build.py dist/<THE_PATH_OF_WHEEL_FILE>`
-
 3. 启动容器
    
    ```shell

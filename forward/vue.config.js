@@ -3,6 +3,7 @@ const { defineConfig } = require('@vue/cli-service')
 
 module.exports = defineConfig({
   // devServer: {
+  // allowedHosts: "all"
   //   proxy: {
   //     '/': {
   //       target: 'localhost:8080/',

@@ -43,10 +43,10 @@ export default {
             try {
                 await this.dialog.commit(this.images);
                 this.display = false;
-                this.$emit('completed');
             } catch (error) {
                 console.error(error)
             }
+            this.$emit('completed');
         }
     },
     created() {

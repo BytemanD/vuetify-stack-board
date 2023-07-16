@@ -58,10 +58,11 @@ class OpenstackV3AuthProxy(object):
         except requests.exceptions.ConnectionError:
             return False
 
-    def update_auth_token(self):
-        LOG.debug('auth body: %s', json.dumps(self.auth_body))
+    def update_auth_token(self, fetch_max_version=True):
+        auth_body = self._get_auth_body()
+        LOG.debug('auth body: %s', auth_body)
         resp = requests.post(f'{self.auth_url}/v3/auth/tokens',
-                             json=self.auth_body, timeout=60)
+                             json=auth_body, timeout=60)
         token = json.loads(resp.content).get('token', {})
         self.auth_token = {
             'token': resp.headers.get('x-subject-token', None),
@@ -72,12 +73,15 @@ class OpenstackV3AuthProxy(object):
             raise RuntimeError('auth faield')
         self._update_endpoints(token)
         LOG.debug('Endpoints %s', self.endpoints)
-        LOG.debug('Update auth token success')
+        LOG.debug('Update auth token success, expires_at %s,  token is %s',
+                  self.auth_token.get('expires_at'),
+                  self.auth_token.get('token'))
 
-        if 'compute' not in CONF.openstack.api_version and \
-                CONF.openstack.fetch_max_version:
-            CONF.openstack.api_version['compute'] = \
-                self.get_compute_max_version()
+        if fetch_max_version:
+            if 'compute' not in CONF.openstack.api_version and \
+                    CONF.openstack.fetch_max_version:
+                CONF.openstack.api_version['compute'] = \
+                    self.get_compute_max_version()
 
     def _get_endpoint(self, service):
         # sourcery skip: reintroduce-else, swap-if-else-branches,
@@ -130,7 +134,8 @@ class OpenstackV3AuthProxy(object):
     def _get_api_version(self):
         if not self._api_version:
             self._api_version = ','.join(
-                [f'{k} {v}' for k, v in CONF.openstack.api_version.items()]
+                [f'{k} {v}' for k, v in CONF.openstack.api_version.items()
+                    if v is not None]
             )
 
             LOG.info('api version: %s', self._api_version)
@@ -145,9 +150,12 @@ class OpenstackV3AuthProxy(object):
             raise
 
     def get_header(self):
-        return {'X-Auth-Token': self.get_token(),
-                'Content-Type': 'application/json',
-                'OpenStack-API-Version': self._get_api_version()}
+        headers = {'X-Auth-Token': self.get_token(),
+                   'Content-Type': 'application/json'}
+        api_version  = self._get_api_version()
+        if api_version:
+            headers['OpenStack-API-Version'] = api_version
+        return headers
 
     def proxy_keystone(self, method='GET', url=None, data=None, headers=None):
         proxy_url = f"{self._get_endpoint('keystone')}{url or '/'}"
