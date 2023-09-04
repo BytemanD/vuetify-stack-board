@@ -37,7 +37,7 @@
 import { KeypairDataTable } from '@/assets/app/tables.js';
 import { Utils } from '@/assets/app/lib.js';
 
-import NewKeypairDialog from './dialogs/NewKeypairDialog .vue';
+import NewKeypairDialog from './dialogs/NewKeypairDialog.vue';
 
 export default {
     components: {
