@@ -58,6 +58,7 @@
 </template>
 
 <script>
+import Init from '@/assets/app/init';
 import { ClusterTable, RegionTable } from '@/assets/app/tables';
 import SETTINGS from '@/assets/app/settings';
 
@@ -196,6 +197,7 @@ export default {
     }
   },
   created() {
+    Init()
     this.initItem();
 
     this.$vuetify.theme.dark = SETTINGS.ui.getItem('themeDark').value;

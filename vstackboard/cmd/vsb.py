@@ -1,3 +1,4 @@
+import json
 import logging
 import mimetypes
 import os
@@ -159,10 +160,25 @@ class Serve(cli.SubCli):
         if args.port:
             CONF.port = args.port
 
-        if not pathlib.Path(args.static).exists():
+        if args.static and not pathlib.Path(args.static).exists():
             LOG.warning('static path %s not exists.', args.static)
-        if not pathlib.Path(args.template).exists():
+        if args.template and not pathlib.Path(args.template).exists():
             LOG.warning('template path %s not exists.', args.template)
+
+        # update config.json
+        if args.template and CONF.web.stylesheet:
+            json_file = pathlib.Path(args.template, 'config.json')
+            if not json_file.exists():
+                LOG.warning("config json %s is not exists", json_file)
+            else:
+                LOG.debug("update config json %s", json_file)
+                with open(json_file) as fp:
+                    config_json = json.load(fp)
+                    config_json['static_stylesheet'] = CONF.web.stylesheet
+                new_config_json = json.dumps(config_json, indent=4)
+                with open(json_file, 'w') as fp:
+                    LOG.debug("new config json: %s", new_config_json)
+                    fp.write(new_config_json)
 
         views.RUN_AS_CONTAINER = args.container
         application.init(enable_cross_domain=True,
@@ -171,7 +187,8 @@ class Serve(cli.SubCli):
                              develop=args.develop,
                              static_path=args.static,
                              template_path=args.template,)
-        app.start(port=args.port or CONF.port,
+        LOG.debug("starting server on port: %s", CONF.port)
+        app.start(port=CONF.port,
                   num_processes=CONF.workers)
 
 

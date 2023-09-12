@@ -145,3 +145,4 @@ vstackboard/locale
 install/forward
 install/requirements.txt
 install/*.whl
+package-lock.json

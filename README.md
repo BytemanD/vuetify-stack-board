@@ -42,7 +42,6 @@ npm run build
 1. 构建后端项目
 2. 构建镜像 `python .\install\build.py dist/<THE_PATH_OF_WHEEL_FILE>`
 3. 启动容器
-   
    ```shell
    IMAGE=vstackboard:<VERSION>
    docker run -itd -p 8081:8081 --name vstackboard ${IMAGE}
@@ -51,13 +50,19 @@ npm run build
 ### 3.3 直接运行（开发者模式）
 
 1. 进入项目目录，设置环境变量
-   
    + powershell: `$env:PYTHONPATH="./"`
    + cmd: `set PYTHONPATH=./`
    + shell: `export PYTHONPATH=./`
 
-2. 启动后端服务: `python .\vstackboard\cmd\vsb.py --dev`
-3. 启动前端服务: `cd forward; npm run serve`
+2. 启动后端服务:
+   ```
+   python3 vstackboard/cmd/vsb.py serve --dev
+   ```
+3. 启动前端服务:
+   ```
+   cd forward
+   npm run serve
+   ```
 
 *更多用法参考帮助信息。*
 

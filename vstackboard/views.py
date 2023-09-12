@@ -322,7 +322,6 @@ class Actions(web.RequestHandler, GetContext):
             self.check_update()
 
 
-
 class ConfigJson(BaseReqHandler):
 
     @utils.with_response(return_code=202)

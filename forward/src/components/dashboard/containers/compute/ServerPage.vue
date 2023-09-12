@@ -274,7 +274,7 @@ export default {
     },
     openChangeServerNameDialog: async function (server) {
       this.selectedServer = server;
-      this.showServerResetStateDialog = !this.showServerResetStateDialog;
+      this.showChangeNameDialog = !this.showChangeNameDialog;
     },
     openServerActionDialog: async function (server) {
       this.selectedServer = server;

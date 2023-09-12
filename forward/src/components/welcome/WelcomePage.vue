@@ -15,19 +15,18 @@
               <v-card-subtitle>Forward 是一个基于Vuetify实现的OpenStack管理服务。</v-card-subtitle>
             </v-img>
             <v-card-text class="text--primary">
-              <v-alert class="blue-grey lighten-4" border="left" colored-border color="deep-purple accent-1"
-                v-if="table.items.length == 0">
-                <v-icon>mdi-information-outline</v-icon>当前集群数目为 {{ table.items.length }}，请添加新集群。
-              </v-alert>
               <h4>常用集群 <v-btn icon @click="refresh()"><v-icon>mdi-refresh</v-icon></v-btn> </h4>
-                <v-chip close label color="primary" class="mr-2 mt-2" v-bind:key="item.i" v-for="item in table.items"
-                  @click:close="deleteCluster(item)" @click="useCluster(item)">{{ item.name }}
-                </v-chip>
-              <v-icon v-if="refreshing" class="mdi-spin">mdi-rotate-right</v-icon>
+              <v-chip close label color="primary" class="mr-2 mt-2" v-bind:key="item.i" v-for="item in table.items"
+              @click:close="deleteCluster(item)" @click="useCluster(item)">{{ item.name }}
+            </v-chip>
+            <v-icon v-if="refreshing" class="mdi-spin">mdi-rotate-right</v-icon>
+            <template v-if="table.items.length == 0">
+              <v-alert dense type="warning">请添加新集群</v-alert>
+            </template>
             </v-card-text>
             <v-card-actions>
-              <v-btn color="orange" text @click="openNewClusterDialog = true"><v-icon>mdi-plus</v-icon> 添加集群</v-btn>
-              <NewClusterVue :show.sync="openNewClusterDialog" @completed="this.table.refreh()" />
+              <v-btn color="primary" text @click="openNewClusterDialog = true"><v-icon>mdi-plus</v-icon> 添加集群</v-btn>
+              <NewClusterVue :show.sync="openNewClusterDialog" @completed="refresh()" />
               <v-spacer></v-spacer>
               <v-btn icon href="https://github.com/fjboy/vuetify-stack-board"
                 target="_new"><v-icon>mdi-github</v-icon></v-btn>
@@ -42,9 +41,9 @@
 <script>
 import axios from 'axios';
 import { MESSAGE } from '@/assets/app/lib';
+import Init from '@/assets/app/init';
 
 import API from '@/assets/app/api';
-import { NewAggDialog } from '@/assets/app/dialogs';
 import { ClusterTable } from '@/assets/app/tables';
 import NewClusterVue from './NewCluster.vue';
 
@@ -61,7 +60,6 @@ export default {
     newVersion: {},
     table: new ClusterTable(),
     openNewClusterDialog: false,
-    newCluster: new NewAggDialog(),
     refreshing: true,
   }),
   methods: {
@@ -96,6 +94,7 @@ export default {
     }
   },
   created() {
+    Init()
     this.getVersion();
     this.refresh();
   }

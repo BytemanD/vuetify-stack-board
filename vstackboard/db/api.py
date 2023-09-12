@@ -22,6 +22,8 @@ def init():
     SESSION = scoped_session(sessionmaker(bind=ENGINE))
 
     LOG.info('database file is %s', DB_FILE)
+    if not os.path.exists(CONF.data_path):
+        os.makedirs(CONF.data_path)
     models.Base.metadata.create_all(ENGINE, checkfirst=True)
 
     dbconf.init(conf.configs_items_in_db,
