@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import * as Echarts from 'echarts';
 
-import API, { ExpectServerPaused, ExpectServerRebooted, ExpectServerShutoff, ExpectServerStarted, ExpectServerUnpaused } from './api.js'
+import API from './api.js'
 import I18N from './i18n.js';
 import { LOG, MESSAGE, ServerTasks, Utils } from './lib.js'
 
@@ -439,8 +439,7 @@ export class ServerDataTable extends DataTable {
             if (currentServer.status){
                 await Utils.sleep(5)
             }
-            let body = await API.server.get(server_id);
-            currentServer = body.server;
+            currentServer = await API.server.show(server_id);
             if (currentServer['OS-EXT-STS:task_state'] != oldTaskState) {
                 this.updateItem(currentServer);
                 oldTaskState = currentServer['OS-EXT-STS:task_state'];
@@ -463,7 +462,7 @@ export class ServerDataTable extends DataTable {
             if (currentServer['OS-EXT-STS:task_state'] != oldTaskState) {
                 this.updateItem(currentServer);
             }
-            console.debug(`wait server ${server_id} task state to be ${expectStateList}, now: ${currentServer['OS-EXT-STS:task_state']}`);
+            LOG.debug(`wait server ${server_id} task state to be ${expectStateList}, now: ${currentServer['OS-EXT-STS:task_state']}`);
         } while(expectStateList.indexOf(currentServer['OS-EXT-STS:task_state']) >= 0);
         return currentServer
     }
@@ -471,8 +470,7 @@ export class ServerDataTable extends DataTable {
         for (let i in servers){
             let item = servers[i];
             await API.server.stop(item.id);
-            let watcher = new ExpectServerShutoff(item, this);
-            watcher.watch();
+            this.waitServerStopped(item)
         }
     }
     async stopSelected() {
@@ -497,8 +495,7 @@ export class ServerDataTable extends DataTable {
         for (let i in servers){
             let item = servers[i];
             await this.api.start(item.id)
-            let watcher = new ExpectServerStarted(item, this);
-            watcher.watch();
+            this.waitServerStarted(item, I18N.t('start'))
         }
     }
     async startSelected() {
@@ -530,8 +527,7 @@ export class ServerDataTable extends DataTable {
                 continue;
             }
             await self.api.pause(item.id);
-            let watcher = new ExpectServerPaused(item, this);
-            watcher.watch();
+            this.waitServerPaused(item)
         }
         this.resetSelected();
     }
@@ -544,8 +540,7 @@ export class ServerDataTable extends DataTable {
                 continue;
             }
             await self.api.unpause(item.id);
-            let watcher = new ExpectServerUnpaused(item, this);
-            watcher.watch();
+            this.waitServerUnpaused(item)
         }
         this.resetSelected();
     }
@@ -556,9 +551,8 @@ export class ServerDataTable extends DataTable {
                 MESSAGE.warning(`虚拟机 ${item.name} 不是运行状态`, 1)
                 continue;
             }
-            await this.api.reboot(item.id, type)
-            let watcher = new ExpectServerRebooted(item, this);
-            watcher.watch();
+            API.server.reboot(item.id)
+            this.waitServerStarted(item, I18N.t("reboot"))
         }
         this.resetSelected();
     }
@@ -604,6 +598,52 @@ export class ServerDataTable extends DataTable {
             }
         }
         return Object.values(addressMap);
+    }
+    async waitServerStarted(server, action){
+        let refreshServer = await this.waitServerStatus(server.id, ['ACTIVE', 'ERROR'])
+        if (refreshServer.status.toUpperCase() == 'ACTIVE'){
+            MESSAGE.success(`${server.name || server.id} ${action} 成功`)
+        } else {
+            MESSAGE.error(`${server.name || server.id} ${action} 失败`)
+        }
+    }
+    async waitServerStopped(server){
+        let action = I18N.t('stop')
+        let refreshServer = await this.waitServerStatus(server.id, ['SHUTOFF', 'ERROR'])
+        if (refreshServer.status.toUpperCase() == 'SHUTOFF'){
+            MESSAGE.success(`${server.name || server.id} ${action} 成功`)
+        } else {
+            MESSAGE.error(`${server.name || server.id} ${action} 失败`)
+        }
+    }
+    async waitServerPaused(server){
+        let action = I18N.t('pause')
+        let refreshServer = await this.waitServerStatus(server.id, ['PAUSED', 'ERROR'])
+        if (refreshServer.status.toUpperCase() == 'PAUSED'){
+            MESSAGE.success(`${server.name || server.id} ${action} 成功`)
+        } else {
+            MESSAGE.error(`${server.name || server.id} ${action} 失败`)
+        }
+    }
+    async waitServerUnpaused(server){
+        let action = I18N.t('unpause')
+        let refreshServer = await this.waitServerStatus(server.id, ['ACTIVE', 'ERROR'])
+        if (refreshServer.status.toUpperCase() == 'ACTIVE'){
+            MESSAGE.success(`${server.name || server.id} ${action} 成功`)
+        } else {
+            MESSAGE.error(`${server.name || server.id} ${action} 失败`)
+        }
+    }
+    async waitServerMigrated(server){
+        let action = I18N.t("migrate")
+        // TODO: show server first
+        let srcHost = server['OS-EXT-SRV-ATTR:host'];
+        let refreshServer = await this.waitServerStatus(server.id, [server.status, 'ERROR'])
+        if (refreshServer['OS-EXT-SRV-ATTR:host'] != srcHost){
+            MESSAGE.success(`${server.name || server.id} ${action} 成功`)
+        } else {
+            MESSAGE.error(`${server.name || server.id} ${action} 失败`)
+        }
     }
 }
 export class ComputeServiceTable extends DataTable {

@@ -2,7 +2,7 @@ import Vue from 'vue';
 import * as Echarts from 'echarts';
 
 import API, {
-    ExpectServerCreated, ExpectServerMigrated, ExpectServerRebuild,
+    ExpectServerCreated, ExpectServerRebuild,
     ExpectServerResized
 } from './api.js';
 import I18N from './i18n.js';
@@ -629,8 +629,7 @@ export class MigrateDialog extends Dialog {
                     await API.server.migrate(server.id, this.host);
                     MESSAGE.info(`实例 ${server.name} 冷迁移中`)
                 }
-                let watcher = new ExpectServerMigrated(server, this.serverTable)
-                watcher.watch();
+                this.serverTable.waitServerMigrated(server);
             } catch (error) {
                 MESSAGE.warning(error);
             }

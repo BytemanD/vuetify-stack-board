@@ -77,7 +77,15 @@ const MESSAGES = {
         'resize_migrating': 'resize migrating',
         'resize_finish': 'resize finish',
         'migrating': 'migrating',
-        'networking': 'networking'
+        'networking': 'networking',
+        // server actions
+        migrate: 'migrate',
+        reboot: 'reboot',
+        pause: 'pause',
+        unpause: 'unpause',
+        stop: 'stop',
+        start: 'start',
+
     },
     'zh-CN': {
         language: '语言',
@@ -155,6 +163,13 @@ const MESSAGES = {
         'resize_migrating': '变更迁移中',
         'resize_finish': '变更结束',
         'migrating': '迁移中',
+
+        migrate: '迁移',
+        reboot: '重启',
+        pause: '暂停',
+        unpause: '取消暂停',
+        stop: '关机',
+        start: '开机',
     },
 };
 

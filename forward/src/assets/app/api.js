@@ -248,6 +248,9 @@ class Migrations extends Restfulclient {
 
 class Server extends VstackboardApi {
     constructor() { super('/computing/servers') }
+    async show(id) {
+        return (await this.get(id)).server;
+    }
     async detail(filters = {}) {
         filters.all_tenants = 1
         return await super.detail(filters)
@@ -900,24 +903,6 @@ export class ExpectServerResized extends ExpectServerStatus {
             return false
         }
         if (this.server.flavor.original_name != this.sourceFlavorName){
-            MESSAGE.success(`虚拟机 ${this.action} 成功`)
-        } else {
-            MESSAGE.error(`虚拟机 ${this.action} 失败`)
-        }
-        return true;
-    }
-}
-export class ExpectServerMigrated extends ExpectServerStatus {
-    constructor(server, serverTable, options={}){
-        super("迁移", server, serverTable, "ACTIVE", options);
-        this.sourceHost = this.server['OS-EXT-SRV-ATTR:host'];
-    }
-    async check(){
-        let statusOk = await super.check();
-        if (!statusOk) {
-            return false
-        }
-        if (this.server['OS-EXT-SRV-ATTR:host'] != this.sourceHost){
             MESSAGE.success(`虚拟机 ${this.action} 成功`)
         } else {
             MESSAGE.error(`虚拟机 ${this.action} 失败`)

@@ -7,14 +7,13 @@
             <v-card-text class="mp-0">
                 <v-timeline dense>
                     <v-timeline-item small right class="py-1" v-for="item in dialog.actions"
-                        :color="dialog.isActionError(item) == true ? 'error' : 'success'" v-bind:key="item.request_id">
+                        :color="dialog.isActionError(item) == true ? 'error' : 'success'" v-bind:key="item.action + '-' + item.request_id">
                         <v-row>
                             <v-col class="text-left" cols="3">
                                 {{ dialog.formatTime(item.start_time) }}</v-col>
                             <v-col cols="3"><strong>{{ item.action }}</strong></v-col>
                             <v-col>
-                                <a @click="openServerActionEventsDialog(item.request_id)">{{
-                                    item.request_id }}</a>
+                                <a @click="openServerActionEventsDialog(item.request_id)">{{item.request_id }}</a>
                             </v-col>
                         </v-row>
                     </v-timeline-item>
