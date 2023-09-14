@@ -1,7 +1,10 @@
 import Vue from 'vue';
 import * as Echarts from 'echarts';
 
-import API, { ExpectServerCreated, ExpectServerMigrated, ExpectServerRebuild, ExpectServerResize } from './api.js';
+import API, {
+    ExpectServerCreated, ExpectServerMigrated, ExpectServerRebuild,
+    ExpectServerResized
+} from './api.js';
 import I18N from './i18n.js';
 import SETTINGS from './settings.js';
 import { Utils, LOG, CONST, MESSAGE } from './lib.js';
@@ -573,7 +576,7 @@ export class ResizeDialog extends Dialog {
         }
         await API.server.resize(this.server.id, this.flavorRef);
         MESSAGE.info(`虚拟机 ${this.server.id} 变更中...`);
-        let watcher = new ExpectServerResize(this.server, this.serverTable);
+        let watcher = new ExpectServerResized(this.server, this.serverTable);
         watcher.watch();
     }
 }

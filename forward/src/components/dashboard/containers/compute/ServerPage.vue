@@ -70,8 +70,7 @@
             <v-icon v-else-if="item.status.toUpperCase() == 'SHUTOFF'" color="warning">mdi-stop-circle</v-icon>
             <v-icon v-else-if="item.status.toUpperCase() == 'PAUSED'" color="warning">mdi-pause-circle</v-icon>
             <v-icon v-else-if="item.status.toUpperCase() == 'ERROR'" color="error">mdi-alpha-x-circle</v-icon>
-            <v-icon v-else-if="item.status.toUpperCase() == 'HARD_REBOOT'" color="warning"
-              class="mdi-spin">mdi-rotate-right</v-icon>
+            <v-icon v-else-if="item.status.toUpperCase() == 'HARD_REBOOT'" color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
             <v-icon
               v-else-if="['REBOOT', 'BUILD', 'REBUILD', 'RESIZE', 'VERIFY_RESIZE', 'MIGRATING'].indexOf(item.status.toUpperCase()) >= 0"
               color="warning" class="mdi-spin">mdi-rotate-right</v-icon>

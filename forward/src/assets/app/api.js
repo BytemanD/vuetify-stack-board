@@ -834,119 +834,95 @@ class Expect {
 }
 
 class ExpectServerStatus extends Expect {
-    constructor(server, serverTable, options={}){
+    constructor(action, server, serverTable, expectStatus, options={}){
         super(options);
+        this.action = action;
         this.server = server;
+        this.expectStatus = expectStatus;
         this.serverTable = serverTable;
     }
 
-    serverCheck(){
-        return true;
-    }
-
-    async _check(expectStatus, actionName){
-        let servers = []
-        servers = (await API.server.detail({uuid: this.server.id})).servers;
-        if (servers.length == 0){
-            throw Error(`实例 ${this.server.name || this.server.id} 不存在`);
-        }
-        let currentServer = servers[0];
-        let serverStaus = currentServer.status.toUpperCase();
-        LOG.debug(`等待实例 ${this.server.name || this.server.id} 状态变为(${expectStatus}, ERROR), 当前状态: ${serverStaus.toUpperCase()}`);
+    async check(){
+        this.server = (await API.server.show(this.server.id)).server;
+        let serverStatus = this.server.status.toUpperCase();
+        LOG.debug(`等待实例 ${this.server.name || this.server.id} 状态变为(${this.expectStatus}, ERROR), 当前状态: ${serverStatus.toUpperCase()}`);
 
         if (this.serverTable){
-            this.serverTable.updateItem(currentServer);
+            this.serverTable.updateItem(this.server);
         }
-
-        if (serverStaus == 'ERROR'){
-            MESSAGE.error(`实例 ${this.server.name || this.server.id} ${actionName}失败`);
-            return true
-        }
-        if (serverStaus == expectStatus){
-            let serverCheckReturn = this.serverCheck(currentServer);
-            if (serverCheckReturn) {
-                MESSAGE.success(`实例 ${this.server.name || this.server.id} ${actionName}成功`);
-                return true;
-            } else {
-                MESSAGE.error(`实例 ${this.server.name || this.server.id} ${actionName}失败`);
-                return true;
-            }
-            
-        }
+        return serverStatus == this.expectStatus.toUpperCase();
     }
 }
 
 export class ExpectServerCreated extends ExpectServerStatus {
-    async check(){
-        return await this._check('ACTIVE', '创建')
+    constructor(server, serverTable, options={}){
+        super("创建", server, serverTable, 'ACTIVE', options);
     }
 }
 export class ExpectServerPaused extends ExpectServerStatus {
-    async check(){
-        return await this._check('PAUSED', '暂停')
+    constructor(server, serverTable, options={}){
+        super("暂停", server, serverTable, 'PAUSED', options);
     }
 }
 export class ExpectServerUnpaused extends ExpectServerStatus {
-    async check(){
-        return await this._check('ACTIVE', '取消暂停')
+    constructor(server, serverTable, options={}){
+        super("取消暂停", server, serverTable, 'ACTIVE', options);
     }
 }
 export class ExpectServerShutoff extends ExpectServerStatus {
-    async check(){
-        return await this._check('SHUTOFF', '关机')
+    constructor(server, serverTable, options={}){
+        super("关机", server, serverTable, 'SHUTOFF', options);
     }
 }
 export class ExpectServerStarted extends ExpectServerStatus {
-    async check(){
-        return await this._check('ACTIVE', '开机')
+    constructor(server, serverTable, options={}){
+        super("开机", server, serverTable, 'ACTIVE', options);
     }
 }
 export class ExpectServerRebooted extends ExpectServerStatus {
-    async check(){
-        return await this._check('ACTIVE', '重启')
+    constructor(server, serverTable, options={}){
+        super("重启", server, serverTable, 'ACTIVE', options);
     }
 }
 export class ExpectServerRebuild extends ExpectServerStatus {
-    async check(){
-        return await this._check('ACTIVE', '重建')
+    constructor(server, serverTable, options={}){
+        super("重建", server, serverTable, 'ACTIVE', options);
     }
 }
-export class ExpectServerResize extends ExpectServerStatus {
-
+export class ExpectServerResized extends ExpectServerStatus {
     constructor(server, serverTable, options={}){
-        super(server, serverTable, options);
+        super("规格变更", server, serverTable, "ACTIVE", options);
+        this.sourceFlavorName = this.server.flavor.original_name
     }
-
-    serverCheck(currentServer) {
-        let oldFlavorRef = this.server.flavor.original_name;
-        if (currentServer.flavor.original_name == oldFlavorRef) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     async check(){
-        return await this._check('ACTIVE', '规格变更')
+        let statusOk = await super.check();
+        if (!statusOk) {
+            return false
+        }
+        if (this.server.flavor.original_name != this.sourceFlavorName){
+            MESSAGE.success(`虚拟机 ${this.action} 成功`)
+        } else {
+            MESSAGE.error(`虚拟机 ${this.action} 失败`)
+        }
+        return true;
     }
 }
 export class ExpectServerMigrated extends ExpectServerStatus {
-
     constructor(server, serverTable, options={}){
-        super(server, serverTable, options);
+        super("迁移", server, serverTable, "ACTIVE", options);
+        this.sourceHost = this.server['OS-EXT-SRV-ATTR:host'];
     }
-
-    serverCheck(currentServer) {
-        let sourceHost = this.server['OS-EXT-SRV-ATTR:host'];
-        if (currentServer['OS-EXT-SRV-ATTR:host'] == sourceHost) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     async check(){
-        return await this._check('ACTIVE', '迁移')
+        let statusOk = await super.check();
+        if (!statusOk) {
+            return false
+        }
+        if (this.server['OS-EXT-SRV-ATTR:host'] != this.sourceHost){
+            MESSAGE.success(`虚拟机 ${this.action} 成功`)
+        } else {
+            MESSAGE.error(`虚拟机 ${this.action} 失败`)
+        }
+        return true;
     }
 }
 export class ExpectServerDeleted extends Expect {
@@ -957,22 +933,14 @@ export class ExpectServerDeleted extends Expect {
     }
 
     async check(){
-        let servers = []
-        servers = (await API.server.detail({uuid: this.server.id})).servers;
-        if (servers.length == 0){
+        try {
+            super.check()
+        } catch (e) {
+            console.error(e)
             MESSAGE.success(`实例 ${this.server.name || this.server.id} 删除成功`);
-            return true;
-        }
-        let currentServer = servers[0];
-        let serverStaus = currentServer.status.toUpperCase();
-        LOG.debug(`等待实例 ${this.server.name || this.server.id} 删除, 当前状态: ${serverStaus.toUpperCase()}`);
-        if (serverStaus == 'ERROR'){
-            MESSAGE.error(`实例 ${this.server.name || this.server.id} 删除失败`);
             return true
         }
-        if (this.serverTable){
-            this.serverTable.updateItem(currentServer);
-        }
+        return false;
     }
 }
 const API = new OpenstackProxyApi();
