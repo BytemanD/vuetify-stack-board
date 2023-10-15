@@ -10,28 +10,6 @@ LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 DEFAULT_HOST = socket.gethostname()
 
-
-# TODO: move this to easy2use
-class ListOption(cfg.Option):
-
-    def parse_value(self, value):
-        """ list values
-        e.g.
-        list_option = value1
-                      value2
-        """
-        if not value:
-            return
-        tmp_value = []
-        if isinstance(value, list):
-            tmp_value = value
-        else:
-            # is string
-            for item in value.split():
-                tmp_value.append(item.strip())
-        return tmp_value
-
-
 default_options = [
     cfg.BooleanOption('debug', default=False),
     cfg.Option('log_file', default=None),
@@ -52,7 +30,7 @@ openstack_options = [
 ]
 
 web_options = [
-    ListOption(name='stylesheet', default=None),
+    cfg.ListOption(name='stylesheet', default=None),
 ]
 
 configs_items_in_db = [
