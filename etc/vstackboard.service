@@ -1,9 +1,0 @@
-[Unit]
-Description=Vuetify Openstack Dashboard
-
-[Service]
-Type=simple
-NotifyAccess=all
-TimeoutStartSec=0
-ExecStartPre=/usr/bin/mkdir -p /var/log/vstackboard/
-ExecStart=/usr/local/bin/vstackboard serve --log-file /var/log/vstackboard/vstackboard.log

@@ -35,7 +35,7 @@ npm run build
 2. 构建wheel包：`python3 setup.py bdist_wheel`
 3. 安装：`pip3 install dist/<THE_PATH_OF_WHEEL_FILE>`
 
-*安装成功后，可执行 `vastackboard --help` 命令查看帮助信息*
+*安装成功后，可执行 `skylight --help` 命令查看帮助信息*
 
 ### 3.2 在docker容器中运行
 
@@ -43,8 +43,8 @@ npm run build
 2. 构建镜像 `python .\install\build.py dist/<THE_PATH_OF_WHEEL_FILE>`
 3. 启动容器
    ```shell
-   IMAGE=vstackboard:<VERSION>
-   docker run -itd -p 8081:8081 --name vstackboard ${IMAGE}
+   IMAGE=skylight:<VERSION>
+   docker run -itd -p 8081:8081 --name skylight ${IMAGE}
    ```
 
 ### 3.3 直接运行（开发者模式）
@@ -60,8 +60,8 @@ npm run build
    ```
 3. 启动前端服务:
    ```
-   cd forward
-   npm run serve
+   cd skylight-web
+   npm run dev
    ```
 
 *更多用法参考帮助信息。*

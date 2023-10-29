@@ -4,7 +4,7 @@ import nox
 @nox.session
 def flake8(session):
     session.install("flake8")
-    session.run("flake8", "vstackboard", "tests", 'noxfile.py', 'install')
+    session.run("flake8", "skylight", "tests", 'noxfile.py', 'install')
 
 
 @nox.session(name='pytest')

@@ -1,0 +1,79 @@
+<template>
+    <v-row>
+        <v-col cols="12">
+            <v-data-table show-expand single-expand show-select density='compact' :loading="table.loading"
+                :headers="table.headers" :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search"
+                class="elevation-1" v-model="table.selected">
+                <template v-slot:top>
+                    <v-row>
+                        <v-col cols="12" md="6" sm="12">
+                            <v-toolbar density="compact" class="rounded-pill">
+                                <v-btn x-small fab class="mr-1" color="primary" icon="mdi-plus"
+                                    @click="openNewFlavorDialog = true"></v-btn>
+                                <v-spacer></v-spacer>
+                                <v-btn small class="mr-1" color="red" icon="mdi-trash-can" @click="table.deleteSelected()"
+                                    :disabled="table.selected.length == 0">
+                                </v-btn>
+                            </v-toolbar>
+                        </v-col>
+                        <v-col>
+                            <v-text-field small density='compact' v-model="table.search" label="搜索" single-line
+                                hide-details></v-text-field>
+                        </v-col>
+                        <v-col cols="1">
+                            <v-btn color="info" variant="text" icon="mdi-refresh" v-on:click="table.refresh()"></v-btn>
+                        </v-col>
+                    </v-row>
+                </template>
+
+                <template v-slot:[`item.is_public`]="{ item }">
+                    <v-icon v-if="item.is_public == true" color="success">mdi-check</v-icon>
+                    <v-icon v-else color="red">mdi-close</v-icon>
+                </template>
+
+                <template v-slot:[`item.extra_specs`]="{ item }">
+                    <v-chip label x-small class="mr-1" v-for="(value, key) in item.extra_specs" v-bind:key="key">{{ key
+                    }}={{ value }}</v-chip>
+                </template>
+                <template v-slot:expanded-row="{ columns, item }">
+                    <td></td>
+                    <td></td>
+                    <td :colspan="columns.length - 1">
+                        <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
+                            <td class="text-info">{{ extendItem.title }}:</td>
+                            <td>{{ item[extendItem.title] }}</td>
+                        </tr>
+                    </td>
+                </template>
+            </v-data-table>
+        </v-col>
+        <v-col cols="12">
+            <NewVolumeType :show.sync="openNewFlavorDialog" @completed="table.refresh()" />
+        </v-col>
+    </v-row>
+</template>
+
+<script>
+import { VolumeTypeTable } from '@/assets/app/tables.jsx';
+
+import NewVolumeType from './dialogs/NewVolumeType.vue';
+
+export default {
+    components: {
+        NewVolumeType
+    },
+
+    data: () => ({
+        openNewFlavorDialog: false,
+        table: new VolumeTypeTable()
+        // miniVariant: false,
+    }),
+    methods: {
+
+    },
+    created() {
+        this.table.refresh();
+    }
+};
+</script>
+    

@@ -133,16 +133,17 @@ dmypy.json
 # vscode
 .vscode
 
-vstackboard/static/cdn
-vstackboard/static/cdn.zip
-vstackboard/static/include
+skylight/static/cdn
+skylight/static/cdn.zip
+skylight/static/include
 
-etc/vstackboard.db
-etc/vstackboard.conf
+etc/skylight.db
+etc/skylight.conf
 i18n/locale
 i18n/*.mo
-vstackboard/locale
+skylight/locale
 install/forward
 install/requirements.txt
 install/*.whl
 package-lock.json
+etc/skylight.db

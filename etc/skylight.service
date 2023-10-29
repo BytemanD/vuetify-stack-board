@@ -1,0 +1,9 @@
+[Unit]
+Description=The Skylight Proxy Server
+
+[Service]
+Type=simple
+NotifyAccess=all
+TimeoutStartSec=0
+ExecStartPre=/usr/bin/mkdir -p /var/log/skylight/
+ExecStart=/usr/local/bin/skylight serve --log-file /var/log/skylight/skylight.log

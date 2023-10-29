@@ -1,0 +1,33 @@
+{
+  "name": "forward2",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --fix --ignore-path .gitignore"
+  },
+  "dependencies": {
+    "@mdi/font": "7.0.96",
+    "@websitevirtuoso/vue3-v-snackbars": "^1.0.5",
+    "axios": "^1.5.1",
+    "core-js": "^3.29.0",
+    "echarts": "^5.4.3",
+    "roboto-fontface": "*",
+    "vue": "^3.2.0",
+    "vue-cookies": "^1.8.3",
+    "vue-i18n": "^9.5.0",
+    "vue-router": "^4.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.0.0",
+    "eslint": "^8.37.0",
+    "eslint-plugin-vue": "^9.3.0",
+    "sass": "^1.60.0",
+    "unplugin-fonts": "^1.0.3",
+    "vite": "^4.2.0",
+    "vite-plugin-vuetify": "^1.0.2",
+    "vuetify": "^3.3.21"
+  }
+}
