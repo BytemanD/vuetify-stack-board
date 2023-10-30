@@ -4,7 +4,7 @@
       <v-row text-center>
         <v-col cols="6" class="mx-auto">
           <v-card class="mx-auto mt-6 bg-blue-grey-lighten-4" elevation="4">
-            <v-img class="text-white align-end" src="/welcome.svg">
+            <v-img class="text-white align-end" src="@/assets/welcome.svg">
               <v-card-title>欢迎使用 SkyLight</v-card-title>
               <v-card-text>SkyLight 是一个基于Vuetify实现的OpenStack管理服务。</v-card-text>
             </v-img>

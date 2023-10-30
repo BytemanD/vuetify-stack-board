@@ -88,28 +88,19 @@ def prepare_build_resources(resources: list):
             shutil.copy(src_path, dst_path)
 
 
-@log_step
-def update_config_json(config_json_path):
-    """更新文件: config.json
-    """
-    if not os.path.exists(config_json_path):
-        LOG.warning('----> config.json file %s not exists', config_json_path)
-        return
-    with open(config_json_path) as f:
-        content = json.load(f)
-    if 'backend_url' in content:
-        content['backend_url'] = ''
-    with open(config_json_path, 'w') as f:
-        json.dump(content, f, indent=4)
-
-
-@log_step
-def update_favicon_ico(favicon_file, dst_path):
-    """准备文件: favicon.ico
-    """
-    if not os.path.exists(favicon_file):
-        raise RuntimeError(f'favicon file {favicon_file} not exists')
-    shutil.move(favicon_file, os.path.join(dst_path, 'favicon.ico'))
+# @log_step
+# def update_config_json(config_json_path):
+#     """更新文件: config.json
+#     """
+#     if not os.path.exists(config_json_path):
+#         LOG.warning('----> config.json file %s not exists', config_json_path)
+#         return
+#     with open(config_json_path) as f:
+#         content = json.load(f)
+#     if 'backend_url' in content:
+#         content['backend_url'] = ''
+#     with open(config_json_path, 'w') as f:
+#         json.dump(content, f, indent=4)
 
 
 @log_step
@@ -128,8 +119,8 @@ def build_docker_image(name, version, backend, frontend,
     CONTAINER_CMD.build(
         './', network='host', target=target,
         no_cache=no_cache,
-        build_args=[f'PACKAGE_NAME={backend}',
-                    f'FORWARD_PACKAGE_NANME={frontend}'])
+        build_args=[f'BACKEND_PACKAGE_NAME={backend}',
+                    f'FRONTEND_PACKAGE_NANME={frontend}'])
     return target
 
 
@@ -166,7 +157,7 @@ def cleanup(resources):
 def main():
     global CONTAINER_CMD
 
-    parser = argparse.ArgumentParser(description='vstackboard build tool')
+    parser = argparse.ArgumentParser(description='skylight build tool')
     parser.add_argument('whl_file', help='The file of whl package')
     parser.add_argument('-r', '--push-registry', action='append', nargs='?',
                         help='The registry to push, e.g. docker.io, '
@@ -188,7 +179,7 @@ def main():
     CONTAINER_CMD = shell.get_container_impl(impl=args.container_cmd)
 
     requirements = 'requirements.txt'
-    frontend_name = 'forward'
+    frontend_name = 'skylight-web'
     whl_file_path = os.path.abspath(args.whl_file)
     frontend_path = os.path.join(frontend_name, 'dist')
 
@@ -203,14 +194,11 @@ def main():
         (requirements, join_install_path(os.path.basename(requirements))),
     ])
 
-    config_json = join_install_path(frontend_name, 'config.json')
-    update_config_json(config_json)
-    # NOTE: favicon.ico file must put in static path
-    update_favicon_ico(join_install_path(frontend_name, 'favicon.ico'),
-                       join_install_path(frontend_name, 'static'))
+    # config_json = join_install_path(frontend_name, 'config.json')
+    # update_config_json(config_json)
 
     try:
-        target = build_docker_image('vstackboard', whl_version,
+        target = build_docker_image('skylight', whl_version,
                                     whl_name, frontend_name,
                                     no_cache=args.no_cache)
     except Exception as e:

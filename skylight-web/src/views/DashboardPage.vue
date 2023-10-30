@@ -3,7 +3,7 @@
     <v-navigation-drawer :rail="navigation.mini" :width="ui.navigationWidth.value" :expand-on-hover="navigation.mini">
       <v-list-item title="Skylight">
         <template v-slot:prepend>
-          <v-avatar image="/favicon.svg" rounded="0"></v-avatar>
+          <v-avatar image="@/assets/favicon.svg" rounded="0"></v-avatar>
         </template>
       </v-list-item>
 

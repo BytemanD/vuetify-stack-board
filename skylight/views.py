@@ -328,9 +328,15 @@ class ConfigJson(BaseReqHandler):
         self.render(self.request.path[1:])
 
 
+class StaticFile(BaseReqHandler):
+
+    @utils.with_response(return_code=202)
+    def get(self, path):
+        self.render(path)
+
+
 def get_routes():
     return [
-        (r'/config.json', ConfigJson),
         (r'/version', Version),
         (r'/configs', Configs),
         (r'/cluster', Cluster),
@@ -344,4 +350,5 @@ def get_routes():
         (r'/volume(.*)', CinderProxy),
         (r'/auth_info', AuthInfo),
         (r'/actions', Actions),
+        (r'/(.*)', StaticFile),
     ]

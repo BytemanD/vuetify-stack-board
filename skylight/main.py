@@ -4,6 +4,7 @@ import mimetypes
 import os
 import pathlib
 import sys
+import shutil
 import subprocess
 
 from easy2use.downloader.urllib import driver
@@ -130,6 +131,51 @@ class VstackboardApp(application.TornadoApp):
         super().start(**kwargs)
 
 
+def init_favicon_ico(favicon_file: pathlib.Path, static_path):
+    LOG.debug('将favicon.ico 文件链接到 static 下')
+    if not favicon_file.exists():
+        LOG.warning('favicon file %s not exists', favicon_file)
+        return
+    static_favicon_ico = pathlib.Path(static_path, 'favicon.ico')
+    if static_favicon_ico.exists():
+        LOG.debug('删除static下的 favicon.ico 文件')
+        os.remove(static_favicon_ico)
+    os.link(favicon_file, os.path.join(static_path, 'favicon.ico'))
+
+
+def init_config_json(json_file: pathlib.Path, update_config_json=False):
+    json_file_origin = pathlib.Path(json_file.parent,
+                                    json_file.name + '.origin')
+    if not update_config_json:
+        if not json_file_origin.exists():
+            return
+        if json_file.exists():
+            os.remove(json_file)
+        shutil.move(json_file_origin, json_file)
+    else:
+        if not json_file.exists():
+            LOG.warning("config json %s is not exists", json_file)
+            return
+        if not json_file_origin.exists():
+            shutil.copyfile(json_file, json_file_origin)
+
+        LOG.info("更新 config.json 文件: %s", json_file)
+        if not json_file.exists():
+            return
+        if not CONF.web.stylesheet:
+            return
+
+        with open(json_file) as fp:
+            config_json = json.load(fp)
+        config_json['static_stylesheet'] = CONF.web.stylesheet
+        config_json['backend_url'] = ''
+
+        new_config_json = json.dumps(config_json, indent=4)
+        LOG.debug("new config json: %s", new_config_json)
+        with open(json_file, 'w') as fp:
+            fp.write(new_config_json)
+
+
 class Serve(cli.SubCli):
     NAME = 'serve'
     ARGUMENTS = log.get_args() + [
@@ -143,6 +189,8 @@ class Serve(cli.SubCli):
                 help=_("The path of template")),
         cli.Arg('--container', action='store_true',
                 help=_("Run serve with docker container")),
+        cli.Arg('--update-config-json', action='store_true',
+                help=_("Update file: config.json")),
         cli.Arg('-c', '--enale-cross-domain', action='store_true',
                 help=_("Enable cross domain")),
     ]
@@ -164,24 +212,15 @@ class Serve(cli.SubCli):
         if args.template and not pathlib.Path(args.template).exists():
             LOG.warning('template path %s not exists.', args.template)
 
-        # update config.json
-        if args.template and CONF.web.stylesheet:
-            json_file = pathlib.Path(args.template, 'config.json')
-            if not json_file.exists():
-                LOG.warning("config json %s is not exists", json_file)
-            else:
-                LOG.debug("update config json %s", json_file)
-                with open(json_file) as fp:
-                    config_json = json.load(fp)
-                    config_json['static_stylesheet'] = CONF.web.stylesheet
-                new_config_json = json.dumps(config_json, indent=4)
-                with open(json_file, 'w') as fp:
-                    LOG.debug("new config json: %s", new_config_json)
-                    fp.write(new_config_json)
+        # NOTE: init config.json
+        init_config_json(pathlib.Path(args.template, 'config.json'),
+                         update_config_json=args.update_config_json)
+        # NOTE: favicon.ico file must put in static path
+        init_favicon_ico(pathlib.Path(args.template, 'favicon.ico'),
+                         args.static)
 
         views.RUN_AS_CONTAINER = args.container
-        application.init(enable_cross_domain=True,
-                         index_redirect=CONF.index_redirect)
+        application.init(enable_cross_domain=True)
         routes = application.get_routes() + views.get_routes()
         app = VstackboardApp(routes, develop=args.develop,
                              static_path=args.static,
