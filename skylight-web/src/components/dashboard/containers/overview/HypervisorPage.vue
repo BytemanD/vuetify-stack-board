@@ -69,15 +69,15 @@
       <v-card density='compact'>
         <v-card-text>
           <v-row>
-            <v-col>
-              <v-btn small color="info" @click="() => $router.push('/dashboard/hypervisor/tenantUsage')">
+            <v-col class="px-auto">
+              <v-btn variant="text" color="info" @click="() => $router.push('/dashboard/hypervisor/tenantUsage')">
                 {{ $t('tenantUsage') }}</v-btn>
             </v-col>
             <v-col>
               <v-text-field density='compact' v-model="table.search" label="搜索" single-line hide-details></v-text-field>
             </v-col>
             <v-col cols="1">
-              <v-btn size="small" icon="mdi-refresh" color="primary" @click="refresh()"></v-btn>
+              <v-btn variant="text" icon="mdi-refresh" color="primary" @click="refresh()"></v-btn>
             </v-col>
           </v-row>
         </v-card-text>
@@ -85,7 +85,7 @@
     </v-col>
     <v-col cols="12">
       <v-data-table density='compact' show-expand single-expand :headers="table.headers" :items="table.items"
-        v-model:items-per-page="table.itemsPerPage" :search="table.search" v-model="table.selected">
+        :items-per-page="table.itemsPerPage" :search="table.search" v-model="table.selected" :loading="table.loading">
 
         <template v-slot:[`item.status`]="{ item }">
           <v-icon v-if="item.status == 'enabled'" color="success">mdi-emoticon-happy</v-icon>

@@ -19,4 +19,4 @@ RUN mkdir -p /etc/skylight && touch /etc/skylight/skylight.conf
 
 EXPOSE 8081
 
-ENTRYPOINT [ "skylight", "serve", "--container", "--static", "/usr/share/skylight-web/static", "--template", "/usr/share/skylight-web" ]
+ENTRYPOINT [ "skylight", "serve", "--static", "/usr/share/skylight-web/static", "--template", "/usr/share/skylight-web" ]

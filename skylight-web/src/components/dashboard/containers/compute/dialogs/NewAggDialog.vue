@@ -1,5 +1,8 @@
 <template>
     <v-dialog v-model="display" width="600">
+        <template v-slot:activator="{ props }">
+            <v-btn v-bind="props" icon="mdi-plus" fab color="primary" class="mr-1"></v-btn>
+        </template>
         <v-card>
             <v-card-title class="headline primary lighten-2" primary-title>新建聚合</v-card-title>
             <v-card-text>

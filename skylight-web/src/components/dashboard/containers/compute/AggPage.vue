@@ -1,32 +1,42 @@
 <template>
     <v-row>
         <v-col>
-            <v-btn x-small fab class="mr-1" color="primary"
-                @click="openNewAggDialog = true"><v-icon>mdi-plus</v-icon></v-btn>
-            <v-btn small color="red" @click="table.deleteSelected()" :disabled="table.selected.length == 0">
-                <v-icon>mdi-trash-can</v-icon>删除
-            </v-btn>
-            <!-- <v-btn small color="warning" @click="">节点管理</v-btn> -->
-        </v-col>
-        <v-col>
-            <v-text-field small density='compact' hide-details single-line v-model="table.search" 
-                label="搜索"></v-text-field>
-        </v-col>
-        <v-col cols="1" class="text-center">
-            <v-btn fab x-small color="info" v-on:click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
-        </v-col>
-        <v-col cols="12">
-            <v-data-table density='compact' show-select show-expand single-expand :loading="table.loading" :headers="table.headers"
-                :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1"
-                v-model="table.selected">
+            <v-data-table density='compact' show-select show-expand single-expand :loading="table.loading"
+                :headers="table.headers" :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search"
+                class="elevation-1" v-model="table.selected">
+                <template v-slot:top>
+                    <v-row>
+                        <v-col cols="12" md="7" sm="12">
+                            <v-toolbar density="compact" class="rounded-pill">
+                                <NewAggDialog @completed="table.refresh()" />
+                                <v-spacer></v-spacer>
+                                <v-btn icon="mdi-trash-can" color="red" :disabled="table.selected.length == 0"
+                                    @click="table.deleteSelected()"></v-btn>
+                            </v-toolbar>
+                        </v-col>
+                        <v-col>
+                            <v-text-field small density='compact' v-model="table.search" label="搜索" single-line
+                                hide-details></v-text-field>
+                        </v-col>
+                        <v-col cols="1" class="text-center">
+                            <v-btn variant="text" icon="mdi-refresh" color="info"
+                                v-on:click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
+                        </v-col>
+                    </v-row>
+                </template>
+
+
+
 
                 <template v-slot:[`item.host_num`]="{ item }">
-                    <v-btn size="small" variant="text" icon color="info" @click="editAggHosts(item)">{{ item.hosts.length }}</v-btn>
-                    <v-btn size="small" variant="text" icon="mdi-plus" color="primary" @click="openAggAddHostsDialog(item)"></v-btn>
+                    <v-btn size="small" variant="text" icon color="info" @click="editAggHosts(item)">{{ item.hosts.length
+                    }}</v-btn>
+                    <v-btn size="small" variant="text" icon="mdi-plus" color="primary"
+                        @click="openAggAddHostsDialog(item)"></v-btn>
                 </template>
                 <template v-slot:expanded-row="{ columns, item }">
                     <td></td>
-                    <td :colspan="columns.length-1">
+                    <td :colspan="columns.length - 1">
                         <table>
                             <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
                                 <td><strong>{{ extendItem.text }}:</strong> </td>
@@ -37,7 +47,7 @@
                 </template>
             </v-data-table>
         </v-col>
-        <NewAggDialog :show.sync="openNewAggDialog" @completed="table.refresh()" />
+
         <AggHostDialog :show.sync="openAggHostsDialog" :aggregate="editAgg" @completed="table.refresh()" />
         <AggAddHostsDialog :show.sync="showAggAddHostsDialog" :aggregate="editAgg" @completed="table.refresh()" />
     </v-row>
@@ -69,7 +79,7 @@ export default {
             this.editAgg = agg;
             this.openAggHostsDialog = !this.openAggHostsDialog;
         },
-        openAggAddHostsDialog: function(agg){
+        openAggAddHostsDialog: function (agg) {
             this.editAgg = agg;
             this.showAggAddHostsDialog = !this.showAggAddHostsDialog;
         }

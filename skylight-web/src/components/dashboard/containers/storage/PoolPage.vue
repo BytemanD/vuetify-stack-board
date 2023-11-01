@@ -28,8 +28,8 @@
                     <v-tooltip bottom>
                         <template v-slot:activator="{ props }">
                             <v-sheet color="grey lighten-1" v-bind="props">
-                                <v-progress-linear height="20"
-                                    :value="(item.capabilities.total_capacity_gb - item.capabilities.free_capacity_gb) * 100 / item.capabilities.total_capacity_gb">
+                                <v-progress-linear height="20" color="info" :max="item.capabilities.total_capacity_gb"
+                                    :model-value="item.capabilities.total_capacity_gb - item.capabilities.free_capacity_gb">
                                 </v-progress-linear>
                             </v-sheet>
                         </template>

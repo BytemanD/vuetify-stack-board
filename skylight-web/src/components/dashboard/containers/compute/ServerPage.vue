@@ -261,8 +261,15 @@ export default {
     refreshTable: function () {
       this.table.refresh();
     },
-    pageRefresh: function ({ page, itemsPerPage, sortBy }) {
-      let filter = { limit: itemsPerPage || this.table.itemsPerPage }
+    pageRefresh: function ({ page, itemsPerPage, sortBy }) { 
+      let filter = {}
+      if (itemsPerPage) {
+        if (itemsPerPage >= 0){
+          filter.limit = itemsPerPage 
+        }
+      } else {
+        filter.limit = this.table.itemsPerPage
+      }
       if (page > 1 && this.totalServers.length > 1) {
         let index = filter.limit * (page - 1) - 1
         filter.marker = this.totalServers[index].id

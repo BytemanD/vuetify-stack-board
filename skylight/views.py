@@ -23,8 +23,6 @@ CONF_DB_API = None
 UPLOADING_IMAGES = {}
 UPLOADING_THREADS = {}
 
-RUN_AS_CONTAINER = False
-
 
 class GetContext(object):
 
@@ -303,14 +301,8 @@ class NeutronProxy(OpenstackProxyBase):
 class Actions(web.RequestHandler, GetContext):
 
     def check_update(self):
-        global RUN_AS_CONTAINER
-
-        if RUN_AS_CONTAINER:
-            LOG.info('Check latest image version')
-            last_version = utils.check_last_image_version()
-        else:
-            LOG.info('Check latest wheel version')
-            last_version = utils.check_last_version()
+        LOG.debug('Check latest wheel version')
+        last_version = utils.check_last_version()
         self.set_status(200)
         self.finish({'checkLastVersion': last_version or {}})
 

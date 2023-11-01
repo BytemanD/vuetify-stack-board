@@ -27,7 +27,6 @@ import { MigrateDialog } from '@/assets/app/dialogs';
 
 export default {
     props: {
-        show: Boolean,
         servers: Array,
         serverTable: Object,
     },
@@ -47,13 +46,10 @@ export default {
     created() {
     },
     watch: {
-        show(newVal) {
-            this.display = newVal;
+        display(newVal) {
             if (this.display) {
                 this.dialog.init(this.servers, this.serverTable);
             }
-        },
-        display(newVal) {
             this.display = newVal;
             this.$emit("update:show", this.display);
         }

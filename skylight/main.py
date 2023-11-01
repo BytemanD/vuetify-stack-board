@@ -187,8 +187,6 @@ class Serve(cli.SubCli):
                 help=_("The path of static files")),
         cli.Arg('--template', default='skylight-web/dist',
                 help=_("The path of template")),
-        cli.Arg('--container', action='store_true',
-                help=_("Run serve with docker container")),
         cli.Arg('--update-config-json', action='store_true',
                 help=_("Update file: config.json")),
         cli.Arg('-c', '--enale-cross-domain', action='store_true',
@@ -219,7 +217,6 @@ class Serve(cli.SubCli):
         init_favicon_ico(pathlib.Path(args.template, 'favicon.ico'),
                          args.static)
 
-        views.RUN_AS_CONTAINER = args.container
         application.init(enable_cross_domain=True)
         routes = application.get_routes() + views.get_routes()
         app = VstackboardApp(routes, develop=args.develop,
