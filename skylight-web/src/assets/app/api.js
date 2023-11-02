@@ -291,6 +291,9 @@ class Server extends VstackboardApi {
             min_count: options.minCount  || 1,
             max_count: options.maxCount|| 1,
         }
+        if (options.description) {
+            data.description = options.description
+        }
         if (!options.networks || options.networks.length == 0) {
             data.networks = 'none';
         } else {

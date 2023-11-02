@@ -13,7 +13,7 @@
             </v-chip>
           </v-col>
           <v-col cols="10">
-            <v-select :items="dialog.subnets" label="可用子网" item-value="id" item-text="name" multiple chips outlined
+            <v-select :items="dialog.subnets" label="可用子网" item-value="id" :item-props="dialog.itemProps" multiple chips outlined
               v-model="dialog.selected">
             </v-select>
           </v-col>

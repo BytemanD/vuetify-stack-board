@@ -15,27 +15,23 @@
                     <v-col cols="2" class="my-auto">
                         <v-btn variant="text" color="primary" @click="dialog.refreshName()">随机名字</v-btn>
                     </v-col>
-                    <v-col cols="8">
-                        <v-select :items="dialog.networks" label="网络" item-title="name" item-value="id" density='compact'
+                    <v-col cols="6">
+                        <v-select :items="dialog.networks" label="网络" :item-props="dialog.itemProps" item-value="id" density='compact'
                             outlined v-model="dialog.networkId" :error="!dialog.networkId">
                         </v-select>
-                    </v-col>
-                    <v-col cols="4">
                         <v-select :items="dialog.vnicTypes" clearable density='compact' outlined label="VNIC类型"
                             v-model="dialog.vnicType"></v-select>
-                    </v-col>
-                    <v-col cols="6">
                         <v-select :items="dialog.qosPolicies" clearable density='compact' outlined label="QoS策略"
-                            v-model="dialog.qosPolicyId"></v-select>
+                            :item-props="dialog.itemProps" item-title="id" v-model="dialog.qosPolicyId"></v-select>
                         <v-text-field hide-details label="MAC地址" outlined density='compact' placeholder="自定义MAC地址"
                             v-model="dialog.macAddress"></v-text-field>
                     </v-col>
                     <v-col cols="6">
-                        <v-switch clearable outlined density='compact' class="my-auto" v-model="dialog.portSecurityEnabled"
-                            label="启用安全状态">
+                        <v-switch clearable outlined hide-details density='compact' color="info" class="my-auto" v-model="dialog.portSecurityEnabled"
+                            label="启用安全组">
                         </v-switch>
                         <!-- TODO: 刷新安全组,根据tenant_id过滤 -->
-                        <v-select :items="dialog.securityGroups" @click="dialog.refreshSecurityGroups()" item-title="name"
+                        <v-select :items="dialog.securityGroups" @click="dialog.refreshSecurityGroups()" :item-props="dialog.itemProps"
                             multiple item-value="id" label="安全组" v-model="dialog.portSecurityGroups"></v-select>
                     </v-col>
                     <v-col cols="12">

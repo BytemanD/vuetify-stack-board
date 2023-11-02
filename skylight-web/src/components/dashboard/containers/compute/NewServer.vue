@@ -20,22 +20,22 @@
                             </v-text-field>
                         </v-col>
                         <v-col cols="2">
-                            <v-btn class="mt-2" text color="info" variant="text"
+                            <v-btn class="mt-2" color="info" variant="text"
                                 @click="dialog.params.name = Utils.getRandomName('server')">随机名字</v-btn>
                         </v-col>
                         <v-col cols="6">
-                            <v-select :items="dialog.flavors" label="规格" density='compact' item-text="name" item-value="id"
-                                item-title="name" v-model="dialog.params.flavor" :error="!dialog.params.flavor">
+                            <v-select :items="dialog.flavors" label="规格" density='compact' item-value="id"
+                            :item-props="dialog.itemProps" v-model="dialog.params.flavor" :error="!dialog.params.flavor">
                             </v-select>
-                            <v-select :items="dialog.images" label="镜像" density='compact' item-title="name" item-value="id"
+                            <v-select :items="dialog.images" label="镜像" density='compact' :item-props="dialog.itemProps" item-value="id"
                                 v-model="dialog.params.image" :error="!dialog.params.image">
                             </v-select>
                         </v-col>
                         <v-col cols="6">
-                            <v-select :items="dialog.networks" clearable label="网络" density='compact' item-title="name"
+                            <v-select :items="dialog.networks" clearable label="网络" density='compact' :item-props="dialog.itemProps"
                                 item-value="id" v-model="dialog.params.netId" @click="dialog.refresNetworks()">
                             </v-select>
-                            <v-select clearable density='compact' :items="dialog.ports" label="端口:" item-title="name"
+                            <v-select clearable density='compact' :items="dialog.ports" label="端口:" :item-props="dialog.itemProps"
                                 item-value="id" messages="如果选择端口，只能创建一台虚拟机。" v-model="dialog.portId"
                                 @click="dialog.refresPorts()">
                             </v-select>
@@ -61,7 +61,7 @@
                 </template>
 
                 <template v-slot:item.2>
-                    <v-select :items="dialog.securityGroups" clearable label="安全组" item-title="name" item-value="id"
+                    <v-select :items="dialog.securityGroups" clearable label="安全组" :item-props="dialog.itemProps" item-value="id"
                         v-model="dialog.securityGroup" persistent-hint hint="只能选择当前租户的安全组"
                         @click="dialog.refreshSecurityGroups()">
                     </v-select>
@@ -72,6 +72,10 @@
 
                 <template v-slot:item.3>
                     <v-row>
+                        <v-col cols="6">
+                            <v-text-field hide-details label="描述" outlined density='compact' placeholder="请输入描述信息"
+                                v-model="dialog.description"></v-text-field>
+                        </v-col>
                         <v-col lg="12">
                             <v-range-slider v-model="dialog.params.nums" label="实例数量" max="20" min="1" step="1"
                                 show-ticks="always" tick-size="4" color="info" hide-details strict>
@@ -85,7 +89,7 @@
                             </v-select>
                         </v-col>
                         <v-col lg="6">
-                            <v-select :items="dialog.azHosts[dialog.params.az]" clearable label="节点" placeholder="请选择节点"
+                            <v-select :disabled="!dialog.params.az" :items="dialog.azHosts[dialog.params.az]" clearable label="节点" placeholder="请选择节点"
                                 v-model="dialog.params.host" item-value="value" item-title="title">
                             </v-select>
                         </v-col>

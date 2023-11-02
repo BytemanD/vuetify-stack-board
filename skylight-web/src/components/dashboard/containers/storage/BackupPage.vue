@@ -9,8 +9,7 @@
                     <v-row>
                         <v-col cols="12" md="6" sm="12">
                             <v-toolbar density="compact" class="rounded-pill">
-                                <v-btn color="primary" class="mr-1" icon="mdi-plus"
-                                    @click="showNewBackupDialog = !showNewBackupDialog"></v-btn>
+                                <NewBackupVue @completed="table.refresh()" />
                                 <v-btn color="warning" @click="showBackupStateResetDialog = !showBackupStateResetDialog"
                                     :disabled="table.selected.length == 0">状态重置</v-btn>
                                     <v-spacer></v-spacer>
@@ -57,7 +56,6 @@
                 </template>
             </v-data-table>
         </v-col>
-        <NewBackupVue :show.sync="showNewBackupDialog" @completed="table.refresh()" />
         <BackupStatusResetDialog :show.sync="showBackupStateResetDialog" :backups="table.selected"
             @completed="table.refresh()" />
     </v-row>

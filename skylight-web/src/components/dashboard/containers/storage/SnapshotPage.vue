@@ -9,19 +9,18 @@
                     <v-row>
                         <v-col cols="12" md="6" sm="12">
                             <v-toolbar density="compact" class="rounded-pill">
-                                <v-btn class="mr-1" color="primary" icon="mdi-plus"
-                                    @click="showNewSnapshotDialog = !showNewSnapshotDialog"></v-btn>
+                                <NewSnapshotDialog @completed="table.refresh()" />
                                 <v-btn small class="mr-1" color="warning"
                                     @click="showSnapshotResetStateDialog = !showSnapshotResetStateDialog"
                                     :disabled="table.selected.length == 0">状态重置</v-btn>
-                                    <v-spacer></v-spacer>
+                                <v-spacer></v-spacer>
                                 <v-btn small color="red" icon="mdi-trash-can" @click="table.deleteSelected()"
                                     :disabled="table.selected.length == 0"></v-btn>
                             </v-toolbar>
                         </v-col>
                         <v-col>
-                            <v-text-field small density='compact' v-model="table.search" 
-                                label="搜索" single-line hide-details></v-text-field>
+                            <v-text-field small density='compact' v-model="table.search" label="搜索" single-line
+                                hide-details></v-text-field>
                         </v-col>
                         <v-col cols="1" class="text-center">
                             <v-btn color="info" icon="mdi-refresh" variant="text" v-on:click="table.refresh()"></v-btn>
@@ -42,7 +41,7 @@
                 </template>
             </v-data-table>
         </v-col>
-        <NewSnapshotDialog :show.sync="showNewSnapshotDialog" @completed="table.refresh()" />
+
         <SnapshotStatusResetDialog :show.sync="showSnapshotResetStateDialog" :snapshots="table.selected"
             @completed="table.refresh()" />
     </v-row>

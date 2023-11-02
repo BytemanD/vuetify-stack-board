@@ -64,6 +64,9 @@ class Dialog {
     formatTime(dateTime) {
         return dateTime ? Utils.parseUTCToLocal(dateTime) : '';
     }
+    itemProps(item){
+        return { name: item.name, title: item.id, subtitle: item.name }
+    }
 }
 
 export class ProjectUserDialog extends Dialog {
@@ -752,6 +755,7 @@ export class NewServerDialog extends Dialog {
         this.useBdm = SETTINGS.openstack.getItem('bootWithVolume').value;
         this.volumeSize = SETTINGS.openstack.getItem('volumeSizeDefault').value;
         this.volumeSizeMin = SETTINGS.openstack.getItem('volumeSizeMin').value;
+        this.description = null;
     }
     async refresPorts() {
         let ports = (await API.port.list()).ports;
@@ -825,6 +829,7 @@ export class NewServerDialog extends Dialog {
             password: this.params.password,
             keyName: this.keypair,
             volumeType: this.volumeType,
+            description: this.description,
         }
         if (this.params.az) {
             data.az = this.params.az
