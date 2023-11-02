@@ -44,7 +44,7 @@
                 <ServerResetStateDialog :servers="table.selected" @completed="table.refresh()" />
 
                 <v-spacer></v-spacer>
-                <v-btn class="ml-1" color="red" icon="mdi-trash-can" @click="table.deleteSelected()"
+                <v-btn class="ml-1" color="red" icon="mdi-trash-can" @click="deleteSelected()"
                   :disabled="table.selected.length == 0"></v-btn>
               </v-toolbar>
             </v-col>
@@ -203,7 +203,6 @@ import { Utils } from '@/assets/app/lib';
 
 import { ServerDataTable } from '@/assets/app/tables.jsx';
 
-import NewServerDialog from './dialogs/NewServerDialog';
 import ServerTopology from './dialogs/ServerTopology.vue';
 
 import ChangeServerNameDialog from './dialogs/ChangeServerNameDialog.vue';
@@ -222,7 +221,7 @@ import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 
 export default {
   components: {
-    BtnIcon, NewServerDialog, ServerTopology,
+    BtnIcon, ServerTopology,
     ServerMigrateDialog, ServerEvacuateDialog, ServerResetStateDialog,
     ChangeServerNameDialog,
     ServerActionDialog,
@@ -261,6 +260,21 @@ export default {
     refreshTable: function () {
       this.table.refresh();
     },
+    deleteSelected: async function(){
+      let selected = this.table.selected;
+      await this.table.deleteSelected()
+      for (let i in selected){
+            let serverId = selected[i];
+            await this.table.waitServerDeleted(serverId)
+      }
+      this.refreshTotlaServers()
+    },
+    refreshTotlaServers: function() {
+      let self = this;
+      API.server.list().then((servers) => {
+        self.totalServers = servers
+      })
+    },
     pageRefresh: function ({ page, itemsPerPage, sortBy }) { 
       let filter = {}
       if (itemsPerPage) {
@@ -275,9 +289,7 @@ export default {
         filter.marker = this.totalServers[index].id
       }
       this.table.refresh(filter)
-      API.server.list().then((servers) => {
-        this.totalServers = servers
-      })
+      this.refreshTotlaServers()
     },
     updateServer: async function () {
       if (!this.selectedServer.id) {

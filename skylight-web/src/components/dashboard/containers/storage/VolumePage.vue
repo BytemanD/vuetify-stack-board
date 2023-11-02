@@ -3,7 +3,8 @@
         <v-col>
             <v-data-table-server show-expand single-expand show-select density='compact' :loading="table.loading"
                 :headers="table.headers" :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search"
-                class="elevation-1" v-model="table.selected" :items-length="totlaVolumes.length" @update:options="pageRefresh">
+                class="elevation-1" v-model="table.selected" :items-length="totlaVolumes.length"
+                @update:options="pageRefresh">
                 <template v-slot:top>
                     <v-row>
                         <v-col cols="12" md="6" sm="12">
@@ -15,7 +16,7 @@
                                 <v-btn color="warning" @click="openVolumeStatusResetDialog = true"
                                     :disabled="table.selected.length == 0">状态重置</v-btn>
                                 <v-spacer></v-spacer>
-                                <v-btn icon="mdi-trash-can" color="red" @click="table.deleteSelected()"
+                                <v-btn icon="mdi-trash-can" color="red" @click="deleteSelected()"
                                     :disabled="table.selected.length == 0">
                                 </v-btn>
                             </v-toolbar>
@@ -129,17 +130,41 @@ export default {
         totlaVolumes: [],
     }),
     methods: {
+        deleteSelected: async function () {
+            let selected = this.table.selected;
+            await this.table.deleteSelected()
+            for (let i in selected) {
+                let serverId = selected[i];
+                await this.table.waitVolumeDeleted(serverId)
+                this.refreshTotalVolumes()
+            }
+            // this.refreshTotlaServers()
+        },
+        refreshTotalVolumes: function () {
+            let self = this;
+            API.volume.list().then((data) => {
+                self.totlaVolumes = data.volumes
+            })
+        },
         pageRefresh: function ({ page, itemsPerPage, sortBy }) {
-            let filter = { limit: itemsPerPage }
+            let filter = { }
+            if (itemsPerPage) {
+                if (itemsPerPage >= 0) {
+                    filter.limit = itemsPerPage
+                }
+            } else {
+                filter.limit = this.table.itemsPerPage
+            }
+            if (page > 1 && this.totalServers.length > 1) {
+                let index = filter.limit * (page - 1) - 1
+                filter.marker = this.totalServers[index].id
+            }
             if (page > 1 && this.totlaVolumes.length > 1) {
                 let index = itemsPerPage * (page - 1) - 1
                 filter.marker = this.totlaVolumes[index].id
             }
             this.table.refresh(filter)
-            API.volume.list().then((data) => {
-                console.log(data)
-                this.totlaVolumes = data.volumes
-            })
+            this.refreshTotalVolumes()
         },
         openResourceActionsDialog(item) {
             this.selectedVolume = item;

@@ -104,7 +104,6 @@ import { Utils } from '@/assets/app/lib';
 import SETTINGS from '@/assets/app/settings';
 export default {
     props: {
-        show: Boolean,
         table: Object,
     },
     data: () => ({
@@ -122,13 +121,7 @@ export default {
         this.dialog.init();
     },
     watch: {
-        show(newVal) {
-            this.display = newVal;
-        },
-        display(newVal) {
-            this.display = newVal;
-            this.$emit("update:show", this.display);
-        }
+
     },
 };
 </script>

@@ -51,13 +51,7 @@ class DataTable {
                 Notify.error(`删除 ${item} 失败`)
             }
         }
-        this.refresh();
         this.resetSelected();
-        for (let i in deleting) {
-            let item = deleting[i];
-            await this.api.waitDeleted(item, this);
-        }
-        // this.refresh();
     }
     resetSelected() {
         this.selected = [];
@@ -74,6 +68,18 @@ class DataTable {
                 this.items[i][key] = newItem[key];
             }
             break
+        }
+    }
+    removeItem(id){
+        let index = -1;
+        for (let i in this.items){
+            if (this.items[i].id == id){
+                index = i
+                break;
+            }
+        }
+        if (index >= 0){
+            this.items.splice(index, 1)
         }
     }
     async refresh(filters = {}) {
@@ -654,6 +660,22 @@ export class ServerDataTable extends DataTable {
             Notify.error(`${server.name || server.id} ${action} 失败`)
         }
     }
+    async waitServerDeleted(serverId){
+        do {
+            try {
+                let server = await (API.server.show(serverId))
+                this.updateItem(server);
+                Utils.sleep(2)
+            } catch (e) {
+                if (e.response.status == 404){
+                    console.error(e)
+                    Notify.success(`实例 ${serverId} 已删除`)
+                    this.removeItem(serverId)
+                    break;
+                }
+            }
+        } while(true)
+    }
 }
 export class ComputeServiceTable extends DataTable {
     constructor() {
@@ -801,6 +823,22 @@ export class VolumeDataTable extends DataTable {
             }
             this.items = filterItems
         }
+    }
+    async waitVolumeDeleted(volumeId){
+        do {
+            try {
+                let volume = (await API.volume.get(volumeId)).volume
+                this.updateItem(volume)
+                Utils.sleep(2)
+            } catch (e) {
+                if (e.response.status == 404){
+                    console.error(e)
+                    Notify.success(`卷 ${volumeId} 已删除`)
+                    this.removeItem(volumeId)
+                    break;
+                }
+            }
+        } while (true)
     }
 }
 
