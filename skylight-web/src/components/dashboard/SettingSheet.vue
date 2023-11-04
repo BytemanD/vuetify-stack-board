@@ -5,12 +5,10 @@
         </template>
         <v-card>
             <v-toolbar color="primary" density="compact">
-                <v-btn icon="mdi-close" @click="display = false"></v-btn>
                 <v-toolbar-title>{{ $t('setting') }}</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-toolbar-items>
-                    <v-btn @click="save()">{{ $t('save') }}</v-btn>
-                    <v-btn color="warning" @click="reset()">{{ $t('reset') }}</v-btn>
+                    <v-btn icon="mdi-close" @click="display = false"></v-btn>
                 </v-toolbar-items>
             </v-toolbar>
             <v-card-text>
@@ -50,7 +48,8 @@
                 <v-alert variant="text" density='compact' :type="alert.type" v-if="alert.message">
                     {{ alert.message }}
                 </v-alert>
-
+                <v-btn color="warning" @click="reset()">{{ $t('reset') }}</v-btn>
+                <v-btn color="primary" @click="save()">{{ $t('save') }}</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>

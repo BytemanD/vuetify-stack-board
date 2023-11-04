@@ -9,12 +9,9 @@
                     <v-row>
                         <v-col cols="12" md="6" sm="12">
                             <v-toolbar density="compact" class="rounded-pill">
-                                <v-btn icon="mdi-plus" color="primary"
-                                    @click="openNewVolumeDialog = !openNewVolumeDialog"></v-btn>
-                                <v-btn color="info" @click="openVolumeExtendDialog = true"
-                                    :disabled="table.selected.length == 0">扩容</v-btn>
-                                <v-btn color="warning" @click="openVolumeStatusResetDialog = true"
-                                    :disabled="table.selected.length == 0">状态重置</v-btn>
+                                <NewVolumeVue @completed="table.refresh()" />
+                                <VolumeExtendVue :volumes="table.selected" @completed="table.refresh()"></VolumeExtendVue>
+                                <VolumeStatusResetDialog :volumes="table.selected" @completed="table.refresh()" />
                                 <v-spacer></v-spacer>
                                 <v-btn icon="mdi-trash-can" color="red" @click="deleteSelected()"
                                     :disabled="table.selected.length == 0">
@@ -60,8 +57,8 @@
                 </template>
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-menu offset-y>
-                        <template v-slot:activator="{ progs }">
-                            <v-btn size="x-small" color="purple" v-bind="progs" icon="mdi-dots-vertical"></v-btn>
+                        <template v-slot:activator="{ props }">
+                            <v-btn size="x-small" variant="text" color="purple" v-bind="props" icon="mdi-dots-vertical"></v-btn>
                         </template>
                         <v-list density='compact'>
                             <v-list-item @click="openResourceActionsDialog(item)" :disabled="!supportResourceAction">
@@ -90,13 +87,8 @@
             </v-data-table-server>
         </v-col>
         <v-col cols="12">
-            <NewVolumeVue :show.sync="openNewVolumeDialog" @completed="table.refresh()" />
-            <VolumeStatusResetDialog :volumes="table.selected" :show.sync="openVolumeStatusResetDialog"
-                @completed="table.refresh()" />
             <ResourceActionsDialog :show.sync="showResourceActionsDialog" :resource="selectedVolume">
             </ResourceActionsDialog>
-            <VolumeExtendVue :volumes="table.selected" :show.sync="openVolumeExtendDialog" @completed="table.refresh()">
-            </VolumeExtendVue>
         </v-col>
     </v-row>
 </template>
@@ -120,7 +112,6 @@ export default {
 
     data: () => ({
         Utils: Utils,
-        openNewVolumeDialog: false,
         openVolumeStatusResetDialog: false,
         openVolumeExtendDialog: false,
         showResourceActionsDialog: false,

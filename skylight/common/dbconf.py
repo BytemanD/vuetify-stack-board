@@ -114,7 +114,7 @@ class DBApi(object):
         SESSION.commit()
 
 
-def init(items, dbfile, engine=None, session=None, table_name=None):
+def init(dbfile, engine=None, session=None, table_name=None):
     global TABLE_NAME
     global DB_FILE, ENGINE, SESSION
 

@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import notify from './notify.js';
 import { LOG, Utils, MESSAGE } from "./lib.js";
 
 async function waitDeletedByList(api, bodyKey, item){
@@ -32,7 +33,6 @@ class Restfulclient {
     constructor(baseUrl, async=false) {
         this.async = async;
         this.baseUrl = baseUrl;
-        this.clusterId = localStorage.getItem('clusterId');
     }
     getHeaders() {
         return null;
@@ -81,7 +81,7 @@ class Restfulclient {
             `${this.baseUrl}/${id}`, { headers: this.getHeaders() });
         return resp.data
     }
-    async post(body, url = null) {
+    async doPost(body, url = null){
         try {
             let reqUrl = this.baseUrl;
             if (url) {
@@ -93,12 +93,16 @@ class Restfulclient {
             }
             let resp = await axios.post(
                 reqUrl, body, { headers: this.getHeaders() });
-            return resp.data
+            return resp
         } catch (e) {
             console.error(e);
             MESSAGE.error(this._getErrorMsg(e.response))
             throw e
         }
+    }
+    async post(body, url = null) {
+        let resp = await this.doPost(body, url)
+        return resp.data
     }
     async put(id, body) {
         let resp = await axios.put(`${this.baseUrl}/${id}`, body, { headers: this.getHeaders() });
@@ -136,15 +140,17 @@ class Restfulclient {
     }
 }
 
-Restfulclient.prototype.getHeaders = function () {
-    let headers = {'X-Cluster-Id': localStorage.getItem('clusterId')};
-    if (sessionStorage.getItem('region')){
-        headers['X-Region'] = sessionStorage.getItem('region');
+class System extends Restfulclient {
+    async login(username, password){
+        let auth = {
+            username: username,
+            password: password
+        }
+        return await this.doPost({auth: auth}, '/login')
     }
-    return headers;
 }
 
-class VstackboardApi extends Restfulclient {
+class OpenstackProxyAPI extends Restfulclient {
     constructor(baseUrl) {
         super(baseUrl);
     }
@@ -161,12 +167,26 @@ class VstackboardApi extends Restfulclient {
     }
 }
 
-class Hypervisor extends VstackboardApi {
+class Identity extends Restfulclient {
+    constructor() {
+        super('/identity');
+    }
+    getHeaders() {
+        return {'X-Token': localStorage.getItem('X-Token')}
+    }
+    async index(clusterId){
+        let headers = this.getHeaders()
+        headers['X-Cluster-Id'] = clusterId
+        await axios.get('/identity', { headers: headers })
+    }
+}
+
+class Hypervisor extends OpenstackProxyAPI {
     constructor() { super('/computing/os-hypervisors') }
     async statistics() { return await this.get('statistics'); }
 }
 
-class Flavor extends VstackboardApi {
+class Flavor extends OpenstackProxyAPI {
     constructor() { super('/computing/flavors') }
     async create(data) { return await this.post({ flavor: data }); }
     async getExtraSpecs(id) {
@@ -202,7 +222,7 @@ class Flavor extends VstackboardApi {
     }
 }
 
-class AZ extends VstackboardApi {
+class AZ extends OpenstackProxyAPI {
     constructor() { super('/computing/os-availability-zone') }
 }
 
@@ -246,7 +266,7 @@ class Migrations extends Restfulclient {
     constructor() { super('/computing/os-migrations') }
 }
 
-class Server extends VstackboardApi {
+class Server extends OpenstackProxyAPI {
     constructor() { super('/computing/servers') }
     async show(id) {
         return (await this.get(id)).server;
@@ -447,7 +467,6 @@ class Region extends Restfulclient {
     constructor() { super('/identity/regions') }
 }
 
-
 class Service extends Restfulclient {
     constructor() { super('/identity/services') }
     // interface=public
@@ -606,7 +625,7 @@ class Router extends Restfulclient {
         return await this.put(`${id}/remove_router_interface`, { subnet_id: subnet_id })
     }
 }
-class Volume extends VstackboardApi {
+class Volume extends OpenstackProxyAPI {
     constructor() { super('/volume/volumes', true) }
     async create(data) { return this.post({ volume: data }) }
     async waitDeleted(item) {
@@ -638,13 +657,13 @@ class Volume extends VstackboardApi {
         return await this.doAction(id, {'os-extend': {new_size: newSize}})
     }
 }
-class VolumePool extends VstackboardApi {
+class VolumePool extends OpenstackProxyAPI {
     constructor() { super('/volume/scheduler-stats/get_pools') }
     async detail(){
         return await this.list({detail: true})
     }
 }
-class Snapshot extends VstackboardApi {
+class Snapshot extends OpenstackProxyAPI {
     constructor() { super('/volume/snapshots') }
     async create(data) { return this.post({ snapshot: data }) }
     async waitDeleted(item) {
@@ -665,7 +684,7 @@ class Snapshot extends VstackboardApi {
         return await this.doAction(id, { 'os-reset_status': { status: status } })
     }
 }
-class Backup extends VstackboardApi {
+class Backup extends OpenstackProxyAPI {
     constructor() { super('/volume/backups') }
     async waitDeleted(item) {
         await waitDeletedByGet(API.backup, 'backup', item);
@@ -747,9 +766,11 @@ class Version extends Restfulclient {
     }
 }
 
-export class OpenstackProxyApi {
+export class SkylightAPI {
     constructor() {
+        this.system = new System();
         // keystone
+        this.idengity = new Identity()
         this.service = new Service();
         this.endpoint = new Endpoint();
         this.user = new User();
@@ -931,6 +952,17 @@ export class ExpectServerDeleted extends Expect {
         return false;
     }
 }
-const API = new OpenstackProxyApi();
+Restfulclient.prototype.getHeaders = function () {
+    let headers = {
+        'X-Cluster-Id': localStorage.getItem('clusterId'),
+        'X-Token': localStorage.getItem('X-Token'),
+    };
+    if (sessionStorage.getItem('region')){
+        headers['X-Region'] = sessionStorage.getItem('region');
+    }
+    return headers;
+}
+
+const API = new SkylightAPI();
 
 export default API;

@@ -16,7 +16,7 @@
           </v-btn>
         </v-col>
         <v-col cols="auto">
-          <v-btn size="x-large" target="_blank" variant="text" prepend-icon="mdi-login">Login
+          <v-btn size="x-large" target="_blank" variant="text" prepend-icon="mdi-login"  @click="$router.push('login')">Login
           </v-btn>
         </v-col>
       </v-row>
@@ -25,5 +25,14 @@
 </template>
 
 <script setup>
-//
+import { getCurrentInstance} from 'vue';
+import notify from '@/assets/app/notify';
+
+const {proxy} = getCurrentInstance()
+
+if (!localStorage.getItem('X-Token')){
+  notify.error('请重新登录')
+  proxy.$router.push('/login')
+}
+
 </script>

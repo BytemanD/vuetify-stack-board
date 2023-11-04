@@ -43,7 +43,7 @@
         <router-view></router-view>
       </v-container>
     </v-main>
-    <v-notifications location="bottom center" :timeout="3000" />
+    <v-notifications location="bottom right" :timeout="3000" />
   </v-app>
 </template>
 
@@ -57,6 +57,7 @@ import BtnHome from '../components/plugins/BtnHome.vue';
 import i18n from '@/assets/app/i18n';
 import SettingSheet from '@/components/dashboard/SettingSheet.vue';
 import { Utils } from '@/assets/app/lib';
+import notify from '@/assets/app/notify';
 
 const navigationGroup = [
   {
@@ -195,6 +196,11 @@ export default {
     }
   },
   created() {
+    if (!localStorage.getItem('X-Token')){
+      notify.error('请重新登录')
+      this.$router.push('/login')
+      return
+    }
     Init()
     this.initItem();
 

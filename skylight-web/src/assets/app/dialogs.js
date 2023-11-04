@@ -1439,9 +1439,9 @@ export class VolumeStateResetDialog extends Dialog {
             throw Error('请至少指定一个要重置的属性。');
         }
         for (let i in volumes) {
-            let volume = volumes[i];
-            await API.volume.resetState(volume.id, data);
-            notify.success(`卷 ${volume.name || volume.id} 状态重置成功`);
+            let volumeId = volumes[i];
+            await API.volume.resetState(volumeId, data);
+            notify.success(`卷 ${volumeId} 状态重置成功`);
         }
     }
 }

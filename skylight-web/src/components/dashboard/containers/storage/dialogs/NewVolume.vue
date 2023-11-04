@@ -1,10 +1,12 @@
 <template>
   <v-dialog v-model="display" width="960" scrollable>
+    <template v-slot:activator="{ props }">
+      <v-btn v-bind="props" icon="mdi-plus" fab color="primary" class="mr-1"></v-btn>
+    </template>
+
     <v-card>
       <v-card-title class="info" primary-title>新建卷</v-card-title>
       <v-card-text>
-        <v-row>
-        </v-row>
         <v-row>
           <v-col cols="10">
             <v-text-field label="名字" placeholder="请输入卷名" v-model="dialog.name" hide-details
@@ -22,7 +24,7 @@
               v-model="dialog.params.size"></v-text-field>
           </v-col>
           <v-col cols="2">
-            <v-text-field hide-details label="数目" placeholder="请输入新建数量" v-model="dialog.params.nums" density='compact'
+            <v-text-field hide-details label="数量" placeholder="请输入新建数量" v-model="dialog.params.nums" density='compact'
               outlined>
             </v-text-field>
           </v-col>
@@ -37,7 +39,7 @@
             </v-select>
           </v-col>
           <v-alert type="info" density='compact' variant="text">
-            1.镜像和快照不能同时选择<br />2.选择快照后不能选择类型。
+            镜像和快照不能同时选择, 选择快照后不能选择类型。
           </v-alert>
         </v-row>
       </v-card-text>
@@ -55,9 +57,6 @@ import { NewVolumeDialog } from '@/assets/app/dialogs';
 import { Utils } from '@/assets/app/lib';
 
 export default {
-  props: {
-    show: Boolean,
-  },
   data: () => ({
     i18n: i18n,
     display: false,
@@ -75,14 +74,11 @@ export default {
 
   },
   watch: {
-    show(newVal) {
+    display(newVal) {
       this.display = newVal;
       if (this.display) {
         this.dialog.init();
       }
-    },
-    display(newVal) {
-      this.display = newVal;
       this.$emit("update:show", this.display);
     }
   },

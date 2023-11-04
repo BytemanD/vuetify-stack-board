@@ -1,5 +1,9 @@
 <template>
     <v-dialog v-model="display" width="900" scrollable>
+        <template v-slot:activator="{ props }">
+            <v-btn v-bind="props" icon="mdi-plus" fab color="primary" class="mr-1"></v-btn>
+        </template>
+
         <v-card>
             <v-card-text class="mt-4">
                 <v-row>
@@ -8,7 +12,7 @@
                             :rules="[dialog.checkNotNull]"></v-text-field>
                     </v-col>
                     <v-col cols="2" class="my-auto">
-                        <v-btn hide-details text color="primary" @click="dialog.randomName()">随机名字</v-btn>
+                        <v-btn hide-details variant="text" color="primary" @click="dialog.randomName()">随机名字</v-btn>
                     </v-col>
                     <v-col cols="6">
                         <v-file-input hide-details show-size label="镜像文件" v-model="dialog.file"

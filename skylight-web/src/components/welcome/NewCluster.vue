@@ -8,23 +8,33 @@
             <v-card-text>
                 <v-col>
                     <v-text-field density="compact" placeholder="请输入环境名" v-model="dialog.name">
-                        <template v-slot:prepend><p class="text-info">环境</p></template>
+                        <template v-slot:prepend>
+                            <p class="text-info">环境</p>
+                        </template>
                     </v-text-field>
                     <v-text-field density="compact" label="" placeholder="例如: http://keystone-server:5000"
                         v-model="dialog.authUrl">
-                        <template v-slot:prepend><p class="text-info">认证</p></template>
+                        <template v-slot:prepend>
+                            <p class="text-info">认证</p>
+                        </template>
                     </v-text-field>
                     <v-text-field density="compact" label="" placeholder="请输入租户名" v-model="dialog.authProject">
-                        <template v-slot:prepend><p class="text-info">租户</p></template>
+                        <template v-slot:prepend>
+                            <p class="text-info">租户</p>
+                        </template>
                     </v-text-field>
                     <v-text-field density="compact" label="" placeholder="请输入用户名" v-model="dialog.authUser">
-                        <template v-slot:prepend><p class="text-info">用户</p></template>
+                        <template v-slot:prepend>
+                            <p class="text-info">用户</p>
+                        </template>
                     </v-text-field>
                     <v-text-field density="compact" label="" placeholder="请输入密码" v-model="dialog.authPassword"
-                    :append-icon="dialog.hidePassword ? 'mdi-eye-off' : 'mdi-eye'"
-                    :type="dialog.hidePassword ? 'password' : 'text'"
-                    @click:append="dialog.hidePassword = !dialog.hidePassword">
-                    <template v-slot:prepend><p class="text-info">密码</p></template>
+                        :append-icon="dialog.hidePassword ? 'mdi-eye-off' : 'mdi-eye'"
+                        :type="dialog.hidePassword ? 'password' : 'text'"
+                        @click:append="dialog.hidePassword = !dialog.hidePassword">
+                        <template v-slot:prepend>
+                            <p class="text-info">密码</p>
+                        </template>
                     </v-text-field>
                 </v-col>
             </v-card-text>

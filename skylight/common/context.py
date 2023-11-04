@@ -1,7 +1,7 @@
 import dataclasses
 
 from skylight.common import conf
-from skylight.db import api
+from skylight.common.db import api
 
 CONF = conf.CONF
 

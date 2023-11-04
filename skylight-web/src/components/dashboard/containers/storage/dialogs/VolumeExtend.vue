@@ -1,13 +1,15 @@
 <template>
   <v-dialog v-model="display" width="600">
+    <template v-slot:activator="{ props }">
+      <v-btn v-bind="props" color="info" :disabled="volumes.length == 0">扩容</v-btn>
+    </template>
     <v-card>
       <v-card-title class="info" primary-title>卷扩容</v-card-title>
       <v-card-text>
-        <v-slider v-model="newSize" thumb-label="always" ticks="always"
-          label="新容量(GB)" class="mt-10"
-          :min="minNewSize" :max="minNewSize + 100" step="10" :disabled="customNewSize!=null && customNewSize!=''">
+        <v-slider v-model="newSize" color="info" show-ticks="always" tick-size="4" label="新容量(GB)" :min="minNewSize"
+          :max="minNewSize + 100" step="10" :disabled="customNewSize != null && customNewSize != ''">
         </v-slider>
-        <v-text-field outlined label="自定义" class="mt-5" v-model="customNewSize" clearable
+        <v-text-field outlined label="自定义大小" suffix="GB" v-model="customNewSize" clearable
           :rules="volumeSizeRules"></v-text-field>
       </v-card-text>
       <v-divider></v-divider>
@@ -44,7 +46,7 @@ export default {
   }),
   methods: {
     commit: async function () {
-      for (let volume of this.volumes){
+      for (let volume of this.volumes) {
         API.volume.extend(volume.id, this.customNewSize || this.newSize)
       }
       this.display = false;
@@ -57,9 +59,9 @@ export default {
   watch: {
     show(newVal) {
       this.display = newVal;
-      if (this.display){
+      if (this.display) {
         this.minNewSize = 0;
-        for(let volume of this.volumes) {
+        for (let volume of this.volumes) {
           this.minNewSize = Math.max(volume.size, this.minNewSize);
         }
         this.minNewSize += 10

@@ -5,7 +5,7 @@
         <v-col cols="6" class="mx-auto">
           <v-card class="mx-auto mt-6 bg-blue-grey-lighten-4" elevation="4">
             <v-img class="text-white align-end" src="@/assets/welcome.svg">
-              <v-card-title>欢迎使用 SkyLight</v-card-title>
+              <v-card-title>欢迎使用 Skylight</v-card-title>
               <v-card-text>SkyLight 是一个基于Vuetify实现的OpenStack管理服务。</v-card-text>
             </v-img>
             <v-card-subtitle class="pt-4">版本: {{ version }}
@@ -32,18 +32,18 @@
           </v-card>
         </v-col>
       </v-row>
+      <v-notifications location="bottom center" :timeout="3000" />
     </v-main>
   </v-app>
 </template>
 
 <script>
-import axios from 'axios';
-// import { MESSAGE } from '@/assets/app/lib';
 import Init from '@/assets/app/init';
 
 import API from '@/assets/app/api';
 import { ClusterTable } from '@/assets/app/tables';
 import NewClusterVue from './NewCluster.vue';
+import notify from '@/assets/app/notify';
 
 export default {
   components: { NewClusterVue },
@@ -54,23 +54,18 @@ export default {
     table: new ClusterTable(),
     openNewClusterDialog: false,
     refreshing: false,
-    noCluster: false,
+    noCluster: true,
   }),
   methods: {
-    useCluster: function (cluster) {
-      this.$cookies.set('clusterId', cluster.id);
-      this.$cookies.set('clusterName', cluster.name);
-      let headers = {
-        'X-Cluster-Id': cluster.id,
-      };
-      axios.get('/identity', { headers: headers }).then(() => {
+    useCluster: async function (cluster) {
+      try {
+        await API.idengity.index(cluster.id)
         localStorage.setItem('clusterId', cluster.id);
         this.$router.push('/dashboard')
-        // window.open('/dashboard', '_self');
-      }).catch(error => {
-        console.error(error);
-        MESSAGE.error(`连接 ${cluster.name} 失败`)
-      })
+      } catch(e){
+        console.error(e);
+        notify.error(`"${cluster.name}" 连接失败`)
+      }
     },
     checkLastVersion: async function () {
       this.newVersion = await API.actions.checkLastVersion()
@@ -95,6 +90,11 @@ export default {
   },
   created() {
     Init()
+    if (!localStorage.getItem('X-Token')){
+      notify.error('请重新登录')
+      this.$router.push('/login')
+      return
+    }
     this.getVersion();
     this.refresh();
   }

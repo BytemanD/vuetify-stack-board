@@ -1,5 +1,9 @@
 <template>
     <v-dialog v-model="display" width="740">
+        <template v-slot:activator="{ props }">
+            <v-btn v-bind="props" icon="mdi-plus" fab color="primary" class="mr-1"></v-btn>
+        </template>
+
         <v-card>
             <v-card-title class="primary" primary-title>添加卷类型</v-card-title>
             <v-card-text>
@@ -9,13 +13,13 @@
                             :rules="[dialog.checkNotNull]"></v-text-field>
                     </v-col>
                     <v-col cols="2" class="my-auto">
-                        <v-btn text color="primary" @click="dialog.refreshName()">随机名字</v-btn>
+                        <v-btn variant="text" color="primary" @click="dialog.refreshName()">随机名字</v-btn>
                     </v-col>
                     <v-col>
                         <v-text-field label="后端名" placeholder="请输入卷类型对应的后端名" v-model="dialog.backendName"></v-text-field>
                         <v-text-field label="描述" placeholder="请输入卷类型描述消息" v-model="dialog.description"
                             hide-details></v-text-field>
-                        <v-switch hide-details v-model="dialog.private" label="私有"></v-switch>
+                        <v-switch hide-details color="info" v-model="dialog.private" label="私有"></v-switch>
                     </v-col>
                 </v-row>
             </v-card-text>
@@ -33,9 +37,7 @@ import { NewVolumeTypeDialog } from '@/assets/app/dialogs';
 import { Utils } from '@/assets/app/lib';
 
 export default {
-    props: {
-        show: Boolean,
-    },
+
     data: () => ({
         i18n: i18n,
         Utils: Utils,
@@ -57,13 +59,10 @@ export default {
 
     },
     watch: {
-        show(newVal) {
-            this.display = newVal;
-            if (this.display){
+        display(newVal) {
+            if (this.display) {
                 this.dialog.init();
             }
-        },
-        display(newVal) {
             this.display = newVal;
             this.$emit("update:show", this.display);
         }

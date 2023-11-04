@@ -8,7 +8,8 @@
           <v-row>
             <v-col cols="8">
               <v-toolbar density="compact" class="rounded-pill">
-                <v-btn color="primary" icon="mdi-plus" @click="openNewImageDialog = !openNewImageDialog"></v-btn>
+                <NewImageVue :images="table.selected" @completed="table.resetSelected(); table.refresh()" />
+
                 <v-btn color="red" icon="mdi-trash-can" @click="openImageDeleteSmartDialog = true"
                   :disabled="table.selected.length == 0"> </v-btn>
 
@@ -68,8 +69,6 @@
         </template>
       </v-data-table>
     </v-col>
-    <NewImageVue :show.sync="openNewImageDialog" :images="table.selected"
-      @completed="table.resetSelected(); table.refresh()" />
     <ImagePropertiesDialog :show.sync="showImagePropertiesDialog" :image="selectedImage" @completed="table.refresh()" />
     <TasksDialog :show.sync="showTasksDialog" />
   </v-row>

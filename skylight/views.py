@@ -9,10 +9,11 @@ from tornado import web
 from easy2use.web import application
 
 from skylight.common import conf
+from skylight.common import token
 from skylight.common import context
 from skylight.common import exceptions
 from skylight.common import utils
-from skylight.db import api
+from skylight.common.db import api as db_api
 from skylight.openstack import proxy
 
 LOG = logging.getLogger(__name__)
@@ -42,7 +43,22 @@ class GetContext(object):
 
 
 class BaseReqHandler(application.BaseReqHandler, GetContext):
-    pass
+
+    def set_default_headers(self):
+        super().set_default_headers()
+        self.set_header('Access-Control-Expose-Headers', 'X-TOKEN')
+
+    @utils.with_response()
+    def prepare(self):
+        if self.request.method.upper() == 'OPTIONS':
+            return
+        if self.request.path == '/config.json':
+            return
+        if self.request.method.upper() == 'POST' \
+           and self.request.path == '/login':
+            return
+        if not token.valid_token(self._get_header('X-Token')):
+            return 403, 'user is not login'
 
 
 class Version(BaseReqHandler):
@@ -66,7 +82,7 @@ class Configs(BaseReqHandler):
 class Cluster(BaseReqHandler):
 
     def get(self):
-        cluster_list = api.query_cluster()
+        cluster_list = db_api.query_cluster()
         self.set_status(200)
         self.finish({
             'clusters': [cluster.to_dict() for cluster in cluster_list]
@@ -82,10 +98,10 @@ class Cluster(BaseReqHandler):
                                                   cluster.get('authUser'),
                                                   cluster.get('authPassword'))
             identity.update_auth_token()
-            api.create_cluster(cluster.get('name'), cluster.get('authUrl'),
-                               cluster.get('authProject'),
-                               cluster.get('authUser'),
-                               cluster.get('authPassword'))
+            db_api.create_cluster(cluster.get('name'), cluster.get('authUrl'),
+                                  cluster.get('authProject'),
+                                  cluster.get('authUser'),
+                                  cluster.get('authPassword'))
             self.set_status(200)
             self.finish(json.dumps({}))
         except Exception as e:
@@ -94,7 +110,7 @@ class Cluster(BaseReqHandler):
             self.finish({'error': str(e)})
 
     def delete(self, cluster_id):
-        deleted = api.delete_cluster_by_id(cluster_id)
+        deleted = db_api.delete_cluster_by_id(cluster_id)
         if deleted >= 1:
             self.set_status(204)
             self.finish()
@@ -108,7 +124,7 @@ class Tasks(BaseReqHandler):
 
     def _get_uploading_tasks(self):
         uploading_tasks = []
-        for image_chunk in api.query_image_chunk():
+        for image_chunk in db_api.query_image_chunk():
             data = {'id': image_chunk.id,
                     'image_id': image_chunk.image_id, 'size': image_chunk.size,
                     'cached': image_chunk.cached * 100 / image_chunk.size,
@@ -129,7 +145,7 @@ class Tasks(BaseReqHandler):
 
     def delete(self, task_id):
         try:
-            api.delete_image_chunk(task_id)
+            db_api.delete_image_chunk(task_id)
             self.set_status(204)
             self.finish()
         except Exception:
@@ -270,7 +286,8 @@ class GlanceProxy(OpenstackProxyBase):
         content_length = self.request.headers.get('Content-Length')
         LOG.info('image %s add chunk, size=%s', url, content_length)
         image_chunk.add(self.request.body, int(content_length))
-        api.add_image_chunk_cached(image_chunk.image_id, int(content_length))
+        db_api.add_image_chunk_cached(
+            image_chunk.image_id, int(content_length))
 
         if image_chunk.all_cached() and url in UPLOADING_IMAGES:
             LOG.info('image %s all cached, waitting for upload', url)
@@ -327,8 +344,23 @@ class StaticFile(BaseReqHandler):
         self.render(path)
 
 
+class Login(BaseReqHandler):
+
+    @utils.with_response(return_code=204)
+    def post(self):
+        data = json.loads(self.request.body)
+        auth = data.get('auth', {})
+        LOG.debug('user login: %s', auth.get('username'))
+        user = db_api.get_user(auth.get('username'))
+        if not user or user.password != auth.get('password'):
+            return 403, f'auth failed for user {auth.get("username")}'
+        new_token = token.new_token()
+        self.set_header('X-TOKEN', new_token)
+
+
 def get_routes():
     return [
+        (r'/login', Login),
         (r'/version', Version),
         (r'/configs', Configs),
         (r'/cluster', Cluster),

@@ -1,5 +1,5 @@
 // Composables
-import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 const routes = [
   {
@@ -20,6 +20,11 @@ const routes = [
         component: () => import('@/views/Welcome.vue'),
       }
     ],
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/Login.vue'),
   },
   {
     path: '/welcome',

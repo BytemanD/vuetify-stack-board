@@ -6,7 +6,7 @@ import requests
 from skylight.common import conf
 from skylight.common import context
 from skylight.common import exceptions
-from skylight.db import api
+from skylight.common.db import api
 
 LOG = logging.getLogger(__name__)
 CONF = conf.CONF

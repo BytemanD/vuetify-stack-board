@@ -8,8 +8,7 @@
                     <v-row>
                         <v-col cols="12" md="6" sm="12">
                             <v-toolbar density="compact" class="rounded-pill">
-                                <v-btn x-small fab class="mr-1" color="primary" icon="mdi-plus"
-                                    @click="openNewFlavorDialog = true"></v-btn>
+                                <NewVolumeType @completed="table.refresh()" />
                                 <v-spacer></v-spacer>
                                 <v-btn small class="mr-1" color="red" icon="mdi-trash-can" @click="table.deleteSelected()"
                                     :disabled="table.selected.length == 0">
@@ -32,11 +31,10 @@
                 </template>
 
                 <template v-slot:[`item.extra_specs`]="{ item }">
-                    <v-chip label x-small class="mr-1" v-for="(value, key) in item.extra_specs" v-bind:key="key">{{ key
-                    }}={{ value }}</v-chip>
+                    <v-chip label x-small class="mr-1" v-for="(value, key) in item.extra_specs" v-bind:key="key">
+                        {{ key }}={{ value }}</v-chip>
                 </template>
                 <template v-slot:expanded-row="{ columns, item }">
-                    <td></td>
                     <td></td>
                     <td :colspan="columns.length - 1">
                         <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
@@ -46,9 +44,6 @@
                     </td>
                 </template>
             </v-data-table>
-        </v-col>
-        <v-col cols="12">
-            <NewVolumeType :show.sync="openNewFlavorDialog" @completed="table.refresh()" />
         </v-col>
     </v-row>
 </template>
@@ -64,9 +59,7 @@ export default {
     },
 
     data: () => ({
-        openNewFlavorDialog: false,
         table: new VolumeTypeTable()
-        // miniVariant: false,
     }),
     methods: {
 

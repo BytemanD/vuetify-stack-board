@@ -20,8 +20,7 @@ from skylight.common import exceptions
 from skylight.common import utils
 from skylight.common.i18n import _
 from skylight import views
-from skylight.db import api as db_api
-from skylight.common import dbconf
+from skylight.common.db import api as db_api
 
 
 LOG = logging.getLogger(__name__)
@@ -123,11 +122,9 @@ class Upgrade(cli.SubCli):
         return file_path
 
 
-class VstackboardApp(application.TornadoApp):
+class SkylightServer(application.TornadoApp):
 
     def start(self, **kwargs):
-        db_api.init()
-        views.CONF_DB_API = dbconf.DBApi(conf.configs_items_in_db)
         super().start(**kwargs)
 
 
@@ -191,6 +188,7 @@ class Serve(cli.SubCli):
                 help=_("Update file: config.json")),
         cli.Arg('-c', '--enale-cross-domain', action='store_true',
                 help=_("Enable cross domain")),
+        cli.Arg('--admin-password', help=_("Init admin password")),
     ]
 
     def __call__(self, args):
@@ -219,12 +217,12 @@ class Serve(cli.SubCli):
 
         application.init(enable_cross_domain=True)
         routes = application.get_routes() + views.get_routes()
-        app = VstackboardApp(routes, develop=args.develop,
+        db_api.init(admin_password=args.admin_password)
+        app = SkylightServer(routes, develop=args.develop,
                              static_path=args.static,
                              template_path=args.template,)
         LOG.debug("starting server on port: %s", CONF.port)
-        app.start(port=CONF.port,
-                  num_processes=CONF.workers)
+        app.start(port=CONF.port, num_processes=CONF.workers)
 
 
 def main():

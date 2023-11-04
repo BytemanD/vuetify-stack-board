@@ -260,26 +260,26 @@ export default {
     refreshTable: function () {
       this.table.refresh();
     },
-    deleteSelected: async function(){
+    deleteSelected: async function () {
       let selected = this.table.selected;
       await this.table.deleteSelected()
-      for (let i in selected){
-            let serverId = selected[i];
-            await this.table.waitServerDeleted(serverId)
+      for (let i in selected) {
+        let serverId = selected[i];
+        await this.table.waitServerDeleted(serverId)
       }
       this.refreshTotlaServers()
     },
-    refreshTotlaServers: function() {
+    refreshTotlaServers: function () {
       let self = this;
       API.server.list().then((servers) => {
         self.totalServers = servers
       })
     },
-    pageRefresh: function ({ page, itemsPerPage, sortBy }) { 
+    pageRefresh: function ({ page, itemsPerPage, sortBy }) {
       let filter = {}
       if (itemsPerPage) {
-        if (itemsPerPage >= 0){
-          filter.limit = itemsPerPage 
+        if (itemsPerPage >= 0) {
+          filter.limit = itemsPerPage
         }
       } else {
         filter.limit = this.table.itemsPerPage

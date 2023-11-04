@@ -10,7 +10,7 @@ from easy2use.common import pkg
 from skylight.common import constants
 from skylight.common import exceptions
 from skylight.common.i18n import _
-from skylight.db import api
+from skylight.common.db import api
 
 LOG = logging.getLogger(__name__)
 

@@ -1,5 +1,9 @@
 <template>
   <v-dialog v-model="display" width="500">
+    <template v-slot:activator="{ props }">
+      <v-btn v-bind="props" color="warning" :disabled="volumes.length==0">状态重置</v-btn>
+    </template>
+
     <v-card>
       <v-card-title class="info" primary-title>重置卷状态</v-card-title>
       <v-card-text>
