@@ -7,13 +7,13 @@
                 <v-expansion-panels>
                     <v-expansion-panel v-for="(item, i) in dialog.resourceAction.events"
                         :class="dialog.isEventError(item) ? 'error lighten-1' : 'success lighten-1'" v-bind:key="i">
-                        <v-expansion-panel-header>
+                        <v-expansion-panel-title>
                             {{ dialog.formatTime(item.start_time) }} - {{ dialog.formatTime(item.finish_time) }}
                             <strong class="ml-2">{{ item.event }}</strong> {{ item.result }}
-                        </v-expansion-panel-header>
-                        <v-expansion-panel-content>
+                        </v-expansion-panel-title>
+                        <v-expansion-panel-text>
                             <pre class="white--text grey darken-3">{{ item.traceback }}</pre>
-                        </v-expansion-panel-content>
+                        </v-expansion-panel-text>
                     </v-expansion-panel>
                 </v-expansion-panels>
             </v-card-text>

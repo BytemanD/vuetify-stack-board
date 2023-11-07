@@ -28,7 +28,7 @@
                                         <v-select density='compact' outlined v-bind:key="key" v-if="item.choises"
                                             :label="$t(key)" :items="item.choises" v-model="item.value" hide-details>
                                         </v-select>
-                                        <v-switch density='compact' v-else-if="item.type == Boolean" :label="$t(key)"
+                                        <v-switch color="info" density='compact' v-else-if="item.type == Boolean" :label="$t(key)"
                                             v-model="item.value"></v-switch>
                                         <div v-else-if="item.type == 'label'" style="width: 4000;">
                                             {{ $t(key) }}: <v-chip density='compact' color="info">{{ item.value }}</v-chip>

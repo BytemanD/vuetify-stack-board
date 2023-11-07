@@ -1,27 +1,23 @@
 <template>
-    <v-dialog v-model="display" width="1000" scrollable>
+    <v-dialog v-model="display" width="800" scrollable>
         <v-card>
-            <v-card-title primary-title class="headline primary">
-                资源操作记录({{ dialog.actions.length }})
-            </v-card-title>
-            <v-card-text class="mp-0">
-                <v-timeline density='compact'>
-                    <v-timeline-item small right class="py-1" v-for="item in dialog.actions"
-                        :color="dialog.isActionError(item) == true ? 'error' : 'success'" v-bind:key="item.request_id">
-                        <v-row>
-                            <v-col class="text-left" cols="3" >
-                                {{ dialog.formatTime(item.start_time) }}</v-col>
-                            <v-col cols="3"><strong>{{ item.action }}</strong></v-col>
-                            <v-col>
-                                <a @click="openResourceActionEventsDialog(item.request_id)">{{
-                                    item.request_id }}</a>
-                            </v-col>
-                        </v-row>
+            <v-card-title primary-title class="headline primary">资源操作记录({{ dialog.actions.length }})</v-card-title>
+            <v-card-text class="ml-0">
+                <v-timeline side="end" class="ml-0 pl-0">
+                    <v-timeline-item fill-dot size="x-small" v-for="item in dialog.actions"
+                        :dot-color="dialog.isActionError(item) == true ? 'error' : 'success'" v-bind:key="item.request_id">
+                        <template v-slot:opposite>{{ dialog.formatTime(item.start_time) }}</template>
+                        <div>
+                            <strong>{{ item.action }}</strong><br>
+                            <v-chip label density="compact" @click="openResourceActionEventsDialog(item.request_id)">
+                                {{ item.request_id }}</v-chip>
+                        </div>
                     </v-timeline-item>
                 </v-timeline>
             </v-card-text>
         </v-card>
-        <ResourceActionEvents :show.sync="showResourcectionEventsDialog" :resource="resource" :request-id="actionRequestId" />
+        <ResourceActionEvents :show="showResourcectionEventsDialog" @update:show="(e) => showResourcectionEventsDialog = e"
+            :resource="resource" :request-id="actionRequestId" />
     </v-dialog>
 </template>
 <script>
@@ -49,7 +45,7 @@ export default {
         actionRequestId: null
     }),
     methods: {
-        openResourceActionEventsDialog(requestId){
+        openResourceActionEventsDialog(requestId) {
             this.actionRequestId = requestId;
             this.showResourcectionEventsDialog = !this.showResourcectionEventsDialog;
         }
