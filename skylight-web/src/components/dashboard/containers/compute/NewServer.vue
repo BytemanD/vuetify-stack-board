@@ -1,11 +1,13 @@
 <template>
     <v-row>
         <v-col cols="8">
-            <v-breadcrumbs :items="breadcrumbItems" color="info" active-color="red" density="compact">
-                <template v-slot:divider>
-                    <v-icon icon="mdi-chevron-right"></v-icon>
-                </template>
-            </v-breadcrumbs>
+            <v-toolbar density="compact" class="rounded">
+                <v-breadcrumbs :items="breadcrumbItems" color="info" active-color="red" density="compact">
+                    <template v-slot:divider>
+                        <v-icon icon="mdi-chevron-right"></v-icon>
+                    </template>
+                </v-breadcrumbs>
+            </v-toolbar>
         </v-col>
         <v-col cols="4" class="text-right">
             <v-btn @click="dialog.commit()" color="primary">提交</v-btn>

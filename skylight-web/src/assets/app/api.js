@@ -141,12 +141,19 @@ class Restfulclient {
 }
 
 class System extends Restfulclient {
+    constructor() {
+        super('');
+    }
     async login(username, password){
         let auth = {
             username: username,
             password: password
         }
         return await this.doPost({auth: auth}, '/login')
+    }
+    async logout(){
+        await this.delete('login')
+        notify.success('成功退出')
     }
 }
 

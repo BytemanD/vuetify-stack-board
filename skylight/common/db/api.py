@@ -70,6 +70,11 @@ def update_token_issue_at(token):
     SESSION.commit()
 
 
+def delete_token(token):
+    SESSION.query(models.Token).filter_by(token=token).delete()
+    SESSION.commit()
+
+
 def create_cluster(name, auth_url, auth_project, auth_user, auth_password):
     SESSION.add(
         models.Cluster(name=name, auth_url=auth_url,

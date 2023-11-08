@@ -33,9 +33,10 @@
         </v-select>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <BtnTheme />
-      <BtnHome />
+      <btn-theme />
+      <btn-home />
       <SettingSheet />
+      <btn-logout />
     </v-app-bar>
 
     <v-main>
@@ -54,6 +55,7 @@ import SETTINGS from '@/assets/app/settings';
 
 import BtnTheme from '../components/plugins/BtnTheme.vue';
 import BtnHome from '../components/plugins/BtnHome.vue';
+import BtnLogout from '../components/plugins/BtnLogout.vue';
 import i18n from '@/assets/app/i18n';
 import SettingSheet from '@/components/dashboard/SettingSheet.vue';
 import { Utils } from '@/assets/app/lib';
@@ -95,6 +97,7 @@ export default {
   components: {
     BtnTheme, BtnHome,
     SettingSheet,
+    BtnLogout,
   },
 
   data: () => ({
@@ -196,6 +199,7 @@ export default {
     }
   },
   created() {
+    console.log('1111111111')
     if (!localStorage.getItem('X-Token')){
       notify.error('请重新登录')
       this.$router.push('/login')

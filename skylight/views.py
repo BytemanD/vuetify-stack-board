@@ -357,6 +357,11 @@ class Login(BaseReqHandler):
         new_token = token.new_token()
         self.set_header('X-TOKEN', new_token)
 
+    @utils.with_response(return_code=204)
+    def delete(self):
+        token = self._get_header("X-Token")
+        db_api.delete_token(token)
+
 
 def get_routes():
     return [

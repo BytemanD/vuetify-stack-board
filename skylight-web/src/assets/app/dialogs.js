@@ -431,11 +431,10 @@ export class ServerInterfaceDialog extends Dialog {
         this.networks = [];
         this.table = {
             headers: [
-                { text: '端口ID', value: 'port_id' },
-                { text: 'MAC地址', value: 'mac_addr' },
-                { text: 'IP地址', value: 'fixed_ips' },
-                { text: '操作', value: 'actions' },
-
+                { title: '端口ID', key: 'port_id' },
+                { title: 'MAC地址', key: 'mac_addr' },
+                { title: 'IP地址', key: 'fixed_ips' },
+                { title: '操作', key: 'actions' },
             ],
             selected: [],
         }
@@ -732,7 +731,7 @@ export class NewClusterDialog extends Dialog {
 export class NewServerDialog extends Dialog {
     constructor(serverTable) {
         super({
-            name: '', flavor: '', image: '', netId: '',
+            name: '', flavor: '', image: '', netId: null,
             nums: [1,1], az: null, host: null,
             password: ''
         });

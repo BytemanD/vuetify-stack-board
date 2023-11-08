@@ -6,10 +6,11 @@
                 <br>
                 <v-row>
                     <v-col cols="12">
-                        <v-data-table  density='compact' :headers="dialog.table.headers" :items="dialog.attachments" class="elevation-2"
-                            v-model="dialog.table.selected">
+                        <v-data-table density='compact' :headers="dialog.table.headers" :items="dialog.attachments"
+                            class="elevation-2" v-model="dialog.table.selected">
                             <template v-slot:[`item.fixed_ips`]="{ item }">
-                                <v-chip x-small v-for="(fixed_ip) in item.fixed_ips" v-bind:key="fixed_ip.ip_address">{{ fixed_ip.ip_address }}</v-chip>
+                                <v-chip x-small v-for="(fixed_ip) in item.fixed_ips" v-bind:key="fixed_ip.ip_address">{{
+                                    fixed_ip.ip_address }}</v-chip>
                             </template>
                             <template v-slot:[`item.actions`]="{ item }">
                                 <v-btn icon small color="red"
@@ -18,16 +19,18 @@
                         </v-data-table>
                     </v-col>
                     <v-col cols="10">
-                        <v-select multiple chips outlined hide-details :items="dialog.ports" label="可用端口" item-value="id"
-                            item-text="name" v-model="dialog.selected">
+                        <v-select multiple chips outlined hide-details :items="dialog.ports" label="选择端口" item-value="id"
+                            :item-props="(item) => { return { title: item.id, subtitle: item.name } }"
+                            v-model="dialog.selected">
                         </v-select>
                     </v-col>
                     <v-col cols="2" class="my-auto">
                         <v-btn color="primary" @click="attachSelectedPorts()">挂载</v-btn></v-col>
 
                     <v-col cols="10">
-                        <v-select multiple chips outlined hide-details :items="dialog.networks" label="可用网络" item-value="id"
-                            item-text="name" v-model="dialog.netSelected">
+                        <v-select multiple chips outlined hide-details :items="dialog.networks" label="选择网络" item-value="id"
+                            :item-props="(item) => { return { title: item.id, subtitle: item.name } }"
+                            v-model="dialog.netSelected">
                         </v-select>
                     </v-col>
                     <v-col cols="2" class="my-auto">
@@ -70,12 +73,12 @@ export default {
     watch: {
         show(newVal) {
             this.display = newVal;
-            if (this.display) {
-                this.dialog.init(this.server);
-            }
         },
         display(newVal) {
             this.display = newVal;
+            if (this.display) {
+                this.dialog.init(this.server);
+            }
             this.$emit("update:show", this.display);
         }
     },

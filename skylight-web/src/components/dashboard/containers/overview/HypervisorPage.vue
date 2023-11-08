@@ -66,22 +66,20 @@
     </v-col>
 
     <v-col cols="12">
-      <v-card density='compact'>
-        <v-card-text>
-          <v-row>
-            <v-col class="px-auto">
-              <v-btn variant="text" color="info" @click="() => $router.push('/dashboard/hypervisor/tenantUsage')">
-                {{ $t('tenantUsage') }}</v-btn>
-            </v-col>
-            <v-col>
-              <v-text-field density='compact' v-model="table.search" label="搜索" single-line hide-details></v-text-field>
-            </v-col>
-            <v-col cols="1">
-              <v-btn variant="text" icon="mdi-refresh" color="primary" @click="refresh()"></v-btn>
-            </v-col>
-          </v-row>
-        </v-card-text>
-      </v-card>
+      <v-row>
+        <v-col>
+          <v-toolbar density="compact" class="rounded">
+            <v-btn variant="text" color="info" @click="$router.push('/dashboard/hypervisor/tenantUsage')">
+              {{ $t('tenantUsage') }}</v-btn>
+          </v-toolbar>
+        </v-col>
+        <v-col>
+          <v-text-field density='compact' v-model="table.search" label="搜索" single-line hide-details></v-text-field>
+        </v-col>
+        <v-col cols="1">
+          <v-btn variant="text" icon="mdi-refresh" color="primary" @click="refresh()"></v-btn>
+        </v-col>
+      </v-row>
     </v-col>
     <v-col cols="12">
       <v-data-table density='compact' show-expand single-expand :headers="table.headers" :items="table.items"

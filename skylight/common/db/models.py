@@ -25,7 +25,7 @@ class Token(Base, BaseModel):
     __tablename__ = 'token'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    token = Column(String(20), nullable=False)
+    token = Column(String(20), unique=True, nullable=False)
     issue_at = Column(DateTime(), default=datetime.now, nullable=False)
 
 
