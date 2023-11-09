@@ -364,10 +364,10 @@ export class ServerVolumeDialog extends Dialog {
         this.volumes = [];
         this.selectedVolumes = [];
         this.headers = [
-            { value: 'device', text: '设备' },
-            { value: 'id', text: 'ID' },
-            { value: 'volumeId', text: '卷ID' },
-            { value: 'actions', text: '操作' },
+            { key: 'device', title: '设备' },
+            { key: 'id', title: 'ID' },
+            { key: 'volumeId', title: '卷ID' },
+            { key: 'actions', title: '操作' },
         ];
         this.selected = [];
     }
@@ -854,7 +854,8 @@ export class ServerGroupDialog extends Dialog {
     }
     async init(server){
         this.server = server;
-        this.serverGroup = await API.server.getServerGroup(this.server.id);
+        let serverGroup = await API.server.getServerGroup(this.server.id);
+        this.serverGroup = serverGroup || {}
     }
 }
 
@@ -1223,8 +1224,9 @@ export class RebuildDialog extends Dialog {
         super();
         this.server = {};
         this.images = [];
-        this.imageRef = '',
-        this.description = '';
+        this.imageRef = ''
+        this.password = null
+        this.description = null;
         this.serverTable = null;
     }
     async init(server, serverTable) {
@@ -1235,10 +1237,11 @@ export class RebuildDialog extends Dialog {
         this.images = (await API.image.listActive()).images;
     }
     async commit() {
-        await API.server.rebuild(
-            this.server.id,
-            { imageRef: this.imageRef, description: this.description }
-        );
+        let data = { imageRef: this.imageRef, description: this.description }
+        if (this.password) {
+            data.adminPass = this.password
+        }
+        await API.server.rebuild(this.server.id, data);
         notify.info(`虚拟机${this.server.name}重建中`)
         let watcher = new ExpectServerRebuild(this.server, this.serverTable);
         watcher.watch();
@@ -1248,10 +1251,10 @@ export class UpdateServerSG extends Dialog {
     constructor() {
         super();
         this.interfaceHeaders = [
-            { text: 'ID或名字', value: 'id' },
-            { text: 'MAC地址', value: 'mac_address' },
-            { text: 'IP地址', value: 'fixed_ips' },
-            { text: '安全组', value: 'security_groups' },
+            { title: 'ID或名字', key: 'id' },
+            { title: 'MAC地址', key: 'mac_address' },
+            { title: 'IP地址', key: 'fixed_ips' },
+            { title: '安全组', key: 'security_groups' },
         ]
         this.itemsPerPage = 10;
         this.server = {};
@@ -2298,13 +2301,16 @@ export class ServerConsoleLogDialog extends Dialog {
         if (!this.show) {
             return
         }
+        if (!this.length) {
+            this.length = 10;
+        }
         await this.refreshConsoleLog(this.length);
     }
     async more() {
         if (this.length == null) {
             this.length = 10;
         }
-        let length = this.length + 10;
+        let length = parseInt(this.length ) + 10;
         await this.refreshConsoleLog(length);
         this.length = length;
     }

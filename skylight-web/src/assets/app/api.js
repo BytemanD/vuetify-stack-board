@@ -877,7 +877,7 @@ class ExpectServerStatus extends Expect {
     }
 
     async check(){
-        this.server = (await API.server.show(this.server.id)).server;
+        this.server = (await API.server.show(this.server.id));
         let serverStatus = this.server.status.toUpperCase();
         LOG.debug(`等待实例 ${this.server.name || this.server.id} 状态变为(${this.expectStatus}, ERROR), 当前状态: ${serverStatus.toUpperCase()}`);
 

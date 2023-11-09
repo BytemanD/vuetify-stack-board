@@ -9,7 +9,8 @@
                         <v-col cols="12" md="5" sm="12">
                             <v-toolbar density="compact" class="rounded-pill">
                                 <v-spacer></v-spacer>
-                                <v-btn icon="mdi-trash-can" color="red" :disabled="table.selected.length == 0" @click="table.deleteSelected()"></v-btn>
+                                <v-btn icon="mdi-trash-can" color="red" :disabled="table.selected.length == 0"
+                                    @click="table.deleteSelected()"></v-btn>
                             </v-toolbar>
                         </v-col>
                         <v-col>

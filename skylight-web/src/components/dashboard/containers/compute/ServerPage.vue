@@ -181,17 +181,22 @@
     <ServerTopology :show="openServerTopology" />
     <ServerActionDialog :show="showServerActionDialog" :server="selectedServer"
       @update:show="(e) => showServerActionDialog = e" />
-    <ServerConsoleLogDialog :show="showServerConsoleLogDialog" :server="selectedServer" />
-    <ServerChangePassword :show="showChangePassowrdDialog" :server="selectedServer" />
-    <ServerVolumes :show="showServerVolumesDialog" :server="selectedServer" />
-    <ServerInterfaces :show="showServerInterfacesDialog" :server="selectedServer" @completed="table.refresh()" />
-    <ServerUpdateSG :show="showServerUpdateSGDialog" :server="selectedServer" />
-    <ServerResize :show="showServerResizeDialog" :server="selectedServer" :server-table.sync="table"
-      @completed="table.refresh()" />
-    <ServerRebuild :show="showServerRebuildDialog" :server="selectedServer" :server-table.sync="table"
-      @completed="table.refresh()" />
-    <ServerGroupDialog :show="showServerGroupDialog" :server="selectedServer"
-      @update:show="(e) => showServerGroupDialog = e" />
+    <ServerConsoleLogDialog :show="showServerConsoleLogDialog" @update:show="(e) => showServerConsoleLogDialog = e"
+      :server="selectedServer" />
+    <ServerChangePassword :show="showChangePassowrdDialog" @update:show="(e) => showChangePassowrdDialog = e"
+      :server="selectedServer" />
+    <ServerVolumes :show="showServerVolumesDialog" @update:show="(e) => showServerVolumesDialog = e"
+      :server="selectedServer" />
+    <ServerInterfaces :show="showServerInterfacesDialog" @update:show="(e) => showServerInterfacesDialog = e"
+      :server="selectedServer" @completed="table.refresh()" />
+    <ServerUpdateSG :show="showServerUpdateSGDialog" @update:show="(e) => showServerUpdateSGDialog = e"
+      :server="selectedServer" />
+    <ServerResize :show="showServerResizeDialog" @update:show="(e) => showServerResizeDialog = e" :server="selectedServer"
+      :server-table.sync="table" @completed="table.refresh()" />
+    <ServerRebuild :show="showServerRebuildDialog" @update:show="(e) => showServerRebuildDialog = e" :server="selectedServer"
+      :server-table.sync="table" @completed="table.refresh()" />
+    <ServerGroupDialog :show="showServerGroupDialog" @update:show="(e) => showServerGroupDialog = e"
+      :server="selectedServer" />
   </v-row>
 </template>
 

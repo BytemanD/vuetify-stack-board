@@ -1,18 +1,17 @@
 <template>
-    <v-dialog v-model="display" width="800">
+    <v-dialog v-model="display" width="600">
         <v-card>
             <v-card-title class="headline warning" primary-title>虚拟机重建</v-card-title>
             <v-card-text>
-                <v-row>
-                    <v-col cols="12">
-                        <v-text-field label="描述" v-model="dialog.description"></v-text-field>
-                    </v-col>
-                    <v-col cols="12">
-                        <v-select density='compact' clearable :items="dialog.images" label="镜像" item-value="id" item-text="name"
-                            outlined v-model="dialog.imageRef">
-                        </v-select>
-                    </v-col>
-                </v-row>
+                <v-select density='compact' clearable :items="dialog.images" label="镜像" item-value="id"
+                    :item-props="(item) => { return { title: item.id, subtitle: item.name } }" outlined
+                    v-model="dialog.imageRef">
+                </v-select>
+                <v-text-field density="compact" label="密码" clearable placeholder="请输入密码" v-model="dialog.password"
+                    :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                    :type="showPassword ? 'text' : 'password'" @click:append="showPassword = !showPassword">
+                </v-text-field>
+                <v-text-field label="描述" v-model="dialog.description"></v-text-field>
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
@@ -38,6 +37,7 @@ export default {
         Utils: Utils,
         display: false,
         dialog: new RebuildDialog(),
+        showPassword: false,
     }),
     methods: {
         commit: async function () {
