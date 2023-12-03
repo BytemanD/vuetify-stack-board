@@ -69,7 +69,7 @@
         </template>
 
         <template v-slot:[`item.name`]="{ item }">
-          <v-chip  variant="text" density='compact'>{{ item.name }}</v-chip>
+          <v-chip  variant="text" density='compact' @click="$router.push('/dashboard/server/' + item.id)">{{ item.name }}</v-chip>
           <v-icon @click="openChangeServerNameDialog(item)" size="x-small">mdi-pencil-minus</v-icon>
           <v-icon @click="loginVnc(item)" size="x-small" icon>mdi-console</v-icon>
         </template>

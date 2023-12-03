@@ -1,7 +1,7 @@
 <template>
     <v-row>
         <v-col cols="12" lg="6">
-            <v-breadcrumbs :items="breadcrumbItems" color="info" active-color="red" density="compact">
+            <v-breadcrumbs :items="breadcrumbItems" color="info" density="compact">
                 <template v-slot:divider>
                     <v-icon icon="mdi-chevron-right"></v-icon>
                 </template>

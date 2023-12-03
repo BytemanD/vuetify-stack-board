@@ -53,6 +53,10 @@ const routes = [
         component: () => import('@/components/dashboard/containers/compute/NewServer.vue'),
       },
       {
+        path: 'server/:id',
+        component: () => import('@/components/dashboard/containers/compute/ServerInfoPage.vue'),
+      },
+      {
         path: 'compute',
         component: () => import('@/components/dashboard/containers/compute/ComputePage.vue'),
       },
