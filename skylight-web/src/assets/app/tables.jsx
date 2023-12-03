@@ -47,11 +47,28 @@ class DataTable {
             try {
                 await this.api.delete(item);
                 deleting.push(item);
+                this.watchDeleting(item)
             } catch {
                 Notify.error(`删除 ${item} 失败`)
             }
         }
-        this.resetSelected();
+        this.resetSelected()
+    }
+    async watchDeleting(itemId) {
+        do {
+            try {
+                let item = await (this.api.show(itemId))
+                this.updateItem(item);
+                Utils.sleep(2)
+            } catch (e) {
+                if (e.response.status == 404){
+                    console.error(e)
+                    Notify.success(`${this.name} ${itemId} 已删除`)
+                    this.removeItem(itemId)
+                    break;
+                }
+            }
+        } while(true)
     }
     resetSelected() {
         this.selected = [];
@@ -236,22 +253,21 @@ export class PortDataTable extends DataTable {
                 { title: 'vnic_type', key: 'binding:vnic_type' },
                 { title: 'vif_type', key: 'binding:vif_type' },
                 { title: 'status', key: 'status' },
-                // { title: 'device_owner', key: 'device_owner' },
                 { title: 'fixed_ips', key: 'fixed_ips' },
-                { title: '操作', key: 'actions' },
-        ], API.port, 'ports');
-
-        this.extendItems = [
-            { title: 'binding:vif_details', key: 'binding:vif_details' },
-            { title: 'binding:profile', key: 'binding:profile' },
-            { title: 'binding:host_id', key: 'binding:host_id' },
-            { title: 'network_id', key: 'network_id' },
-            { title: 'device_id', key: 'device_id' },
-            { title: 'security_groups', key: 'security_groups' },
-            { title: 'mac_address', key: 'mac_address' },
-            { title: 'qos_policy_id', key: 'qos_policy_id' },
-            { title: 'description', key: 'description' },
-
+                { title: '启用', key: 'admin_state_up' },
+            ], API.port, 'ports');
+            
+            this.extendItems = [
+                { title: 'device_owner', key: 'device_owner' },
+                { title: 'binding:vif_details', key: 'binding:vif_details' },
+                { title: 'binding:profile', key: 'binding:profile' },
+                { title: 'binding:host_id', key: 'binding:host_id' },
+                { title: 'network_id', key: 'network_id' },
+                { title: 'device_id', key: 'device_id' },
+                { title: 'security_groups', key: 'security_groups' },
+                { title: 'mac_address', key: 'mac_address' },
+                { title: 'qos_policy_id', key: 'qos_policy_id' },
+                { title: 'description', key: 'description' },
         ];
     }
     adminStateDown(item) {
@@ -323,7 +339,7 @@ export class FlavorDataTable extends DataTable {
         { title: '磁盘', key: 'disk' },
         { title: 'swap', key: 'swap' },
         { title: 'ephemeral', key: 'OS-FLV-EXT-DATA:ephemeral' },
-        ], API.flavor, 'flavors');
+        ], API.flavor, 'flavors', '规格');
         this.extraSpecsMap = {};
         this.isPublic = true;
     }
@@ -331,8 +347,10 @@ export class FlavorDataTable extends DataTable {
         for (let i in this.items) {
             let item = this.items[i];
             let body = await API.flavor.getExtraSpecs(item.id);
+            this.extraSpecsMap[item.id] = body.extra_specs;
             // Vue.set(this.extraSpecsMap, item.id, body.extra_specs);
         }
+
     }
     async refresh() {
         await super.refresh({ is_public: this.isPublic })
@@ -366,6 +384,18 @@ export class KeypairDataTable extends DataTable {
         })
         return body
     }
+    removeItem(name){
+        let index = -1;
+        for (let i in this.items){
+            if (this.items[i].name == name){
+                index = i
+                break;
+            }
+        }
+        if (index >= 0){
+            this.items.splice(index, 1)
+        }
+    }
 }
 
 export class ServerDataTable extends DataTable {
@@ -395,12 +425,13 @@ export class ServerDataTable extends DataTable {
         this.errorNotify = {};
         this.deleted = false;
         this.imageName = {};
+        this.filterName = ""
     }
     refresh(filters={}){
         // search only for server.name
         filters.deleted = this.deleted
-        if (this.search){
-            filters.name = this.search;
+        if (this.filterName != ""){
+            filters.name = this.filterName;
         }
         super.refresh(filters);
     }

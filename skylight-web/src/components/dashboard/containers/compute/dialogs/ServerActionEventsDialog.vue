@@ -1,17 +1,23 @@
 <template>
     <v-dialog v-model="display" width="960" scrollable>
         <v-card>
-            <v-card-title >{{ dialog.instanceAction.action }} 事件
-            </v-card-title>
+            <v-card-title >{{ dialog.instanceAction.action }} 事件</v-card-title>
+            <v-card-subtitle>{{ dialog.instanceAction.request_id }}</v-card-subtitle>
             <v-card-text class="pa-2">
                 <v-expansion-panels>
                     <v-expansion-panel v-for="(item, i) in dialog.instanceAction.events"
-                        :class="dialog.isEventError(item) ? 'error lighten-1' : 'success lighten-1'" v-bind:key="i">
+                         v-bind:key="i">
                         <v-expansion-panel-title>
                             {{ dialog.formatTime(item.start_time) }} - {{ dialog.formatTime(item.finish_time) }}
-                            <strong class="mx-4">{{ item.event }}</strong> {{ item.result }}
+                            <strong class="mx-4">{{ item.event }}</strong>
+                            {{ item.result }}
+                            <template v-slot:actions>
+                                <v-icon :class="dialog.isEventError(item) ? 'text-error' : 'text-success'" :icon="dialog.isEventError(item)? 'mdi-alert-circle' : 'mdi-check-circle'">
+                                </v-icon>
+                            </template>
                         </v-expansion-panel-title>
                         <v-expansion-panel-text>
+                            <v-chip label density="compact" color="info">节点: {{ item.host }}</v-chip>
                             <pre class="white--text grey darken-3">{{ item.traceback }}</pre>
                         </v-expansion-panel-text>
                     </v-expansion-panel>

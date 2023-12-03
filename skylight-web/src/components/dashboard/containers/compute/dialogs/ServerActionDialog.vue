@@ -1,19 +1,17 @@
 <template>
     <v-dialog v-model="display" width="800" scrollable>
         <v-card>
-            <v-card-title>虚拟机操作记录({{ dialog.actions.length }})</v-card-title>
-            <!-- <v-divider></v-divider> -->
+            <v-card-title>虚拟机操作记录</v-card-title>
+            <v-card-subtitle>{{ dialog.actions.length }}条记录</v-card-subtitle>
             <v-card-text class="pl-0">
                 <v-timeline side="end" class="ml-0 pl-0">
-                    <v-timeline-item size="x-small" fill-dot v-for="item in dialog.actions"
-                        :dot-color="dialog.isActionError(item) == true ? 'error' : 'success'"
+                    <v-timeline-item size="x-small" v-for="item in dialog.actions"
+                        :dot-color="dialog.isActionError(item) ? 'red' : 'success'"
                         v-bind:key="item.action + '-' + item.request_id">
-                        <template v-slot:opposite>
-                            {{ item.start_time }}
-                        </template>
+                        <template v-slot:opposite>{{ item.start_time }}</template>
                         <div>
-                            <strong>{{ item.action }}</strong><br>
-                            <v-chip label density="compact" @click="openServerActionEventsDialog(item.request_id)">
+                            <strong>{{ item.action }}</strong>
+                            <v-chip variant="text" density="compact" @click="openServerActionEventsDialog(item.request_id)">
                                 {{ item.request_id }}</v-chip>
                         </div>
                     </v-timeline-item>

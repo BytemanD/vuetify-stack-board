@@ -199,7 +199,6 @@ export default {
     }
   },
   created() {
-    console.log('1111111111')
     if (!localStorage.getItem('X-Token')){
       notify.error('请重新登录')
       this.$router.push('/login')

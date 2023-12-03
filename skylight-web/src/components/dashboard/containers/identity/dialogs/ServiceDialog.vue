@@ -1,31 +1,36 @@
 <template>
-    <v-dialog scrollable v-model="display" width="900">
+    <v-dialog scrollable v-model="display" width="1000">
         <template v-slot:activator="{ props }">
             <v-btn v-bind="props" color="primary" variant="text">{{ $t('service') }}</v-btn>
         </template>
         <v-card>
             <v-card-title class="headline primary lighten-2" primary-title>服务管理</v-card-title>
             <v-card-text>
-                <v-row>
-                    <v-col>
-                        <!-- TODO -->
-                        <v-btn x-small fab class='mr-1' color="primary"><v-icon>mdi-plus</v-icon></v-btn>
-                        <v-btn small class='mr-1' color="red"
-                            @click="dialog.serviceTable.deleteSelected()"><v-icon>mdi-trash-can</v-icon></v-btn>
-                    </v-col>
-                    <v-col>
-                        <v-text-field density='compact' single-line hide-details small v-model="dialog.serviceTable.search"
-                            label="搜索"></v-text-field>
-                    </v-col>
-                    <v-col cols="1">
-                        <v-btn fab x-small color="info"
-                            v-on:click="dialog.serviceTable.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
-                    </v-col>
-                </v-row>
                 <v-data-table density='compact' show-select class="mt-1" :loading="dialog.serviceTable.loading"
                     :headers="dialog.serviceTable.headers" :items="dialog.serviceTable.items"
                     :items-per-page="dialog.serviceTable.itemsPerPage" :search="dialog.serviceTable.search"
                     v-model="dialog.serviceTable.selected">
+                    <template v-slot:top>
+                        <v-row>
+                            <v-col cols="6">
+                                <v-toolbar density="compact" class="rounded-pill">
+                                    <!-- TODO -->
+                                    <v-btn color="primary" icon="mdi-plus"></v-btn>
+                                    <v-spacer></v-spacer>
+                                    <v-btn color="red" icon="mdi-trash-can"
+                                        @click="dialog.serviceTable.deleteSelected()"></v-btn>
+                                </v-toolbar>
+                            </v-col>
+                            <v-col>
+                                <v-text-field density='compact' single-line hide-details small
+                                    v-model="dialog.serviceTable.search" label="搜索"></v-text-field>
+                            </v-col>
+                            <v-col cols="1">
+                                <v-btn color="info" icon="mdi-refresh" variant="text"
+                                    v-on:click="dialog.serviceTable.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
+                            </v-col>
+                        </v-row>
+                    </template>
                 </v-data-table>
             </v-card-text>
         </v-card>

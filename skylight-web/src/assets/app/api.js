@@ -275,9 +275,7 @@ class Migrations extends Restfulclient {
 
 class Server extends OpenstackProxyAPI {
     constructor() { super('/computing/servers') }
-    async show(id) {
-        return (await this.get(id)).server;
-    }
+    async show(id) {return (await this.get(id)).server;}
     async detail(filters = {}) {
         filters.all_tenants = 1
         return await super.detail(filters)
@@ -634,6 +632,7 @@ class Router extends Restfulclient {
 }
 class Volume extends OpenstackProxyAPI {
     constructor() { super('/volume/volumes', true) }
+    async show(id) { return (await super.show(id)).volume }
     async create(data) { return this.post({ volume: data }) }
     async waitDeleted(item) {
         await waitDeletedByList(API.volume, 'volumes', item);

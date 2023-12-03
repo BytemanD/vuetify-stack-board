@@ -9,7 +9,7 @@
             <v-col cols="12" md="5" sm="12">
               <v-toolbar density="compact" class="rounded-pill">
                 <NewEndpointDialog @completed="table.refresh()" />
-
+                <v-spacer></v-spacer>
                 <v-btn small color="red" icon="mdi-trash-can" @click="table.deleteSelected()"></v-btn>
               </v-toolbar>
             </v-col>

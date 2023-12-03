@@ -1095,7 +1095,7 @@ export class NewEndpoingDialog extends Dialog {
         let endpoints = this.interfaces.map(item => {
             return {
                 url: this.url,
-                interface: this.INTERFACES[item],
+                interface: item,
                 service_id: this.service,
                 region: this.region,
             }
@@ -1919,19 +1919,18 @@ export class SGRulesDialog extends Dialog {
         this.itemsPerPage = 10;
         this.search = '';
         this.headers = [
-            { text: 'direction', value: 'direction' },
-            { text: 'protocol', value: 'protocol' },
-            { text: 'ethertype', value: 'ethertype' },
-            { text: 'port_range', value: 'port_range' },
-            { text: 'remote_ip_prefix', value: 'remote_ip_prefix' },
+            { title: '方向', key: 'direction' },
+            { title: '协议', key: 'protocol' },
+            { title: '以太网类型', key: 'ethertype' },
+            { title: '端口范围', key: 'port_range',},
+            { title: '目标IP前缀', key: 'remote_ip_prefix' },
         ];
         this.extendItems = [
-            { text: 'id', value: 'id' },
-            { text: 'description', value: 'description' },
-            { text: 'revision_number', value: 'revision_number' },
-            { text: 'tags', value: 'tags' },
-            { text: 'created_at', value: 'created_at' },
-
+            { title: 'id', key: 'id' },
+            { title: '描述', key: 'description' },
+            { title: '修订号', key: 'revision_number' },
+            { title: '标签', key: 'tags' },
+            { title: '创建时间', key: 'created_at' },
         ]
     }
     async init(securityGroup) {
@@ -2222,7 +2221,7 @@ export class ServerActionsDialog extends Dialog {
         this.actions = (await API.server.actionList(this.server.id)).reverse();
     }
     isActionError(action) {
-        if (action.notify && action.notify.toLowerCase().includes('error')) {
+        if (action.message && action.message.toLowerCase().includes('error')) {
             return true;
         }
         else {
@@ -2388,27 +2387,27 @@ export class ImageDeleteSmartDialog extends Dialog {
         notify.info('开始删除镜像');
         if (!this.smart) {
             for (let i in images) {
-                let image = images[i];
-                await API.image.delete(image.id);
-                await imageTable.waitDeleted(image.id);
+                let imageId = images[i];
+                await API.image.delete(imageId);
             }
             return;
         }
         for (let i in images) {
-            let image = images[i];
+            let imageId = images[i];
+            let image = (await API.image.show(imageId));
             if (!image.image_type) {
-                await API.image.delete(image.id);
-                await imageTable.waitDeleted(image.id);
+                await API.image.delete(imageId);
+                // await imageTable.waitDeleted(imageId);
                 continue;
             }
             if (image.image_type == 'instance_backup') {
-                await this.deleteInstanceBackup(image);
-                await imageTable.waitDeleted(image.id);
+                await this.deleteInstanceBackup(imageId);
+                // await imageTable.waitDeleted(imageId);
                 continue;
             }
             if (image.image_type == 'snapshot') {
                 await this.deleteSnapshot(image);
-                await imageTable.waitDeleted(image.id);
+                // await imageTable.waitDeleted(image.id);
                 continue;
             }
             notify.warning(`image type ${image.image_type} is unkown.`)

@@ -48,7 +48,7 @@ import { Utils } from '@/assets/app/lib';
 
 export default {
   props: {
-    show: Boolean,
+
   },
   data: () => ({
     i18n: i18n,
@@ -67,9 +67,6 @@ export default {
 
   },
   watch: {
-    show(newVal) {
-      this.display = newVal;
-    },
     display(newVal) {
       this.display = newVal;
       this.$emit("update:show", this.display);

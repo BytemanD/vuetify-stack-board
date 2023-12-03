@@ -146,9 +146,9 @@ export default {
             } else {
                 filter.limit = this.table.itemsPerPage
             }
-            if (page > 1 && this.totalServers.length > 1) {
+            if (page > 1 && this.totlaVolumes.length > 1) {
                 let index = filter.limit * (page - 1) - 1
-                filter.marker = this.totalServers[index].id
+                filter.marker = this.totlaVolumes[index].id
             }
             if (page > 1 && this.totlaVolumes.length > 1) {
                 let index = itemsPerPage * (page - 1) - 1

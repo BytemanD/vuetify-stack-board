@@ -25,7 +25,10 @@
                         </v-col>
                     </v-row>
                 </template>
-
+                <template v-slot:[`item.id`]="{ item }">
+                    {{ item.id  }}
+                    <v-btn size="x-small" variant="text" icon="mdi-pencil" @click="openUpdatePortDialog(item)"></v-btn>
+                </template>
                 <template v-slot:[`item.status`]="{ item }">
                     <v-icon v-if="item.status == 'ACTIVE'" color="green">mdi-emoticon-happy</v-icon>
                     <v-icon v-else color="red">mdi-emoticon-sad</v-icon>
@@ -35,10 +38,9 @@
                         {{ fixed_ip.ip_address }}
                     </v-chip>
                 </template>
-                <template v-slot:[`item.actions`]="{ item }">
+                <template v-slot:[`item.admin_state_up`]="{ item }">
                     <v-switch class="my-auto" color="success" v-model="item.admin_state_up" hide-details density='compact'
                         @click="table.adminStateDown(item)"></v-switch>
-                    <v-btn variant="text" size="small" color="purple" text="更新" @click="openUpdatePortDialog(item)"></v-btn>
                 </template>
                 <template v-slot:expanded-row="{ columns, item }">
                     <td></td>

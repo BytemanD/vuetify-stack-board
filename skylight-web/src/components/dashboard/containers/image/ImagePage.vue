@@ -6,27 +6,22 @@
         v-model="table.selected">
         <template v-slot:top>
           <v-row>
-            <v-col cols="8">
+            <v-col cols="6">
               <v-toolbar density="compact" class="rounded-pill">
                 <NewImageVue :images="table.selected" @completed="table.resetSelected(); table.refresh()" />
-
-                <v-btn color="red" icon="mdi-trash-can" @click="openImageDeleteSmartDialog = true"
-                  :disabled="table.selected.length == 0"> </v-btn>
-
                 <v-spacer></v-spacer>
-                <v-btn size="small" color="primary" @click="showTasksDialog = !showTasksDialog"
-                  icon="mdi-progress-upload"></v-btn>
+                  <ImageDeleteSmartDialog :images="table.selected" @completed="table.resetSelected(); table.refresh()" />
               </v-toolbar>
-              <ImageDeleteSmartDialog :show.sync="openImageDeleteSmartDialog" :images="table.selected"
-                @completed="table.resetSelected(); table.refresh()" />
             </v-col>
-
             <v-col>
               <v-text-field size="small" density='compact' v-model="table.search" label="搜索" single-line
                 hide-details></v-text-field>
             </v-col>
-            <v-col cols="12" md="1" sm="12">
+            <v-col cols="12" md="2" sm="12">
               <v-btn color="info" icon="mdi-refresh" variant="text" v-on:click="table.refresh()"></v-btn>
+              <v-btn color="primary" variant="text" icon="mdi-progress-upload"
+                @click="showTasksDialog = !showTasksDialog">
+              </v-btn>
             </v-col>
           </v-row>
         </template>

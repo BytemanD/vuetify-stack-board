@@ -1,8 +1,8 @@
 <template>
     <v-dialog v-model="display" width="960" scrollable>
         <v-card>
-            <v-card-title class="headline info" primary-title>{{ dialog.resourceAction.action }} 事件
-            </v-card-title>
+            <v-card-title class="headline info" primary-title>事件</v-card-title>
+            <v-card-subtitle>{{ dialog.resourceAction.action }}</v-card-subtitle>
             <v-card-text class="pa-2">
                 <v-expansion-panels>
                     <v-expansion-panel v-for="(item, i) in dialog.resourceAction.events"

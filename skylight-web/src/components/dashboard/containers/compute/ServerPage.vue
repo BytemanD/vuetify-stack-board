@@ -49,8 +49,8 @@
               </v-toolbar>
             </v-col>
             <v-col cols="12" md="3" sm="6">
-              <v-text-field density='compact' hide-details v-model="table.search" label="搜索实例名"
-                single-line></v-text-field>
+              <v-text-field density='compact' hide-details single-line v-model="table.filterName" label="搜索实例名"
+              @keyup.enter.native="refreshTable()"></v-text-field>
             </v-col>
             <v-col cols="12" md="2" sm="6">
               <BtnIcon variant="text" icon="mdi-refresh" color="info" tool-tip="刷新" @click="pageRefresh(1)" />
@@ -69,8 +69,7 @@
         </template>
 
         <template v-slot:[`item.name`]="{ item }">
-          {{ item.name }}
-          <br>
+          <v-chip  variant="text" density='compact'>{{ item.name }}</v-chip>
           <v-icon @click="openChangeServerNameDialog(item)" size="x-small">mdi-pencil-minus</v-icon>
           <v-icon @click="loginVnc(item)" size="x-small" icon>mdi-console</v-icon>
         </template>
@@ -179,6 +178,8 @@
     </v-col>
 
     <ServerTopology :show="openServerTopology" />
+    <ChangeServerNameDialog :show="showChangeNameDialog" :server="selectedServer"
+      @update:show="(e) => showChangeNameDialog = e" />
     <ServerActionDialog :show="showServerActionDialog" :server="selectedServer"
       @update:show="(e) => showServerActionDialog = e" />
     <ServerConsoleLogDialog :show="showServerConsoleLogDialog" @update:show="(e) => showServerConsoleLogDialog = e"
@@ -193,8 +194,8 @@
       :server="selectedServer" />
     <ServerResize :show="showServerResizeDialog" @update:show="(e) => showServerResizeDialog = e" :server="selectedServer"
       :server-table.sync="table" @completed="table.refresh()" />
-    <ServerRebuild :show="showServerRebuildDialog" @update:show="(e) => showServerRebuildDialog = e" :server="selectedServer"
-      :server-table.sync="table" @completed="table.refresh()" />
+    <ServerRebuild :show="showServerRebuildDialog" @update:show="(e) => showServerRebuildDialog = e"
+      :server="selectedServer" :server-table.sync="table" @completed="table.refresh()" />
     <ServerGroupDialog :show="showServerGroupDialog" @update:show="(e) => showServerGroupDialog = e"
       :server="selectedServer" />
   </v-row>
@@ -259,7 +260,6 @@ export default {
     showServerGroupDialog: false,
 
     totalServers: [],
-
   }),
   methods: {
     refreshTable: function () {
@@ -317,6 +317,9 @@ export default {
     loginVnc: async function (server) {
       let body = await API.server.getVncConsole(server.id);
       window.open(body.remote_console.url, '_blank');
+    },
+    searchByName: async function () {
+      console.log("search by name", this.search)
     },
     openChangeServerNameDialog: async function (server) {
       this.selectedServer = server;

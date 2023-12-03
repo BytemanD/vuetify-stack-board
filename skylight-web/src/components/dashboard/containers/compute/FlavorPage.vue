@@ -28,20 +28,21 @@
 
                 <template v-slot:[`item.ram`]="{ item }">{{ Utils.humanRam(item.ram) }}</template>
                 <template v-slot:expanded-row="{ columns, item }">
-                    <td :colspan="columns.length - 1">
-                        <v-btn text="编辑属性" color="info" variant="text" class="my-auto"
-                            @click="openFlavorExtraDialog(item)"></v-btn>
-                    </td>
+                    <td></td>
+                    <td>属性</td>
                     <td :colspan="columns.length - 1">
                         <v-chip size="small" label class="mt-1 mb-1 mr-1"
                             v-for="(value, key) in table.extraSpecsMap[item.id]" v-bind:key="key">
                             {{ key }}={{ value }}
                         </v-chip>
+                        <v-btn text="编辑属性" color="warning" variant="text" class="my-auto"
+                            @click="openFlavorExtraDialog(item)"></v-btn>
                     </td>
                 </template>
             </v-data-table>
         </v-col>
-        <FlavorExtraDialog :show.sync="showFlavorExtraDialog" :flavor="selectedFlavor" @completed="table.refresh()" />
+        <FlavorExtraDialog :show="showFlavorExtraDialog" @update:show="(e) => showFlavorExtraDialog = e"
+            :flavor="selectedFlavor" @completed="table.refresh()" />
     </v-row>
 </template>
     

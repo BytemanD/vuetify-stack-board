@@ -1,21 +1,19 @@
 <template>
+    <v-dialog v-model="display" width="500">
+        <v-card>
+            <v-card-title>重命名</v-card-title>
+            <v-card-subtitle>当前实例名: {{ dialog.server.name }}</v-card-subtitle>
+            <v-card-text>
+                <v-text-field hide-details label="新实例名" placeholder="请输入新实例名" v-model="dialog.newName"></v-text-field>
+            </v-card-text>
+            <v-divider></v-divider>
 
-<v-dialog v-model="display" width="500">
-    <v-card>
-      <v-card-text>
-        <br />
-        <v-text-field disabled label="旧实例名" placeholder="旧实例名" v-model="dialog.server.name"></v-text-field>
-        <v-text-field hide-details label="新实例名" placeholder="请输入新实例名" v-model="dialog.newName"></v-text-field>
-      </v-card-text>
-      <v-divider></v-divider>
-
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="warning" @click="commit()" :disabled="dialog.newName == ''">修改</v-btn>
-      </v-card-actions>
-    </v-card>
-</v-dialog>
-
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="warning" block @click="commit()" :disabled="dialog.newName == ''">修改</v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 <script>
 import i18n from '@/assets/app/i18n';
@@ -34,7 +32,7 @@ export default {
         dialog: new ChangeServerNameDialog(),
     }),
     methods: {
-        commit: async function(){
+        commit: async function () {
             await this.dialog.commit()
             this.display = false;
             this.$emit('completed');
@@ -45,8 +43,8 @@ export default {
     watch: {
         show(newVal) {
             this.display = newVal;
-            if(this.display){
-              this.dialog.init(this.server);
+            if (this.display) {
+                this.dialog.init(this.server);
             }
         },
         display(newVal) {

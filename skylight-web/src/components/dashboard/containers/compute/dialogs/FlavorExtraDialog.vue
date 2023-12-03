@@ -4,16 +4,17 @@
             <v-card-title class="headline primary" primary-title>设置规格属性</v-card-title>
             <v-card-text>
                 <v-row>
-                    <v-col cols="12">
+                    <v-col cols="6">
                         <h4>属性</h4>
-                        <v-chip label small close class="mr-1 mt-1 info" v-for="(value, key) in dialog.extraSpecs"
+                        <v-chip label small closable class="mr-1 mt-1 info" v-for="(value, key) in dialog.extraSpecs"
                             v-bind:key="key" @click:close="deleteExtra(key)">{{ key }}={{ value }}</v-chip>
                     </v-col>
-                    <v-col cols="12">
+                    <v-col cols="6">
                         <h4>快速添加常用属性</h4>
-                        <v-chip label small close close-icon="mdi-plus" class="mr-1 mb-1"
+                        <v-chip label small closable close-icon="mdi-plus" class="mr-1 mb-1"
                             v-for="item in dialog.customizeExtras" v-bind:key="item.key"
-                            @click:close="addExtra(item)">{{ item.key }}={{ item.value }}</v-chip>
+                            @click:close="addExtra(item)">{{ item.key }}={{ item.value }}
+                        </v-chip>
                     </v-col>
                     <v-col cols="10">
                         <v-textarea hide-details filled label="自定义属性"

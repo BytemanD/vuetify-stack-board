@@ -6,25 +6,31 @@
         <v-card>
             <v-card-title>Region管理</v-card-title>
             <v-card-text>
-                <v-row>
-                    <v-col>
-                        <!-- TODO -->
-                        <v-btn icon="mdi-plus" variant="text" color="primary"></v-btn>
-                        <v-btn color="red" icon="mdi-trash-can" variant="text" @click="dialog.regionTable.deleteSelected()"></v-btn>
-                    </v-col>
-                    <v-col>
-                        <v-text-field density='compact' single-line hide-details small v-model="dialog.regionTable.search"
-                            label="搜索"></v-text-field>
-                    </v-col>
-                    <v-col cols="1">
-                        <v-btn fab x-small color="info"
-                            v-on:click="dialog.regionTable.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
-                    </v-col>
-                </v-row>
                 <v-data-table density='compact' show-select :loading="dialog.regionTable.loading"
                     :headers="dialog.regionTable.headers" :items="dialog.regionTable.items"
                     :items-per-page="dialog.regionTable.itemsPerPage" :search="dialog.regionTable.search"
                     v-model="dialog.regionTable.selected">
+                    <template v-slot:top>
+                        <v-row>
+                            <v-col cols="6">
+                                <v-toolbar density="compact" class="rounded-pill">
+                                    <!-- TODO -->
+                                    <v-btn color="primary" icon="mdi-plus"></v-btn>
+                                    <v-spacer></v-spacer>
+                                    <v-btn color="red" icon="mdi-trash-can"
+                                        @click="dialog.regionTable.deleteSelected()"></v-btn>
+                                </v-toolbar>
+                            </v-col>
+                            <v-col>
+                                <v-text-field density='compact' single-line hide-details small
+                                    v-model="dialog.regionTable.search" label="搜索"></v-text-field>
+                            </v-col>
+                            <v-col cols="1">
+                                <v-btn color="info" icon="mdi-refresh" variant="text"
+                                    v-on:click="dialog.regionTable.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
+                            </v-col>
+                        </v-row>
+                    </template>
                 </v-data-table>
             </v-card-text>
         </v-card>
