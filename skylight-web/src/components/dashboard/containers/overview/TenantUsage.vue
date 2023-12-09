@@ -50,7 +50,7 @@ export default {
     data: () => ({
         breadcrumbItems: [
             {
-                title: '资源概况',
+                title: '资源',
                 href: '#/dashboard/hypervisor',
             },
             {

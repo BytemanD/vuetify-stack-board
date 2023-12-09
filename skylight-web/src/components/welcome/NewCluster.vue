@@ -1,39 +1,39 @@
 <template>
-    <v-dialog v-model="display" width="500">
+    <v-dialog v-model="display" width="500" scrollable>
         <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" color="purple" text @click="openNewClusterDialog = true">添加集群</v-btn>
+            <v-btn v-bind="props" variant="text" density="compact" icon="mdi-plus"
+                @click="openNewClusterDialog = true"></v-btn>
         </template>
         <v-card>
-            <v-card-title class="headline primary lighten-2">新建集群</v-card-title>
+            <v-card-title class="headline primary lighten-2">添加集群</v-card-title>
             <v-card-text>
                 <v-col>
                     <v-text-field density="compact" placeholder="请输入环境名" v-model="dialog.name">
                         <template v-slot:prepend>
-                            <p class="text-info">环境</p>
+                            <span class="text-info">环境</span>
                         </template>
                     </v-text-field>
-                    <v-text-field density="compact" label="" placeholder="例如: http://keystone-server:5000"
-                        v-model="dialog.authUrl">
+                    <v-text-field density="compact" placeholder="例如: http://keystone-server:5000" v-model="dialog.authUrl">
                         <template v-slot:prepend>
-                            <p class="text-info">认证</p>
+                            <span class="text-info">入口</span>
                         </template>
                     </v-text-field>
-                    <v-text-field density="compact" label="" placeholder="请输入租户名" v-model="dialog.authProject">
+                    <v-text-field density="compact" placeholder="请输入租户名" v-model="dialog.authProject">
                         <template v-slot:prepend>
-                            <p class="text-info">租户</p>
+                            <span class="text-info">租户</span>
                         </template>
                     </v-text-field>
-                    <v-text-field density="compact" label="" placeholder="请输入用户名" v-model="dialog.authUser">
+                    <v-text-field density="compact" placeholder="请输入用户名" v-model="dialog.authUser">
                         <template v-slot:prepend>
-                            <p class="text-info">用户</p>
+                            <span class="text-info">用户</span>
                         </template>
                     </v-text-field>
-                    <v-text-field density="compact" label="" placeholder="请输入密码" v-model="dialog.authPassword"
-                        :append-icon="dialog.hidePassword ? 'mdi-eye-off' : 'mdi-eye'"
+                    <v-text-field density="compact" placeholder="请输入密码" v-model="dialog.authPassword"
+                        :append-inner-icon="dialog.hidePassword ? 'mdi-eye-off' : 'mdi-eye'"
                         :type="dialog.hidePassword ? 'password' : 'text'"
-                        @click:append="dialog.hidePassword = !dialog.hidePassword">
+                        @click:append-inner="dialog.hidePassword = !dialog.hidePassword">
                         <template v-slot:prepend>
-                            <p class="text-info">密码</p>
+                            <span class="text-info">密码</span>
                         </template>
                     </v-text-field>
                 </v-col>
@@ -51,8 +51,6 @@ import { NewClusterDialog } from '@/assets/app/dialogs';
 import { MESSAGE } from '@/assets/app/lib.js';
 
 export default {
-    props: {
-    },
     data: () => ({
         display: false,
         dialog: new NewClusterDialog(),

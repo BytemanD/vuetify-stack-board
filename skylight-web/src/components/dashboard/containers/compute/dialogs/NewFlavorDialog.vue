@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="display" width="900">
+  <v-dialog v-model="display" width="900" scrollable>
     <template v-slot:activator="{ props }">
       <v-btn v-bind="props" icon="mdi-plus" fab color="primary" class="mr-1"></v-btn>
     </template>
@@ -17,13 +17,13 @@
           </v-col>
           <v-col cols="4">
             <v-text-field type="number" label="内存(MB)" v-model="dialog.params.ram" prepend-icon="mdi-minus"
-              append-outer-icon="mdi-plus" @click:prepend="dialog.ramMinus()"
+              append-icon="mdi-plus" @click:prepend="dialog.ramMinus()"
               @click:append-outer="dialog.ramPlus()"></v-text-field>
             <v-text-field type="number" label="CPU个数" v-model="dialog.params.vcpu" prepend-icon="mdi-minus"
-              append-outer-icon="mdi-plus" @click:prepend="dialog.vcpuMinus()"
+              append-icon="mdi-plus" @click:prepend="dialog.vcpuMinus()"
               @click:append-outer="dialog.vcpuPlus()"></v-text-field>
             <v-text-field type="number" label="磁盘(GB)" v-model="dialog.params.disk" prepend-icon="mdi-minus"
-              append-outer-icon="mdi-plus" @click:prepend="dialog.diskMinus()"
+              append-icon="mdi-plus" @click:prepend="dialog.diskMinus()"
               @click:append-outer="dialog.diskPlus()"></v-text-field>
             <v-switch hide-details density='compact' v-model="dialog.params.isPublic" label="设为共享"></v-switch>
           </v-col>

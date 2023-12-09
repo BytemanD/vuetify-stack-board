@@ -11,14 +11,14 @@
         <div v-for="group in navigation.group" v-bind:key="group.name">
           <v-list-subheader class="text-primary">{{ group.name }}</v-list-subheader>
           <v-list-item v-for="(item, i) in group.items" v-bind:key="i" :title="item.title" :value="item" color="primary"
-            @click="selectItem(item)" :disabled="navigation.selectedItem == item.title"
-            :active="navigation.selectedItem == item.title">
+            @click="selectItem(item)" :disabled="$route.path.startsWith('/dashboard' + item.router)"
+            :active="$route.path.startsWith('/dashboard' + item.router)">
             <template v-slot:prepend><v-icon :icon="item.icon"></v-icon></template>
           </v-list-item>
         </div>
       </v-list>
-
     </v-navigation-drawer>
+    
     <v-app-bar density="compact">
       <v-app-bar-nav-icon @click="navigation.mini = !navigation.mini"></v-app-bar-nav-icon>
       <v-toolbar-title class="ml-0">
@@ -33,8 +33,8 @@
         </v-select>
       </v-toolbar-title>
       <v-spacer></v-spacer>
-      <btn-theme />
       <btn-home />
+      <btn-theme />
       <SettingSheet />
       <btn-logout />
     </v-app-bar>
@@ -60,11 +60,13 @@ import i18n from '@/assets/app/i18n';
 import SettingSheet from '@/components/dashboard/SettingSheet.vue';
 import { Utils } from '@/assets/app/lib';
 import notify from '@/assets/app/notify';
+import API from '@/assets/app/api';
 
 const navigationGroup = [
   {
     name: '概览',
     items: [
+      { title: '首页', icon: 'mdi-home', router: '/home' },
       { title: '虚拟化资源', icon: 'mdi-alpha-h-circle', router: '/hypervisor' },
     ]
   },
@@ -146,6 +148,8 @@ export default {
       if (!route) {
         this.$router.push('/dashboard' + item.router)
       }
+      let selectedItem = this.getItem();
+      this.navigation.itemIndex = selectedItem.index;
       // if (this.$route.path == '/dashboard' || this.$route.path != '/dashboard' + item.router) {
       //   this.$router.replace({ path: '/dashboard' + item.router });
       // }
@@ -199,18 +203,23 @@ export default {
     }
   },
   created() {
+    console.log(this.$route.path)
+    Init()
     if (!localStorage.getItem('X-Token')){
       notify.error('请重新登录')
       this.$router.push('/login')
       return
     }
-    Init()
-    this.initItem();
-
-    this.$vuetify.theme.dark = SETTINGS.ui.getItem('themeDark').value;
-
-    this.refresh();
-    this.initRegion();
-  }
+    let self = this;
+    API.system.isLogin().then(function(){
+      self.initItem();
+      self.$vuetify.theme.dark = SETTINGS.ui.getItem('themeDark').value;
+      self.refresh();
+      self.initRegion();
+    }).catch((e)=>{
+      notify.error('请重新登录')
+      self.$router.push('/login')
+    })
+  },
 }
 </script>

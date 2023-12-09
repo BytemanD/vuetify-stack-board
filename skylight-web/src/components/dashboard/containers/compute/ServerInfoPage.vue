@@ -15,156 +15,145 @@
         <v-window-item>
           <v-row>
             <v-col cols="6">
-              <v-table density="compact">
-                <tbody>
-                  <tr>
-                    <th>实例ID</th>
-                    <td>{{ server.id }}<v-btn variant="text" color="info" @click="loginVnc()">远程登录</v-btn></td>
-                  </tr>
-                  <tr>
-                    <th>实例名</th>
-                    <td>{{ server.name }}<v-btn variant="text" color="warning">重命名</v-btn></td>
-                  </tr>
-                  <tr>
-                    <th>描述</th>
-                    <td>{{ server.description }}</td>
-                  </tr>
-                  <tr>
-                    <th>系统盘类型</th>
-                    <td><v-chip color="info" label>{{ server.root_bdm_type }}</v-chip></td>
-                  </tr>
-                  <tr>
-                    <th>节点</th>
-                    <td>{{ server['OS-EXT-SRV-ATTR:host'] }}
-                      <v-btn variant="text" color="warning">迁移</v-btn>
-                      <v-btn variant="text" color="warning">热迁移</v-btn>
-                      <v-btn variant="text" color="warning">疏散</v-btn>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>创建时间</th>
-                    <td>{{ server.created }}</td>
-                  </tr>
-                  <tr>
-                    <th>更新时间</th>
-                    <td>{{ server.updated }}</td>
-                  </tr>
-                </tbody>
-              </v-table>
-              <br>
-              <v-table density="compact">
-                <tbody>
-                  <tr>
-                    <th>实例状态</th>
-                    <td>{{ server.status }}</td>
-                  </tr>
-                  <tr>
-                    <th>电源状态</th>
-                    <td>
-                      <v-icon size='small' v-if="server['OS-EXT-STS:power_state'] == 1"
-                        color="success">mdi-power-on</v-icon>
-                      <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] == 3"
-                        color="warning">mdi-pause</v-icon>
-                      <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] == 4"
-                        color="red">mdi-power-off</v-icon>
-                      <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] != 0" color="warning"
-                        class="mdi-spin">mdi-loading</v-icon>
-                      <v-btn variant="text" color="warning">关机</v-btn>
-                      <v-btn variant="text" color="warning">重启</v-btn>
-                      <v-btn variant="text" color="warning">暂停</v-btn>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                      任务状态 <v-icon size="small" @click="refreshServer()">mdi-refresh</v-icon>
-                    </th>
-                    <td>
-                      <v-chip v-if="server['OS-EXT-STS:task_state'] && server['OS-EXT-STS:task_state'] != ''">
-                        {{ $t(server['OS-EXT-STS:task_state']) }}
-                      </v-chip>
-                    </td>
-                  </tr>
-
-                </tbody>
-              </v-table>
-            </v-col>
-            <v-divider vertical></v-divider>
-            <v-col cols="6">
-              <v-table density="compact">
-                <tbody>
-                  <tr>
-                    <th>规格</th>
-                    <td>
-                      {{ server.flavor && server.flavor.original_name }}
-                      <v-btn variant="text" color="warning">变更</v-btn>
-                    </td>
-                  </tr>
-                  <tr>
-                    <!-- <td>{{ server.flavor && server.flavor.original_name }}</td> -->
-                    <th>CPU & 内存</th>
-                    <td>{{ server.flavor && server.flavor.vcpus || 0 }}核 {{ server.flavor && server.flavor.ram || 0 }} MB
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>磁盘大小</th>
-                    <td>{{ server.flavor && server.flavor.diskx || 0 }} GB</td>
-                  </tr>
-                </tbody>
-              </v-table>
-              <br>
-              <v-table density="compact">
-                <tbody>
-                  <tr>
-                    <th>镜像ID</th>
-                    <td>
-                      {{ server.image && server.image.id }}
-                      <v-btn variant="text" color="warning">重装</v-btn>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>镜像名</th>
-                    <td>{{ image.name }}</td>
-                  </tr>
-                  <tr>
-                    <th>状态</th>
-                    <td>{{ image.status }}</td>
-                  </tr>
-                  <tr>
-                    <th>大小</th>
-                    <td>{{ image.size }}</td>
-                  </tr>
-                </tbody>
+              <v-table density="compact" class="text-left">
+                <tr>
+                  <th>实例ID</th>
+                  <td>{{ server.id }}<v-btn variant="text" color="info" @click="loginVnc()">远程登录</v-btn></td>
+                </tr>
+                <tr>
+                  <th>实例名</th>
+                  <td>{{ server.name }}<v-btn variant="text" color="warning">重命名</v-btn></td>
+                </tr>
+                <tr>
+                  <th>描述</th>
+                  <td>{{ server.description }}</td>
+                </tr>
+                <tr>
+                  <th>系统盘类型</th>
+                  <td><v-chip color="info" variant="text">{{ server.root_bdm_type }}</v-chip></td>
+                </tr>
+                <tr>
+                  <th>节点</th>
+                  <td>{{ server['OS-EXT-SRV-ATTR:host'] }}
+                    <v-btn variant="text" color="warning">迁移</v-btn>
+                    <v-btn variant="text" color="warning">热迁移</v-btn>
+                    <v-btn variant="text" color="warning">疏散</v-btn>
+                  </td>
+                </tr>
+                <tr>
+                  <th>创建时间</th>
+                  <td>{{ server.created }}</td>
+                </tr>
+                <tr>
+                  <th>更新时间</th>
+                  <td>{{ server.updated }}</td>
+                </tr>
               </v-table>
             </v-col>
             <v-col cols="6">
+              <v-table density="compact" class="text-left">
+                <tr>
+                  <th>实例状态</th>
+                  <td>{{ server.status }}</td>
+                </tr>
+                <tr>
+                  <th>电源状态</th>
+                  <td>
+                    <v-icon size='small' v-if="server['OS-EXT-STS:power_state'] == 1"
+                      color="success">mdi-power-on</v-icon>
+                    <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] == 3"
+                      color="warning">mdi-pause</v-icon>
+                    <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] == 4"
+                      color="red">mdi-power-off</v-icon>
+                    <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] != 0" color="warning"
+                      class="mdi-spin">mdi-loading</v-icon>
+                    <v-btn variant="text" color="warning">关机</v-btn>
+                    <v-btn variant="text" color="warning">重启</v-btn>
+                    <v-btn variant="text" color="warning">暂停</v-btn>
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    任务状态 <v-btn density="compact" variant="text" icon="mdi-refresh" @click="refreshServer()"></v-btn>
+                  </th>
+                  <td>
+                    <v-chip v-if="server['OS-EXT-STS:task_state'] && server['OS-EXT-STS:task_state'] != ''">
+                      {{ $t(server['OS-EXT-STS:task_state']) }}
+                    </v-chip>
+                  </td>
+                </tr>
+              </v-table>
+            </v-col>
+            <v-divider></v-divider>
+            <v-col cols="6">
+              <v-table density="compact" class="text-left">
+                <tr>
+                  <th>规格</th>
+                  <td>
+                    {{ server.flavor && server.flavor.original_name }}
+                    <v-btn variant="text" color="warning">变更</v-btn>
+                  </td>
+                </tr>
+                <tr>
+                  <!-- <td>{{ server.flavor && server.flavor.original_name }}</td> -->
+                  <th>CPU & 内存</th>
+                  <td>{{ server.flavor && server.flavor.vcpus || 0 }}核 {{ server.flavor && server.flavor.ram || 0 }} MB
+                  </td>
+                </tr>
+                <tr>
+                  <th>磁盘大小</th>
+                  <td>{{ server.flavor && server.flavor.diskx || 0 }} GB</td>
+                </tr>
+              </v-table>
+            </v-col>
+            <v-col cols="6">
+              <v-table density="compact" class="text-left">
+                <tr>
+                  <th>镜像ID</th>
+                  <td>
+                    {{ server.image && server.image.id }}
+                    <v-btn variant="text" color="warning">重装</v-btn>
+                  </td>
+                </tr>
+                <tr>
+                  <th>镜像名</th>
+                  <td>{{ image.name }}</td>
+                </tr>
+                <tr>
+                  <th>状态</th>
+                  <td>{{ image.status }}</td>
+                </tr>
+                <tr>
+                  <th>大小</th>
+                  <td>{{ image.size }}</td>
+                </tr>
+              </v-table>
             </v-col>
           </v-row>
         </v-window-item>
         <v-window-item>
           <v-row>
-            <v-col cols="5" v-for="item in interfaces" :key="item.mac_addr">
-              <v-card class="ma-1">
+            <v-col cols="5" v-for="item in interfaces" :key="item.mac_addr" class="ma-1">
+              <v-card>
                 <v-card-title>MAC地址: {{ item.mac_addr }}</v-card-title>
                 <v-card-text>
-                  <v-table density="compact">
-                    <tbody>
-                      <tr>
-                        <td>ID</td>
-                        <td>{{ item.port_id }}</td>
-                      </tr>
-                      <tr>
-                        <td>状态</td>
-                        <td>{{ item.port_state }}</td>
-                      </tr>
-                      <tr>
-                        <td>IP地址</td>
-                        <td>
-                          <v-chip size="small" label v-for="fixedIp in item.fixed_ips" :key="fixedIp.ip_address">{{
-                            fixedIp.ip_address
-                          }}</v-chip>
-                        </td>
-                      </tr>
-                    </tbody>
+                  <v-table density="compact" class="text-left">
+                    <tr>
+                      <td>ID</td>
+                      <td>{{ item.port_id }}</td>
+                    </tr>
+                    <tr>
+                      <td>状态</td>
+                      <td>{{ item.port_state }}</td>
+                    </tr>
+                    <tr>
+                      <td>IP地址</td>
+                      <td>
+                        <v-chip size="small" label v-for="fixedIp in item.fixed_ips" :key="fixedIp.ip_address">
+                          {{ fixedIp.ip_address }}
+                        </v-chip>
+                      </td>
+                    </tr>
                   </v-table>
                 </v-card-text>
                 <v-card-actions>
@@ -182,7 +171,6 @@
                 <v-card-title>挂载路径: {{ item.device }}</v-card-title>
                 <v-card-text>
                   <v-table density="compact">
-                    <tbody>
                       <tr>
                         <td>挂载ID</td>
                         <td>{{ item.id }}</td>
@@ -191,12 +179,11 @@
                         <td>卷ID</td>
                         <td>{{ item.volumeId }}</td>
                       </tr>
-                    </tbody>
                   </v-table>
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn v-if="item.device != server['OS-EXT-SRV-ATTR:root_device_name']" variant="text"
+                  <v-btn v-if="item.device != server['OS-EXT-SRV-ATTR:root_device_name']"
                     color="warning">卸载</v-btn>
                 </v-card-actions>
               </v-card>

@@ -50,7 +50,7 @@
             </v-col>
             <v-col cols="12" md="3" sm="6">
               <v-text-field density='compact' hide-details single-line v-model="table.filterName" label="搜索实例名"
-              @keyup.enter.native="refreshTable()"></v-text-field>
+                @keyup.enter.native="refreshTable()"></v-text-field>
             </v-col>
             <v-col cols="12" md="2" sm="6">
               <BtnIcon variant="text" icon="mdi-refresh" color="info" tool-tip="刷新" @click="pageRefresh(1)" />
@@ -69,7 +69,8 @@
         </template>
 
         <template v-slot:[`item.name`]="{ item }">
-          <v-chip  variant="text" density='compact' @click="$router.push('/dashboard/server/' + item.id)">{{ item.name }}</v-chip>
+          <chip-link hide-link-icon color="default" density="compact" :link="'/dashboard/server/' + item.id"
+            :label="item.name" />
           <v-icon @click="openChangeServerNameDialog(item)" size="x-small">mdi-pencil-minus</v-icon>
           <v-icon @click="loginVnc(item)" size="x-small" icon>mdi-console</v-icon>
         </template>
@@ -110,9 +111,7 @@
             {{ item.flavor && item.flavor.original_name }}</span></template>
         <template v-slot:[`item.image`]="{ item }">
           <span class="text-info">{{ table.imageName[item.image.id] }}</span>
-          <template>
-            {{ table.updateImageName(item) }}
-          </template>
+          <template> {{ table.updateImageName(item) }} </template>
           <v-icon size="x-small"
             v-if="item['os-extended-volumes:volumes_attached'] && item['os-extended-volumes:volumes_attached'].length > 0">
             mdi-cloud</v-icon>
@@ -158,18 +157,16 @@
           <td :colspan="columns.length - 1">
             <v-table density='compact'>
               <template v-slot:default>
-                <tbody>
-                  <template v-for="extendItem in Object.keys(item)">
-                    <tr v-bind:key="extendItem" v-if="table.columns.indexOf(extendItem) < 0">
-                      <td class="text-info">{{ extendItem }}:</td>
-                      <td v-if="extendItem == 'created'">{{ Utils.parseUTCToLocal(item[extendItem]) }}</td>
-                      <td v-else-if="extendItem == 'updated'">{{ Utils.parseUTCToLocal(item[extendItem]) }}</td>
-                      <td v-else-if="extendItem == 'fault'" class="error--text">{{ item[extendItem] &&
-                        item[extendItem].message }}</td>
-                      <td v-else>{{ item[extendItem] }}</td>
-                    </tr>
-                  </template>
-                </tbody>
+                <template v-for="extendItem in Object.keys(item)">
+                  <tr v-bind:key="extendItem" v-if="table.columns.indexOf(extendItem) < 0">
+                    <td class="text-info">{{ extendItem }}:</td>
+                    <td v-if="extendItem == 'created'">{{ Utils.parseUTCToLocal(item[extendItem]) }}</td>
+                    <td v-else-if="extendItem == 'updated'">{{ Utils.parseUTCToLocal(item[extendItem]) }}</td>
+                    <td v-else-if="extendItem == 'fault'" class="error--text">{{ item[extendItem] &&
+                      item[extendItem].message }}</td>
+                    <td v-else>{{ item[extendItem] }}</td>
+                  </tr>
+                </template>
               </template>
             </v-table>
           </td>
@@ -210,6 +207,7 @@ import { Utils } from '@/assets/app/lib';
 import { ServerDataTable } from '@/assets/app/tables.jsx';
 
 import ServerTopology from './dialogs/ServerTopology.vue';
+import ChipLink from '@/components/plugins/ChipLink.vue';
 
 import ChangeServerNameDialog from './dialogs/ChangeServerNameDialog.vue';
 import ServerActionDialog from './dialogs/ServerActionDialog.vue';
@@ -227,7 +225,7 @@ import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 
 export default {
   components: {
-    BtnIcon, ServerTopology,
+    BtnIcon, ServerTopology, ChipLink,
     ServerMigrateDialog, ServerEvacuateDialog, ServerResetStateDialog,
     ChangeServerNameDialog,
     ServerActionDialog,

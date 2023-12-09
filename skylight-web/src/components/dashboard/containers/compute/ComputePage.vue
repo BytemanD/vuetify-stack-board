@@ -8,7 +8,7 @@
         <v-tab><v-icon>mdi-alpha-z-box</v-icon> AZ </v-tab>
         <v-tab><v-icon>mdi-alpha-a-box</v-icon> 聚合 </v-tab>
         <v-tab><v-icon>mdi-alpha-m-box</v-icon> 迁移记录 </v-tab>
-        <v-tab><v-icon>mdi-alpha-g-box</v-icon> 群组 </v-tab>
+        <v-tab><v-icon>mdi-alpha-g-box</v-icon> 主机组 </v-tab>
       </v-tabs>
 
       <v-window v-model="tabIndex" class="mt-4">

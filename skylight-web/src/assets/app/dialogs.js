@@ -257,8 +257,8 @@ export class UsersDialog extends Dialog {
 export class NewNetworkDialog extends Dialog {
     constructor() {
         super({
-            shared: false, networkType: null, qosPolicy: '',
-            segId: '', dnsDomain: '', azHint: ''
+            shared: false, networkType: null, qosPolicy: null,
+            segId: null, dnsDomain: null, azHint: null
         })
         this.resource = 'network';
         this.netTypes = ['vlan', 'vxlan', 'flat', 'geneve'];
@@ -270,10 +270,10 @@ export class NewNetworkDialog extends Dialog {
             shared: this.params.shared,
         }
         if (this.params.networkType) { data['provider:network_type'] = this.params.networkType }
-        if (this.params.segId != '') { data['provider:segmentation_id'] = this.params.segId }
-        if (this.params.qosPolicy != '') { data.qos_policy = this.params.qosPolicy }
-        if (this.params.dnsDomain != '') { data.dns_domain = this.params.dnsDomain }
-        if (this.params.azHint != '') { data.availability_zone_hints = [this.params.azHint] }
+        if (this.params.segId) { data['provider:segmentation_id'] = this.params.segId }
+        if (this.params.qosPolicy ) { data.qos_policy = this.params.qosPolicy }
+        if (this.params.dnsDomain) { data.dns_domain = this.params.dnsDomain }
+        if (this.params.azHint) { data.availability_zone_hints = [this.params.azHint] }
 
         try {
             await API.network.post({ network: data })

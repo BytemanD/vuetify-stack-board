@@ -87,6 +87,10 @@ const MESSAGES = {
         version: 'version',
         copy: 'copy',
 
+        vcore: 'Vcore',
+        ram: 'Ram',
+        serverGroup: 'Server Group',
+
     },
     'zh-CN': {
         language: '语言',
@@ -175,6 +179,10 @@ const MESSAGES = {
         about: '关于',
         version: '版本',
         copy: '复制',
+
+        vcore: '虚拟机CPU',
+        ram: '内存',
+        serverGroup: '主机组',
     },
 };
 

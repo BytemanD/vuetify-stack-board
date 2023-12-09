@@ -614,6 +614,7 @@ export class ServerDataTable extends DataTable {
         if (Object.keys(this.imageName).indexOf(imageId) >=0){
             return
         }
+        this.imageName[imageId] = imageId
         let image = await API.image.get(imageId)
         this.imageName[imageId] = image.name
     }
@@ -1247,6 +1248,8 @@ export class HypervisortTable extends DataTable {
             // { title: 'cpu_info', key: 'cpu_info'},
         ];
         // this.tenantUsageDialog = new TenantUsageDialog();
+        this.users = [];
+        this.projects = [];
     }
     async refreshStatics() {
         this.statistics = (await API.hypervisor.statistics()).hypervisor_statistics;
@@ -1254,6 +1257,7 @@ export class HypervisortTable extends DataTable {
         this._vcpuUsedPercent = (this.statistics.vcpus_used * 100 / this.statistics.vcpus).toFixed(2);
         this._diskUsedPercent = (this.statistics.local_gb_used * 100 / this.statistics.local_gb).toFixed(2);
     }
+
     async refresh() {
         await super.refresh();
         // await this.refreshStatics();
@@ -1425,6 +1429,110 @@ export class MigrationDataTable extends DataTable{
             { title: '更新时间', key: 'updated_at' },
             { title: 'dest_host', key: 'dest_host' },
         ]
+    }
+}
+
+export class Overview {
+    constructor(){
+        this.statistics = {}
+        this.users = []
+        this.projects = []
+        this.hypervisors = []
+        this._memUsedPercent = 0
+        this._vcpuUsedPercent = 0
+        this._diskUsedPercent = 0
+
+        this.authInfo = {}
+        this.user = {}
+        this.userRoles = []
+    }
+    percentAvaliableHypervisor() {
+        if (!this.statistics.count || this.hypervisors.length <= 0 ) {
+            return 0
+        }
+        return this.statistics.count * 100 / this.hypervisors.length
+    }
+    async refreshUseres(){
+        this.users = (await API.user.list()).users
+    }
+    async refreshProjects(){
+        this.projects = (await API.project.list()).projects
+    }
+    async refreshHypervisors(){
+        this.hypervisors = (await API.hypervisor.list()).hypervisors
+    }
+    async refreshStatics() {
+        this.statistics = (await API.hypervisor.statistics()).hypervisor_statistics;
+        this._memUsedPercent = (this.statistics.memory_mb_used * 100 / this.statistics.memory_mb).toFixed(2);
+        this._vcpuUsedPercent = (this.statistics.vcpus_used * 100 / this.statistics.vcpus).toFixed(2);
+        this._diskUsedPercent = (this.statistics.local_gb_used * 100 / this.statistics.local_gb).toFixed(2);
+    }
+    async refresh(){
+        this.refreshProjects()
+        this.refreshUseres()
+        this.refreshStatics()
+        this.refreshHypervisors()
+    }
+}
+
+export class UserCard {
+    constructor(){
+        this.authInfo = {}
+        this.user = {}
+        this.userRoles = []
+        this.loading = false
+    }
+    async refresAuthInfo(){
+        this.loading = true
+        this.authInfo = await API.authInfo.get()
+        this.user = (await API.user.show(this.authInfo.user.id)).user
+        let assignments = (await API.roleAssignments.listByUserId(this.user.id))
+        this.userRoles = [];
+        for (let i in assignments){
+            let role = (await API.role.show(assignments[i].role.id)).role
+            this.userRoles.push(role)
+        }
+        this.loading = false;
+    }
+    async refresh(){
+        this.refresAuthInfo()
+    }
+}
+export class LimitsCard {
+    constructor(){
+        this.loading = false
+        this.computeLimits = {}
+        this.vcore = {}
+        this.ram = {}
+        this.instance = {}
+        this.serverGroup = {}
+
+        this.resources = ['instance', 'vcore', 'ram', 'serverGroup']
+    }
+    percent(resource){
+        if (!this[resource].max || this[resource].max <= 0){
+            return 0
+        }
+        return this[resource].used * 100 / this[resource].max;
+
+    }
+    async refreshComputeLimits(){
+        this.computeLimits = (await API.computeLimits.list()).limits
+        this.vcore.used = this.computeLimits.absolute.totalCoresUsed
+        this.vcore.max = this.computeLimits.absolute.maxTotalCores
+
+        this.ram.used = this.computeLimits.absolute.totalRAMUsed
+        this.ram.max = this.computeLimits.absolute.maxTotalRAMSize
+
+        this.instance.used = this.computeLimits.absolute.totalInstancesUsed
+        this.instance.max = this.computeLimits.absolute.maxTotalInstances
+
+        this.serverGroup.used = this.computeLimits.absolute.totalServerGroupsUsed
+        this.serverGroup.max = this.computeLimits.absolute.maxServerGroups
+    }
+
+    async refresh(){
+        this.refreshComputeLimits()
     }
 }
 

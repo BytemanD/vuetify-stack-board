@@ -151,6 +151,9 @@ class System extends Restfulclient {
         }
         return await this.doPost({auth: auth}, '/login')
     }
+    async isLogin(){
+        return await this.get('/login')
+    }
     async logout(){
         await this.delete('login')
         notify.success('成功退出')
@@ -489,6 +492,7 @@ class Project extends Restfulclient {
 class Role extends Restfulclient {
     constructor() { super('/identity/roles') }
 }
+
 class Domain extends Restfulclient {
     constructor() { super('/identity/domains') }
     async enable(id) {
@@ -501,6 +505,10 @@ class Domain extends Restfulclient {
 
 class RoleAssignments extends Restfulclient {
     constructor() { super('/identity/role_assignments') }
+
+    async listByUserId(userId){
+        return (await this.list({'user.id': userId})).role_assignments
+    }
     async listByProject(projectId) {
         return (await this.list({ 'scope.project.id': projectId })).role_assignments;
     }
@@ -772,6 +780,10 @@ class Version extends Restfulclient {
     }
 }
 
+class ComputeLimits extends Restfulclient {
+    constructor() { super('/computing/limits') }
+}
+
 export class SkylightAPI {
     constructor() {
         this.system = new System();
@@ -797,6 +809,7 @@ export class SkylightAPI {
         this.keypair = new Keypair();
         this.migration = new Migrations();
         this.serverGroup = new ServerGroup();
+        this.computeLimits = new ComputeLimits()
         // glance
         this.image = new Image();
         // neutron

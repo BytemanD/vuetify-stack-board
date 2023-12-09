@@ -10,12 +10,11 @@
               <v-toolbar density="compact" class="rounded-pill">
                 <NewImageVue :images="table.selected" @completed="table.resetSelected(); table.refresh()" />
                 <v-spacer></v-spacer>
-                  <ImageDeleteSmartDialog :images="table.selected" @completed="table.resetSelected(); table.refresh()" />
+                <ImageDeleteSmartDialog :images="table.selected" @completed="table.resetSelected(); table.refresh()" />
               </v-toolbar>
             </v-col>
             <v-col>
-              <v-text-field size="small" density='compact' v-model="table.search" label="搜索" single-line
-                hide-details></v-text-field>
+              <v-text-field density='compact' v-model="table.search" label="搜索" single-line hide-details></v-text-field>
             </v-col>
             <v-col cols="12" md="2" sm="12">
               <v-btn color="info" icon="mdi-refresh" variant="text" v-on:click="table.refresh()"></v-btn>
@@ -54,8 +53,8 @@
                 <td class="text-info">Properties</td>
                 <td>
                   <template v-for="(value, key) in item">
-                    <v-chip x-small label v-bind:key="key" v-if="key.startsWith('hw')" class="mr-2">{{ key }}={{ value
-                    }}</v-chip>
+                    <v-chip size="x-small" label v-bind:key="key" v-if="key.startsWith('hw')" class="mr-2">
+                      {{ key }}={{ value }}</v-chip>
                   </template>
                 </td>
               </tr>

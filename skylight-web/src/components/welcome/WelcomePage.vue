@@ -9,28 +9,27 @@
               <v-card-text>
                 Skylight 是一个基于Vuetify实现的OpenStack管理服务。
                 <v-btn variant="text" icon="mdi-github" href="https://github.com/BytemanD/vuetify-stack-board"
-                  target="_new"></v-btn>
+                  target="_new">
+                </v-btn>
+                <br>
+                <v-chip>{{ version }}</v-chip>
+                <v-chip variant="text" prepend-icon="mdi-star" size="small" color="warning" class="ml-4"
+                  v-if="newVersion && newVersion.version">
+                  新版本：{{ newVersion.version }}
+                </v-chip>
               </v-card-text>
             </v-img>
-            <v-card-subtitle class="pt-4">版本: {{ version }}
-              <v-chip label size="small" color="green-darken-4" class="ma-4" v-if="newVersion && newVersion.version">
-                <v-icon>mdi-star</v-icon>新版本：{{ newVersion.version }}
-              </v-chip>
-            </v-card-subtitle>
-            <v-card-text class="text--primary">
-              <h3 class="mb-2">常用集群</h3>
-              <v-icon v-if="refreshing" class="mdi-spin" small>mdi-rotate-right</v-icon>
+            <v-card-text>
+              <strong>集群</strong>
+              <v-btn color="grey" variant="text" density="compact" class="ml-4" @click="refresh()" icon="mdi-refresh"></v-btn>
+              <br>
               <v-alert density='compact' type="warning" variant="text" v-if="noCluster" text="请添加新集群"></v-alert>
               <v-chip close closable label color="primary" class="mr-1 mt-1" v-bind:key="item.i"
-                v-for="item in table.items" @click:close="deleteCluster(item)" @click="useCluster(item)">{{ item.name }}
-              </v-chip>
+              v-for="item in table.items" @click:close="deleteCluster(item)" @click="useCluster(item)">{{ item.name }}
+            </v-chip>
+            <NewClusterVue @completed="refresh()"/>
             </v-card-text>
-            <v-divider></v-divider>
-            <v-card-actions>
-              <v-btn variant="text" color="primary" @click="refresh()">刷新</v-btn>
-              <v-spacer></v-spacer>
-              <NewClusterVue @completed="refresh()" />
-            </v-card-actions>
+            <v-progress-linear indeterminate color="purple-darken-2" v-if="refreshing"></v-progress-linear>
           </v-card>
         </v-col>
       </v-row>

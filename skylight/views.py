@@ -362,6 +362,10 @@ class Login(BaseReqHandler):
         token = self._get_header("X-Token")
         db_api.delete_token(token)
 
+    @utils.with_response(return_code=200)
+    def get(self):
+        return 'user logged in'
+
 
 def get_routes():
     return [

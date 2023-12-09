@@ -37,6 +37,10 @@ const routes = [
     component: () => import('@/views/DashboardPage.vue'),
     children: [
       {
+        path: 'home',
+        component: () => import('@/components/dashboard/containers/overview/HomePage.vue'),
+      },
+      {
         path: 'hypervisor',
         component: () => import('@/components/dashboard/containers/overview/HypervisorPage.vue'),
       },
