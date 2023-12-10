@@ -23,14 +23,14 @@ class DataTable {
         this.extendItems = []
         this.newItemDialog = null;
         this.loading = false;
-        this.columns = this.headers.map((header) => {return header.value});
+        this.columns = this.headers.map((header) => { return header.value });
     }
-    async openNewItemDialog(){
-        if (this.newItemDialog){
+    async openNewItemDialog() {
+        if (this.newItemDialog) {
             this.newItemDialog.open();
         }
     }
-    async createNewItem(){
+    async createNewItem() {
         if (this.newItemDialog) {
             await this.newItemDialog.commit();
             this.refresh();
@@ -61,14 +61,14 @@ class DataTable {
                 this.updateItem(item);
                 Utils.sleep(2)
             } catch (e) {
-                if (e.response.status == 404){
+                if (e.response.status == 404) {
                     console.error(e)
                     Notify.success(`${this.name} ${itemId} 已删除`)
                     this.removeItem(itemId)
                     break;
                 }
             }
-        } while(true)
+        } while (true)
     }
     resetSelected() {
         this.selected = [];
@@ -79,7 +79,7 @@ class DataTable {
                 continue;
             }
             for (var key in newItem) {
-                if (this.items[i][key] == newItem[key]){
+                if (this.items[i][key] == newItem[key]) {
                     continue
                 }
                 this.items[i][key] = newItem[key];
@@ -87,15 +87,15 @@ class DataTable {
             break
         }
     }
-    removeItem(id){
+    removeItem(id) {
         let index = -1;
-        for (let i in this.items){
-            if (this.items[i].id == id){
+        for (let i in this.items) {
+            if (this.items[i].id == id) {
                 index = i
                 break;
             }
         }
-        if (index >= 0){
+        if (index >= 0) {
             this.items.splice(index, 1)
         }
     }
@@ -123,30 +123,30 @@ export class Server {
     constructor(serverObj) {
         this.serverObj = serverObj;
     }
-    getId(){
+    getId() {
         return this.serverObj['id'];
     }
-    getVolumesAttached(){
+    getVolumesAttached() {
         return this.serverObj['os-extended-volumes:volumes_attached']
     }
-    getRootDeviceName(){
+    getRootDeviceName() {
         return this.serverObj['OS-EXT-SRV-ATTR:root_device_name'];
     }
-    isDeleted(){
+    isDeleted() {
         return this.serverObj.status.toUpperCase() == 'DELETED';
     }
-    async getRootBdm(){
-        if (this.isDeleted()){
+    async getRootBdm() {
+        if (this.isDeleted()) {
             return
         }
         let volumesAttached = this.getVolumesAttached();
-        if (volumesAttached.length == 0){
+        if (volumesAttached.length == 0) {
             return null;
         }
         let rootDeviceName = this.getRootDeviceName();
         let attachments = (await API.server.volumeAttachments(this.serverObj['id'])).volumeAttachments;
-        for (let i in attachments){
-            if (attachments[i].device == rootDeviceName){
+        for (let i in attachments) {
+            if (attachments[i].device == rootDeviceName) {
                 return attachments[i];
             }
         }
@@ -187,7 +187,7 @@ export class RouterDataTable extends DataTable {
 export class NetDataTable extends DataTable {
     constructor() {
         super([
-            { title: 'ID', key: 'id'},
+            { title: 'ID', key: 'id' },
             { title: '名字', key: 'name' },
             { title: '状态', key: 'status' },
             { title: '网络类型', key: 'provider:network_type' },
@@ -221,7 +221,7 @@ export class NetDataTable extends DataTable {
         let subnet = this.subnets[subnet_id];
         try {
             await API.subnet.delete(subnet_id)
-        } catch(error) {
+        } catch (error) {
             Notify.error(`子网 ${subnet.cidr} 删除失败， ${error.response.data.NeutronError.Notify}`)
             return;
         }
@@ -248,26 +248,26 @@ export class NetDataTable extends DataTable {
 export class PortDataTable extends DataTable {
     constructor() {
         super([
-                { title: 'ID', key: 'id' },
-                { title: 'Name', key: 'name' },
-                { title: 'vnic_type', key: 'binding:vnic_type' },
-                { title: 'vif_type', key: 'binding:vif_type' },
-                { title: 'status', key: 'status' },
-                { title: 'fixed_ips', key: 'fixed_ips' },
-                { title: '启用', key: 'admin_state_up' },
-            ], API.port, 'ports');
-            
-            this.extendItems = [
-                { title: 'device_owner', key: 'device_owner' },
-                { title: 'binding:vif_details', key: 'binding:vif_details' },
-                { title: 'binding:profile', key: 'binding:profile' },
-                { title: 'binding:host_id', key: 'binding:host_id' },
-                { title: 'network_id', key: 'network_id' },
-                { title: 'device_id', key: 'device_id' },
-                { title: 'security_groups', key: 'security_groups' },
-                { title: 'mac_address', key: 'mac_address' },
-                { title: 'qos_policy_id', key: 'qos_policy_id' },
-                { title: 'description', key: 'description' },
+            { title: 'ID', key: 'id' },
+            { title: 'Name', key: 'name' },
+            { title: 'vnic_type', key: 'binding:vnic_type' },
+            { title: 'vif_type', key: 'binding:vif_type' },
+            { title: 'status', key: 'status' },
+            { title: 'fixed_ips', key: 'fixed_ips' },
+            { title: '启用', key: 'admin_state_up' },
+        ], API.port, 'ports');
+
+        this.extendItems = [
+            { title: 'device_owner', key: 'device_owner' },
+            { title: 'binding:vif_details', key: 'binding:vif_details' },
+            { title: 'binding:profile', key: 'binding:profile' },
+            { title: 'binding:host_id', key: 'binding:host_id' },
+            { title: 'network_id', key: 'network_id' },
+            { title: 'device_id', key: 'device_id' },
+            { title: 'security_groups', key: 'security_groups' },
+            { title: 'mac_address', key: 'mac_address' },
+            { title: 'qos_policy_id', key: 'qos_policy_id' },
+            { title: 'description', key: 'description' },
         ];
     }
     adminStateDown(item) {
@@ -297,20 +297,20 @@ export class SecurityGroupDataTable extends DataTable {
             { title: 'description', key: 'description' },
             { title: 'created_at', key: 'created_at' },
             { title: 'updated_at', key: 'updated_at' },
-            
+
         ];
     }
 }
 export class QosPolicyDataTable extends DataTable {
     constructor() {
         super([
-                { title: 'id', key: 'id' },
-                { title: '名字', key: 'name' },
-                { title: '标签', key: 'tags' },
-                { title: 'revision_number', key: 'revision_number' },
-                { title: '是否默认', key: 'is_default' },
-                { title: '是否共享', key: 'shared' },
-                { title: '操作', key: 'actions' },
+            { title: 'id', key: 'id' },
+            { title: '名字', key: 'name' },
+            { title: '标签', key: 'tags' },
+            { title: 'revision_number', key: 'revision_number' },
+            { title: '是否默认', key: 'is_default' },
+            { title: '是否共享', key: 'shared' },
+            { title: '操作', key: 'actions' },
         ], API.qosPolicy, 'policies');
         this.extendItems = [
             { title: 'rules', key: 'rules' },
@@ -319,15 +319,15 @@ export class QosPolicyDataTable extends DataTable {
             { title: 'description', key: 'description' },
         ];
     }
-    async updateDefault(item){
-        let data = {is_default: item.is_default}
-        await API.qosPolicy.put(item.id, {policy: data});
-        Notify.success(`限速规则 ${item.name || item.id } 更新成功`)
+    async updateDefault(item) {
+        let data = { is_default: item.is_default }
+        await API.qosPolicy.put(item.id, { policy: data });
+        Notify.success(`限速规则 ${item.name || item.id} 更新成功`)
     }
-    async updateShared(item){
-        let data = {shared: item.shared}
-        await API.qosPolicy.put(item.id, {policy: data});
-        Notify.success(`限速规则 ${item.name || item.id } 更新成功`)
+    async updateShared(item) {
+        let data = { shared: item.shared }
+        await API.qosPolicy.put(item.id, { policy: data });
+        Notify.success(`限速规则 ${item.name || item.id} 更新成功`)
     }
 }
 export class FlavorDataTable extends DataTable {
@@ -384,15 +384,15 @@ export class KeypairDataTable extends DataTable {
         })
         return body
     }
-    removeItem(name){
+    removeItem(name) {
         let index = -1;
-        for (let i in this.items){
-            if (this.items[i].name == name){
+        for (let i in this.items) {
+            if (this.items[i].name == name) {
                 index = i
                 break;
             }
         }
-        if (index >= 0){
+        if (index >= 0) {
             this.items.splice(index, 1)
         }
     }
@@ -401,14 +401,14 @@ export class KeypairDataTable extends DataTable {
 export class ServerDataTable extends DataTable {
     constructor() {
         super([{ title: '实例名字', key: 'name' },
-                { title: '节点', key: 'OS-EXT-SRV-ATTR:host' },
-                { title: '规格', key: 'flavor' },
-                { title: '镜像', key: 'image' },
-                { title: 'IP地址', key: 'addresses' },
-                { title: '状态/任务', key: 'status' },
-                { title: '电源', key: 'power_state' },
-                { title: '操作', key: 'action' },
-              ], API.server, 'servers', '实例');
+        { title: '节点', key: 'OS-EXT-SRV-ATTR:host' },
+        { title: '规格', key: 'flavor' },
+        { title: '镜像', key: 'image' },
+        { title: 'IP地址', key: 'addresses' },
+        { title: '状态/任务', key: 'status' },
+        // { title: '电源', key: 'power_state' },
+        { title: '操作', key: 'action' },
+        ], API.server, 'servers', '实例');
         this.extendItems = [
             { title: 'UUID', key: 'id' },
             { title: '实例名', key: 'OS-EXT-SRV-ATTR:instance_name' },
@@ -427,23 +427,23 @@ export class ServerDataTable extends DataTable {
         this.imageName = {};
         this.filterName = ""
     }
-    refresh(filters={}){
+    refresh(filters = {}) {
         // search only for server.name
         filters.deleted = this.deleted
-        if (this.filterName != ""){
+        if (this.filterName != "") {
             filters.name = this.filterName;
         }
         super.refresh(filters);
     }
-    openResetStateDialog(){
+    openResetStateDialog() {
         this.resetStateDialog.open(this);
     }
 
-    async recheckSavedTasks(){
+    async recheckSavedTasks() {
         let serverTasks = new ServerTasks();
-        for (let serverId in serverTasks.getAll()){
-            let servers = (await API.server.list({uuid: serverId})).servers;
-            if (! servers || servers.length == 0 ){
+        for (let serverId in serverTasks.getAll()) {
+            let servers = (await API.server.list({ uuid: serverId })).servers;
+            if (!servers || servers.length == 0) {
                 serverTasks.delete(serverId)
                 continue;
             }
@@ -463,10 +463,10 @@ export class ServerDataTable extends DataTable {
 
             if (serverUpdated['OS-EXT-STS:task_state']) {
                 await Utils.sleep(5)
-            } else if (serverUpdated['OS-EXT-SRV-ATTR:host'] == srcHost){
+            } else if (serverUpdated['OS-EXT-SRV-ATTR:host'] == srcHost) {
                 throw Error(`疏散失败`);
             }
-        } while(! serverUpdated['OS-EXT-STS:task_state'] && serverUpdated['OS-EXT-SRV-ATTR:host'] != srcHost)
+        } while (!serverUpdated['OS-EXT-STS:task_state'] && serverUpdated['OS-EXT-SRV-ATTR:host'] != srcHost)
     }
     async waitServerStatus(server_id, expectStatus = ['ACTIVE', 'ERROR']) {
         let expectStatusList = []
@@ -479,8 +479,8 @@ export class ServerDataTable extends DataTable {
         }
         let currentServer = {};
         let oldTaskState = ''
-        do{
-            if (currentServer.status){
+        do {
+            if (currentServer.status) {
                 await Utils.sleep(5)
             }
             currentServer = await API.server.show(server_id);
@@ -489,16 +489,16 @@ export class ServerDataTable extends DataTable {
                 oldTaskState = currentServer['OS-EXT-STS:task_state'];
             }
             LOG.debug(`wait server ${server_id} to be ${expectStatusList}, now: ${currentServer.status.toUpperCase()}`)
-        } while(expectStatusList.indexOf(currentServer.status.toUpperCase()) < 0)
+        } while (expectStatusList.indexOf(currentServer.status.toUpperCase()) < 0)
         this.updateItem(currentServer);
         return currentServer
     }
     async waitServerTaskCompleted(server_id, taskState) {
-        let expectStateList = typeof taskState == 'string'? [taskState] : taskState
+        let expectStateList = typeof taskState == 'string' ? [taskState] : taskState
         let currentServer = {};
         let oldTaskState = ''
         do {
-            if (currentServer['OS-EXT-STS:task_state']){
+            if (currentServer['OS-EXT-STS:task_state']) {
                 await Utils.sleep(5)
             }
             let body = await API.server.get(server_id);
@@ -507,18 +507,18 @@ export class ServerDataTable extends DataTable {
                 this.updateItem(currentServer);
             }
             LOG.debug(`wait server ${server_id} task state to be ${expectStateList}, now: ${currentServer['OS-EXT-STS:task_state']}`);
-        } while(expectStateList.indexOf(currentServer['OS-EXT-STS:task_state']) >= 0);
+        } while (expectStateList.indexOf(currentServer['OS-EXT-STS:task_state']) >= 0);
         return currentServer
     }
-    async stopServers(servers){
-        for (let i in servers){
+    async stopServers(servers) {
+        for (let i in servers) {
             let server = servers[i];
             await API.server.stop(server.id);
             this.waitServerStopped(server)
         }
     }
     async stopSelected() {
-        let statusMap = {inactive: [], active: []};
+        let statusMap = { inactive: [], active: [] };
         for (let i in this.selected) {
             let serverId = this.selected[i]
             let item = (await API.server.show(serverId))
@@ -528,23 +528,23 @@ export class ServerDataTable extends DataTable {
             }
             statusMap.active.push(item);
         }
-        if (statusMap.active.length != 0){
-            Notify.info(`开始关机: ${statusMap.active.map((item) => {return item.name})} `);
+        if (statusMap.active.length != 0) {
+            Notify.info(`开始关机: ${statusMap.active.map((item) => { return item.name })} `);
             this.stopServers(statusMap.active)
         }
-        if (statusMap.inactive.length != 0){
-            Notify.warning(`虚拟机不是运行状态: ${statusMap.inactive.map((item) => {return item.name})}`);
+        if (statusMap.inactive.length != 0) {
+            Notify.warning(`虚拟机不是运行状态: ${statusMap.inactive.map((item) => { return item.name })}`);
         }
     }
     async startServers(servers) {
-        for (let i in servers){
+        for (let i in servers) {
             let item = servers[i];
             await this.api.start(item.id)
             this.waitServerStarted(item, 'start')
         }
     }
     async startSelected() {
-        let statusMap = {notShutoff: [], shutoff: []};
+        let statusMap = { notShutoff: [], shutoff: [] };
         for (let i in this.selected) {
             let serverId = this.selected[i]
             let item = (await API.server.show(serverId))
@@ -555,12 +555,12 @@ export class ServerDataTable extends DataTable {
             }
             statusMap.shutoff.push(item);
         }
-        if (statusMap.shutoff.length != 0){
-            Notify.info(`开始开机: ${statusMap.shutoff.map((item) => {return item.name})} `);
+        if (statusMap.shutoff.length != 0) {
+            Notify.info(`开始开机: ${statusMap.shutoff.map((item) => { return item.name })} `);
             await this.startServers(statusMap.shutoff);
         }
         if (statusMap.notShutoff.length != 0) {
-            Notify.warning(`虚拟机不是关机状态: ${statusMap.notShutoff.map((item) => {return item.name})}`);
+            Notify.warning(`虚拟机不是关机状态: ${statusMap.notShutoff.map((item) => { return item.name })}`);
         }
         this.resetSelected();
     }
@@ -606,12 +606,12 @@ export class ServerDataTable extends DataTable {
         this.resetSelected();
     }
 
-    async updateImageName(server){
+    async updateImageName(server) {
         let imageId = server.image && server.image.id;
         if (!imageId) {
             return
         }
-        if (Object.keys(this.imageName).indexOf(imageId) >=0){
+        if (Object.keys(this.imageName).indexOf(imageId) >= 0) {
             return
         }
         this.imageName[imageId] = imageId
@@ -619,9 +619,9 @@ export class ServerDataTable extends DataTable {
         this.imageName[imageId] = image.name
     }
 
-    getRootBdm(server){
+    getRootBdm(server) {
         let self = this;
-        if (! server['os-extended-volumes:volumes_attached']){
+        if (!server['os-extended-volumes:volumes_attached']) {
             return null;
         }
         let serverObj = new Server(server);
@@ -633,10 +633,10 @@ export class ServerDataTable extends DataTable {
         }
         return this.rootBdmMap[serverObj.getId()];
     }
-    parseAddresses(server){
+    parseAddresses(server) {
         let addressMap = {};
-        for (let netName in server.addresses){
-            for (let i in server.addresses[netName]){
+        for (let netName in server.addresses) {
+            for (let i in server.addresses[netName]) {
                 let address = server.addresses[netName][i]
                 if (Object.keys(addressMap).indexOf(address['OS-EXT-IPS-MAC:mac_addr']) < 0) {
                     addressMap[address['OS-EXT-IPS-MAC:mac_addr']] = []
@@ -646,67 +646,67 @@ export class ServerDataTable extends DataTable {
         }
         return Object.values(addressMap);
     }
-    async waitServerStarted(server, action){
+    async waitServerStarted(server, action) {
         let refreshServer = await this.waitServerStatus(server.id, ['ACTIVE', 'ERROR'])
-        if (refreshServer.status.toUpperCase() == 'ACTIVE'){
+        if (refreshServer.status.toUpperCase() == 'ACTIVE') {
             Notify.success(`${server.name || server.id} ${action} 成功`)
         } else {
             Notify.error(`${server.name || server.id} ${action} 失败`)
         }
     }
-    async waitServerStopped(server){
+    async waitServerStopped(server) {
         let action = 'stop'
         let refreshServer = await this.waitServerStatus(server.id, ['SHUTOFF', 'ERROR'])
-        if (refreshServer.status.toUpperCase() == 'SHUTOFF'){
+        if (refreshServer.status.toUpperCase() == 'SHUTOFF') {
             Notify.success(`${server.name || server.id} ${action} 成功`)
         } else {
             Notify.error(`${server.name || server.id} ${action} 失败`)
         }
     }
-    async waitServerPaused(server){
+    async waitServerPaused(server) {
         let action = 'pause'
         let refreshServer = await this.waitServerStatus(server.id, ['PAUSED', 'ERROR'])
-        if (refreshServer.status.toUpperCase() == 'PAUSED'){
+        if (refreshServer.status.toUpperCase() == 'PAUSED') {
             Notify.success(`${server.name || server.id} ${action} 成功`)
         } else {
             Notify.error(`${server.name || server.id} ${action} 失败`)
         }
     }
-    async waitServerUnpaused(server){
+    async waitServerUnpaused(server) {
         let action = 'unpause'
         let refreshServer = await this.waitServerStatus(server.id, ['ACTIVE', 'ERROR'])
-        if (refreshServer.status.toUpperCase() == 'ACTIVE'){
+        if (refreshServer.status.toUpperCase() == 'ACTIVE') {
             Notify.success(`${server.name || server.id} ${action} 成功`)
         } else {
             Notify.error(`${server.name || server.id} ${action} 失败`)
         }
     }
-    async waitServerMigrated(server){
+    async waitServerMigrated(server) {
         let action = "migrate"
         // TODO: show server first
         let srcHost = server['OS-EXT-SRV-ATTR:host'];
         let refreshServer = await this.waitServerStatus(server.id, [server.status, 'ERROR'])
-        if (refreshServer['OS-EXT-SRV-ATTR:host'] != srcHost){
+        if (refreshServer['OS-EXT-SRV-ATTR:host'] != srcHost) {
             Notify.success(`${server.name || server.id} ${action} 成功`)
         } else {
             Notify.error(`${server.name || server.id} ${action} 失败`)
         }
     }
-    async waitServerDeleted(serverId){
+    async waitServerDeleted(serverId) {
         do {
             try {
                 let server = await (API.server.show(serverId))
                 this.updateItem(server);
                 Utils.sleep(2)
             } catch (e) {
-                if (e.response.status == 404){
+                if (e.response.status == 404) {
                     console.error(e)
                     Notify.success(`实例 ${serverId} 已删除`)
                     this.removeItem(serverId)
                     break;
                 }
             }
-        } while(true)
+        } while (true)
     }
 }
 export class ComputeServiceTable extends DataTable {
@@ -759,7 +759,7 @@ export class ComputeServiceTable extends DataTable {
         }
     }
 }
-export class ServerGroupTable extends DataTable{
+export class ServerGroupTable extends DataTable {
     constructor() {
         super([
             { title: 'ID', key: 'id' },
@@ -823,10 +823,10 @@ export class VolumeDataTable extends DataTable {
             'creating', 'downloading', 'attaching', 'deleting'
         ]
     }
-    isDoing(item){
-        return this.doingStatus.indexOf(item.status)>= 0;
+    isDoing(item) {
+        return this.doingStatus.indexOf(item.status) >= 0;
     }
-    extendSelected(newSize){
+    extendSelected(newSize) {
         if (this.selected.length == 0) {
             return;
         }
@@ -841,14 +841,14 @@ export class VolumeDataTable extends DataTable {
         }
         this.refresh();
     }
-    async refresh(filters={}){
+    async refresh(filters = {}) {
         // search only for volume.name or volume.id
         await super.refresh(filters);
 
-        if (this.search){
+        if (this.search) {
             let filterItems = [];
-            for (let i in this.items){
-                if (this.items[i].id.includes(this.search) 
+            for (let i in this.items) {
+                if (this.items[i].id.includes(this.search)
                     || this.items[i].name.includes(this.search)) {
                     filterItems.push(this.items[i])
                 }
@@ -856,14 +856,14 @@ export class VolumeDataTable extends DataTable {
             this.items = filterItems
         }
     }
-    async waitVolumeDeleted(volumeId){
+    async waitVolumeDeleted(volumeId) {
         do {
             try {
                 let volume = (await API.volume.get(volumeId)).volume
                 this.updateItem(volume)
                 Utils.sleep(2)
             } catch (e) {
-                if (e.response.status == 404){
+                if (e.response.status == 404) {
                     console.error(e)
                     Notify.success(`卷 ${volumeId} 已删除`)
                     this.removeItem(volumeId)
@@ -892,9 +892,9 @@ export class VolumeTypeTable extends DataTable {
 export class SnapshotTable extends DataTable {
     constructor() {
         super([{ title: '名字', key: 'name' },
-            { title: '状态', key: 'status' },
-            { title: '大小', key: 'size' },
-            { title: '卷ID', key: 'volume_id' },
+        { title: '状态', key: 'status' },
+        { title: '大小', key: 'size' },
+        { title: '卷ID', key: 'volume_id' },
         ], API.snapshot, 'snapshots', '快照');
         this.extendItems = [
             { title: '描述', key: 'description' },
@@ -954,7 +954,7 @@ export class BackupTable extends DataTable {
         }
         return backup
     }
-    async waitBackupStatus(backupId, status){
+    async waitBackupStatus(backupId, status) {
         let backup = {};
         while (backup.status != status) {
             try {
@@ -971,7 +971,7 @@ export class BackupTable extends DataTable {
         this.refresh();
         return backup
     }
-    async resetState(backupId){
+    async resetState(backupId) {
         console.info(`TODO resetState ${backupId}`)
         // API.backup.resetState(backupId, status =)
     }
@@ -994,13 +994,13 @@ export class VolumeServiceTable extends DataTable {
     itemKey() {
         return this.index;
     }
-    async refresh(){
+    async refresh() {
         await super.refresh();
         // NOTE: For volume services, no id in items, so add id to make
         // v-data-table item-key works.
         let index = 0;
         for (let i in this.items) {
-            this.items[i].id = index ++;
+            this.items[i].id = index++;
         }
     }
     async toggleEnabled(item) {
@@ -1044,13 +1044,13 @@ export class VolumePoolTable extends DataTable {
     itemKey() {
         return this.index;
     }
-    async refresh(){
+    async refresh() {
         await super.refresh();
         // NOTE: For volume services, no id in items, so add id to make
         // v-data-table item-key works.
         let index = 0;
         for (let i in this.items) {
-            this.items[i].id = index ++;
+            this.items[i].id = index++;
         }
     }
 }
@@ -1065,26 +1065,26 @@ export class ClusterTable extends DataTable {
         try {
             await API.cluster.delete(item.id)
             Notify.success(`集群 ${item.name || item.id} 删除成功`);
-        } catch (error){
+        } catch (error) {
             console.error('集群删除失败', error);
             Notify.error(`集群 ${item.name} 删除失败`);
             throw error;
         }
     }
-    getSelectedCluster(){
-        if (! this.selected){
+    getSelectedCluster() {
+        if (!this.selected) {
             return;
         }
-        for(let i in this.items){
-            if (this.items[i].name == this.selected){
+        for (let i in this.items) {
+            if (this.items[i].name == this.selected) {
                 return this.items[i]
             }
         }
     }
-    setSelected(clusterId){
-        for(let i in this.items){
+    setSelected(clusterId) {
+        for (let i in this.items) {
             let cluster = this.items[i];
-            if (cluster.id == clusterId){
+            if (cluster.id == clusterId) {
                 this.selected = cluster.name
                 break
             }
@@ -1096,8 +1096,8 @@ export class RegionTable extends DataTable {
         super([], API.region, 'regions', '地区');
         this.selected = ''
     }
-    setSelected(region){
-        if (region){
+    setSelected(region) {
+        if (region) {
             this.selected = region
         }
     }
@@ -1122,7 +1122,7 @@ export class DomainTable extends DataTable {
         ], API.domain, 'domains', '域');
         // this.newItemDialog = new NewDomainDialog();
     }
-    async deleteSelected(){
+    async deleteSelected() {
         for (let i in this.selected) {
             let domain = this.selected[i];
             if (domain.enabled) {
@@ -1133,9 +1133,9 @@ export class DomainTable extends DataTable {
         }
         super.deleteSelected();
     }
-    async toggleEnabled(domain){
+    async toggleEnabled(domain) {
         try {
-            if (domain.enabled){
+            if (domain.enabled) {
                 await API.domain.enable(domain.id)
                 Notify.success(`Domain ${domain.name} 已启用`)
             } else {
@@ -1144,7 +1144,7 @@ export class DomainTable extends DataTable {
             }
         } catch {
             Notify.success(`Domain ${domain.name} 操作失败`)
-            domain.enabled = ! domain.enabled;
+            domain.enabled = !domain.enabled;
         }
     }
 
@@ -1158,15 +1158,15 @@ export class ProjectTable extends DataTable {
             { title: '操作', key: 'actions' },
         ], API.project, 'projects', '租户');
         this.extendItems = [
-            {title: 'id', key: 'id'},
-            {title: 'description', key: 'description'},
+            { title: 'id', key: 'id' },
+            { title: 'description', key: 'description' },
         ]
         this.userTable = new UserTable();
         // this.usersDialog = new UsersDialog();
         // this.newItemDialog = new NewProjectDialog();
     }
-    
-    openUserTable(){
+
+    openUserTable() {
         this.userTable.refresh()
         this.usersDialog.open()
     }
@@ -1227,9 +1227,9 @@ export class HypervisortTable extends DataTable {
     constructor() {
         super([
             { title: i18n.global.t('hostName'), key: 'hypervisor_hostname', class: 'text-blue' },
-            { title: i18n.global.t('memory')+'(MB)', key: 'memory_mb', class: 'text-blue' },
+            { title: i18n.global.t('memory') + '(MB)', key: 'memory_mb', class: 'text-blue' },
             { title: i18n.global.t('cpu'), key: 'vcpus', class: 'text-blue' },
-            { title: i18n.global.t('disk')+'(GB)', key: 'local_gb', class: 'text-blue' },
+            { title: i18n.global.t('disk') + '(GB)', key: 'local_gb', class: 'text-blue' },
             { title: i18n.global.t('status'), key: 'status', class: 'text-blue' },
             { title: i18n.global.t('ipAddress'), key: 'host_ip', class: 'text-blue' },
             { title: i18n.global.t('hypervisorType'), key: 'hypervisor_type', class: 'text-blue' },
@@ -1239,11 +1239,11 @@ export class HypervisortTable extends DataTable {
         this._memUsedPercent = 0;
         this._vcpuUsedPercent = 0;
         this.extendItems = [
-            { title: 'numa_node_0_cpuset', key: 'numa_node_0_cpuset'},
-            { title: 'numa_node_1_cpuset', key: 'numa_node_1_cpuset'},
-            { title: 'numa_node_0_hugepages', key: 'numa_node_0_hugepages'},
-            { title: 'numa_node_1_hugepages', key: 'numa_node_1_hugepages'},
-            { title: 'extra_resources', key: 'extra_resources'},
+            { title: 'numa_node_0_cpuset', key: 'numa_node_0_cpuset' },
+            { title: 'numa_node_1_cpuset', key: 'numa_node_1_cpuset' },
+            { title: 'numa_node_0_hugepages', key: 'numa_node_0_hugepages' },
+            { title: 'numa_node_1_hugepages', key: 'numa_node_1_hugepages' },
+            { title: 'extra_resources', key: 'extra_resources' },
             // { title: 'serial_number', key: 'serial_number'},
             // { title: 'cpu_info', key: 'cpu_info'},
         ];
@@ -1276,7 +1276,7 @@ export class AZDataTable extends DataTable {
             { title: '状态', key: 'active', class: 'blue--text' },
             { title: 'available', key: 'available', class: 'blue--text' },
         ], API.az, 'availabilityZoneInfo')
-        this.azMap = {internal: {hosts: []}}
+        this.azMap = { internal: { hosts: [] } }
         this.statistics = {};
         this.zoneName = 'internal';
         this.showTree = 0;
@@ -1306,11 +1306,11 @@ export class AZDataTable extends DataTable {
         do {
             chartDom = document.getElementById(eleId);
             console.log(chartDom)
-            if (!chartDom){
+            if (!chartDom) {
                 Utils.sleep(0.1)
             }
-        } while(!chartDom)
-        
+        } while (!chartDom)
+
         var myChart = Echarts.init(chartDom);
         let data = { name: '集群', children: [] }
         for (let i in this.items) {
@@ -1338,7 +1338,7 @@ export class AZDataTable extends DataTable {
                             position: 'right', verticalAlign: 'middle', align: 'left'
                         }
                     },
-                    emphasis: {focus: 'descendant'},
+                    emphasis: { focus: 'descendant' },
                     expandAndCollapse: true,
                     animationDuration: 550,
                     animationDurationUpdate: 750
@@ -1357,22 +1357,22 @@ export class AggDataTable extends DataTable {
             { title: '节点数量', key: 'host_num', class: 'blue--text' },
         ], API.agg, 'aggregates', '聚合');
         this.extendItems = [
-            { title: 'created_at', key: 'created_at'},
-            { title: 'updated_at', key: 'updated_at'},
-            { title: 'metadata', key: 'metadata'},
-            { title: 'hosts', key: 'hosts'},
+            { title: 'created_at', key: 'created_at' },
+            { title: 'updated_at', key: 'updated_at' },
+            { title: 'metadata', key: 'metadata' },
+            { title: 'hosts', key: 'hosts' },
         ];
     }
-    async removeHosts(){
+    async removeHosts() {
         await this.aggHostsDialog.removeHosts();
         this.refresh()
     }
-    async addHosts(){
+    async addHosts() {
         await this.aggHostsDialog.addHosts();
         this.refresh();
     }
 }
-export class ImageDataTable extends DataTable{
+export class ImageDataTable extends DataTable {
     constructor() {
         super([
             { title: '名字', key: 'name' },
@@ -1398,14 +1398,14 @@ export class ImageDataTable extends DataTable{
         this.GB = this.MB * 1024;
     }
     humanSize(image) {
-        if (! image.size ) {
-            return '' ;
+        if (!image.size) {
+            return '';
         }
         else if (image.size >= this.GB) {
-            return `${(image.size / this.GB).toFixed(2)} GB` ;
-        } else if(image.size >= this.MB) {
+            return `${(image.size / this.GB).toFixed(2)} GB`;
+        } else if (image.size >= this.MB) {
             return `${(image.size / this.MB).toFixed(2)} MB`;
-        } else if(image.size >= this.KB) {
+        } else if (image.size >= this.KB) {
             return `${(image.size / this.KB).toFixed(2)} KB`;
         } else {
             return `${image.size} B`
@@ -1413,7 +1413,7 @@ export class ImageDataTable extends DataTable{
     }
 }
 
-export class MigrationDataTable extends DataTable{
+export class MigrationDataTable extends DataTable {
     constructor() {
         super([
             { title: '类型', key: 'migration_type' },
@@ -1423,7 +1423,7 @@ export class MigrationDataTable extends DataTable{
             { title: '旧规格', key: 'old_instance_type_id' },
             { title: '新规格', key: 'new_instance_type_id' },
             { title: '开始时间', key: 'created_at' },
-            { title: '状态', key: 'status'},
+            { title: '状态', key: 'status' },
         ], API.migration, 'migrations', '迁移记录');
         this.extendItems = [
             { title: '更新时间', key: 'updated_at' },
@@ -1433,7 +1433,7 @@ export class MigrationDataTable extends DataTable{
 }
 
 export class Overview {
-    constructor(){
+    constructor() {
         this.statistics = {}
         this.users = []
         this.projects = []
@@ -1447,18 +1447,18 @@ export class Overview {
         this.userRoles = []
     }
     percentAvaliableHypervisor() {
-        if (!this.statistics.count || this.hypervisors.length <= 0 ) {
+        if (!this.statistics.count || this.hypervisors.length <= 0) {
             return 0
         }
         return this.statistics.count * 100 / this.hypervisors.length
     }
-    async refreshUseres(){
+    async refreshUseres() {
         this.users = (await API.user.list()).users
     }
-    async refreshProjects(){
+    async refreshProjects() {
         this.projects = (await API.project.list()).projects
     }
-    async refreshHypervisors(){
+    async refreshHypervisors() {
         this.hypervisors = (await API.hypervisor.list()).hypervisors
     }
     async refreshStatics() {
@@ -1467,7 +1467,7 @@ export class Overview {
         this._vcpuUsedPercent = (this.statistics.vcpus_used * 100 / this.statistics.vcpus).toFixed(2);
         this._diskUsedPercent = (this.statistics.local_gb_used * 100 / this.statistics.local_gb).toFixed(2);
     }
-    async refresh(){
+    async refresh() {
         this.refreshProjects()
         this.refreshUseres()
         this.refreshStatics()
@@ -1476,30 +1476,30 @@ export class Overview {
 }
 
 export class UserCard {
-    constructor(){
+    constructor() {
         this.authInfo = {}
         this.user = {}
         this.userRoles = []
         this.loading = false
     }
-    async refresAuthInfo(){
+    async refresAuthInfo() {
         this.loading = true
         this.authInfo = await API.authInfo.get()
         this.user = (await API.user.show(this.authInfo.user.id)).user
         let assignments = (await API.roleAssignments.listByUserId(this.user.id))
         this.userRoles = [];
-        for (let i in assignments){
+        for (let i in assignments) {
             let role = (await API.role.show(assignments[i].role.id)).role
             this.userRoles.push(role)
         }
         this.loading = false;
     }
-    async refresh(){
+    async refresh() {
         this.refresAuthInfo()
     }
 }
 export class LimitsCard {
-    constructor(){
+    constructor() {
         this.loading = false
         this.computeLimits = {}
         this.vcore = {}
@@ -1509,14 +1509,14 @@ export class LimitsCard {
 
         this.resources = ['instance', 'vcore', 'ram', 'serverGroup']
     }
-    percent(resource){
-        if (!this[resource].max || this[resource].max <= 0){
+    percent(resource) {
+        if (!this[resource].max || this[resource].max <= 0) {
             return 0
         }
         return this[resource].used * 100 / this[resource].max;
 
     }
-    async refreshComputeLimits(){
+    async refreshComputeLimits() {
         this.computeLimits = (await API.computeLimits.list()).limits
         this.vcore.used = this.computeLimits.absolute.totalCoresUsed
         this.vcore.max = this.computeLimits.absolute.maxTotalCores
@@ -1531,8 +1531,63 @@ export class LimitsCard {
         this.serverGroup.max = this.computeLimits.absolute.maxServerGroups
     }
 
-    async refresh(){
+    async refresh() {
         this.refreshComputeLimits()
+    }
+}
+export class ServerTaskWaiter {
+    constructor(server) {
+        this.server = server
+    }
+    async updateServer(server) {
+        for (var key in server) {
+            if (this.server[key] == server[key]) {
+                continue
+            }
+            this.server[key] = server[key]
+        }
+
+    }
+    async waitServerStatus(server_id, expectStatus = ['ACTIVE', 'ERROR']) {
+        let expectStatusList = []
+        if (typeof expectStatus == 'string') {
+            expectStatusList.push(expectStatus.toUpperCase())
+        } else {
+            expectStatus.forEach(item => {
+                expectStatusList.push(item.toUpperCase())
+            })
+        }
+        let oldTaskState = ''
+        do {
+            let server = await API.server.show(this.server.id);
+            this.updateServer(server)
+            if (this.server['OS-EXT-STS:task_state'] != oldTaskState) {
+                oldTaskState = this.server['OS-EXT-STS:task_state'];
+            }
+            LOG.debug(`[${this.server.id}] waiting server to be ${expectStatusList}, now: ${this.server.status.toUpperCase()}`)
+            if (expectStatusList.indexOf(this.server.status.toUpperCase()) >= 0) {
+                break
+            }
+            await Utils.sleep(5)
+        } while (true)
+    }
+    async waitStopped() {
+        let action = 'stop'
+        await this.waitServerStatus(this.server.id, ['SHUTOFF', 'ERROR'])
+        if (this.server.status.toUpperCase() == 'SHUTOFF') {
+            Notify.success(`${this.server.name || this.server.id} ${action} 成功`)
+        } else {
+            Notify.error(`${this.server.name || this.server.id} ${action} 失败`)
+        }
+    }
+    async waitStarted() {
+        let action = 'start'
+        await this.waitServerStatus(this.server.id)
+        if (this.server.status.toUpperCase() == 'ACTIVE') {
+            Notify.success(`${this.server.name || this.server.id} ${action} 成功`)
+        } else {
+            Notify.error(`${this.server.name || this.server.id} ${action} 失败`)
+        }
     }
 }
 

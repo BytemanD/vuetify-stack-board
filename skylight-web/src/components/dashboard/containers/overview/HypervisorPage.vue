@@ -25,11 +25,9 @@
         <template v-slot:[`item.memory_mb`]="{ item }">
           <v-tooltip bottom>
             <template v-slot:activator="{ props }">
-              <v-sheet color="grey lighten-1" v-bind="props">
-                <v-progress-linear height="20" color="info" :model-value="item.memory_mb - item.free_ram_mb"
-                  :max="item.memory_mb">
-                </v-progress-linear>
-              </v-sheet>
+              <v-progress-linear v-bind="props" height="16" color="info" rounded
+                :model-value="item.memory_mb - item.free_ram_mb" :max="item.memory_mb">
+              </v-progress-linear>
             </template>
             已使用: {{ item.memory_mb_used }} <br>
             不可用: {{ item.memory_mb - item.free_ram_mb - item.memory_mb_used }} <br>
@@ -40,11 +38,9 @@
 
           <v-tooltip bottom>
             <template v-slot:activator="{ props }">
-              <v-sheet color="grey lighten-1" v-bind="props">
-                <v-progress-linear height="20" class="white--text" color="info"
-                  :model-value="item.vcpus_used * 100 / item.vcpus"
-                  :buffer-value="item.vcpus_used * 100 / item.vcpus"></v-progress-linear>
-              </v-sheet>
+              <v-progress-linear v-bind="props" height="16" rounded color="info"
+                :model-value="item.vcpus_used * 100 / item.vcpus"
+                :buffer-value="item.vcpus_used * 100 / item.vcpus"></v-progress-linear>
             </template>
             已使用: {{ item.vcpus_used }}<br>
             总量: {{ item.vcpus }}
@@ -54,11 +50,9 @@
         <template v-slot:[`item.local_gb`]="{ item }">
           <v-tooltip bottom>
             <template v-slot:activator="{ props }">
-              <v-sheet color="grey lighten-1" v-bind="props">
-                <v-progress-linear height="20" class="white--text" color="info"
-                  :model-value="item.local_gb_used * 100 / item.local_gb"
-                  :buffer-value="item.local_gb_used * 100 / item.local_gb"></v-progress-linear>
-              </v-sheet>
+              <v-progress-linear v-bind="props" height="16" rounded color="info"
+                :model-value="item.local_gb_used * 100 / item.local_gb"
+                :buffer-value="item.local_gb_used * 100 / item.local_gb"></v-progress-linear>
             </template>
             已使用: {{ item.local_gb_used }} <br>
             总量: {{ item.local_gb }}
@@ -67,12 +61,14 @@
 
         <template v-slot:expanded-row="{ columns, item }">
           <td :colspan="columns.length - 1">
-            <v-list lines="one">
-              <v-list-item v-for="extendItem in table.extendItems" v-bind:key="extendItem.title">
-                <v-list-item-title>{{ extendItem.title }}</v-list-item-title>
-                <v-list-item-subtitle>{{ item[extendItem.title] }}</v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
+            <v-table density='compact'>
+              <template v-slot:default>
+                <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.title" class="text-left">
+                  <th>{{ extendItem.title }}:</th>
+                  <td>{{ item[extendItem.title] }}</td>
+                </tr>
+              </template>
+            </v-table>
           </td>
         </template>
       </v-data-table>

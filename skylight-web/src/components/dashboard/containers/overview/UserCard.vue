@@ -1,5 +1,5 @@
 <template>
-    <v-card  elevation="4">
+    <v-card elevation="4">
         <v-card-title>欢迎, {{ card.user.name }}</v-card-title>
         <v-divider></v-divider>
         <v-card-text>
@@ -11,9 +11,9 @@
                 <tr>
                     <td>用户角色</td>
                     <td>
-                        <spawn v-for="role in card.userRoles" :key="role.id" class="mr-1">
+                        <span v-for="role in card.userRoles" :key="role.id" class="mr-1">
                             {{ role.name }}
-                        </spawn>
+                        </span>
                     </td>
                 </tr>
                 <tr>

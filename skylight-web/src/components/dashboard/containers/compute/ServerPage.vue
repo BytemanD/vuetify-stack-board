@@ -70,7 +70,7 @@
 
         <template v-slot:[`item.name`]="{ item }">
           <chip-link hide-link-icon color="default" density="compact" :link="'/dashboard/server/' + item.id"
-            :label="item.name" />
+          :label="item.name" />
           <v-icon @click="openChangeServerNameDialog(item)" size="x-small">mdi-pencil-minus</v-icon>
           <v-icon @click="loginVnc(item)" size="x-small" icon>mdi-console</v-icon>
         </template>
@@ -91,17 +91,22 @@
               color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
             <span v-else>{{ item.status.toUpperCase() }}</span>
           </template>
-          <template v-if="item['OS-EXT-STS:task_state'] && item['OS-EXT-STS:task_state'] != ''">
-            <v-chip size="x-small">{{ $t(item['OS-EXT-STS:task_state']) }}</v-chip>
-          </template>
-        </template>
-        <template v-slot:[`item.power_state`]="{ item }">
+          <!-- - -->
+          <v-divider vertical class="mx-1"></v-divider>
           <v-icon size='small' v-if="item['OS-EXT-STS:power_state'] == 1" color="success">mdi-power-on</v-icon>
           <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] == 3" color="warning">mdi-pause</v-icon>
           <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] == 4" color="red">mdi-power-off</v-icon>
-          <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] != 0" color="warning"
-            class="mdi-spin">mdi-loading</v-icon>
+          <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] != 0" color="warning" class="mdi-spin">mdi-loading</v-icon>
+          <template v-if="item['OS-EXT-STS:task_state'] && item['OS-EXT-STS:task_state'] != ''">
+            <v-chip size="x-small" variant="text">{{ $t(item['OS-EXT-STS:task_state']) }}</v-chip>
+          </template>
         </template>
+        <!-- <template v-slot:[`item.power_state`]="{ item }">
+          <v-icon size='small' v-if="item['OS-EXT-STS:power_state'] == 1" color="success">mdi-power-on</v-icon>
+          <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] == 3" color="warning">mdi-pause</v-icon>
+          <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] == 4" color="red">mdi-power-off</v-icon>
+          <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] != 0" color="warning" class="mdi-spin">mdi-loading</v-icon>
+        </template> -->
         <template v-slot:[`item.addresses`]="{ item }">
           <div v-for="(addresses, j) in table.parseAddresses(item)" v-bind:key="j">
             <v-chip label size="x-small" class="mr-1 mb-1">{{ addresses.join(' | ') }}</v-chip>

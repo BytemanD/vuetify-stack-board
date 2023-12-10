@@ -25,7 +25,6 @@
                         <v-col cols="1" class="text-center">
                             <v-btn color="info" variant="text" icon="mdi-refresh" v-on:click="table.refresh()"></v-btn>
                         </v-col>
-
                     </v-row>
                 </template>
 
@@ -58,7 +57,8 @@
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-menu offset-y>
                         <template v-slot:activator="{ props }">
-                            <v-btn size="x-small" variant="text" color="purple" v-bind="props" icon="mdi-dots-vertical"></v-btn>
+                            <v-btn size="x-small" variant="text" color="purple" v-bind="props"
+                                icon="mdi-dots-vertical"></v-btn>
                         </template>
                         <v-list density='compact'>
                             <v-list-item @click="openResourceActionsDialog(item)" :disabled="!supportResourceAction">
@@ -72,14 +72,12 @@
                     <td :colspan="columns.length - 1">
                         <v-table density='compact'>
                             <template v-slot:default>
-                                <tbody>
-                                    <template v-for="extendItem in Object.keys(item)">
-                                        <tr v-bind:key="extendItem" v-if="table.columns.indexOf(extendItem) < 0">
-                                            <td class="text-info">{{ extendItem }}:</td>
-                                            <td>{{ item[extendItem] }}</td>
-                                        </tr>
-                                    </template>
-                                </tbody>
+                                <template v-for="extendItem in Object.keys(item)">
+                                    <tr v-bind:key="extendItem" v-if="table.columns.indexOf(extendItem) < 0">
+                                        <td class="text-info">{{ extendItem }}:</td>
+                                        <td>{{ item[extendItem] }}</td>
+                                    </tr>
+                                </template>
                             </template>
                         </v-table>
                     </td>
@@ -138,7 +136,7 @@ export default {
             })
         },
         pageRefresh: function ({ page, itemsPerPage, sortBy }) {
-            let filter = { }
+            let filter = {}
             if (itemsPerPage) {
                 if (itemsPerPage >= 0) {
                     filter.limit = itemsPerPage

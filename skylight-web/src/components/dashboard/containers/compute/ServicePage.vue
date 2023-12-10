@@ -13,8 +13,8 @@
                             </v-toolbar>
                         </v-col>
                         <v-col>
-                            <v-text-field small density='compact' single-line hide-details v-model="table.search"
-                                 label="搜索"></v-text-field>
+                            <v-text-field density='compact' single-line hide-details v-model="table.search"
+                                label="搜索"></v-text-field>
                         </v-col>
                         <v-col cols="1" class="text-center">
                             <v-btn color="info" icon="mdi-refresh" variant="text" v-on:click="table.refresh()"></v-btn>

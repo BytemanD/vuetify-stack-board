@@ -1,7 +1,5 @@
 <template>
   <v-row>
-    <!-- <v-col cols="12" lg="12">
-    </v-col> -->
     <v-col cols="12">
       <v-breadcrumbs class="pl-0" :items="breadcrumbItems" color="info" density="compact"></v-breadcrumbs>
       <v-tabs v-model="tabIndex" selected-class="bg-white text-primary " bg-color="primary" density="compact">
@@ -14,7 +12,7 @@
       <v-window v-model="tabIndex">
         <v-window-item>
           <v-row>
-            <v-col cols="6">
+            <v-col cols="12" md="12" lg="6">
               <v-table density="compact" class="text-left">
                 <tr>
                   <th>实例ID</th>
@@ -50,11 +48,17 @@
                 </tr>
               </v-table>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="12" md="12" lg="6">
               <v-table density="compact" class="text-left">
                 <tr>
                   <th>实例状态</th>
-                  <td>{{ server.status }}</td>
+                  <td style="min-width: 120px">
+                    {{ server.status }}
+                    <!-- <v-btn variant="text" color="warning">重置状态</v-btn> -->
+                  </td>
+                  <td>
+                    <v-btn variant="text" color="warning">重置状态</v-btn>
+                  </td>
                 </tr>
                 <tr>
                   <th>电源状态</th>
@@ -65,27 +69,34 @@
                       color="warning">mdi-pause</v-icon>
                     <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] == 4"
                       color="red">mdi-power-off</v-icon>
-                    <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] != 0" color="warning"
-                      class="mdi-spin">mdi-loading</v-icon>
-                    <v-btn variant="text" color="warning">关机</v-btn>
-                    <v-btn variant="text" color="warning">重启</v-btn>
+                    <span v-else>UNKOWN</span>
+
+                  </td>
+                  <td>
+                    <v-btn variant="text" color="warning" :disabled="this.server.status != 'ACTIVE'" @click="stop()">
+                      {{ $t('stop') }}</v-btn>
+                    <v-btn variant="text" color="success" :disabled="this.server.status != 'SHUTOFF'" @click="start()">
+                      {{ $t('start') }}</v-btn>
+                    <v-btn variant="text" color="warning" @click="hardReboot()">硬重启</v-btn>
                     <v-btn variant="text" color="warning">暂停</v-btn>
                   </td>
                 </tr>
                 <tr>
                   <th>
-                    任务状态 <v-btn density="compact" variant="text" icon="mdi-refresh" @click="refreshServer()"></v-btn>
+                    任务状态
+                    <v-btn density="compact" variant="text" icon="mdi-refresh" @click="refreshServer()"></v-btn>
                   </th>
-                  <td>
-                    <v-chip v-if="server['OS-EXT-STS:task_state'] && server['OS-EXT-STS:task_state'] != ''">
-                      {{ $t(server['OS-EXT-STS:task_state']) }}
+                  <td colspan="2">
+                    <v-chip density="compact" variant="outlined" label color="warning"
+                      v-if="server['OS-EXT-STS:task_state'] && server['OS-EXT-STS:task_state']">
+                      {{ server['OS-EXT-STS:task_state'] && $t(server['OS-EXT-STS:task_state']) }} ...
                     </v-chip>
                   </td>
                 </tr>
               </v-table>
             </v-col>
             <v-divider></v-divider>
-            <v-col cols="6">
+            <v-col cols="12" md="12" lg="6">
               <v-table density="compact" class="text-left">
                 <tr>
                   <th>规格</th>
@@ -106,7 +117,7 @@
                 </tr>
               </v-table>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="12" md="12" lg="6">
               <v-table density="compact" class="text-left">
                 <tr>
                   <th>镜像ID</th>
@@ -133,60 +144,16 @@
         </v-window-item>
         <v-window-item>
           <v-row>
-            <v-col cols="5" v-for="item in interfaces" :key="item.mac_addr" class="ma-1">
-              <v-card>
-                <v-card-title>MAC地址: {{ item.mac_addr }}</v-card-title>
-                <v-card-text>
-                  <v-table density="compact" class="text-left">
-                    <tr>
-                      <td>ID</td>
-                      <td>{{ item.port_id }}</td>
-                    </tr>
-                    <tr>
-                      <td>状态</td>
-                      <td>{{ item.port_state }}</td>
-                    </tr>
-                    <tr>
-                      <td>IP地址</td>
-                      <td>
-                        <v-chip size="small" label v-for="fixedIp in item.fixed_ips" :key="fixedIp.ip_address">
-                          {{ fixedIp.ip_address }}
-                        </v-chip>
-                      </td>
-                    </tr>
-                  </v-table>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn variant="text" color="warning">卸载</v-btn>
-                </v-card-actions>
-              </v-card>
+            <v-col cols="12" md='6' lg="4" class="pa-4" v-for="item in interfaces" :key="item.mac_addr">
+              <server-interface-card :server-id="server.id" :vif="item" />
             </v-col>
           </v-row>
         </v-window-item>
         <v-window-item>
           <v-row>
-            <v-col cols="5" v-for="item in volumes" :key="item.device">
-              <v-card class="ma-1">
-                <v-card-title>挂载路径: {{ item.device }}</v-card-title>
-                <v-card-text>
-                  <v-table density="compact">
-                      <tr>
-                        <td>挂载ID</td>
-                        <td>{{ item.id }}</td>
-                      </tr>
-                      <tr>
-                        <td>卷ID</td>
-                        <td>{{ item.volumeId }}</td>
-                      </tr>
-                  </v-table>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn v-if="item.device != server['OS-EXT-SRV-ATTR:root_device_name']"
-                    color="warning">卸载</v-btn>
-                </v-card-actions>
-              </v-card>
+            <v-col cols="12" md='6' lg="4" class="pa-4" v-for="item in volumes" :key="item.device">
+              <server-volume-card :server-id="server.id" :volume="item"
+                :root-device-name="server['OS-EXT-SRV-ATTR:root_device_name']" />
             </v-col>
           </v-row>
         </v-window-item>
@@ -224,9 +191,12 @@ import BtnIcon from '@/components/plugins/BtnIcon'
 import API from '@/assets/app/api';
 import { Utils } from '@/assets/app/lib';
 
-import { ServerDataTable } from '@/assets/app/tables.jsx';
+import { ServerTaskWaiter } from '@/assets/app/tables.jsx';
 
 import ServerTopology from './dialogs/ServerTopology.vue';
+
+import ServerInterfaceCard from '../../../plugins/ServerInterfaceCard.vue';
+import ServerVolumeCard from '@/components/plugins/ServerVolumeCard.vue';
 
 import ChangeServerNameDialog from './dialogs/ChangeServerNameDialog.vue';
 import ServerActionDialog from './dialogs/ServerActionDialog.vue';
@@ -244,7 +214,7 @@ import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 
 export default {
   components: {
-    BtnIcon, ServerTopology,
+    BtnIcon, ServerTopology, ServerInterfaceCard, ServerVolumeCard,
     ServerMigrateDialog, ServerEvacuateDialog, ServerResetStateDialog,
     ChangeServerNameDialog,
     ServerActionDialog,
@@ -259,7 +229,6 @@ export default {
     Utils: Utils,
     i18n: i18n,
     serveId: "",
-    table: new ServerDataTable(),
     selectedServer: {},
     openServerTopology: false,
 
@@ -289,55 +258,6 @@ export default {
     volumes: [],
   }),
   methods: {
-    deleteSelected: async function () {
-      let selected = this.table.selected;
-      await this.table.deleteSelected()
-      for (let i in selected) {
-        let serverId = selected[i];
-        await this.table.waitServerDeleted(serverId)
-      }
-      this.refreshTotlaServers()
-    },
-    refreshTotlaServers: function () {
-      let self = this;
-      API.server.list().then((servers) => {
-        self.totalServers = servers
-      })
-    },
-    pageRefresh: function ({ page, itemsPerPage, sortBy }) {
-      let filter = {}
-      if (itemsPerPage) {
-        if (itemsPerPage >= 0) {
-          filter.limit = itemsPerPage
-        }
-      } else {
-        filter.limit = this.table.itemsPerPage
-      }
-      if (page > 1 && this.totalServers.length > 1) {
-        let index = filter.limit * (page - 1) - 1
-        filter.marker = this.totalServers[index].id
-      }
-      this.table.refresh(filter)
-      this.refreshTotlaServers()
-    },
-    updateServer: async function () {
-      if (!this.selectedServer.id) {
-        console.warn('server id is null');
-        return;
-      }
-      let newServer = (await API.server.show(this.selectedServer.id)).server;
-      for (let i in this.table.items) {
-        if (this.table.items[i].id == this.selectedServer.id) {
-          for (let key in this.table.items[i]) {
-            if (!newServer[key]) {
-              continue;
-            }
-            this.table.items[i][key] = newServer[key];
-          }
-          break;
-        }
-      }
-    },
     loginVnc: async function () {
       let body = await API.server.getVncConsole(this.serverId);
       window.open(body.remote_console.url, '_blank');
@@ -392,11 +312,31 @@ export default {
       }
       this.interfaces = (await API.server.interfaceList(this.serverId)).interfaceAttachments
       this.volumes = (await API.server.volumeAttachments(this.serverId)).volumeAttachments
-    }
+    },
+    stop: async function () {
+      if (!this.server.id) { return }
+      await API.server.stop(this.serverId)
+      let waiter = new ServerTaskWaiter(this.server)
+      waiter.waitStopped()
+    },
+    start: async function () {
+      if (!this.server.id) { return }
+      await API.server.start(this.serverId)
+      let waiter = new ServerTaskWaiter(this.server)
+      waiter.waitStarted()
+    },
+    hardReboot: async function () {
+      if (!this.server.id) {
+        return
+      }
+      await API.server.hardReboot(this.serverId, 'HAR')
+      let waiter = new ServerTaskWaiter(this.server)
+      waiter.waitStarted()
+    },
   },
   created() {
     this.serverId = this.$route.params.id
-    this.breadcrumbItems.push({ title: this.serverId, href: "sdf" })
+    this.breadcrumbItems.push({ title: this.serverId })
     this.refresh()
   }
 };
