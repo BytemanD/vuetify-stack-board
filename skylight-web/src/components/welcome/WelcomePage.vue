@@ -19,15 +19,17 @@
                 </v-chip>
               </v-card-text>
             </v-img>
+            <v-toolbar density="compact" class="bg-blue-grey-lighten-4">
+              <v-toolbar-title>{{ $t('cluster') }}</v-toolbar-title>
+              <cluster-dialog />
+              <new-cluster @completed="refresh()" />
+              <v-btn variant="text" density="compact" class="ml-4" @click="refresh()" icon="mdi-refresh"></v-btn>
+            </v-toolbar>
             <v-card-text>
-              <strong>集群</strong>
-              <v-btn color="grey" variant="text" density="compact" class="ml-4" @click="refresh()" icon="mdi-refresh"></v-btn>
-              <br>
               <v-alert density='compact' type="warning" variant="text" v-if="noCluster" text="请添加新集群"></v-alert>
               <v-chip close closable label color="primary" class="mr-1 mt-1" v-bind:key="item.i"
-              v-for="item in table.items" @click:close="deleteCluster(item)" @click="useCluster(item)">{{ item.name }}
-            </v-chip>
-            <NewClusterVue @completed="refresh()"/>
+                v-for="item in table.items" @click:close="deleteCluster(item)" @click="useCluster(item)">{{ item.name }}
+              </v-chip>
             </v-card-text>
             <v-progress-linear indeterminate color="purple-darken-2" v-if="refreshing"></v-progress-linear>
           </v-card>
@@ -43,17 +45,16 @@ import Init from '@/assets/app/init';
 
 import API from '@/assets/app/api';
 import { ClusterTable } from '@/assets/app/tables';
-import NewClusterVue from './NewCluster.vue';
-import notify from '@/assets/app/notify';
+import NewCluster from './NewCluster.vue';
+import ClusterDialog from './ClusterDialog.vue';
 
 export default {
-  components: { NewClusterVue },
+  components: { NewCluster, ClusterDialog },
   data: () => ({
     api: API,
     version: "",
     newVersion: {},
     table: new ClusterTable(),
-    openNewClusterDialog: false,
     refreshing: false,
     noCluster: true,
   }),

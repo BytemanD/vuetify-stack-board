@@ -2,6 +2,7 @@ import axios from 'axios';
 
 import notify from './notify.js';
 import { LOG, Utils, MESSAGE } from "./lib.js";
+import { RegExp } from 'core-js';
 
 async function waitDeletedByList(api, bodyKey, item){
     let items = [];
@@ -520,6 +521,26 @@ class RoleAssignments extends Restfulclient {
 class Image extends Restfulclient {
     constructor() {
         super('/image/v2/images');
+    }
+    async list(filters={}){
+        let images = []
+        do {
+            let data = await super.list(filters)
+            if (data.images) {
+                images = images.concat(data.images)
+            }
+            if (!data.next){
+                break
+            }
+            //  = new URL(data.next)
+            let params = new URLSearchParams(data.next.split('?')[1])
+            let marker = params.get('marker')
+            if (! marker) {
+                break
+            }
+            filters['marker'] = marker
+        } while (true)
+        return {images: images}
     }
     async removeProperties(id, properties) {
         let data = [];

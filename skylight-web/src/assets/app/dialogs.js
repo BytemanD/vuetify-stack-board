@@ -755,6 +755,10 @@ export class NewServerDialog extends Dialog {
         this.volumeSize = SETTINGS.openstack.getItem('volumeSizeDefault').value;
         this.volumeSizeMin = SETTINGS.openstack.getItem('volumeSizeMin').value;
         this.description = null;
+        this.imageHeaders = [
+            {title: 'ID', key: 'id'},
+            {title: '名字', key: 'name'},
+        ]
     }
     async refresPorts() {
         let ports = (await API.port.list()).ports;

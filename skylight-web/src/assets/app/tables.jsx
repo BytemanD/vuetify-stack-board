@@ -1057,7 +1057,10 @@ export class VolumePoolTable extends DataTable {
 
 export class ClusterTable extends DataTable {
     constructor() {
-        super([], API.cluster, 'clusters', '集群');
+        super([
+            {title: '名字', key: 'name'},
+            {title: '认证地址', key: 'auth_url'},
+        ], API.cluster, 'clusters', '集群');
         this.selected = null;
         this.region = ''
     }

@@ -36,7 +36,7 @@
 
         <template v-slot:[`item.size`]="{ item }"><span class="blue--text">{{ table.humanSize(item) }}</span></template>
         <template v-slot:[`item.actions`]="{ item }">
-          <v-btn size="small" text color="purple" @click="openImagePropertiesDialog(item)">设置属性</v-btn>
+          <v-btn size="small" variant='text' color="purple" @click="openImagePropertiesDialog(item)">设置属性</v-btn>
         </template>
 
         <template v-slot:expanded-row="{ columns, item }">
@@ -63,7 +63,8 @@
         </template>
       </v-data-table>
     </v-col>
-    <ImagePropertiesDialog :show.sync="showImagePropertiesDialog" :image="selectedImage" @completed="table.refresh()" />
+    <ImagePropertiesDialog :show.sync="showImagePropertiesDialog" @update:show="(e) => showImagePropertiesDialog = e"
+      :image="selectedImage" @completed="table.refresh()" />
     <TasksDialog :show.sync="showTasksDialog" />
   </v-row>
 </template>
