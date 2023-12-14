@@ -388,7 +388,7 @@ class Server extends OpenstackProxyAPI {
         let resp = await this.doAction(id, { 'reboot': { type: type } })
         return resp;
     }
-    async hardReboot(id, ) {
+    async hardReboot(id) {
         return await this.reboot(id, 'HARD')
     }
     async pause(id) {

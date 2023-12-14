@@ -77,7 +77,7 @@
                       {{ $t('stop') }}</v-btn>
                     <v-btn variant="text" color="success" :disabled="this.server.status != 'SHUTOFF'" @click="start()">
                       {{ $t('start') }}</v-btn>
-                    <v-btn variant="text" color="warning" @click="hardReboot()">硬重启</v-btn>
+                    <menu-reboot-server :servers="[this.serverId]" @updateServer="updateServer"/>
                     <v-btn variant="text" color="warning">暂停</v-btn>
                   </td>
                 </tr>
@@ -191,6 +191,8 @@ import BtnIcon from '@/components/plugins/BtnIcon'
 import API from '@/assets/app/api';
 import { Utils } from '@/assets/app/lib';
 
+import MenuRebootServer from '@/components/plugins/MenuRebootServer.vue';
+
 import { ServerTaskWaiter } from '@/assets/app/tables.jsx';
 
 import ServerTopology from './dialogs/ServerTopology.vue';
@@ -215,6 +217,7 @@ import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 export default {
   components: {
     BtnIcon, ServerTopology, ServerInterfaceCard, ServerVolumeCard,
+    MenuRebootServer,
     ServerMigrateDialog, ServerEvacuateDialog, ServerResetStateDialog,
     ChangeServerNameDialog,
     ServerActionDialog,
@@ -329,10 +332,19 @@ export default {
       if (!this.server.id) {
         return
       }
-      await API.server.hardReboot(this.serverId, 'HAR')
+      await API.server.hardReboot(this.serverId)
       let waiter = new ServerTaskWaiter(this.server)
       waiter.waitStarted()
     },
+    updateServer: function (server) {
+      console.debug('update server', server)
+      for (var key in server) {
+        if (this.server[key] == server[key]) {
+          continue
+        }
+        this.server[key] = server[key]
+      }
+    }
   },
   created() {
     this.serverId = this.$route.params.id

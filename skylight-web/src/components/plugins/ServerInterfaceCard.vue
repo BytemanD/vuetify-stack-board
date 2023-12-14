@@ -1,12 +1,11 @@
 <template>
-    <v-card>
-        <v-card-title>MAC地址: {{ vif.mac_addr }}</v-card-title>
+    <v-card variant="tonal" :title="'MAC地址:' + vif.mac_addr">
+        <template v-slot:append>
+            <v-btn variant="text" color="warning">卸载</v-btn>
+        </template>
+        <v-card-subtitle>ID: {{ vif.port_id }}</v-card-subtitle>
         <v-card-text>
             <v-table density="compact" class="text-left">
-                <tr>
-                    <td>ID</td>
-                    <td>{{ vif.port_id }}</td>
-                </tr>
                 <tr>
                     <td>状态</td>
                     <td>{{ vif.port_state }}</td>
@@ -21,10 +20,6 @@
                 </tr>
             </v-table>
         </v-card-text>
-        <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn variant="text" color="warning">卸载</v-btn>
-        </v-card-actions>
     </v-card>
 </template>
 

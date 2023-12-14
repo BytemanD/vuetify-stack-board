@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-col cols="12" md="6">
+    <v-col cols="12" md="7">
       <v-card elevation="4">
         <v-card-title>平台概况</v-card-title>
         <v-divider></v-divider>
@@ -45,7 +45,7 @@
         </v-card-text>
       </v-card>
     </v-col>
-    <v-col cols="12" md="6">
+    <v-col cols="12" md="5">
       <v-card elevation="4">
         <v-card-title>资源使用量</v-card-title>
         <v-divider></v-divider>

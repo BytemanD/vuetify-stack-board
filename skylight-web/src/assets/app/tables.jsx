@@ -1551,7 +1551,7 @@ export class ServerTaskWaiter {
         }
 
     }
-    async waitServerStatus(server_id, expectStatus = ['ACTIVE', 'ERROR']) {
+    async waitServerStatus(expectStatus = ['ACTIVE', 'ERROR']) {
         let expectStatusList = []
         if (typeof expectStatus == 'string') {
             expectStatusList.push(expectStatus.toUpperCase())
@@ -1576,7 +1576,7 @@ export class ServerTaskWaiter {
     }
     async waitStopped() {
         let action = 'stop'
-        await this.waitServerStatus(this.server.id, ['SHUTOFF', 'ERROR'])
+        await this.waitServerStatus(['SHUTOFF', 'ERROR'])
         if (this.server.status.toUpperCase() == 'SHUTOFF') {
             Notify.success(`${this.server.name || this.server.id} ${action} 成功`)
         } else {
@@ -1585,7 +1585,7 @@ export class ServerTaskWaiter {
     }
     async waitStarted() {
         let action = 'start'
-        await this.waitServerStatus(this.server.id)
+        await this.waitServerStatus()
         if (this.server.status.toUpperCase() == 'ACTIVE') {
             Notify.success(`${this.server.name || this.server.id} ${action} 成功`)
         } else {
