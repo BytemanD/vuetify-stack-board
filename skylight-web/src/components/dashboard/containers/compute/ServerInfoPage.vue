@@ -28,13 +28,14 @@
                 </tr>
                 <tr>
                   <th>系统盘类型</th>
-                  <td><v-chip color="info" variant="text">{{ server.root_bdm_type }}</v-chip></td>
+                  <td><span class="text-info">{{ server.root_bdm_type }}</span></td>
                 </tr>
                 <tr>
                   <th>节点</th>
                   <td>{{ server['OS-EXT-SRV-ATTR:host'] }}
-                    <v-btn variant="text" color="warning">迁移</v-btn>
-                    <v-btn variant="text" color="warning">热迁移</v-btn>
+                    <!-- <v-btn variant="text" color="warning">迁移</v-btn>
+                      <v-btn variant="text" color="warning">热迁移</v-btn> -->
+                    <btn-server-migrate :servers="[server]" @updateServer="updateServer" />
                     <v-btn variant="text" color="warning">疏散</v-btn>
                   </td>
                 </tr>
@@ -77,7 +78,7 @@
                       {{ $t('stop') }}</v-btn>
                     <v-btn variant="text" color="success" :disabled="this.server.status != 'SHUTOFF'" @click="start()">
                       {{ $t('start') }}</v-btn>
-                    <menu-reboot-server :servers="[this.serverId]" @updateServer="updateServer"/>
+                    <btn-server-reboot :servers="[server]" @updateServer="updateServer" />
                     <v-btn variant="text" color="warning">暂停</v-btn>
                   </td>
                 </tr>
@@ -87,9 +88,12 @@
                     <v-btn density="compact" variant="text" icon="mdi-refresh" @click="refreshServer()"></v-btn>
                   </th>
                   <td colspan="2">
-                    <v-chip density="compact" variant="outlined" label color="warning"
+                    <v-chip density="compact" variant="text" label color="warning"
                       v-if="server['OS-EXT-STS:task_state'] && server['OS-EXT-STS:task_state']">
-                      {{ server['OS-EXT-STS:task_state'] && $t(server['OS-EXT-STS:task_state']) }} ...
+                      {{ server['OS-EXT-STS:task_state'] && $t(server['OS-EXT-STS:task_state']) }}
+                      <template v-slot:append>
+                        <v-icon class="mdi-spin" small>mdi-loading</v-icon>
+                      </template>
                     </v-chip>
                   </td>
                 </tr>
@@ -191,7 +195,8 @@ import BtnIcon from '@/components/plugins/BtnIcon'
 import API from '@/assets/app/api';
 import { Utils } from '@/assets/app/lib';
 
-import MenuRebootServer from '@/components/plugins/MenuRebootServer.vue';
+import BtnServerReboot from '@/components/plugins/BtnServerReboot.vue';
+import BtnServerMigrate from '@/components/plugins/BtnServerMigrate.vue';
 
 import { ServerTaskWaiter } from '@/assets/app/tables.jsx';
 
@@ -217,7 +222,7 @@ import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 export default {
   components: {
     BtnIcon, ServerTopology, ServerInterfaceCard, ServerVolumeCard,
-    MenuRebootServer,
+    BtnServerReboot, BtnServerMigrate,
     ServerMigrateDialog, ServerEvacuateDialog, ServerResetStateDialog,
     ChangeServerNameDialog,
     ServerActionDialog,
@@ -317,6 +322,7 @@ export default {
       this.volumes = (await API.server.volumeAttachments(this.serverId)).volumeAttachments
     },
     stop: async function () {
+      // TODO: use BtnServerStop
       if (!this.server.id) { return }
       await API.server.stop(this.serverId)
       let waiter = new ServerTaskWaiter(this.server)

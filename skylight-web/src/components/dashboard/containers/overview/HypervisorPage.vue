@@ -25,7 +25,7 @@
         <template v-slot:[`item.memory_mb`]="{ item }">
           <v-tooltip bottom>
             <template v-slot:activator="{ props }">
-              <v-progress-linear v-bind="props" height="16" color="info" rounded
+              <v-progress-linear v-bind="props" height="12" color="info" rounded
                 :model-value="item.memory_mb - item.free_ram_mb" :max="item.memory_mb">
               </v-progress-linear>
             </template>
@@ -38,7 +38,7 @@
 
           <v-tooltip bottom>
             <template v-slot:activator="{ props }">
-              <v-progress-linear v-bind="props" height="16" rounded color="info"
+              <v-progress-linear v-bind="props" height="12" rounded color="info"
                 :model-value="item.vcpus_used * 100 / item.vcpus"
                 :buffer-value="item.vcpus_used * 100 / item.vcpus"></v-progress-linear>
             </template>
@@ -50,7 +50,7 @@
         <template v-slot:[`item.local_gb`]="{ item }">
           <v-tooltip bottom>
             <template v-slot:activator="{ props }">
-              <v-progress-linear v-bind="props" height="16" rounded color="info"
+              <v-progress-linear v-bind="props" height="12" rounded color="info"
                 :model-value="item.local_gb_used * 100 / item.local_gb"
                 :buffer-value="item.local_gb_used * 100 / item.local_gb"></v-progress-linear>
             </template>

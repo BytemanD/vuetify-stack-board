@@ -634,7 +634,9 @@ export class MigrateDialog extends Dialog {
                     await API.server.migrate(server.id, this.host);
                     notify.info(`实例 ${server.name} 冷迁移中`)
                 }
-                this.serverTable.waitServerMigrated(server);
+                if (this.serverTable){
+                    this.serverTable.waitServerMigrated(server);
+                }
             } catch (error) {
                 notify.warning(error);
             }

@@ -29,35 +29,39 @@ const progs = defineProps({
     servers: { type: Array, default: [], required: true, },
 })
 
+function getServerId(server){
+    return typeof server == 'object' ? server.id : server
+}
+async function getServer(server){
+    if (typeof server == 'object'){
+        return server
+    } else {
+        let serverObject = await API.server.show(server)
+        return serverObject
+    }
+}
+function onUpdatedServer(server) {
+    emits('updateServer', server)
+}
 async function softReboot() {
     for (let i in progs.servers) {
-        let serverId = progs.servers[i];
-        API.server.reboot(serverId)
+        API.server.reboot(getServerId(progs.servers[i]))
     }
     for (let i in progs.servers) {
-        let serverId = progs.servers[i];
-        let server = await API.server.show(serverId)
-        emits('updateServer', server)
-
-        let waiter = new ServerTaskWaiter(server)
+        let server = await getServer(getServerId(progs.servers[i]))
+        let waiter = new ServerTaskWaiter(server, onUpdatedServer)
         await waiter.waitStarted()
-        emits('updateServer', server)
     }
 }
 
 async function hardReboot() {
     for (let i in progs.servers) {
-        let serverId = progs.servers[i];
-        API.server.hardReboot(serverId)
+        API.server.hardReboot(getServerId(progs.servers[i]))
     }
     for (let i in progs.servers) {
-        let serverId = progs.servers[i];
-        let server = await API.server.show(serverId)
-        emits('updateServer', server)
-
-        let waiter = new ServerTaskWaiter(server)
+        let server = await getServer(getServerId(progs.servers[i]))
+        let waiter = new ServerTaskWaiter(server, onUpdatedServer)
         await waiter.waitStarted()
-        emits('updateServer', server)
     }
 }
 

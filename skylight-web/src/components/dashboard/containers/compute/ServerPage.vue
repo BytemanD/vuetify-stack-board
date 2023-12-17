@@ -91,26 +91,21 @@
               color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
             <span v-else>{{ item.status.toUpperCase() }}</span>
           </template>
-          <!-- - -->
-          <v-divider vertical class="mx-1"></v-divider>
-          <v-icon size='small' v-if="item['OS-EXT-STS:power_state'] == 1" color="success">mdi-power-on</v-icon>
-          <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] == 3" color="warning">mdi-pause</v-icon>
-          <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] == 4" color="red">mdi-power-off</v-icon>
-          <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] != 0" color="warning" class="mdi-spin">mdi-loading</v-icon>
           <template v-if="item['OS-EXT-STS:task_state'] && item['OS-EXT-STS:task_state'] != ''">
             <v-chip size="x-small" variant="text">{{ $t(item['OS-EXT-STS:task_state']) }}</v-chip>
           </template>
         </template>
-        <!-- <template v-slot:[`item.power_state`]="{ item }">
+        <template v-slot:[`item.power_state`]="{ item }">
           <v-icon size='small' v-if="item['OS-EXT-STS:power_state'] == 1" color="success">mdi-power-on</v-icon>
           <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] == 3" color="warning">mdi-pause</v-icon>
           <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] == 4" color="red">mdi-power-off</v-icon>
           <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] != 0" color="warning" class="mdi-spin">mdi-loading</v-icon>
-        </template> -->
+        </template>
         <template v-slot:[`item.addresses`]="{ item }">
-          <div v-for="(addresses, j) in table.parseAddresses(item)" v-bind:key="j">
+          <div v-for="(addresses, j) in table.parseFirstAddresses(item)" v-bind:key="j">
             <v-chip label size="x-small" class="mr-1 mb-1">{{ addresses.join(' | ') }}</v-chip>
           </div>
+          <span v-if="Object.keys(item.addresses).length > 1 ">...</span>
         </template>
         <template v-slot:[`item.flavor`]="{ item }"><span class="cyan--text">
             {{ item.flavor && item.flavor.original_name }}</span></template>

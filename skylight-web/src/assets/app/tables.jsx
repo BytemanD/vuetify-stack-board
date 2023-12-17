@@ -405,8 +405,8 @@ export class ServerDataTable extends DataTable {
         { title: '规格', key: 'flavor' },
         { title: '镜像', key: 'image' },
         { title: 'IP地址', key: 'addresses' },
-        { title: '状态/任务', key: 'status' },
-        // { title: '电源', key: 'power_state' },
+        { title: '状态', key: 'status' },
+        { title: '电源', key: 'power_state' },
         { title: '操作', key: 'action' },
         ], API.server, 'servers', '实例');
         this.extendItems = [
@@ -643,6 +643,20 @@ export class ServerDataTable extends DataTable {
                 }
                 addressMap[address['OS-EXT-IPS-MAC:mac_addr']].push(address.addr)
             }
+        }
+        return Object.values(addressMap);
+    }
+    parseFirstAddresses(server) {
+        let addressMap = {};
+        for (let netName in server.addresses) {
+            for (let i in server.addresses[netName]) {
+                let address = server.addresses[netName][i]
+                if (Object.keys(addressMap).indexOf(address['OS-EXT-IPS-MAC:mac_addr']) < 0) {
+                    addressMap[address['OS-EXT-IPS-MAC:mac_addr']] = []
+                }
+                addressMap[address['OS-EXT-IPS-MAC:mac_addr']].push(address.addr)
+            }
+            break
         }
         return Object.values(addressMap);
     }
@@ -1448,6 +1462,7 @@ export class Overview {
         this.authInfo = {}
         this.user = {}
         this.userRoles = []
+        this.refreshing = false;
     }
     percentAvaliableHypervisor() {
         if (!this.statistics.count || this.hypervisors.length <= 0) {
@@ -1475,6 +1490,14 @@ export class Overview {
         this.refreshUseres()
         this.refreshStatics()
         this.refreshHypervisors()
+    }
+    async refreshAndWait() {
+        this.refreshing = true
+        await this.refreshProjects()
+        await this.refreshUseres()
+        await this.refreshStatics()
+        await this.refreshHypervisors()
+        this.refreshing = false
     }
 }
 
@@ -1539,8 +1562,9 @@ export class LimitsCard {
     }
 }
 export class ServerTaskWaiter {
-    constructor(server) {
+    constructor(server, onUpdatedServer=null) {
         this.server = server
+        this.onUpdatedServer = onUpdatedServer
     }
     async updateServer(server) {
         for (var key in server) {
@@ -1564,6 +1588,9 @@ export class ServerTaskWaiter {
         do {
             let server = await API.server.show(this.server.id);
             this.updateServer(server)
+            if (this.onUpdatedServer) {
+                this.onUpdatedServer(this.server)
+            }
             if (this.server['OS-EXT-STS:task_state'] != oldTaskState) {
                 oldTaskState = this.server['OS-EXT-STS:task_state'];
             }
@@ -1587,6 +1614,17 @@ export class ServerTaskWaiter {
         let action = 'start'
         await this.waitServerStatus()
         if (this.server.status.toUpperCase() == 'ACTIVE') {
+            Notify.success(`${this.server.name || this.server.id} ${action} 成功`)
+        } else {
+            Notify.error(`${this.server.name || this.server.id} ${action} 失败`)
+        }
+    }
+    async waitMigrated(){
+        let action = "迁移"
+        // TODO: show server first
+        let srcHost = this.server['OS-EXT-SRV-ATTR:host'];
+        await this.waitServerStatus(['ACTIVE', 'SHUTOFF', 'ERROR'])
+        if (this.server['OS-EXT-SRV-ATTR:host'] != srcHost) {
             Notify.success(`${this.server.name || this.server.id} ${action} 成功`)
         } else {
             Notify.error(`${this.server.name || this.server.id} ${action} 失败`)

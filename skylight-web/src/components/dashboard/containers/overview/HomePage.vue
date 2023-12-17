@@ -1,8 +1,7 @@
 <template>
   <v-row>
     <v-col cols="12" md="7">
-      <v-card elevation="4">
-        <v-card-title>平台概况</v-card-title>
+      <v-card elevation="4" title="平台概况">
         <v-divider></v-divider>
         <v-card-text>
           <v-row>
@@ -33,7 +32,8 @@
             </v-col>
             <v-col class="text-center">
               <h1 class="ma-8">
-                <span :class="table.percentAvaliableHypervisor() >= resourceWarningPercent.value ? '' : 'text-red-lighten-2'">
+                <span
+                  :class="table.percentAvaliableHypervisor() >= resourceWarningPercent.value ? '' : 'text-red-lighten-2'">
                   {{ table.statistics.count || 0 }}/{{ table.hypervisors.length }}
                 </span>
               </h1>
@@ -46,8 +46,10 @@
       </v-card>
     </v-col>
     <v-col cols="12" md="5">
-      <v-card elevation="4">
-        <v-card-title>资源使用量</v-card-title>
+      <v-card elevation="4" title="资源使用量">
+        <template v-slot:append>
+          <v-btn density="compact" variant="text" icon="mdi-refresh" @click="table.refreshAndWait()"></v-btn>
+        </template>
         <v-divider></v-divider>
         <v-card-text>
           <v-row>
@@ -55,8 +57,8 @@
               <h4>{{ $t('memory') }}</h4>
               <v-tooltip end>
                 <template v-slot:activator="{ props }">
-                  <v-progress-circular v-bind="props" size="96" width="10" :model-value="table._memUsedPercent"
-                    :loading="table.loading"
+                  <v-progress-circular :indeterminate="table.refreshing" v-bind="props" size="96" width="10"
+                    :model-value="table._memUsedPercent" :loading="table.loading"
                     :color="table._memUsedPercent < resourceWarningPercent.value ? 'blue-lighten-1' : 'red-lighten-2'">
                     {{ table._memUsedPercent }}%
                   </v-progress-circular>
@@ -68,7 +70,8 @@
               <h4>{{ $t('cpu') }}</h4>
               <v-tooltip bottom>
                 <template v-slot:activator="{ props }">
-                  <v-progress-circular v-bind="props" size="96" width="10" :model-value="table._vcpuUsedPercent"
+                  <v-progress-circular :indeterminate="table.refreshing" v-bind="props" size="96" width="10"
+                    :model-value="table._vcpuUsedPercent"
                     :color="table._vcpuUsedPercent < resourceWarningPercent.value ? 'blue-lighten-1' : 'red-lighten-2'">
                     {{ table._vcpuUsedPercent }}%
                   </v-progress-circular>
@@ -80,7 +83,8 @@
               <h4>{{ $t('disk') }}</h4>
               <v-tooltip bottom>
                 <template v-slot:activator="{ props }">
-                  <v-progress-circular v-bind="props" size="96" width="10" :model-value="table._diskUsedPercent"
+                  <v-progress-circular :indeterminate="table.refreshing" v-bind="props" size="96" width="10"
+                    :model-value="table._diskUsedPercent"
                     :color="table._diskUsedPercent < resourceWarningPercent.value ? 'blue-lighten-1' : 'red-lighten-1'">
                     {{ table._diskUsedPercent }}%
                   </v-progress-circular>
