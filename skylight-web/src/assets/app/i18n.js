@@ -92,6 +92,10 @@ const MESSAGES = {
         ram: 'Ram',
         serverGroup: 'Server Group',
 
+        public: 'public',
+        shared: 'shared',
+        private: 'private',
+
     },
     'zh-CN': {
         language: '语言',
@@ -185,6 +189,10 @@ const MESSAGES = {
         vcore: '虚拟机CPU',
         ram: '内存',
         serverGroup: '主机组',
+
+        public: '公共',
+        shared: '共享',
+        private: '私有',
     },
 };
 

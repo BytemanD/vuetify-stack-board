@@ -17,45 +17,32 @@
                 <template v-slot:item.1>
                     <v-row>
                         <v-col cols="6">
-                            <v-text-field placeholder="请输入实例名" v-model="dialog.params.name" :error="!dialog.params.name"
-                                :rules="[dialog.checkNotNull]" density="compact" hide-details>
+                            <v-text-field placeholder="请输入实例名" v-model="dialog.name" :error="!dialog.name"
+                                :messages="dialog.validName()" density="compact" hide-details>
                                 <template v-slot:prepend>名字</template>
                                 <template v-slot:append>
                                     <v-btn class="my-auto" color="info" variant="text"
-                                        @click="dialog.params.name = Utils.getRandomName('server')">随机名字</v-btn>
+                                        @click="dialog.name = Utils.getRandomName('server')">随机名字</v-btn>
                                 </template>
                             </v-text-field>
                         </v-col>
-                        <v-col cols="10" class="mt-0">
-                            <v-data-table density='compact' :headers="dialog.imageHeaders" :items="dialog.images"
-                                items-per-page="5" :search="imageSearch">
-                                <template v-slot:[`item.id`]="{ item }">
-                                    <v-chip variant="text" density="compact"
-                                        :color="item.id == selectedImage.id ? 'info' : ''" @click="selectImage(item)">{{
-                                            item.id }}</v-chip>
-                                </template>
-                                <template v-slot:top>
-                                    <v-row>
-                                        <v-col cols="6">
-                                            <v-text-field density="compact" readonly hide-details v-model="selectedImage.id"
-                                                :label="selectedImage.name">
-                                                <template v-slot:prepend>镜像</template>
-                                            </v-text-field>
-                                        </v-col>
-                                        <v-col cols="6">
-                                            <v-text-field density='compact' v-model="imageSearch" placeholder="搜索"
-                                                hide-details></v-text-field>
-                                        </v-col>
-                                    </v-row>
-                                </template>
-                            </v-data-table>
+                        <v-col cols="9" class="mt-0">
+                            <v-text-field class="mb-1" density="compact" readonly v-model="dialog.image.id"
+                                :label="dialog.image.name" :error="!dialog.image.id"
+                                :messages="dialog.validImage()">
+                                <template v-slot:prepend>镜像</template>
+                            </v-text-field>
+                            <image-table class="ml-10" @select-image="(image) => { selectImage(image) }" />
+                        </v-col>
+                        <v-col cols="9" class="mt-0">
+                            <v-text-field class="mb-1" density="compact" readonly v-model="dialog.flavor.id"
+                                :label="dialog.flavor.name" :error="!dialog.flavor.id"
+                                :messages="dialog.validFlavor()">
+                                <template v-slot:prepend>规格</template>
+                            </v-text-field>
+                            <flavor-table class="ml-10" @select-flavor="(flavor) => { selectFlavor(flavor) }" />
                         </v-col>
                         <v-col cols="12" md="6" lg="6">
-                            <v-select :items="dialog.flavors" density='compact' item-value="id"
-                                :item-props="dialog.itemProps" v-model="dialog.params.flavor"
-                                :error="!dialog.params.flavor">
-                                <template v-slot:prepend>规格</template>
-                            </v-select>
                             <v-select :items="dialog.networks" clearable density='compact' :item-props="dialog.itemProps"
                                 item-value="id" v-model="dialog.params.netId" @click="dialog.refresNetworks()">
                                 <template v-slot:prepend>网络</template>
@@ -67,9 +54,8 @@
                             </v-select>
                         </v-col>
                         <v-col cols="12" md="6" lg="6">
-                            <v-switch v-model="dialog.useBdm" color="info" class="my-auto" hide-details>
-                                <template v-slot:prepend>创建卷</template>
-                            </v-switch>
+                            <v-checkbox hide-details v-model="dialog.useBdm" color="info" class="my-auto"
+                                label="创建卷"></v-checkbox>
                             <v-select :disabled="!dialog.useBdm" :items="dialog.volumeTypes" clearable density='compact'
                                 item-title="name" item-value="name" @click="dialog.refreshVolumeTypes()"
                                 v-model="dialog.volumeType">
@@ -141,7 +127,14 @@
 import { NewServerDialog } from '@/assets/app/dialogs';
 import { Utils } from '@/assets/app/lib';
 import SETTINGS from '@/assets/app/settings';
+
+import ImageTable from '@/components/plugins/tables/ImageTable.vue';
+import FlavorTable from '@/components/plugins/tables/FlavorTable.vue';
+
 export default {
+    components: {
+        ImageTable, FlavorTable,
+    },
     props: {
 
     },
@@ -161,13 +154,16 @@ export default {
         SETTINGS: SETTINGS,
         dialog: {},
         selectedImage: {},
+        selectedFlavor: {},
         imageSearch: null,
     }),
     methods: {
         selectImage: function (item) {
-            this.selectedImage = item;
-            this.dialog.params.image = this.selectedImage.id;
-        }
+            this.dialog.image = item;
+        },
+        selectFlavor: function (item) {
+            this.dialog.flavor = item;
+        },
     },
     created() {
         this.dialog = new NewServerDialog(this.table);

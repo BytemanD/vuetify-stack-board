@@ -340,6 +340,11 @@ export class FlavorDataTable extends DataTable {
         { title: 'swap', key: 'swap' },
         { title: 'ephemeral', key: 'OS-FLV-EXT-DATA:ephemeral' },
         ], API.flavor, 'flavors', '规格');
+        this.MiniHeaders = [
+            { title: '名字', key: 'name' },
+            { title: '内存', key: 'ram' },
+            { title: 'vcpu', key: 'vcpus' },
+        ]
         this.extraSpecsMap = {};
         this.isPublic = true;
     }
@@ -1072,8 +1077,8 @@ export class VolumePoolTable extends DataTable {
 export class ClusterTable extends DataTable {
     constructor() {
         super([
-            {title: '名字', key: 'name'},
-            {title: '认证地址', key: 'auth_url'},
+            { title: '名字', key: 'name' },
+            { title: '认证地址', key: 'auth_url' },
         ], API.cluster, 'clusters', '集群');
         this.selected = null;
         this.region = ''
@@ -1413,6 +1418,18 @@ export class ImageDataTable extends DataTable {
         this.KB = 1024;
         this.MB = this.KB * 1024;
         this.GB = this.MB * 1024;
+        this.visibility = null;
+        this.MiniHeaders = [
+            { title: 'ID', key: 'id' },
+            { title: '名字', key: 'name' },
+        ]
+    }
+    refresh() {
+        let filter = {}
+        if (this.visibility) {
+            filter.visibility = this.visibility;
+        }
+        super.refresh(filter)
     }
     humanSize(image) {
         if (!image.size) {
@@ -1562,7 +1579,7 @@ export class LimitsCard {
     }
 }
 export class ServerTaskWaiter {
-    constructor(server, onUpdatedServer=null) {
+    constructor(server, onUpdatedServer = null) {
         this.server = server
         this.onUpdatedServer = onUpdatedServer
     }
@@ -1619,7 +1636,7 @@ export class ServerTaskWaiter {
             Notify.error(`${this.server.name || this.server.id} ${action} 失败`)
         }
     }
-    async waitMigrated(){
+    async waitMigrated() {
         let action = "迁移"
         // TODO: show server first
         let srcHost = this.server['OS-EXT-SRV-ATTR:host'];

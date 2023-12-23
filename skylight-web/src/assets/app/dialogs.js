@@ -67,6 +67,15 @@ class Dialog {
     itemProps(item){
         return { name: item.name, title: item.id, subtitle: item.name }
     }
+    validName(){
+        if (!this.name) { return '名字不能为空' }
+    }
+    valid(){
+        let msg = this.validName()
+        if (msg){
+            throw Error(msg)
+        }
+    }
 }
 
 export class ProjectUserDialog extends Dialog {
@@ -309,7 +318,6 @@ export class NewSubnetDialog extends Dialog {
         if (items[1].search(/^[0-9]+$/) < 0 || parseInt(items[1]) > 32) { return '非法的cidr'; }
         let ipList = items[0].split('.');
         for (let i in ipList) {
-            console.log(`${ipList[i]} ${parseInt(ipList[i])}`)
             if (ipList[i].search(/^[0-9]+$/) < 0 || parseInt(ipList[i]) > 255) { return '非法的cidr'; }
         }
         return true;
@@ -733,14 +741,14 @@ export class NewClusterDialog extends Dialog {
 export class NewServerDialog extends Dialog {
     constructor(serverTable) {
         super({
-            name: '', flavor: '', image: '', netId: null,
+            name: '', netId: null,
             nums: [1,1], az: null, host: null,
             password: ''
         });
+        this.flavor = {};
+        this.image = {};
         this.serverTable = serverTable;
         this.portId = null;
-        this.flavors = [];
-        this.images = [];
         this.networks = [];
         this.ports = [];
         this.azList = [];
@@ -776,18 +784,7 @@ export class NewServerDialog extends Dialog {
         this.networks = (await API.network.list()).networks;
     }
     async init() {
-        this.params.name = Utils.getRandomName('server');
-        // 获取规格
-        this.flavors = (await API.flavor.detail()).flavors;
-        this.flavors.sort(function (flavor1, flavor2) { return flavor1.name.localeCompare(flavor2.name) })
-        if (this.flavors.length > 0 && !this.params.flavor) {
-            this.params.flavor = this.flavors[0].id
-        }
-        // 获取镜像
-        this.images = (await API.image.listActive()).images;
-        if (this.images.length > 0 && !this.params.image) {
-            this.params.image = this.images[0].id
-        }
+        this.name = Utils.getRandomName('server');
     }
     async refreshVolumeTypes() {
         this.volumeTypes = (await API.volumeType.list()).volume_types;
@@ -811,15 +808,27 @@ export class NewServerDialog extends Dialog {
         }
         this.securityGroups = (await API.sg.list({ tenant_id: this.authInfo.project.id })).security_groups;
     }
+    validImage(){
+        if (!this.image.id) { return '请选择镜像' }
+    }
+    validFlavor(){
+        if (!this.flavor.id) { return '请选择规格' }
+    }
+    valid(){
+        super.valid()
+        let msg = this.validImage()
+        if (msg) {throw Error(msg)}
+        msg = this.validFlavor()
+        if (msg) {throw Error(msg)}
+    }
     async commit() {
-        if (!this.params.name) { notify.error(`实例名不能为空`); return; }
-        if (!this.params.flavor) { notify.error(`请选择规格`); return; }
-        if (!this.params.image) { notify.error(`请选择镜像`); return; }
-
-        if (!this.params.name) {
-            notify.error(`实例名字不能为空`);
+        try {
+            this.valid()
+        } catch (e) {
+            notify.error(e.message);
             return;
         }
+
         let networks = [];
         if (this.portId) {
             networks.push({ port: this.portId });
@@ -842,7 +851,7 @@ export class NewServerDialog extends Dialog {
         if (this.securityGroup) {
             data.securityGroup = [{ name: this.securityGroup }];
         }
-        let body = await API.server.boot(this.params.name, this.params.flavor, this.params.image, data)
+        let body = await API.server.boot(this.name, this.flavor.id, this.image.id, data)
         notify.info(`实例 ${this.params.name} 创建中...`);
         // let serverTasks = new ServerTasks();
         // serverTasks.add(body.server.id, 'building')
@@ -994,7 +1003,6 @@ export class FlavorExtraDialog extends Dialog {
         } 
         let extraSpecs = {}
         extraSpecs[item.key] = item.value;
-        console.log(this.flavor)
         await API.flavor.updateExtras(this.flavor.id, extraSpecs);
         notify.success(`属性 ${item.key} 添加成功`);
         // Vue.set(this.extraSpecs, item.key, item.value);
@@ -2236,7 +2244,6 @@ export class ServerActionsDialog extends Dialog {
     }
     async getserverAction(reqId) {
         let action = (await API.server.actionShow(this.server.id, reqId));
-        console.log(action.events);
     }
 }
 export class ServerActionEventsDialog extends Dialog {

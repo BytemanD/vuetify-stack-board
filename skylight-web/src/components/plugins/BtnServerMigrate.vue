@@ -3,7 +3,6 @@
         <template v-slot:activator="{ props }">
             <v-btn variant="text" v-bind="props" color="warning" class="ml-1" :disabled="servers.length == 0">
                 迁移
-                <!-- {{ display }} -->
             </v-btn>
         </template>
         <v-card>
@@ -26,7 +25,7 @@
 
 <script setup>
 
-import { ref, reactive, defineProps, defineEmits } from 'vue';
+import { reactive, defineProps, defineEmits, watch } from 'vue';
 import API from '@/assets/app/api';
 
 import { MigrateDialog } from '@/assets/app/dialogs';
@@ -37,13 +36,14 @@ const progs = defineProps({
     variant: { type: String, default: 'text' },
     servers: { type: Array, default: [], required: true, },
 })
-
 const emits = defineEmits(['updateServer'])
 
-var display = ref(false);
 var dialog = reactive(new MigrateDialog())
 
-dialog.servers = progs.servers;
+watch(() => progs.servers, (newValue, oldValue) => {
+    dialog.servers = newValue;
+    dialog.nodes = [];
+})
 
 function getServerId(server) {
     return typeof server == 'object' ? server.id : server
