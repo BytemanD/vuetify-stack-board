@@ -1,17 +1,18 @@
 <template>
     <v-dialog v-model="dialog.show" width="500">
         <template v-slot:activator="{ props }">
-            <v-btn variant="text" v-bind="props" color="warning" class="ml-1" :disabled="servers.length == 0">
-                迁移
-            </v-btn>
+            <v-btn variant="text" v-bind="props" color="warning" class="ml-1" :disabled="servers.length == 0">迁移</v-btn>
         </template>
         <v-card>
             <v-card-title class="headline warning" primary-title>迁移</v-card-title>
             <v-card-text>
-                <v-switch density="compact" color="info" persistent-hint v-model="dialog.smart" label="智能模式"
-                    hint=智能模式根据虚拟机状态选择冷迁移还是热迁移></v-switch>
-                <v-switch hide-details v-model="dialog.liveMigrate" label="热迁移" :disabled="dialog.smart"></v-switch>
-                <v-select clearable :items="dialog.nodes" label="目标节点" v-model="dialog.host"
+                {{ dialog.migrateMode }}
+                <v-radio-group color="info" mandatory label='选择迁移模式' v-model="dialog.migrateMode">
+                    <v-radio label="自动(根据虚拟机状态选择冷迁移还是热迁移)" value="auto"></v-radio>
+                    <v-radio label="热迁移" value="live"></v-radio>
+                    <v-radio label="冷迁移" value="cold"></v-radio>
+                </v-radio-group>
+                <v-select clearable :items="dialog.nodes" label="目标节点" class="ml-4" v-model="dialog.host"
                     @click="dialog.refreshHosts()"></v-select>
             </v-card-text>
             <v-divider></v-divider>
@@ -27,9 +28,9 @@
 
 import { reactive, defineProps, defineEmits, watch } from 'vue';
 import API from '@/assets/app/api';
+import notify from '@/assets/app/notify.js';
 
 import { MigrateDialog } from '@/assets/app/dialogs';
-
 import { ServerTaskWaiter } from '@/assets/app/tables';
 
 const progs = defineProps({
@@ -66,7 +67,13 @@ async function migrate() {
         dialog.servers.push(serverId)
     }
     // TODO: move commit() code to this page
-    await dialog.commit();
+    try {
+        await dialog.commit();
+    }
+    catch (error) {
+        notify.warning(error);
+        return
+    }
     dialog.show = false;
     for (let i in progs.servers) {
         let server = await getServer(getServerId(progs.servers[i]))

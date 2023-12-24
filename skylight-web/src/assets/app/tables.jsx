@@ -1661,12 +1661,32 @@ export class ServerTaskWaiter {
             Notify.error(`${this.server.name || this.server.id} ${action} 失败`)
         }
     }
+    async waitPaused() {
+        let action = 'start'
+        await this.waitServerStatus(['PAUSED', 'ERROR'])
+        if (this.server.status.toUpperCase() == 'PAUSED') {
+            Notify.success(`${this.server.name || this.server.id} ${action} 成功`)
+        } else {
+            Notify.error(`${this.server.name || this.server.id} ${action} 失败`)
+        }
+    }
     async waitMigrated() {
         let action = "迁移"
         // TODO: show server first
         let srcHost = this.server['OS-EXT-SRV-ATTR:host'];
         await this.waitServerStatus(['ACTIVE', 'SHUTOFF', 'ERROR'])
         if (this.server['OS-EXT-SRV-ATTR:host'] != srcHost) {
+            Notify.success(`${this.server.name || this.server.id} ${action} 成功`)
+        } else {
+            Notify.error(`${this.server.name || this.server.id} ${action} 失败`)
+        }
+    }
+    async waitRebuilded() {
+        let action = "重建"
+        // TODO: show server first
+        let srcHost = this.server['OS-EXT-SRV-ATTR:host'];
+        await this.waitServerStatus(['ACTIVE', 'SHUTOFF', 'ERROR'])
+        if (this.server.status != 'ERROR') {
             Notify.success(`${this.server.name || this.server.id} ${action} 成功`)
         } else {
             Notify.error(`${this.server.name || this.server.id} ${action} 失败`)

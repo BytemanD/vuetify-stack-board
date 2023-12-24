@@ -17,11 +17,6 @@
                   class="pa-0">
                   {{ $t('stop') }}
                 </v-btn>
-
-                <v-btn color="success" v-on:click="table.unpauseSelected()" class="ma-0 pa-0" variant="text"
-                  :disabled="table.selected.length == 0">{{ $t('unpause') }}</v-btn>
-                <v-btn color="warning" v-on:click="table.pauseSelected()" variant="text"
-                  :disabled="table.selected.length == 0">{{ $t('pause') }}</v-btn>
                 <v-menu>
                   <template v-slot:activator="{ props }">
                     <v-btn color="primary" v-bind="props" :disabled="table.selected.length == 0" class="pa-0">
@@ -41,7 +36,7 @@
 
                 <ServerMigrateDialog :servers="table.selected" />
                 <ServerEvacuateDialog :servers="table.selected" />
-                <ServerResetStateDialog :servers="table.selected" @completed="table.refresh()" />
+                <btn-server-reset-state :servers="table.selected" @updateServer="(server) => {table.updateItem(server)}"/>
 
                 <v-spacer></v-spacer>
                 <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除实例?"
@@ -213,7 +208,6 @@ import ChipLink from '@/components/plugins/ChipLink.vue';
 import ChangeServerNameDialog from './dialogs/ChangeServerNameDialog.vue';
 import ServerActionDialog from './dialogs/ServerActionDialog.vue';
 import ServerMigrateDialog from './dialogs/ServerMigrateDialog.vue';
-import ServerResetStateDialog from './dialogs/ServerResetStateDialog.vue';
 import ServerConsoleLogDialog from './dialogs/ServerConsoleLogDialog.vue';
 import ServerChangePassword from './dialogs/ServerChangePassword.vue';
 import ServerVolumes from './dialogs/ServerVolumes.vue';
@@ -223,13 +217,16 @@ import ServerResize from './dialogs/ServerResize.vue';
 import ServerRebuild from './dialogs/ServerRebuild.vue';
 import ServerEvacuateDialog from './dialogs/ServerEvacuateDialog.vue';
 import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
+import BtnServerResetState from '@/components/plugins/button/BtnServerResetState.vue';
 
 import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
+
 
 export default {
   components: {
     BtnIcon, ServerTopology, ChipLink,
-    ServerMigrateDialog, ServerEvacuateDialog, ServerResetStateDialog,
+    ServerMigrateDialog, ServerEvacuateDialog,
+    BtnServerResetState,
     ChangeServerNameDialog,
     ServerActionDialog,
     ServerConsoleLogDialog,

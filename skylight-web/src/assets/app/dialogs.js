@@ -596,11 +596,10 @@ export class MigrateDialog extends Dialog {
     constructor() {
         super();
         this.servers = [];
-        this.liveMigrate = true;
-        this.smart = true;
         this.nodes = [];
         this.host = null;
         this.serverTable = null;
+        this.migrateMode = 'auto'
     }
 
     async init(servers, serverTable) {
@@ -616,12 +615,13 @@ export class MigrateDialog extends Dialog {
         return ['ACTIVE', 'PAUSE'].indexOf(server.status.toUpperCase()) >= 0;
     }
     canLiveMigrate(server) {
-        if (this.smart) {
+        console.log(this.migrateMode)
+        if (this.migrateMode == 'auto') {
             return this.isValidLiveMigrateStatus(server);
         }
-        if (this.liveMigrate && this.isValidLiveMigrateStatus(server)) {
+        if (this.migrateMode == 'live' && this.isValidLiveMigrateStatus(server)) {
             return true;
-        } else if (!this.liveMigrate && server.status.toUpperCase() == 'SHUTOFF') {
+        } else if (!this.migrateMode == 'cold' && server.status.toUpperCase() == 'SHUTOFF') {
             return false;
         } else {
             throw Error(`虚拟机 ${server.name} 状态异常，无法迁移`)
@@ -634,19 +634,15 @@ export class MigrateDialog extends Dialog {
             if (['ACTIVE', 'SHUTOFF', 'PAUSE'].indexOf(server.status) < 0) {
                 continue
             }
-            try {
-                if (this.canLiveMigrate(server)) {
-                    await API.server.liveMigrate(server.id, this.host);
-                    notify.info(`实例 ${server.name} 热迁移中`);
-                } else {
-                    await API.server.migrate(server.id, this.host);
-                    notify.info(`实例 ${server.name} 冷迁移中`)
-                }
-                if (this.serverTable){
-                    this.serverTable.waitServerMigrated(server);
-                }
-            } catch (error) {
-                notify.warning(error);
+            if (this.canLiveMigrate(server)) {
+                await API.server.liveMigrate(server.id, this.host);
+                notify.info(`实例 ${server.name} 热迁移中`);
+            } else {
+                await API.server.migrate(server.id, this.host);
+                notify.info(`实例 ${server.name} 冷迁移中`)
+            }
+            if (this.serverTable){
+                this.serverTable.waitServerMigrated(server);
             }
         }
     }

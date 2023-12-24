@@ -2,7 +2,9 @@
     <v-menu>
         <template v-slot:activator="{ props }">
             <v-btn color="primary" :variant="variant" v-bind="props" :disabled="servers.length == 0" class="pa-0">
-                <v-icon>mdi-menu</v-icon>
+                <template v-slot:append>
+                    <v-icon>mdi-menu-down</v-icon>
+                </template>
                 {{ $t('reboot') }}
             </v-btn>
         </template>

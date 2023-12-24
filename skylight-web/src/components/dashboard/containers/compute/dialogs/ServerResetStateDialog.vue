@@ -1,8 +1,7 @@
 <template>
     <v-dialog v-model="display" width="500">
         <template v-slot:activator="{ props }">
-            <v-btn color="warning" class="ml-1" @click="showServerResetStateDialog = !showServerResetStateDialog"
-                :disabled="servers.length == 0" v-bind="props">重置状态</v-btn>
+            <v-btn color="warning" class="ml-1" :disabled="servers.length == 0" v-bind="props">重置状态</v-btn>
         </template>
 
         <v-card>
@@ -28,7 +27,6 @@ import { ServerResetStateDialog } from '@/assets/app/dialogs';
 
 export default {
     props: {
-        show: Boolean,
         servers: Array,
     },
     data: () => ({

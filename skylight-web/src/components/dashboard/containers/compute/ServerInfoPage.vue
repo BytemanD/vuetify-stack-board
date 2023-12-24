@@ -16,7 +16,11 @@
               <v-table density="compact" class="text-left">
                 <tr>
                   <th>实例ID</th>
-                  <td>{{ server.id }}<v-btn variant="text" color="info" @click="loginVnc()">远程登录</v-btn></td>
+                  <td>
+                    {{ server.id }}
+                    <v-btn variant="text" color="info" @click="loginVnc()">远程登录</v-btn>
+                    <v-btn density="compact" variant="text" icon="mdi-refresh" @click="refreshServer()"></v-btn>
+                  </td>
                 </tr>
                 <tr>
                   <th>实例名</th>
@@ -54,12 +58,11 @@
                 <tr>
                   <th>实例状态</th>
                   <td style="min-width: 120px">
-                    <span v-if="server.status=='ERROR'" class="text-red">{{ server.status }}</span>
+                    <span v-if="server.status == 'ERROR'" class="text-red">{{ server.status }}</span>
                     <span v-else>{{ server.status }}</span>
-                    <!-- <v-btn variant="text" color="warning">重置状态</v-btn> -->
                   </td>
                   <td>
-                    <v-btn variant="text" color="warning">重置状态</v-btn>
+                    <btn-server-reset-state :servers="[server]" @update-server="updateServer" />
                   </td>
                 </tr>
                 <tr>
@@ -72,21 +75,23 @@
                     <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] == 4"
                       color="red">mdi-power-off</v-icon>
                     <span v-else>UNKOWN</span>
-
                   </td>
                   <td>
-                    <v-btn variant="text" color="warning" :disabled="this.server.status != 'ACTIVE'" @click="stop()">
-                      {{ $t('stop') }}</v-btn>
-                    <v-btn variant="text" color="success" :disabled="this.server.status != 'SHUTOFF'" @click="start()">
-                      {{ $t('start') }}</v-btn>
                     <btn-server-reboot :servers="[server]" @updateServer="updateServer" />
-                    <v-btn variant="text" color="warning">暂停</v-btn>
+                    <v-btn variant="text" color="warning" v-if="this.server.status == 'ACTIVE'" @click="stop()">
+                      {{ $t('stop') }}</v-btn>
+                    <v-btn variant="text" color="success" v-if="this.server.status == 'SHUTOFF'" @click="start()">
+                      {{ $t('start') }}</v-btn>
+
+                    <v-btn variant="text" color="warning" v-if="this.server.status == 'ACTIVE'" @click="pause()">
+                      {{ $t('pause') }}</v-btn>
+                    <v-btn variant="text" color="success" v-if="this.server.status == 'PAUSED'" @click="unpause()">
+                      {{ $t('unpause') }}</v-btn>
                   </td>
                 </tr>
                 <tr>
                   <th>
                     任务状态
-                    <v-btn density="compact" variant="text" icon="mdi-refresh" @click="refreshServer()"></v-btn>
                   </th>
                   <td colspan="2">
                     <v-chip density="compact" variant="text" label color="warning"
@@ -128,7 +133,8 @@
                   <th>镜像ID</th>
                   <td>
                     {{ server.image && server.image.id }}
-                    <v-btn variant="text" color="warning">重装</v-btn>
+                    <!-- <v-btn variant="text" color="warning">重装</v-btn> -->
+                    <btn-server-rebuild :servers="[server]" @update-server="updateServer" />
                   </td>
                 </tr>
                 <tr>
@@ -157,8 +163,8 @@
           </v-row>
         </v-window-item>
         <v-window-item>
-          <v-alert v-if="!volumes || volumes.length == 0" color="warning" density="compact" variant="text"
-            class="mb-6" icon="mdi-alert">无云盘</v-alert>
+          <v-alert v-if="!volumes || volumes.length == 0" color="warning" density="compact" variant="text" class="mb-6"
+            icon="mdi-alert">无云盘</v-alert>
           <v-row>
             <v-col cols="12" md='6' lg="4" class="pa-4" v-for="item in volumes" :key="item.device">
               <server-volume-card :server-id="server.id" :volume="item"
@@ -174,23 +180,7 @@
         <v-window-item>
         </v-window-item>
       </v-window>
-
     </v-col>
-    <!-- <v-table density="compact">
-            <tbody>
-              <tr>
-                <td>属性</td>
-                <td>
-                  <template v-if="server.flavor">
-                    <v-chip label variant="text" class="mt-1 ml-1" density="compact"
-                      v-for="(v, k) in server.flavor.extra_specs" v-bind:key="k">
-                      {{ k }}={{ v }}
-                    </v-chip>
-                  </template>
-                </td>
-              </tr>
-            </tbody>
-          </v-table> -->
   </v-row>
 </template>
 
@@ -209,6 +199,8 @@ import ServerTopology from './dialogs/ServerTopology.vue';
 
 import ServerInterfaceCard from '../../../plugins/ServerInterfaceCard.vue';
 import ServerVolumeCard from '@/components/plugins/ServerVolumeCard.vue';
+import BtnServerResetState from '@/components/plugins/button/BtnServerResetState.vue';
+import BtnServerRebuild from '@/components/plugins/button/BtnServerRebuild.vue';
 
 import ChangeServerNameDialog from './dialogs/ChangeServerNameDialog.vue';
 import ServerActionDialog from './dialogs/ServerActionDialog.vue';
@@ -228,6 +220,7 @@ export default {
   components: {
     BtnIcon, ServerTopology, ServerInterfaceCard, ServerVolumeCard,
     BtnServerReboot, BtnServerMigrate,
+    BtnServerResetState, BtnServerRebuild,
     ServerMigrateDialog, ServerEvacuateDialog, ServerResetStateDialog,
     ChangeServerNameDialog,
     ServerActionDialog,
@@ -317,12 +310,18 @@ export default {
     },
     refreshServer: async function () {
       this.server = await API.server.show(this.serverId);
-      this.breadcrumbItems[this.breadcrumbItems.length-1] = this.server.name;
+      this.breadcrumbItems[this.breadcrumbItems.length - 1] = this.server.name;
+    },
+    refreshImage: async function () {
+      if (this.image && this.image.id == this.server.image.id) {
+        return
+      }
+      this.image = await API.image.show(this.server.image.id)
     },
     refresh: async function () {
       await this.refreshServer()
       if (this.server.image && this.server.image.id) {
-        this.image = await API.image.show(this.server.image.id)
+        await this.refreshImage()
       }
       this.interfaces = (await API.server.interfaceList(this.serverId)).interfaceAttachments
       this.volumes = (await API.server.volumeAttachments(this.serverId)).volumeAttachments
@@ -348,12 +347,28 @@ export default {
       let waiter = new ServerTaskWaiter(this.server)
       waiter.waitStarted()
     },
+    pause: async function () {
+      // TODO: use BtnServerStop
+      if (!this.server.id) { return }
+      await API.server.pause(this.serverId)
+      let waiter = new ServerTaskWaiter(this.server)
+      waiter.waitPaused()
+    },
+    unpause: async function () {
+      if (!this.server.id) { return }
+      await API.server.unpause(this.serverId)
+      let waiter = new ServerTaskWaiter(this.server)
+      waiter.waitStarted()
+    },
     updateServer: function (server) {
       for (var key in server) {
         if (this.server[key] == server[key]) {
           continue
         }
         this.server[key] = server[key]
+      }
+      if (this.server.image.id != this.image.id) {
+        this.refreshImage()
       }
     }
   },
