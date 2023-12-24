@@ -1,4 +1,4 @@
-# vuetify-stack-board
+# Skylight
 
 Openstack Dashboard with Vuetify
 
@@ -56,7 +56,7 @@ npm run build
 
 2. 启动后端服务:
    ```
-   python3 vstackboard/cmd/vsb.py serve --dev
+   python3 skylight/main.py serve --dev
    ```
 3. 启动前端服务:
    ```
