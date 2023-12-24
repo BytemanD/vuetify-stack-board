@@ -10,8 +10,8 @@
                             <v-toolbar density="compact" class="rounded-pill">
                                 <NewAggDialog @completed="table.refresh()" />
                                 <v-spacer></v-spacer>
-                                <v-btn icon="mdi-trash-can" color="red" :disabled="table.selected.length == 0"
-                                    @click="table.deleteSelected()"></v-btn>
+                                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除聚合?"
+                                    @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>
@@ -24,9 +24,6 @@
                         </v-col>
                     </v-row>
                 </template>
-
-
-
 
                 <template v-slot:[`item.host_num`]="{ item }">
                     <v-btn size="small" variant="text" icon color="info" @click="editAggHosts(item)">{{ item.hosts.length
@@ -57,13 +54,14 @@
 import { AggDataTable } from '@/assets/app/tables.jsx';
 import { Utils } from '@/assets/app/lib.js';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import NewAggDialog from './dialogs/NewAggDialog.vue';
 import AggHostDialog from './dialogs/AggHostsDialog';
 import AggAddHostsDialog from './dialogs/AggAddHostsDialog.vue';
 
 export default {
     components: {
-        NewAggDialog, AggHostDialog, AggAddHostsDialog
+        NewAggDialog, AggHostDialog, AggAddHostsDialog, DeleteComfirmDialog,
     },
 
     data: () => ({

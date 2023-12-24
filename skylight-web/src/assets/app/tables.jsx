@@ -117,6 +117,16 @@ class DataTable {
         this.items = this.bodyKey ? result[this.bodyKey] : result;
         return result;
     }
+    getSelecedItems(){
+        let items = [];
+        for (let i in this.items){
+            if (this.selected.indexOf(this.items[i].id) < 0) {
+                continue
+            }
+            items.push(this.items[i])
+        }
+        return items;
+    }
 }
 
 export class Server {
@@ -348,6 +358,7 @@ export class FlavorDataTable extends DataTable {
         this.extraSpecsMap = {};
         this.isPublic = true;
     }
+
     async refreshExtraSpecs() {
         for (let i in this.items) {
             let item = this.items[i];
@@ -376,7 +387,18 @@ export class KeypairDataTable extends DataTable {
         Utils.copyToClipboard(item.public_key)
         Notify.success(`公钥内容已复制`);
     }
+    getSelecedItems(){
+        let items = [];
+        for (let i in this.items){
+            if (this.selected.indexOf(this.items[i].name) < 0) {
+                continue
+            }
+            items.push(this.items[i])
+        }
+        return items;
+    }
     async refresh(filters = {}) {
+        this.loading = true;
         let body = null
         if (this.api.detail) {
             body = await this.api.detail(filters);
@@ -387,6 +409,7 @@ export class KeypairDataTable extends DataTable {
         body.keypairs.forEach(item => {
             this.items.push(item.keypair);
         })
+        this.loading = false;
         return body
     }
     removeItem(name) {
@@ -1145,24 +1168,26 @@ export class DomainTable extends DataTable {
         // this.newItemDialog = new NewDomainDialog();
     }
     async deleteSelected() {
-        for (let i in this.selected) {
-            let domain = this.selected[i];
+        let items = this.getSelecedItems();
+        for (let i in items) {
+            let domain = items[i];
             if (domain.enabled) {
                 Notify.warning(`Domin ${domain.name} 处于enabled状态, 请先设置disable后再删除`);
                 return;
             }
             await API.domain.delete(domain.id);
+            Notify.success(`Domin ${domain.name} 已删除`);
         }
-        super.deleteSelected();
+        // this.refresh();
     }
     async toggleEnabled(domain) {
         try {
             if (domain.enabled) {
-                await API.domain.enable(domain.id)
-                Notify.success(`Domain ${domain.name} 已启用`)
-            } else {
                 await API.domain.disable(domain.id)
                 Notify.success(`Domain ${domain.name} 已关闭`)
+            } else {
+                await API.domain.enable(domain.id)
+                Notify.success(`Domain ${domain.name} 已启用`)
             }
         } catch {
             Notify.success(`Domain ${domain.name} 操作失败`)
@@ -1215,7 +1240,7 @@ export class EndpointTable extends DataTable {
         super([
             { title: '服务名', key: 'service_name' },
             { title: '服务类型', key: 'service_type' },
-            { title: 'interface', key: 'interface' },
+            { title: '接口', key: 'interface' },
             { title: 'url', key: 'url' },
             { title: 'region', key: 'region' }
         ], API.endpoint, 'endpoints');

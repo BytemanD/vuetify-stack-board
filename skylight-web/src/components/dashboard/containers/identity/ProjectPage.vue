@@ -1,7 +1,6 @@
 <template>
   <v-row>
 
-
     <v-col cols="12">
       <v-data-table show-expand single-expand density='compact' show-select :loading="table.loading"
         :headers="table.headers" :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search"
@@ -13,7 +12,8 @@
               <v-toolbar density="compact" class="rounded-pill">
                 <NewProjectDialog @completed="table.refresh()" />
                 <v-spacer></v-spacer>
-                <v-btn color="red" icon="mdi-trash-can" @click="table.deleteSelected()"></v-btn>
+                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除项目?"
+                  @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()"/>
               </v-toolbar>
             </v-col>
             <v-col cols="12" md="3" sm="4">
@@ -36,7 +36,7 @@
           <v-icon color="red" v-else>mdi-close-circle</v-icon>
         </template>
         <template v-slot:[`item.actions`]="{ item }">
-          <v-btn text size="small" color="purple" @click="openProjectUserDialog(item)">用户管理</v-btn>
+          <v-btn variant='text' size="small" color="purple" @click="openProjectUserDialog(item)">用户管理</v-btn>
         </template>
 
         <template v-slot:expanded-row="{ columns, item }">
@@ -61,6 +61,7 @@
 import I18N from '@/assets/app/i18n';
 import { ProjectTable } from '@/assets/app/tables';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import NewProjectDialog from './dialogs/NewProjectDialog.vue';
 import UserDialog from './dialogs/UserDialog.vue';
 import RoleDialog from './dialogs/RoleDialog.vue';
@@ -68,7 +69,8 @@ import ProjectUserDialog from './dialogs/ProjectUserDialog.vue';
 
 export default {
   components: {
-    NewProjectDialog, UserDialog, RoleDialog, ProjectUserDialog
+    NewProjectDialog, UserDialog, RoleDialog, ProjectUserDialog,
+    DeleteComfirmDialog,
   },
 
   data: () => ({

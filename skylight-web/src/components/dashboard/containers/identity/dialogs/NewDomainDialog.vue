@@ -6,21 +6,18 @@
     <v-card>
       <v-card-title class="primary lighten-2" primary-title>添加Domain</v-card-title>
       <v-card-text>
-        <v-row>
-          <v-col cols="10">
-            <v-text-field label="*名字" placeholder="请输入Domain名" v-model="dialog.name"></v-text-field>
-          </v-col>
-          <v-col cols="2" class="my-auto">
+        <v-text-field label="*名字" placeholder="请输入Domain名" v-model="dialog.name">
+          <template v-slot:append>
             <v-btn variant="text" color="primary" @click="dialog.randomName()">随机名字</v-btn>
-          </v-col>
-        </v-row>
-        <v-text-field label="描述" placeholder="请输入描述信息" v-model="dialog.description"></v-text-field>
-        <v-switch hide-details class="my-auto" v-model="dialog.enabled"></v-switch>
+          </template>
+        </v-text-field>
+        <v-text-field label="描述" hide-details placeholder="请输入描述信息" v-model="dialog.description"></v-text-field>
+        <v-switch hide-details class="my-auto" v-model="dialog.enabled" label="启用" color="info"></v-switch>
       </v-card-text>
       <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn variant="flat" color="primary" @click="commit()">创建</v-btn>
+        <v-btn color="primary" @click="commit()">创建</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

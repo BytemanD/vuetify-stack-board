@@ -14,8 +14,8 @@
                                     @click="showSnapshotResetStateDialog = !showSnapshotResetStateDialog"
                                     :disabled="table.selected.length == 0">状态重置</v-btn>
                                 <v-spacer></v-spacer>
-                                <v-btn small color="red" icon="mdi-trash-can" @click="table.deleteSelected()"
-                                    :disabled="table.selected.length == 0"></v-btn>
+                                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除快照?"
+                                    @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>
@@ -50,13 +50,13 @@
 <script>
 import { SnapshotTable } from '@/assets/app/tables.jsx';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import NewSnapshotDialog from './dialogs/NewSnapshotDialog.vue';
 import SnapshotStatusResetDialog from './dialogs/SnapshotStatusResetDialog.vue';
 
 export default {
     components: {
-        NewSnapshotDialog,
-        SnapshotStatusResetDialog
+        NewSnapshotDialog, SnapshotStatusResetDialog, DeleteComfirmDialog
     },
     data: () => ({
         table: new SnapshotTable(),

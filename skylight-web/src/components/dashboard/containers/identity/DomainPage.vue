@@ -7,9 +7,10 @@
           <v-row>
             <v-col cols="12" md="6" sm="12">
               <v-toolbar density="compact" class="rounded-pill">
-                <NewDomainDialog @completed="table.refresh()"/>
+                <NewDomainDialog @completed="table.refresh()" />
                 <v-spacer></v-spacer>
-                <v-btn icon="mdi-trash-can" color="red" @click="table.deleteSelected()"></v-btn>
+                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除域?"
+                  @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
               </v-toolbar>
             </v-col>
             <v-col cols="12" md="4" sm="6">
@@ -17,30 +18,29 @@
                 hide-details></v-text-field>
             </v-col>
             <v-col cols="12" md="2" sm="12">
-              <v-btn icon="mdi-refresh" variant="text" color="info" v-on:click="table.refresh()"><v-icon></v-icon></v-btn>
+              <v-btn icon="mdi-refresh" variant="text" color="info" v-on:click="table.refresh()"></v-btn>
             </v-col>
           </v-row>
         </template>
 
         <template v-slot:[`item.enabled`]="{ item }">
-          <v-switch class="my-auto" :disabled="item.id == 'default'" v-model="item.enabled" hide-details
+          <v-switch :disabled="item.id == 'default'" v-model="item.enabled" hide-details color="success"
             @click="table.toggleEnabled(item)"></v-switch>
         </template>
-
       </v-data-table>
     </v-col>
-
   </v-row>
 </template>
 
 <script>
 import { DomainTable } from '@/assets/app/tables';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import NewDomainDialog from './dialogs/NewDomainDialog.vue';
 
 export default {
   components: {
-    NewDomainDialog,
+    NewDomainDialog, DeleteComfirmDialog,
   },
 
   data: () => ({

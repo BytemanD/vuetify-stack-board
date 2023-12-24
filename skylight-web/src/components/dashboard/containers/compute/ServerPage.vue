@@ -44,8 +44,8 @@
                 <ServerResetStateDialog :servers="table.selected" @completed="table.refresh()" />
 
                 <v-spacer></v-spacer>
-                <v-btn class="ml-1" color="red" icon="mdi-trash-can" @click="deleteSelected()"
-                  :disabled="table.selected.length == 0"></v-btn>
+                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除实例?"
+                  @click:comfirm="deleteSelected()" :items="table.getSelecedItems()" />
               </v-toolbar>
             </v-col>
             <v-col cols="12" md="3" sm="6">
@@ -70,7 +70,7 @@
 
         <template v-slot:[`item.name`]="{ item }">
           <chip-link hide-link-icon color="default" density="compact" :link="'/dashboard/server/' + item.id"
-          :label="item.name" />
+            :label="item.name" />
           <v-icon @click="openChangeServerNameDialog(item)" size="x-small">mdi-pencil-minus</v-icon>
           <v-icon @click="loginVnc(item)" size="x-small" icon>mdi-console</v-icon>
         </template>
@@ -99,13 +99,14 @@
           <v-icon size='small' v-if="item['OS-EXT-STS:power_state'] == 1" color="success">mdi-power-on</v-icon>
           <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] == 3" color="warning">mdi-pause</v-icon>
           <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] == 4" color="red">mdi-power-off</v-icon>
-          <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] != 0" color="warning" class="mdi-spin">mdi-loading</v-icon>
+          <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] != 0" color="warning"
+            class="mdi-spin">mdi-loading</v-icon>
         </template>
         <template v-slot:[`item.addresses`]="{ item }">
           <div v-for="(addresses, j) in table.parseFirstAddresses(item)" v-bind:key="j">
             <v-chip label size="x-small" class="mr-1 mb-1">{{ addresses.join(' | ') }}</v-chip>
           </div>
-          <span v-if="Object.keys(item.addresses).length > 1 ">...</span>
+          <span v-if="Object.keys(item.addresses).length > 1">...</span>
         </template>
         <template v-slot:[`item.flavor`]="{ item }"><span class="cyan--text">
             {{ item.flavor && item.flavor.original_name }}</span></template>
@@ -223,6 +224,8 @@ import ServerRebuild from './dialogs/ServerRebuild.vue';
 import ServerEvacuateDialog from './dialogs/ServerEvacuateDialog.vue';
 import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
+
 export default {
   components: {
     BtnIcon, ServerTopology, ChipLink,
@@ -234,6 +237,7 @@ export default {
     ServerVolumes, ServerInterfaces,
     ServerUpdateSG, ServerResize, ServerRebuild,
     ServerGroupDialog,
+    DeleteComfirmDialog,
   },
 
   data: () => ({

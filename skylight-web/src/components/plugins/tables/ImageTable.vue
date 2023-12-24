@@ -82,6 +82,7 @@
 import { ImageDataTable } from '@/assets/app/tables';
 import NewImageVue from '@/components/dashboard/containers/image/dialogs/NewImage.vue';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import ImageDeleteSmartDialog from '@/components/dashboard/containers/image/dialogs/ImageDeleteSmartDialog.vue';
 import ImagePropertiesDialog from '@/components/dashboard/containers/image/dialogs/ImagePropertiesDialog.vue';
 import TasksDialog from '@/components/dashboard/containers/image/dialogs/TasksDialog.vue';
@@ -89,7 +90,7 @@ import TasksDialog from '@/components/dashboard/containers/image/dialogs/TasksDi
 export default {
   components: {
     NewImageVue, ImageDeleteSmartDialog, ImagePropertiesDialog,
-    TasksDialog,
+    TasksDialog, DeleteComfirmDialog,
   },
   props: {
     editable: { type: Boolean, default: false },

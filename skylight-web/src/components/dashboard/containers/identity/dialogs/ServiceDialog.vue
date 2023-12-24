@@ -17,8 +17,9 @@
                                     <!-- TODO -->
                                     <v-btn color="primary" icon="mdi-plus"></v-btn>
                                     <v-spacer></v-spacer>
-                                    <v-btn color="red" icon="mdi-trash-can"
-                                        @click="dialog.serviceTable.deleteSelected()"></v-btn>
+                                    <delete-comfirm-dialog :disabled="dialog.serviceTable.selected.length == 0" title="确定删除安全组?"
+                                        @click:comfirm="dialog.serviceTable.deleteSelected()"
+                                        :items="dialog.serviceTable.getSelecedItems()" />
                                 </v-toolbar>
                             </v-col>
                             <v-col>
@@ -42,7 +43,12 @@ import i18n from '@/assets/app/i18n';
 import { Utils } from '@/assets/app/lib';
 import { ServiceDialog } from '@/assets/app/dialogs';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
+
 export default {
+    components: {
+        DeleteComfirmDialog
+    },
     props: {
     },
     data: () => ({

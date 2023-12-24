@@ -6,23 +6,18 @@
         <v-card>
             <v-card-title class="headline primary lighten-2" primary-title>新建安全组</v-card-title>
             <v-card-text>
-                <v-row>
-                    <v-col cols="10">
-                        <v-text-field label="*名字" placeholder="请输入安全组名" v-model="dialog.name"></v-text-field>
-                    </v-col>
-                    <v-col cols="2" class="my-auto">
+                <v-text-field density="compact" label="*名字" placeholder="请输入安全组名" v-model="dialog.name">
+                    <template v-slot:append>
                         <v-btn variant="text" color="primary" @click="dialog.refreshName()">随机名字</v-btn>
-                    </v-col>
-                    <v-col cols="12">
-                        <v-text-field hide-details label="描述" outlined density='compact' placeholder="请输入描述信息"
-                            v-model="dialog.description"></v-text-field>
-                    </v-col>
-                </v-row>
+                    </template>
+                </v-text-field>
+                <v-text-field hide-details label="描述" outlined density='compact' placeholder="请输入描述信息"
+                    v-model="dialog.description"></v-text-field>
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn variant="flat" color="primary" @click="commit()">创建</v-btn>
+                <v-btn color="primary" @click="commit()">创建</v-btn>
             </v-card-actions>
         </v-card>
     </v-dialog>
@@ -58,8 +53,6 @@ export default {
             if (this.display) {
                 this.dialog.init(this.network);
             }
-            this.display = newVal;
-            this.$emit("update:show", this.display);
         }
     },
 };

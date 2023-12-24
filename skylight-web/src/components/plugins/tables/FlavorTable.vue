@@ -11,8 +11,8 @@
               <v-toolbar v-if="editable" density="compact" class="rounded-pill">
                 <NewFlavorDialog @completed="table.refresh()" />
                 <v-spacer></v-spacer>
-                <v-btn icon="mdi-trash-can" color="red" :disabled="table.selected.length == 0"
-                  @click="table.deleteSelected()"></v-btn>
+                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除规格?"
+                  @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
               </v-toolbar>
             </v-col>
             <v-col>
@@ -56,6 +56,7 @@
 import { Utils } from '@/assets/app/lib.js';
 
 import { FlavorDataTable } from '@/assets/app/tables';
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 
 import NewFlavorDialog from '@/components/dashboard/containers/compute/dialogs/NewFlavorDialog.vue';
 import FlavorExtraDialog from '@/components/dashboard/containers/compute/dialogs/FlavorExtraDialog.vue';
@@ -63,7 +64,7 @@ import FlavorExtraDialog from '@/components/dashboard/containers/compute/dialogs
 
 export default {
   components: {
-    NewFlavorDialog, FlavorExtraDialog,
+    NewFlavorDialog, FlavorExtraDialog, DeleteComfirmDialog,
   },
   props: {
     editable: { type: Boolean, default: false },

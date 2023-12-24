@@ -11,8 +11,8 @@
                             <v-toolbar density="compact" class="rounded-pill">
                                 <NewRouterDialog @completed="table.refresh()" />
                                 <v-spacer></v-spacer>
-                                <v-btn icon="mdi-trash-can" color="red" :disabled="table.selected.length == 0"
-                                    v-on:click="table.deleteSelected()"></v-btn>
+                                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除路由?"
+                                    @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>
@@ -60,12 +60,13 @@
 <script>
 import { RouterDataTable } from '@/assets/app/tables';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import NewRouterDialog from './dialogs/NewRouterDialog.vue';
 import RouterInterfacesDialog from './dialogs/RouterInterfacesDialog.vue';
 
 export default {
     components: {
-        NewRouterDialog, RouterInterfacesDialog
+        NewRouterDialog, RouterInterfacesDialog, DeleteComfirmDialog,
     },
     data: () => ({
         table: new RouterDataTable(),

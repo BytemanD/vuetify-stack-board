@@ -9,10 +9,11 @@
                 <v-row>
                     <v-col cols="10">
                         <v-text-field hide-details label="*名字" placeholder="请输入镜像名" v-model="dialog.name"
-                            :rules="[dialog.checkNotNull]"></v-text-field>
-                    </v-col>
-                    <v-col cols="2" class="my-auto">
-                        <v-btn hide-details variant="text" color="primary" @click="dialog.randomName()">随机名字</v-btn>
+                            :rules="[dialog.checkNotNull]">
+                            <template v-slot:append>
+                                <v-btn hide-details variant="text" color="primary" @click="dialog.name = dialog.randomName()">随机名字</v-btn>
+                            </template>
+                        </v-text-field>
                     </v-col>
                     <v-col cols="6">
                         <v-file-input hide-details show-size label="镜像文件" v-model="dialog.file"
@@ -92,15 +93,10 @@ export default {
 
     },
     watch: {
-        show(newVal) {
-            this.display = newVal;
+        display(newVal) {
             if (this.display) {
                 this.dialog.init();
             }
-        },
-        display(newVal) {
-            this.display = newVal;
-            this.$emit("update:show", this.display);
         }
     },
 };

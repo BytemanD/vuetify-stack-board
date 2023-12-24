@@ -6,16 +6,14 @@
         <v-card>
             <v-card-title class="headline primary lighten-2" primary-title>添加项目</v-card-title>
             <v-card-text>
-                <v-row>
-                    <v-col cols="10">
-                        <v-text-field label="*名字" placeholder="请输入项目名" v-model="dialog.name"
-                            :rules="[dialog.checkNotNull]"></v-text-field>
-                    </v-col>
-                    <v-col cols="2" class="my-auto">
-                        <v-btn text color="primary" @click="dialog.randomName()">随机名字</v-btn>
-                    </v-col>
-                </v-row>
+                <v-text-field label="*名字" placeholder="请输入项目名" v-model="dialog.name"
+                    :rules="[dialog.checkNotNull]">
+                </v-text-field>
+                <template v-slot:append>
+                    <v-btn variant="text" color="primary" @click="dialog.refreshName()">随机名字</v-btn>
+                </template>
                 <v-select density='compact' outlined :items="dialog.domains" label="Domain"
+                    :item-props="dialog.itemProps"
                     item-text="name" item-value="id" v-model="dialog.domainId">
                 </v-select>
                 <v-text-field label="描述" placeholder="请输入描述信息"
@@ -56,8 +54,6 @@ export default {
             if (this.display) {
                 this.dialog.init();
             }
-            this.display = newVal;
-            this.$emit("update:show", this.display);
         }
     },
 };

@@ -4,19 +4,27 @@
             <v-btn v-bind="props" color="primary" variant="text">用户管理</v-btn>
         </template>
         <v-card>
-            <v-card-title class="headline primary lighten-2" primary-title>用户管理</v-card-title>
+            <v-card-title>用户管理</v-card-title>
             <v-card-text>
-                <v-row>
-                    <v-col>
-                        <v-btn color="red" @click="dialog.table.deleteSelected()">删除</v-btn>
-                    </v-col>
-                    <v-col>
-                        <v-text-field density='compact' single-line hide-details v-model="dialog.table.search" 
-                            label="搜索"></v-text-field>
-                    </v-col>
-                </v-row>
-                <v-data-table density='compact' show-select :headers="dialog.table.headers" :items="dialog.table.items" :search="dialog.table.search"
-                    :items-per-page="dialog.table.itemsPerPage" v-model="dialog.table.selected">
+                <v-data-table density='compact' show-select :headers="dialog.table.headers" :items="dialog.table.items"
+                    :search="dialog.table.search" :items-per-page="dialog.table.itemsPerPage"
+                    v-model="dialog.table.selected">
+
+                    <template v-slot:top>
+                        <v-row>
+                            <v-col>
+                                <v-toolbar density="compact" class="rounded-pill">
+                                    <v-spacer></v-spacer>
+                                    <delete-comfirm-dialog :disabled="dialog.table.selected.length == 0" title="确定删除用户?"
+                                        @click:comfirm="dialog.table.deleteSelected()" :items="dialog.table.getSelecedItems()"/>
+                                </v-toolbar>
+                            </v-col>
+                            <v-col>
+                                <v-text-field density='compact' single-line hide-details v-model="dialog.table.search"
+                                    label="搜索"></v-text-field>
+                            </v-col>
+                        </v-row>
+                    </template>
                 </v-data-table>
             </v-card-text>
         </v-card>
@@ -26,7 +34,12 @@
 <script>
 import { UsersDialog } from '@/assets/app/dialogs';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
+
 export default {
+    components: {
+        DeleteComfirmDialog
+    },
     props: {
     },
     data: () => ({

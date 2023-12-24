@@ -15,6 +15,12 @@ const notification = useNotification({})
     error(msg){
         notification.error(msg, {timeout: 5 * 1000})
     }
+    warn(msg){
+        notification.error(msg, {timeout: 5 * 1000})
+    }
+    warning(msg){
+        this.warn(msg)
+    }
 }
 
 export default new Notify()

@@ -57,15 +57,10 @@ export default {
 
   },
   watch: {
-    show(newVal) {
-      this.display = newVal;
+    display(newVal) {
       if (this.display) {
         this.dialog.init();
       }
-    },
-    display(newVal) {
-      this.display = newVal;
-      this.$emit("update:show", this.display);
     }
   },
 };

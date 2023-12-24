@@ -11,8 +11,8 @@
                             <v-toolbar density="compact" class="rounded-pill">
                                 <NewKeypairDialog @completed='table.refresh()' />
                                 <v-spacer></v-spacer>
-                                <v-btn icon="mdi-trash-can" color="red" :disabled="table.selected.length == 0"
-                                    @click="table.deleteSelected()"></v-btn>
+                                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除密钥对?"
+                                    @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>
@@ -20,7 +20,8 @@
                                 hide-details></v-text-field>
                         </v-col>
                         <v-col cols="1" class="text-center">
-                            <v-btn variant="text" icon="mdi-refresh" color="info" @click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
+                            <v-btn variant="text" icon="mdi-refresh" color="info"
+                                @click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
                         </v-col>
                     </v-row>
                 </template>
@@ -46,11 +47,12 @@
 import { KeypairDataTable } from '@/assets/app/tables.jsx';
 import { Utils } from '@/assets/app/lib.js';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import NewKeypairDialog from './dialogs/NewKeypairDialog.vue';
 
 export default {
     components: {
-        NewKeypairDialog
+        NewKeypairDialog, DeleteComfirmDialog
     },
 
     data: () => ({

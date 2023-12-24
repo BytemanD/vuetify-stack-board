@@ -1,5 +1,8 @@
 <template>
     <v-dialog v-model="display" width="600">
+        <template v-slot:activator="{ props }">
+            <v-btn v-bind="props" icon="mdi-plus" fab color="primary" class="mr-1"></v-btn>
+        </template>
         <v-card>
             <v-card-title class="headline primary" primary-title>添加角色</v-card-title>
             <v-card-text>
@@ -38,7 +41,7 @@ export default {
                 await this.dialog.commit()
                 this.display = false;
                 this.$emit('completed');
-            } catch (error){
+            } catch (error) {
                 MESSAGE.error(error.message);
             }
         }

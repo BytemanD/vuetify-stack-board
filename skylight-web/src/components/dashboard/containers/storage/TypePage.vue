@@ -10,9 +10,8 @@
                             <v-toolbar density="compact" class="rounded-pill">
                                 <NewVolumeType @completed="table.refresh()" />
                                 <v-spacer></v-spacer>
-                                <v-btn small class="mr-1" color="red" icon="mdi-trash-can" @click="table.deleteSelected()"
-                                    :disabled="table.selected.length == 0">
-                                </v-btn>
+                                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除类型?"
+                                    @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>
@@ -51,11 +50,12 @@
 <script>
 import { VolumeTypeTable } from '@/assets/app/tables.jsx';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import NewVolumeType from './dialogs/NewVolumeType.vue';
 
 export default {
     components: {
-        NewVolumeType
+        NewVolumeType, DeleteComfirmDialog,
     },
 
     data: () => ({

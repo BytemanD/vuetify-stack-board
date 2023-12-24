@@ -11,8 +11,8 @@
                             <v-toolbar density="compact" class="rounded-pill">
                                 <NewNetworkDialogVue @completed="table.refresh()" />
                                 <v-spacer></v-spacer>
-                                <v-btn icon="mdi-trash-can" color="red" :disabled="table.selected.length == 0"
-                                    v-on:click="table.deleteSelected()"></v-btn>
+                                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除网络?"
+                                    @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>
@@ -60,19 +60,21 @@
                 </template>
             </v-data-table>
         </v-col>
-        <NewSubnetDialog :show="showNewSubnetDialog"  @update:show="(e)=>showNewSubnetDialog=e"  :network="netToAddSubnet" @completed="refresh()" />
+        <NewSubnetDialog :show="showNewSubnetDialog" @update:show="(e) => showNewSubnetDialog = e" :network="netToAddSubnet"
+            @completed="refresh()" />
     </v-row>
 </template>
 
 <script>
 import { NetDataTable } from '@/assets/app/tables';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import NewNetworkDialogVue from './dialogs/NewNetworkDialog.vue';
 import NewSubnetDialog from './dialogs/NewSubnetDialog.vue'
 
 export default {
     components: {
-        NewNetworkDialogVue, NewSubnetDialog
+        NewNetworkDialogVue, NewSubnetDialog, DeleteComfirmDialog,
     },
     data: () => ({
         table: new NetDataTable(),

@@ -10,8 +10,8 @@
                             <v-toolbar density="compact" class="rounded-pill">
                                 <NewSecurityGroup @completed="table.refresh()" />
                                 <v-spacer></v-spacer>
-                                <v-btn icon="mdi-trash-can" color="red" :disabled="table.selected.length == 0"
-                                    v-on:click="table.deleteSelected()"></v-btn>
+                                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除安全组?"
+                                    @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>
@@ -49,12 +49,13 @@
 <script>
 import { SecurityGroupDataTable } from '@/assets/app/tables';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import NewSecurityGroup from './dialogs/NewSecurityGroup.vue';
 import SGRulesDialog from './dialogs/SGRulesDialog.vue';
 
 export default {
     components: {
-        NewSecurityGroup, SGRulesDialog
+        NewSecurityGroup, SGRulesDialog, DeleteComfirmDialog,
     },
     data: () => ({
         table: new SecurityGroupDataTable(),

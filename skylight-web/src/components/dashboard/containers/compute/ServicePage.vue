@@ -8,8 +8,11 @@
                     <v-row>
                         <v-col cols="12" md="7" sm="12">
                             <v-toolbar density="compact" class="rounded-pill">
-                                <v-btn color="red" icon="mdi-trash-can" :disabled="table.selected.length == 0"
-                                    @click="table.deleteSelected()"></v-btn>
+                                <v-spacer></v-spacer>
+                                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除计算服务?"
+                                    @click:comfirm="table.deleteSelected()"
+                                    :item-value-func="(item) => { return item.binary + '@' + item.host }"
+                                    :items="table.getSelecedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>
@@ -41,12 +44,14 @@
 </template>
 
 <script>
-import { ComputeServiceTable } from '@/assets/app/tables.jsx';
 import { Utils } from '@/assets/app/lib.js';
+import { ComputeServiceTable } from '@/assets/app/tables.jsx';
+
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 
 export default {
     components: {
-
+        DeleteComfirmDialog,
     },
 
     data: () => ({

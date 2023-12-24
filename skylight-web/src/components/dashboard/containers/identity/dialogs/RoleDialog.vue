@@ -6,28 +6,38 @@
         <v-card>
             <v-card-title class="headline primary lighten-2" primary-title>角色管理</v-card-title>
             <v-card-text>
-                <v-row class="mt-1">
-                    <v-col>
-                        <v-btn x-small fab class='mr-1' color="primary"
-                            @click="showNewRoleDialog = !showNewRoleDialog"><v-icon>mdi-plus</v-icon></v-btn>
-                        <v-btn small color="red" @click="table.deleteSelected()"
-                            :disabled="table.selected.length == 0">删除</v-btn>
-                    </v-col>
-                    <v-col>
-                        <v-select density='compact' outlined :items="dialog.domains" clearable label="Domain"
-                            item-text="name" item-value="id" v-model="dialog.domainId" v-on:change="changeDoamin()">
-                        </v-select>
-                    </v-col>
-                    <v-col cols="1">
-                        <v-btn fab x-small color="info" v-on:click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
-                    </v-col>
-                </v-row>
                 <v-data-table :headers="table.headers" :items="table.items" :items-per-page="table.itemsPerPage"
                     :search="table.search" density='compact' show-select v-model="table.selected">
+
+                    <template v-slot:top>
+                        <v-row>
+                            <v-col>
+                                <v-toolbar density="compact" class="rounded-pill">
+                                    <NewRoleDialog @completed="table.refresh()" />
+                                    <v-spacer></v-spacer>
+                                    <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除角色?"
+                                        @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
+                                </v-toolbar>
+                            </v-col>
+                            <v-col>
+                                <v-select density='compact' outlined :items="dialog.domains" clearable label="Domain"
+                                    :item-props="dialog.itemProps"
+                                    item-text="name" item-value="id" v-model="dialog.domainId" v-on:change="changeDoamin()">
+                                </v-select>
+                            </v-col>
+                            <v-col>
+                                <v-text-field density='compact' single-line hide-details v-model="table.search"
+                                    label="搜索"></v-text-field>
+                            </v-col>
+                            <v-col cols="1">
+                                <v-btn variant="text" color="info" v-on:click="table.refresh()" icon="mdi-refresh"></v-btn>
+                            </v-col>
+                        </v-row>
+                    </template>
                 </v-data-table>
             </v-card-text>
         </v-card>
-        <NewRoleDialog :show.sync="showNewRoleDialog" @completed="table.refresh()" />
+
     </v-dialog>
 </template>
     
@@ -35,11 +45,12 @@
 import { RoleTable } from '@/assets/app/tables';
 import { RolesDialog } from '@/assets/app/dialogs';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import NewRoleDialog from './NewRoleDialog.vue';
 
 export default {
     components: {
-        NewRoleDialog
+        NewRoleDialog, DeleteComfirmDialog
     },
     props: {
     },

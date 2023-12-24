@@ -11,8 +11,8 @@
                             <v-toolbar density="compact" class="rounded-pill">
                                 <NewQosPolicyDialog @completed="table.refresh()" />
                                 <v-spacer></v-spacer>
-                                <v-btn icon="mdi-trash-can" color="red" :disabled="table.selected.length == 0"
-                                    v-on:click="table.deleteSelected()"></v-btn>
+                                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除QoS策略?"
+                                    @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>
@@ -58,12 +58,13 @@
 <script>
 import { QosPolicyDataTable } from '@/assets/app/tables';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import NewQosPolicyDialog from './dialogs/NewQosPolicyDialog.vue';
 import QosPolicyRulesDialog from './dialogs/QosPolicyRulesDialog.vue';
 
 export default {
     components: {
-        NewQosPolicyDialog, QosPolicyRulesDialog,
+        NewQosPolicyDialog, QosPolicyRulesDialog,DeleteComfirmDialog,
     },
     data: () => ({
         table: new QosPolicyDataTable(),

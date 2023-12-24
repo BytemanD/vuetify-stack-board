@@ -12,21 +12,20 @@
                                 <NewBackupVue @completed="table.refresh()" />
                                 <v-btn color="warning" @click="showBackupStateResetDialog = !showBackupStateResetDialog"
                                     :disabled="table.selected.length == 0">状态重置</v-btn>
-                                    <v-spacer></v-spacer>
-                                <v-btn color="red" @click="table.deleteSelected()" icon="mdi-trash-can"
-                                    :disabled="table.selected.length == 0"></v-btn>
+                                <v-spacer></v-spacer>
+                                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除备份?"
+                                    @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>
-                            <v-text-field small density='compact' v-model="table.search" 
-                                label="搜索" single-line hide-details></v-text-field>
+                            <v-text-field small density='compact' v-model="table.search" label="搜索" single-line
+                                hide-details></v-text-field>
                         </v-col>
                         <v-col cols="1" class="text-center">
                             <v-btn color="info" icon="mdi-refresh" variant="text" v-on:click="table.refresh()"></v-btn>
                         </v-col>
                     </v-row>
                 </template>
-
 
                 <template v-slot:[`item.status_bootable_multi`]="{ item }">
                     <v-icon v-if="item.status == 'available'">mdi-link-variant-off</v-icon>
@@ -45,7 +44,7 @@
 
                 <template v-slot:expanded-row="{ columns, item }">
                     <td></td>
-                    <td :colspan="columns.length-1">
+                    <td :colspan="columns.length - 1">
                         <table>
                             <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
                                 <td><strong>{{ extendItem.text }}:</strong></td>
@@ -64,13 +63,13 @@
 <script>
 import { BackupTable } from '@/assets/app/tables.jsx';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import NewBackupVue from './dialogs/NewBackup.vue';
 import BackupStatusResetDialog from './dialogs/BackupStatusResetDialog.vue';
 
 export default {
     components: {
-        NewBackupVue,
-        BackupStatusResetDialog,
+        NewBackupVue, BackupStatusResetDialog, DeleteComfirmDialog,
     },
 
     data: () => ({

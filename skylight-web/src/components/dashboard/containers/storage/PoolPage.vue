@@ -1,7 +1,7 @@
 <template>
     <v-row>
         <v-col cols="12">
-            <v-data-table show-expand single-expand show-select density='compact' :loading="table.loading"
+            <v-data-table show-expand single-expand density='compact' :loading="table.loading"
                 :headers="table.headers" :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search"
                 class="elevation-1" v-model="table.selected">
 
@@ -48,7 +48,6 @@
                 </template>
 
                 <template v-slot:expanded-row="{ columns, item }">
-                    <td></td>
                     <td :colspan="columns.length - 1">
                         <tr v-for="(value, key) in item.capabilities" v-bind:key="key">
                             <template v-if="table.columns.indexOf(key) < 0">

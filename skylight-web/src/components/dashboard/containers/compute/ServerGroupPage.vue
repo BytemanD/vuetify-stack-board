@@ -9,8 +9,9 @@
                         <v-col cols="12" md="5" sm="12">
                             <v-toolbar density="compact" class="rounded-pill">
                                 <v-spacer></v-spacer>
-                                <v-btn icon="mdi-trash-can" color="red" :disabled="table.selected.length == 0"
-                                    @click="table.deleteSelected()"></v-btn>
+                                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除主机组?"
+                                    @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
+
                             </v-toolbar>
                         </v-col>
                         <v-col>
@@ -28,15 +29,16 @@
         </v-col>
     </v-row>
 </template>
-    
+
 <script>
 import { ServerGroupTable } from '@/assets/app/tables.jsx';
 import { Utils } from '@/assets/app/lib.js';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 
 export default {
     components: {
-
+        DeleteComfirmDialog,
     },
 
     data: () => ({

@@ -1,14 +1,13 @@
 <template>
-    <v-dialog v-model="display" width="600">
+    <v-dialog v-model="display" width="600" persistent>
         <template v-slot:activator="{ props }">
-            <v-btn v-bind="props" icon="mdi-trash-can" color="red"
-                :disabled="images.length == 0"></v-btn>
+            <v-btn v-bind="props" icon="mdi-trash-can" color="red" :disabled="images.length == 0"></v-btn>
         </template>
-        <v-card>
-            <v-card-title class="warning" primary-title>删除镜像</v-card-title>
+        <v-card color="blue-grey-darken-2">
+            <v-card-title class="text-red">确定删除镜像?</v-card-title>
             <v-card-text>
-                <v-switch v-model="dialog.smart" label="智能删除"></v-switch>
-                <v-alert density='compact' color="warning" icon="mdi-alert">
+                <v-switch v-model="dialog.smart" color="warning" label="智能删除" hide-details></v-switch>
+                <v-alert density='compact' color="warning" icon="mdi-alert" variant="text">
                     “智能删除”模式将根据镜像类型自动调整删除的方法,以达到快速删除的目的。
                     <ol>
                         <li>如果是普通镜像，直接删除;</li>
@@ -20,6 +19,7 @@
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
+                <v-btn color='info' @click="display = false">取消</v-btn>
                 <v-spacer></v-spacer>
                 <v-btn color="red" @click="commit()">确定</v-btn>
             </v-card-actions>
@@ -27,8 +27,7 @@
     </v-dialog>
 </template>
 <script>
-import i18n from '@/assets/app/i18n';
-import { Utils } from '@/assets/app/lib';
+
 import { ImageDeleteSmartDialog } from '@/assets/app/dialogs';
 
 export default {
@@ -36,8 +35,6 @@ export default {
         images: Array,
     },
     data: () => ({
-        i18n: i18n,
-        Utils: Utils,
         display: false,
         dialog: new ImageDeleteSmartDialog(),
     }),

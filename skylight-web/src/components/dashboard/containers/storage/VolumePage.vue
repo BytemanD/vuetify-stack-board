@@ -13,9 +13,8 @@
                                 <VolumeExtendVue :volumes="table.selected" @completed="table.refresh()"></VolumeExtendVue>
                                 <VolumeStatusResetDialog :volumes="table.selected" @completed="table.refresh()" />
                                 <v-spacer></v-spacer>
-                                <v-btn icon="mdi-trash-can" color="red" @click="deleteSelected()"
-                                    :disabled="table.selected.length == 0">
-                                </v-btn>
+                                <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除卷?"
+                                    @click:comfirm="deleteSelected()" :items="table.getSelecedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>
@@ -97,6 +96,7 @@ import { VolumeDataTable } from '@/assets/app/tables.jsx';
 import { Utils } from '@/assets/app/lib.js';
 import SETTINGS from '@/assets/app/settings';
 
+import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import NewVolumeVue from './dialogs/NewVolume.vue';
 import VolumeStatusResetDialog from './dialogs/VolumeStatusResetDialog.vue';
 import VolumeExtendVue from './dialogs/VolumeExtend.vue';
@@ -105,7 +105,7 @@ import ResourceActionsDialog from './dialogs/ResourceActionsDialog.vue';
 export default {
     components: {
         NewVolumeVue, VolumeStatusResetDialog, VolumeExtendVue,
-        ResourceActionsDialog,
+        ResourceActionsDialog, DeleteComfirmDialog,
     },
 
     data: () => ({

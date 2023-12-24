@@ -54,7 +54,8 @@
                 <tr>
                   <th>实例状态</th>
                   <td style="min-width: 120px">
-                    {{ server.status }}
+                    <span v-if="server.status=='ERROR'" class="text-red">{{ server.status }}</span>
+                    <span v-else>{{ server.status }}</span>
                     <!-- <v-btn variant="text" color="warning">重置状态</v-btn> -->
                   </td>
                   <td>
@@ -147,6 +148,8 @@
           </v-row>
         </v-window-item>
         <v-window-item>
+          <v-alert v-if="!interfaces || interfaces.length == 0" color="warning" density="compact" variant="text"
+            class="mb-6" icon="mdi-alert">无网卡</v-alert>
           <v-row>
             <v-col cols="12" md='6' lg="4" class="pa-4" v-for="item in interfaces" :key="item.mac_addr">
               <server-interface-card :server-id="server.id" :vif="item" />
@@ -154,6 +157,8 @@
           </v-row>
         </v-window-item>
         <v-window-item>
+          <v-alert v-if="!volumes || volumes.length == 0" color="warning" density="compact" variant="text"
+            class="mb-6" icon="mdi-alert">无云盘</v-alert>
           <v-row>
             <v-col cols="12" md='6' lg="4" class="pa-4" v-for="item in volumes" :key="item.device">
               <server-volume-card :server-id="server.id" :volume="item"
@@ -312,6 +317,7 @@ export default {
     },
     refreshServer: async function () {
       this.server = await API.server.show(this.serverId);
+      this.breadcrumbItems[this.breadcrumbItems.length-1] = this.server.name;
     },
     refresh: async function () {
       await this.refreshServer()
@@ -343,7 +349,6 @@ export default {
       waiter.waitStarted()
     },
     updateServer: function (server) {
-      console.debug('update server', server)
       for (var key in server) {
         if (this.server[key] == server[key]) {
           continue
