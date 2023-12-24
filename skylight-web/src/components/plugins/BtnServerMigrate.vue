@@ -6,7 +6,6 @@
         <v-card>
             <v-card-title class="headline warning" primary-title>迁移</v-card-title>
             <v-card-text>
-                {{ dialog.migrateMode }}
                 <v-radio-group color="info" mandatory label='选择迁移模式' v-model="dialog.migrateMode">
                     <v-radio label="自动(根据虚拟机状态选择冷迁移还是热迁移)" value="auto"></v-radio>
                     <v-radio label="热迁移" value="live"></v-radio>
