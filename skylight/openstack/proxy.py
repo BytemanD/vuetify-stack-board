@@ -1,17 +1,20 @@
+from functools import lru_cache
 import logging
+import re
 import time
 import json
+from urllib import parse
 import requests
 
 from skylight.common import conf
 from skylight.common import context
 from skylight.common import exceptions
 from skylight.common.db import api
-
 LOG = logging.getLogger(__name__)
 CONF = conf.CONF
 
 PROXY_MAP = {}
+REG_API_VERSION = re.compile(r'.*/v[\d.]')
 
 
 class OpenstackV3AuthProxy(object):
@@ -61,7 +64,7 @@ class OpenstackV3AuthProxy(object):
     def update_auth_token(self, fetch_max_version=True):
         auth_body = self._get_auth_body()
         LOG.debug('auth body: %s', auth_body)
-        resp = requests.post(f'{self.auth_url}/v3/auth/tokens',
+        resp = requests.post(parse.urljoin(self.auth_url, '/v3/auth/tokens'),
                              json=auth_body, timeout=60)
         token = json.loads(resp.content).get('token', {})
         self.auth_token = {
@@ -83,21 +86,29 @@ class OpenstackV3AuthProxy(object):
                 CONF.openstack.api_version['compute'] = \
                     self.get_compute_max_version()
 
-    def _get_endpoint(self, service):
+    @lru_cache
+    def _get_endpoint(self, service, defualt_api_version=None):
         # sourcery skip: reintroduce-else, swap-if-else-branches,
         # use-named-expression
         endpoint = self.endpoints.get(service)
         if not endpoint:
             raise exceptions.EndpointNotFound(service=service,
                                               region=self.region)
+        if endpoint.endswith('/'):
+            endpoint = endpoint[:-1]
+        if not REG_API_VERSION.match(endpoint):
+            if not defualt_api_version:
+                LOG.warning('%s endpoint(%s) not container api version',
+                            service, endpoint)
+            else:
+                endpoint = parse.urljoin(endpoint, defualt_api_version)
         return endpoint
 
     def _update_endpoints(self, token):
         for service in token.get('catalog', []):
             for endpoint in service.get('endpoints', []):
-                if endpoint.get('interface') != 'public':
-                    continue
-                if self.region and endpoint.get('region') != self.region:
+                if endpoint.get('interface') != 'public' \
+                   or self.region and endpoint.get('region') != self.region:
                     continue
                 self.endpoints[service.get('name')] = endpoint.get('url')
                 break
@@ -158,20 +169,18 @@ class OpenstackV3AuthProxy(object):
         return headers
 
     def proxy_keystone(self, method='GET', url=None, data=None, headers=None):
-        proxy_url = f"{self._get_endpoint('keystone')}{url or '/'}"
-        proxy_headers = self.get_header()
-        if headers:
-            proxy_headers.update(headers)
-        return requests.request(method, proxy_url, data=data,
-                                headers=proxy_headers)
+        endpoint = self._get_endpoint(
+            'keystone', defualt_api_version=CONF.openstack.keystone_api_version)
+        proxy_url = f"{endpoint}{url or '/'}"
+        return self._proxy_openstack(method, proxy_url, data=data,
+                                     headers=headers)
 
     def proxy_nova(self, method='GET', url=None, data=None, headers=None):
-        proxy_url = f"{self._get_endpoint('nova')}{url or '/'}"
-        proxy_headers = self.get_header()
-        if headers:
-            proxy_headers.update(headers)
-        return requests.request(method, proxy_url, data=data,
-                                headers=proxy_headers)
+        endpoint = self._get_endpoint(
+            'nova', defualt_api_version=CONF.openstack.nova_api_version)
+        proxy_url = f"{endpoint}{url or '/'}"
+        return self._proxy_openstack(method, proxy_url, data=data,
+                                     headers=headers)
 
     def proxy_glance_upload(self, url, image_chunk):
         headers = self.get_header()
@@ -184,23 +193,25 @@ class OpenstackV3AuthProxy(object):
         return resp
 
     def proxy_glance(self, method='GET', url=None, data=None, headers=None):
-        proxy_url = f"{self._get_endpoint('glance')}{url or '/'}"
-        proxy_headers = self.get_header()
-        if headers:
-            proxy_headers.update(headers)
-        return requests.request(method, proxy_url, data=data,
-                                headers=proxy_headers)
+        endpoint = self._get_endpoint(
+            'glance', defualt_api_version=CONF.openstack.glance_api_version)
+        proxy_url = f"{endpoint }{url or '/'}"
+        return self._proxy_openstack(method, proxy_url, data=data,
+                                     headers=headers)
 
     def proxy_neutron(self, method='GET', url=None, data=None, headers=None):
-        proxy_url = f"{self._get_endpoint('neutron')}{url or '/'}"
-        proxy_headers = self.get_header()
-        if headers:
-            proxy_headers.update(headers)
-        return requests.request(method, proxy_url, data=data,
-                                headers=proxy_headers)
+        endpoint = self._get_endpoint(
+            'neutron', defualt_api_version=CONF.openstack.neutron_api_version)
+        proxy_url = f"{endpoint}{url or '/'}"
+        return self._proxy_openstack(method, proxy_url, data=data,
+                                     headers=headers)
 
     def proxy_cinder(self, method='GET', url=None, data=None, headers=None):
         proxy_url = f"{self._get_endpoint('cinderv2')}{url or '/'}"
+        return self._proxy_openstack(method, proxy_url, data=data,
+                                     headers=headers)
+
+    def _proxy_openstack(self, method, proxy_url, data=None, headers=None):
         proxy_headers = self.get_header()
         if headers:
             proxy_headers.update(headers)

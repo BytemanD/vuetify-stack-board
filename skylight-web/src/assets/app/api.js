@@ -520,7 +520,7 @@ class RoleAssignments extends Restfulclient {
 
 class Image extends Restfulclient {
     constructor() {
-        super('/image/v2/images');
+        super('/image/images');
     }
     async list(filters={}){
         let images = []
@@ -609,25 +609,25 @@ class Image extends Restfulclient {
 }
 
 class Network extends Restfulclient {
-    constructor() { super('/networking/v2.0/networks') }
+    constructor() { super('/networking/networks') }
 }
 class Subnet extends Restfulclient {
-    constructor() { super('/networking/v2.0/subnets') }
+    constructor() { super('/networking/subnets') }
 }
 class Port extends Restfulclient {
-    constructor() { super('/networking/v2.0/ports') }
+    constructor() { super('/networking/ports') }
 }
 class SecurityGroup extends Restfulclient {
-    constructor() { super('/networking/v2.0/security_groups') }
+    constructor() { super('/networking/security_groups') }
 }
 class SecurityGroupRule extends Restfulclient {
-    constructor() { super('/networking/v2.0/security_group_rules') }
+    constructor() { super('/networking/security_group_rules') }
     async create(data) {
         return (await this.post({ security_group_rule: data })).security_group_rule
     }
 }
 class QosPolicy extends Restfulclient {
-    constructor() { super('/networking/v2.0/qos/policies') }
+    constructor() { super('/networking/qos/policies') }
     async deleteBpsRule(id, ruleId) {
         return await this.delete(`${id}/bandwidth_limit_rules/${ruleId}`)
     }
@@ -650,7 +650,7 @@ class QosPolicy extends Restfulclient {
     }
 }
 class Router extends Restfulclient {
-    constructor() { super('/networking/v2.0/routers'), this.portClient = new Port() }
+    constructor() { super('/networking/routers'), this.portClient = new Port() }
     // interface=public
     async listInterface(id) {
         return (await this.portClient.list({ device_id: id })).ports
