@@ -16,6 +16,7 @@ from skylight.common import utils
 from skylight.common.db import api as db_api
 from skylight.openstack import proxy
 
+
 LOG = logging.getLogger(__name__)
 CONF = conf.CONF
 
@@ -34,8 +35,7 @@ class GetContext(object):
         )
         LOG.debug('context: %s', req_context)
         if not req_context.cluster_id:
-            raise exceptions.ApiException(
-                400, 'cluster id is none')
+            raise exceptions.ApiException(400, 'cluster id is none')
         return req_context
 
     def _get_header(self, header):
@@ -61,11 +61,11 @@ class BaseReqHandler(application.BaseReqHandler, GetContext):
             return 403, 'user is not login'
 
 
-class Version(BaseReqHandler):
+class Version(application.BaseReqHandler):
 
+    @utils.with_response()
     def get(self):
-        self.set_status(200)
-        self.finish({'version': utils.get_version()})
+        return {'version': utils.get_version()}
 
 
 class Configs(BaseReqHandler):
@@ -79,7 +79,7 @@ class Configs(BaseReqHandler):
         })
 
 
-class Cluster(BaseReqHandler):
+class Cluster(application.BaseReqHandler, GetContext):
 
     def get(self):
         cluster_list = db_api.query_cluster()
@@ -118,6 +118,20 @@ class Cluster(BaseReqHandler):
             self.set_status(404)
             self.finish({'error': f'cluster {cluster_id} is not found'})
         return
+
+
+class ClusterRegions(application.BaseReqHandler, GetContext):
+
+    @utils.with_response()
+    def get(self, clusterId):
+        ctxt = self._get_context()
+        cluster = db_api.get_cluster_by_id(clusterId)
+        cluster_proxy = proxy.OpenstackV3AuthProxy(cluster.auth_url,
+                                                   cluster.auth_project,
+                                                   cluster.auth_user,
+                                                   cluster.auth_password)
+        cluster_proxy.update_auth_token()
+        return {'regions': cluster_proxy.get_catalog_regions()}
 
 
 class Tasks(BaseReqHandler):
@@ -169,7 +183,7 @@ class AuthInfo(BaseReqHandler):
         })
 
 
-class OpenstackProxyBase(BaseReqHandler, GetContext):
+class OpenstackProxyBase(BaseReqHandler):
 
     def _request_body(self):
         return None if self.request.method.upper() in ['DELETE', 'GET'] else \
@@ -373,6 +387,7 @@ def get_routes():
         (r'/version', Version),
         (r'/configs', Configs),
         (r'/cluster', Cluster),
+        (r'/cluster/(.*)/regions', ClusterRegions),
         (r'/cluster/(.*)', Cluster),
         (r'/tasks', Tasks),
         (r'/tasks/(.*)', Tasks),

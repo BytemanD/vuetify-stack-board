@@ -1,7 +1,12 @@
 <template>
   <v-row>
-    <v-col cols="12">
+    <v-col cols="6" class="pb-0">
       <v-breadcrumbs class="pl-0" :items="breadcrumbItems" color="info" density="compact"></v-breadcrumbs>
+    </v-col>
+    <v-col cols="6">
+      <v-btn class="ml-1" size="small" variant="outlined" color="info" @click="refreshServer()">刷新</v-btn>
+    </v-col>
+    <v-col cols="12">
       <v-tabs v-model="tabIndex" selected-class="bg-white text-primary " bg-color="primary" density="compact">
         <v-tab>详情</v-tab>
         <v-tab>网卡</v-tab>
@@ -15,16 +20,19 @@
             <v-col cols="12" md="12" lg="6">
               <v-table density="compact" class="text-left">
                 <tr>
-                  <th>实例ID</th>
+                  <th>ID</th>
                   <td>
                     {{ server.id }}
                     <v-btn variant="text" color="info" @click="loginVnc()">远程登录</v-btn>
-                    <v-btn density="compact" variant="text" icon="mdi-refresh" @click="refreshServer()"></v-btn>
                   </td>
                 </tr>
                 <tr>
-                  <th>实例名</th>
+                  <th>名字</th>
                   <td>{{ server.name }}<v-btn variant="text" color="warning">重命名</v-btn></td>
+                </tr>
+                <tr>
+                  <th>实例名</th>
+                  <td>{{ server['OS-EXT-SRV-ATTR:instance_name'] }}</td>
                 </tr>
                 <tr>
                   <th>描述</th>
@@ -109,7 +117,7 @@
             <v-col cols="12" md="12" lg="6">
               <v-table density="compact" class="text-left">
                 <tr>
-                  <th>规格</th>
+                  <th style="min-width: 100px;">规格</th>
                   <td>
                     {{ server.flavor && server.flavor.original_name }}
                     <v-btn variant="text" color="warning">变更</v-btn>
@@ -124,6 +132,13 @@
                 <tr>
                   <th>磁盘大小</th>
                   <td>{{ server.flavor && server.flavor.diskx || 0 }} GB</td>
+                </tr>
+                <tr v-if="server.flavor">
+                  <th>属性</th>
+                  <td>
+                    <v-chip label density="compact" class="mr-1" v-for="(value, key) in server.flavor.extra_specs" v-bind:key="key">
+                      {{ key }}={{ value }}</v-chip>
+                  </td>
                 </tr>
               </v-table>
             </v-col>

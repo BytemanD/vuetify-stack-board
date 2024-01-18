@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="display" width="800" scrollable>
+    <v-dialog v-model="display" width="900" scrollable>
         <v-card>
             <v-card-title>虚拟机操作记录</v-card-title>
             <v-card-subtitle>{{ dialog.actions.length }}条记录</v-card-subtitle>

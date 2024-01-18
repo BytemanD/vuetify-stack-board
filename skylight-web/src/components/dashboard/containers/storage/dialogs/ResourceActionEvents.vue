@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="display" width="960" scrollable>
+    <v-dialog v-model="display" width="60" scrollable>
         <v-card>
             <v-card-title class="headline info" primary-title>事件</v-card-title>
             <v-card-subtitle>{{ dialog.resourceAction.action }}</v-card-subtitle>

@@ -780,6 +780,9 @@ class Cluster extends Restfulclient {
     async add(data) {
         return this.post({ cluster: data })
     }
+    async regions(clusterId) {
+        return (await this.get(`/cluster/${clusterId}/regions`)).regions
+    }
 }
 class AuthInfo extends Restfulclient {
     constructor() { super('/auth_info') }

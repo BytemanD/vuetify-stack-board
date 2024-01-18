@@ -18,14 +18,20 @@
         </div>
       </v-list>
     </v-navigation-drawer>
-    
+
     <v-app-bar density="compact">
       <v-app-bar-nav-icon @click="navigation.mini = !navigation.mini"></v-app-bar-nav-icon>
-      <v-toolbar-title class="ml-0">
-        <v-select hide-details :prefix='`${$t("cluster")}:`' item-title="name" item-value="id" class="rounded-0"
-          v-model="clusterTable.selected" :items="clusterTable.items">
-        </v-select>
+      <v-toolbar-title>
+        <v-text-field hide-details class="rounded-0" :value="clusterTable.selected && clusterTable.selected.name">
+          <template v-slot:prepend>{{ $t('cluster') }} </template>
+        </v-text-field>
       </v-toolbar-title>
+      <!-- <v-toolbar-title>
+        <v-select hide-details item-title="name" item-value="id" class="rounded-0"
+          v-model="clusterTable.selected" :items="clusterTable.items">
+          <template v-slot:prepend>{{ $t('cluster') }} </template>
+        </v-select>
+      </v-toolbar-title> -->
       <v-toolbar-title class="ml-1">
         <v-select solo-inverted flat hide-details clearable class="rounded-0" prepend-icon="mdi-map-marker"
           v-model="context.region" item-title="id" item-value="id" :items="regionTable.items"
@@ -205,18 +211,18 @@ export default {
   created() {
     console.log(this.$route.path)
     Init()
-    if (!localStorage.getItem('X-Token')){
+    if (!localStorage.getItem('X-Token')) {
       notify.error('请重新登录')
       this.$router.push('/login')
       return
     }
     let self = this;
-    API.system.isLogin().then(function(){
+    API.system.isLogin().then(function () {
       self.initItem();
       self.$vuetify.theme.dark = SETTINGS.ui.getItem('themeDark').value;
       self.refresh();
       self.initRegion();
-    }).catch((e)=>{
+    }).catch((e) => {
       notify.error('请重新登录')
       self.$router.push('/login')
     })

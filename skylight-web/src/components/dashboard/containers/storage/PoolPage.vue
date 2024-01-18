@@ -1,9 +1,9 @@
 <template>
     <v-row>
         <v-col cols="12">
-            <v-data-table show-expand single-expand density='compact' :loading="table.loading"
-                :headers="table.headers" :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search"
-                class="elevation-1" v-model="table.selected">
+            <v-data-table show-expand single-expand density='compact' :loading="table.loading" :headers="table.headers"
+                :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1"
+                v-model="table.selected">
 
                 <template v-slot:top>
                     <v-row>
@@ -12,8 +12,8 @@
                             </v-toolbar> -->
                         </v-col>
                         <v-col>
-                            <v-text-field density='compact' v-model="table.search" 
-                                label="搜索" single-line hide-details></v-text-field>
+                            <v-text-field density='compact' v-model="table.search" label="搜索" single-line
+                                hide-details></v-text-field>
                         </v-col>
                         <v-col cols="1" class="text-center">
                             <v-btn color="info" icon="mdi-refresh" variant="text" v-on:click="table.refresh()"></v-btn>
@@ -27,11 +27,10 @@
                 <template v-slot:[`item.capacity_gb`]="{ item }">
                     <v-tooltip bottom>
                         <template v-slot:activator="{ props }">
-                            <v-sheet color="grey lighten-1" v-bind="props">
-                                <v-progress-linear height="20" color="info" :max="item.capabilities.total_capacity_gb"
-                                    :model-value="item.capabilities.total_capacity_gb - item.capabilities.free_capacity_gb">
-                                </v-progress-linear>
-                            </v-sheet>
+                            <v-progress-linear v-bind="props" height="12" color="info" rounded
+                                :max="item.capabilities.total_capacity_gb"
+                                :model-value="item.capabilities.total_capacity_gb - item.capabilities.free_capacity_gb">
+                            </v-progress-linear>
                         </template>
                         总容量: {{ item.capabilities.total_capacity_gb }} <br>剩余容量: {{ item.capabilities.free_capacity_gb }}
                     </v-tooltip>
@@ -64,7 +63,6 @@
 
 <script>
 import { VolumePoolTable } from '@/assets/app/tables.jsx';
-
 
 export default {
     components: {

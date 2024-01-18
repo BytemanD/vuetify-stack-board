@@ -18,17 +18,34 @@
                         </v-chip>
                     </td>
                 </tr>
+                <tr>
+                    <td>VNIC 类型</td>
+                    <td>{{ port['binding:vnic_type'] }}</td>
+                </tr>
+                <tr>
+                    <td>VIF 类型</td>
+                    <td>{{ port['binding:vif_type'] }}</td>
+                </tr>
             </v-table>
         </v-card-text>
     </v-card>
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
+import { ref, defineProps } from 'vue';
+import API from '@/assets/app/api';
+
+var port = ref({});
 
 const progs = defineProps({
     serverId: { type: String, required: true, },
     vif: { type: Object, default: {}, required: true }
 })
+
+async function showPort() {
+    API.port.show()
+    port.value = (await API.port.show(progs.vif.port_id)).port
+}
+showPort()
 
 </script>

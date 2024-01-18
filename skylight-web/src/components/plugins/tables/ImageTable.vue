@@ -53,12 +53,10 @@
           <td></td>
           <td :colspan="columns.length - 1">
             <table>
-              <template>
-                <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
-                  <td class="text-info">{{ extendItem.text }}:</td>
-                  <td>{{ item[extendItem.value] }}</td>
-                </tr>
-              </template>
+              <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.key">
+                <td class="text-info">{{ extendItem.title }}:</td>
+                <td>{{ item[extendItem.key] }}</td>
+              </tr>
               <tr>
                 <td class="text-info">Properties</td>
                 <td>

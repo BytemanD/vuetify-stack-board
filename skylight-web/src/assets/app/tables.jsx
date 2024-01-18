@@ -686,7 +686,11 @@ export class ServerDataTable extends DataTable {
             }
             break
         }
-        return Object.values(addressMap);
+        if (Object.values(addressMap).length > 0) {
+            return Object.values(addressMap)[0]
+        } else {
+            return []
+        }
     }
     async waitServerStarted(server, action) {
         let refreshServer = await this.waitServerStatus(server.id, ['ACTIVE', 'ERROR'])

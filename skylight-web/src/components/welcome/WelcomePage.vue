@@ -43,6 +43,8 @@
 <script>
 import Init from '@/assets/app/init';
 
+import notify from '@/assets/app/notify';
+
 import API from '@/assets/app/api';
 import { ClusterTable } from '@/assets/app/tables';
 import NewCluster from './NewCluster.vue';

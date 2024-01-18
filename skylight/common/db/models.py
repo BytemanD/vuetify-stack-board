@@ -8,9 +8,13 @@ Base = declarative_base()
 
 
 class BaseModel(object):
+    _safe_fields = []
 
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    def to_dict(self, safe=True):
+        if safe and self._safe_fields:
+            return {c: getattr(self, c) for c in self._safe_fields}
+        else:
+            return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class User(Base, BaseModel):
@@ -31,6 +35,7 @@ class Token(Base, BaseModel):
 
 class Cluster(Base, BaseModel):
     __tablename__ = 'cluster'
+    _safe_fields = ['id', 'name', 'auth_url']
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(20))

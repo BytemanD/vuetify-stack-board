@@ -10,18 +10,31 @@
                     <td>挂载ID</td>
                     <td>{{ volume.id }}</td>
                 </tr>
+                <tr>
+                    <td>大小</td>
+                    <td>{{ vol.size }}</td>
+                </tr>
             </v-table>
         </v-card-text>
     </v-card>
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
+import { ref, defineProps } from 'vue';
+
+import API from '@/assets/app/api';
+
+var vol = ref({});
 
 const progs = defineProps({
     serverId: { type: String, required: true, },
     volume: { type: Object, default: {}, required: true, },
     rootDeviceName: { type: String, default: '/dev/vda' },
 })
+
+async function showVolume(){
+    vol.value = await API.volume.show(progs.volume.volumeId)
+}
+showVolume()
 
 </script>

@@ -3,8 +3,7 @@
         <v-col>
             <v-data-table-server show-expand single-expand show-select density='compact' :loading="table.loading"
                 :headers="table.headers" :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search"
-                class="elevation-1" v-model="table.selected" :items-length="totlaVolumes.length"
-                @update:options="pageRefresh">
+                v-model="table.selected" :items-length="totlaVolumes.length" @update:options="pageRefresh">
                 <template v-slot:top>
                     <v-row>
                         <v-col cols="12" md="6" sm="12">

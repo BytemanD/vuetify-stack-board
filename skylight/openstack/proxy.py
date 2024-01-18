@@ -32,6 +32,7 @@ class OpenstackV3AuthProxy(object):
         self.endpoints = {}
         self._api_version = None
         self.region = region
+        self._catalog = []
 
     def get_token(self):
         if 'token' not in self.auth_token or \
@@ -74,6 +75,8 @@ class OpenstackV3AuthProxy(object):
             'user': token.get('user', {})}
         if not self.auth_token.get('token'):
             raise RuntimeError('auth faield')
+        self._catalog = token.get('catalog', [])
+
         self._update_endpoints(token)
         LOG.debug('Endpoints %s', self.endpoints)
         LOG.debug('Update auth token success, expires_at %s,  token is %s',
@@ -218,10 +221,20 @@ class OpenstackV3AuthProxy(object):
         return requests.request(method, proxy_url, data=data,
                                 headers=proxy_headers)
 
+    def get_catalog_regions(self):
+        regions = []
+        for service in self._catalog:
+            for endpoint in service.get('endpoints', []):
+                if endpoint.get('interface') != 'public':
+                    continue
+                if endpoint.get('region') not in regions:
+                    regions.append(endpoint.get('region'))
+                break
+        return regions
+
 
 def get_proxy(ctxt: context.RequestContext) -> OpenstackV3AuthProxy:
     global PROXY_MAP
-
     if ctxt.cluster_id not in PROXY_MAP or \
        not PROXY_MAP[ctxt.cluster_id].get(ctxt.region):
 

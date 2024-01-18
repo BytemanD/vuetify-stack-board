@@ -36,7 +36,8 @@
 
                 <ServerMigrateDialog :servers="table.selected" />
                 <ServerEvacuateDialog :servers="table.selected" />
-                <btn-server-reset-state :servers="table.selected" @updateServer="(server) => {table.updateItem(server)}"/>
+                <btn-server-reset-state :servers="table.selected"
+                  @updateServer="(server) => { table.updateItem(server) }" />
 
                 <v-spacer></v-spacer>
                 <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除实例?"
@@ -98,9 +99,9 @@
             class="mdi-spin">mdi-loading</v-icon>
         </template>
         <template v-slot:[`item.addresses`]="{ item }">
-          <div v-for="(addresses, j) in table.parseFirstAddresses(item)" v-bind:key="j">
-            <v-chip label size="x-small" class="mr-1 mb-1">{{ addresses.join(' | ') }}</v-chip>
-          </div>
+          <v-chip v-if="Object.keys(item.addresses).length > 0" label size="x-small" class="mr-1 mb-1">
+            {{ table.parseFirstAddresses(item).join(' | ')}}
+          </v-chip>
           <span v-if="Object.keys(item.addresses).length > 1">...</span>
         </template>
         <template v-slot:[`item.flavor`]="{ item }"><span class="cyan--text">
@@ -153,16 +154,14 @@
           <td :colspan="columns.length - 1">
             <v-table density='compact'>
               <template v-slot:default>
-                <template v-for="extendItem in Object.keys(item)">
-                  <tr v-bind:key="extendItem" v-if="table.columns.indexOf(extendItem) < 0">
-                    <td class="text-info">{{ extendItem }}:</td>
-                    <td v-if="extendItem == 'created'">{{ Utils.parseUTCToLocal(item[extendItem]) }}</td>
-                    <td v-else-if="extendItem == 'updated'">{{ Utils.parseUTCToLocal(item[extendItem]) }}</td>
-                    <td v-else-if="extendItem == 'fault'" class="error--text">{{ item[extendItem] &&
-                      item[extendItem].message }}</td>
-                    <td v-else>{{ item[extendItem] }}</td>
-                  </tr>
-                </template>
+                <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.key">
+                  <td class="text-info">{{ extendItem.title }}:</td>
+                  <td v-if="extendItem == 'created'">{{ Utils.parseUTCToLocal(item[extendItem]) }}</td>
+                  <td v-else-if="extendItem == 'updated'">{{ Utils.parseUTCToLocal(item[extendItem]) }}</td>
+                  <td v-else-if="extendItem == 'fault'" class="error--text">{{ item[extendItem] &&
+                    item[extendItem].message }}</td>
+                  <td v-else>{{ item[extendItem.key] }}</td>
+                </tr>
               </template>
             </v-table>
           </td>
