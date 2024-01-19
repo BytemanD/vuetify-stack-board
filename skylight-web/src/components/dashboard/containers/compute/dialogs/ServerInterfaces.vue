@@ -15,7 +15,7 @@
                                     {{ fixed_ip.ip_address }}</v-chip>
                             </template>
                             <template v-slot:[`item.actions`]="{ item }">
-                                <v-btn icon="mdi-close" variant="text" color="red" @click="dialog.detach(item)"></v-btn>
+                                <v-btn size="small" icon="mdi-close" variant="text" color="red" @click="dialog.detach(item)"></v-btn>
                             </template>
                         </v-data-table>
                     </v-col>

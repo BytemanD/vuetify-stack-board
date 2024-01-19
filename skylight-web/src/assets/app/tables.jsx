@@ -1447,7 +1447,7 @@ export class ImageDataTable extends DataTable {
         this.KB = 1024;
         this.MB = this.KB * 1024;
         this.GB = this.MB * 1024;
-        this.visibility = null;
+        this.visibility = 'public';
         this.MiniHeaders = [
             { title: 'ID', key: 'id' },
             { title: '名字', key: 'name' },

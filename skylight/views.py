@@ -124,7 +124,9 @@ class ClusterRegions(application.BaseReqHandler, GetContext):
 
     @utils.with_response()
     def get(self, clusterId):
-        ctxt = self._get_context()
+        if isinstance(clusterId, str):
+            clusterId = int(clusterId)
+
         cluster = db_api.get_cluster_by_id(clusterId)
         cluster_proxy = proxy.OpenstackV3AuthProxy(cluster.auth_url,
                                                    cluster.auth_project,

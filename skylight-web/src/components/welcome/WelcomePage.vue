@@ -27,7 +27,7 @@
             </v-toolbar>
             <v-card-text>
               <v-alert density='compact' type="warning" variant="text" v-if="noCluster" text="请添加新集群"></v-alert>
-              <v-chip close closable label color="primary" class="mr-1 mt-1" v-bind:key="item.i"
+              <v-chip close closable label color="primary" class="mr-1 mt-1" v-bind:key="item.id"
                 v-for="item in table.items" @click:close="deleteCluster(item)" @click="useCluster(item)">{{ item.name }}
               </v-chip>
             </v-card-text>

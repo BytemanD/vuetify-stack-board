@@ -173,9 +173,10 @@
             class="mb-6" icon="mdi-alert">无网卡</v-alert>
           <v-row>
             <v-col cols="12" md='6' lg="4" class="pa-4" v-for="item in interfaces" :key="item.mac_addr">
-              <server-interface-card :server-id="server.id" :vif="item" />
+              <server-interface-card :server-id="server.id" :vif="item" @detaching="interfaceDetaching" @detached="interfaceDetached" />
             </v-col>
           </v-row>
+          <btn-attach-interfaces :server-id="server.id" />
         </v-window-item>
         <v-window-item>
           <v-alert v-if="!volumes || volumes.length == 0" color="warning" density="compact" variant="text" class="mb-6"
@@ -196,6 +197,7 @@
         </v-window-item>
       </v-window>
     </v-col>
+    <v-notifications location="bottom right" :timeout="3000" />
   </v-row>
 </template>
 
@@ -204,6 +206,7 @@ import i18n from '@/assets/app/i18n';
 import BtnIcon from '@/components/plugins/BtnIcon'
 import API from '@/assets/app/api';
 import { Utils } from '@/assets/app/lib';
+import notify from '@/assets/app/notify';
 
 import BtnServerReboot from '@/components/plugins/BtnServerReboot.vue';
 import BtnServerMigrate from '@/components/plugins/BtnServerMigrate.vue';
@@ -224,7 +227,7 @@ import ServerResetStateDialog from './dialogs/ServerResetStateDialog.vue';
 import ServerConsoleLogDialog from './dialogs/ServerConsoleLogDialog.vue';
 import ServerChangePassword from './dialogs/ServerChangePassword.vue';
 import ServerVolumes from './dialogs/ServerVolumes.vue';
-import ServerInterfaces from './dialogs/ServerInterfaces.vue';
+import BtnAttachInterfaces from '@/components/plugins/button/BtnAttachInterfaces.vue';
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
 import ServerResize from './dialogs/ServerResize.vue';
 import ServerRebuild from './dialogs/ServerRebuild.vue';
@@ -241,7 +244,7 @@ export default {
     ServerActionDialog,
     ServerConsoleLogDialog,
     ServerChangePassword,
-    ServerVolumes, ServerInterfaces,
+    ServerVolumes, BtnAttachInterfaces,
     ServerUpdateSG, ServerResize, ServerRebuild,
     ServerGroupDialog,
   },
@@ -326,6 +329,7 @@ export default {
     refreshServer: async function () {
       this.server = await API.server.show(this.serverId);
       this.breadcrumbItems[this.breadcrumbItems.length - 1] = this.server.name;
+      this.refreshInterfaces();
     },
     refreshImage: async function () {
       if (this.image && this.image.id == this.server.image.id) {
@@ -333,12 +337,15 @@ export default {
       }
       this.image = await API.image.show(this.server.image.id)
     },
+    refreshInterfaces: async function () {
+      this.interfaces = (await API.server.interfaceList(this.serverId)).interfaceAttachments
+    },
     refresh: async function () {
       await this.refreshServer()
       if (this.server.image && this.server.image.id) {
         await this.refreshImage()
       }
-      this.interfaces = (await API.server.interfaceList(this.serverId)).interfaceAttachments
+      this.refreshInterfaces()
       this.volumes = (await API.server.volumeAttachments(this.serverId)).volumeAttachments
     },
     stop: async function () {
@@ -385,6 +392,18 @@ export default {
       if (this.server.image.id != this.image.id) {
         this.refreshImage()
       }
+    },
+    interfaceDetaching: function(portId){
+      notify.info(`网卡 ${portId} 卸载中 ...`);
+    },
+    interfaceDetached: function(portId){
+      notify.success(`网卡 ${portId} 卸载成功`);
+      for (let i in this.interfaces) {
+            if (this.interfaces[i].port_id == portId) {
+              this.interfaces.splice(i, 1)
+                break;
+            }
+        }
     }
   },
   created() {

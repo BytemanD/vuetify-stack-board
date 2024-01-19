@@ -1,9 +1,21 @@
 <template>
   <v-row>
     <v-col cols="12">
-      <v-data-table density='compact' :show-select="editable" :show-expand="editable" :loading="table.loading"
-        :headers="editable ? table.headers : table.MiniHeaders" :items="table.items"
-        :items-per-page="editable ? table.itemsPerPage : 5" :search="table.search" v-model="table.selected">
+      <!-- 简单的表格 -->
+      <v-data-table v-if="!editable" density='compact' :loading="table.loading" :headers="table.MiniHeaders"
+        :items="table.items" :items-per-page="5" :search="table.search" @click:row="selectFlavor" hover>
+        <template v-slot:[`item.name`]="{ item }">
+          <v-chip v-if="item.name == selectedFlavor.name" density="compact"
+          :color="item.name == selectedFlavor.name ? 'info' : ''">
+          {{ item.name }}</v-chip>
+          <v-chip v-else variant="text">{{ item.name }}</v-chip>
+        </template>
+      </v-data-table>
+
+      <!-- 详细的表格 -->
+      <v-data-table v-else density='compact' show-select show-expand :loading="table.loading" :headers="table.headers"
+        :items="table.items" :items-per-page="editable ? table.itemsPerPage : 5" :search="table.search"
+        v-model="table.selected" hover>
 
         <template v-slot:top>
           <v-row>
@@ -27,9 +39,8 @@
         </template>
 
         <template v-if="!editable" v-slot:[`item.name`]="{ item }">
-          <v-chip variant="text" density="compact" :color="item.name == selectedFlavor.name ? 'info' : ''"
-            @click="selectFlavor(item)">{{
-              item.id }}</v-chip>
+          <v-chip variant="text" density="compact" :color="item.name == selectedFlavor.name ? 'info' : ''">
+            {{ item.id }}</v-chip>
         </template>
 
         <template v-slot:[`item.ram`]="{ item }">{{ Utils.humanRam(item.ram) }}</template>
@@ -78,8 +89,13 @@ export default {
     selectedFlavor: {},
   }),
   methods: {
-    selectFlavor: function (item) {
-      this.$emit("select-flavor", item);
+    selectFlavor: function (event, data) {
+      this.selectedFlavor = data.item;
+      this.$emit("select-flavor", data.item);
+    },
+    itemSelected: function (a, item, value) {
+      console.log(item, value)
+
     },
     openFlavorExtraDialog(item) {
       this.selectedFlavor = item;

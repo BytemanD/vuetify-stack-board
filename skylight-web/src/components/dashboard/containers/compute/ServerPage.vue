@@ -52,7 +52,7 @@
               <BtnIcon variant="text" icon="mdi-refresh" color="info" tool-tip="刷新" @click="pageRefresh(1)" />
               <v-tooltip bottom>
                 <template v-slot:activator="{ props }">
-                  <v-btn icon variant="text" v-on:click="table.deleted = !table.deleted; table.refresh()" v-bind="props">
+                  <v-btn icon variant="text" v-on:click="table.deleted = !table.deleted; pageRefresh(1)" v-bind="props">
                     <v-icon v-if="table.deleted" color="red">mdi-delete</v-icon>
                     <v-icon v-else color="info">mdi-delete-off</v-icon>
                   </v-btn>
@@ -274,7 +274,8 @@ export default {
     },
     refreshTotlaServers: function () {
       let self = this;
-      API.server.list().then((servers) => {
+      let filter = {'deleted': this.table.deleted}
+      API.server.list(filter).then((servers) => {
         self.totalServers = servers
       })
     },

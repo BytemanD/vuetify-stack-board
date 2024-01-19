@@ -1,12 +1,42 @@
 <template>
   <v-row>
     <v-col cols="12">
-      <v-data-table density='compact' :show-select="editable" :show-expand="editable" :loading="table.loading"
-        :headers="editable ? table.headers : table.MiniHeaders" :items="table.items"
-        :items-per-page="editable ? table.itemsPerPage : 5" :search="table.search" v-model="table.selected">
+      <!-- 简单的表格 -->
+      <v-data-table v-if="!editable" density='compact' :loading="table.loading" :headers="table.MiniHeaders"
+        :items="table.items" :items-per-page="5" :search="table.search" @click:row="selectImage" hover>
+
         <template v-slot:top>
           <v-row>
-            <v-col cols="4" v-if="editable">
+            <v-col class="my-auto text-center">
+              <v-btn-toggle density="compact" variant="outlined" color="info" @click="table.refresh()"
+                v-model="table.visibility">
+                <v-btn value="public">{{ $t('public') }}</v-btn>
+                <v-btn value="shared">{{ $t('shared') }}</v-btn>
+                <v-btn value="private">{{ $t('private') }}</v-btn>
+              </v-btn-toggle>
+            </v-col>
+            <v-col>
+              <v-text-field density='compact' v-model="table.search" label="搜索" single-line hide-details></v-text-field>
+            </v-col>
+            <v-col cols="12" md="2" sm="12">
+              <v-btn color="info" icon="mdi-refresh" variant="text" v-on:click="table.refresh()"></v-btn>
+            </v-col>
+          </v-row>
+        </template>
+
+        
+        <template v-slot:[`item.id`]="{ item }">
+          <v-chip v-if="item.id == selectedImage.id" density="compact"
+            :color="item.id == selectedImage.id ? 'info' : ''">{{ item.id }}</v-chip>
+          <v-chip v-else variant="text">{{ item.id }}</v-chip>
+        </template>
+      </v-data-table>
+      <v-data-table v-else density='compact' :show-select="editable" :show-expand="editable" :loading="table.loading"
+        :headers="editable ? table.headers : table.MiniHeaders" :items="table.items"
+        :items-per-page="editable ? table.itemsPerPage : 5" :search="table.search" v-model="table.selected" hover>
+        <template v-slot:top>
+          <v-row>
+            <v-col cols="4">
               <v-toolbar density="compact" class="rounded-pill">
                 <NewImageVue :images="table.selected" @completed="table.resetSelected(); table.refresh()" />
                 <v-spacer></v-spacer>
@@ -29,11 +59,6 @@
               <TasksDialog v-if='editable' :show.sync="showTasksDialog" />
             </v-col>
           </v-row>
-        </template>
-        <template v-if="!editable" v-slot:[`item.id`]="{ item }">
-          <v-chip variant="text" density="compact" :color="item.id == selectedImage.id ? 'info' : ''"
-            @click="selectImage(item)">{{
-              item.id }}</v-chip>
         </template>
         <template v-slot:[`item.status`]="{ item }">
           <v-icon v-if="item.status == 'active'" color="success">mdi-emoticon-happy</v-icon>
@@ -103,8 +128,13 @@ export default {
     showTasksDialog: false,
   }),
   methods: {
-    selectImage: function (item) {
-      this.$emit("select-image", item);
+    selectImage: function (event, data) {
+      this.selectedImage = data.item;
+      this.$emit("select-image", data.item);
+    },
+    rowFocuse: function (event, data) {
+      console.log(event, data)
+
     },
     openImagePropertiesDialog(image) {
       this.selectedImage = image;

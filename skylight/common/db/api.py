@@ -88,7 +88,7 @@ def query_cluster():
     return SESSION.query(models.Cluster).all()
 
 
-def get_cluster_by_id(cluster_id):
+def get_cluster_by_id(cluster_id: int):
     return SESSION.query(models.Cluster).filter_by(id=cluster_id).first()
 
 

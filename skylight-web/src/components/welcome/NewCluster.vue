@@ -49,6 +49,7 @@
 <script>
 import { NewClusterDialog } from '@/assets/app/dialogs';
 import { MESSAGE } from '@/assets/app/lib.js';
+import notify from '@/assets/app/notify';
 
 export default {
     data: () => ({
@@ -60,7 +61,6 @@ export default {
             try {
                 await this.dialog.commit();
             } catch (e) {
-                MESSAGE.error(e);
                 return;
             }
             this.display = false;

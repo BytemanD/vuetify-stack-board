@@ -1,17 +1,20 @@
 <template>
   <v-container class="text-center">
-    <v-card width="400" class="mx-auto " elevation="10">
+    <v-card width="500" class="mx-auto " elevation="10">
       <v-img height="80" src="@/assets/favicon.svg" class="mt-4" />
       <v-card-title>欢迎使用 Skylight</v-card-title>
       <v-card-text>
         <v-select density="compact" item-title="name" label="选择集群" item-value="id" class="rounded-0"
-          v-model="auth.cluster" :items="clusters" @click="refreshClusters()" @update:modelValue="changeCluster()"
+          v-model="auth.cluster" :items="clusters" @update:modelValue="changeCluster()"
           prepend-icon="mdi-map">
+          <template v-slot:append>
+            <v-btn density="compact" color="info" variant="text" icon="mdi-refresh" @click="refreshClusters()"></v-btn>
+            <new-cluster @completed="refreshClusters()" />
+          </template>
         </v-select>
 
         <v-select density="compact" class="rounded-0" label="选择地区" v-model="auth.region" :items="regions"
-          :disabled="refreshingRegion"
-          prepend-icon="mdi-map-marker">
+          :disabled="refreshingRegion" prepend-icon="mdi-map-marker">
         </v-select>
         <v-text-field density="compact" placeholder="请输入用户名" prepend-icon="mdi-account" v-model="auth.username">
         </v-text-field>
@@ -33,9 +36,11 @@
 </template>
 
 <script setup>
+import { ref, getCurrentInstance } from 'vue';
+
 import API from '@/assets/app/api';
 import notify from '@/assets/app/notify';
-import { ref, getCurrentInstance } from 'vue';
+import NewCluster from '@/components/welcome/NewCluster.vue';
 
 var showPassword = ref(false);
 var refreshingRegion = ref(false);
@@ -59,8 +64,8 @@ function changeCluster() {
   refreshRegions(true)
 }
 
-async function refreshRegions(force=false) {
-  if (!force && regions.value.length > 0){
+async function refreshRegions(force = false) {
+  if (!force && regions.value.length > 0) {
     return
   }
   if (!auth.value.cluster) {
@@ -75,6 +80,8 @@ async function refreshRegions(force=false) {
 }
 
 async function login() {
+  if (!auth.value.cluster) { notify.error('请选择集群'); return }
+  if (!auth.value.region) { notify.error('请选择地区'); return }
   try {
     let resp = await API.system.login(auth.value.username, auth.value.password)
     notify.success('登录成功')
@@ -86,6 +93,8 @@ async function login() {
     notify.error('登录失败')
   }
 }
+
+localStorage.removeItem('clusterId')
 refreshClusters()
 
 </script>

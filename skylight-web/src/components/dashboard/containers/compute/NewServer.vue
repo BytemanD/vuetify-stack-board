@@ -27,6 +27,14 @@
                             </v-text-field>
                         </v-col>
                         <v-col cols="9" class="mt-0">
+                            <v-text-field class="mb-1" density="compact" readonly v-model="dialog.flavor.id"
+                                :label="dialog.flavor.name" :error="!dialog.flavor.id"
+                                :messages="dialog.validFlavor()">
+                                <template v-slot:prepend>规格</template>
+                            </v-text-field>
+                            <flavor-table class="ml-10" @select-flavor="(flavor) => { selectFlavor(flavor) }" />
+                        </v-col>
+                        <v-col cols="9">
                             <v-text-field class="mb-1" density="compact" readonly v-model="dialog.image.id"
                                 :label="dialog.image.name" :error="!dialog.image.id"
                                 :messages="dialog.validImage()">
@@ -34,13 +42,24 @@
                             </v-text-field>
                             <image-table class="ml-10" @select-image="(image) => { selectImage(image) }" />
                         </v-col>
-                        <v-col cols="9" class="mt-0">
-                            <v-text-field class="mb-1" density="compact" readonly v-model="dialog.flavor.id"
-                                :label="dialog.flavor.name" :error="!dialog.flavor.id"
-                                :messages="dialog.validFlavor()">
-                                <template v-slot:prepend>规格</template>
-                            </v-text-field>
-                            <flavor-table class="ml-10" @select-flavor="(flavor) => { selectFlavor(flavor) }" />
+                        <v-col class="ml-10" cols="12" md="9" lg="9">
+                            <v-row>
+                                <v-col md="4" lg="2">
+                                    <v-checkbox hide-details v-model="dialog.useBdm" color="info" class="my-auto"
+                                        label="创建卷"></v-checkbox>
+                                </v-col>
+                                <v-col>
+                                    <v-select :disabled="!dialog.useBdm" :items="dialog.volumeTypes" clearable density='compact'
+                                        item-title="name" item-value="name" @click="dialog.refreshVolumeTypes()"
+                                        v-model="dialog.volumeType" label="选择卷类型">
+                                    </v-select>
+                                </v-col>
+                            </v-row>
+                            <v-slider :disabled="!dialog.useBdm" v-model="dialog.volumeSize" color="info"
+                                show-ticks="always" tick-size="4" :min="dialog.volumeSizeMin" max="100" step="10">
+                                <template v-slot:prepend>卷大小</template>
+                                <template v-slot:append>{{ dialog.volumeSize }} GB</template>
+                            </v-slider>
                         </v-col>
                         <v-col cols="12" md="6" lg="6">
                             <v-select :items="dialog.networks" clearable density='compact' :item-props="dialog.itemProps"
@@ -52,20 +71,6 @@
                                 @click="dialog.refresPorts()">
                                 <template v-slot:prepend>端口</template>
                             </v-select>
-                        </v-col>
-                        <v-col cols="12" md="6" lg="6">
-                            <v-checkbox hide-details v-model="dialog.useBdm" color="info" class="my-auto"
-                                label="创建卷"></v-checkbox>
-                            <v-select :disabled="!dialog.useBdm" :items="dialog.volumeTypes" clearable density='compact'
-                                item-title="name" item-value="name" @click="dialog.refreshVolumeTypes()"
-                                v-model="dialog.volumeType">
-                                <template v-slot:prepend>卷类型</template>
-                            </v-select>
-                            <v-slider :disabled="!dialog.useBdm" v-model="dialog.volumeSize" color="info"
-                                show-ticks="always" tick-size="4" :min="dialog.volumeSizeMin" max="100" step="10">
-                                <template v-slot:prepend>卷大小</template>
-                                <template v-slot:append><v-chip label small>{{ dialog.volumeSize }} GB</v-chip></template>
-                            </v-slider>
                         </v-col>
                     </v-row>
                 </template>

@@ -5,7 +5,6 @@ import API, {
     ExpectServerRebuild,
     ExpectServerResized
 } from './api.js';
-import I18N from './i18n.js';
 import SETTINGS from './settings.js';
 import { Utils, LOG, CONST } from './lib.js';
 import { BackupTable, VolumeDataTable, UserTable, RegionDataTable,
@@ -727,7 +726,13 @@ export class NewClusterDialog extends Dialog {
         try {
             await API.cluster.add(data);
         } catch (error) {
-            throw Error(`环境 ${this.name} 添加失败`);
+            console.error(error.response)
+            if (error.response && error.response.data.error) {
+                notify.error(`环境 ${this.name} 添加失败, ${error.response.data.error}`);
+            } else {
+                notify.error(`环境 ${this.name} 添加失败, ${error}`);
+            }
+            throw error
         }
         notify.success(`环境 ${this.name} 添加成功`);
     }
@@ -752,7 +757,7 @@ export class NewServerDialog extends Dialog {
         this.azHosts = {};
         this.keypairs = [];
         this.keypair = null;
-        this.volumeType = '';
+        this.volumeType = null;
         this.securityGroup = null;
         this.volumeTypes = [];
         this.securityGroups = [];
