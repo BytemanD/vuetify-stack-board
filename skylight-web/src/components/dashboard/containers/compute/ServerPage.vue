@@ -128,12 +128,6 @@
               <v-list-item @click="openChangeServerPasswordDialog(item)">
                 <v-list-item-title>修改密码</v-list-item-title>
               </v-list-item>
-              <v-list-item @click="openServerVolumesDialog(item)">
-                <v-list-item-title>卷管理</v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="openServerInterfacesDialog(item)">
-                <v-list-item-title>网卡管理</v-list-item-title>
-              </v-list-item>
               <v-list-item @click="openServerUpdateSGDialog(item)">
                 <v-list-item-title>更新安全组</v-list-item-title>
               </v-list-item>
@@ -178,10 +172,6 @@
       :server="selectedServer" />
     <ServerChangePassword :show="showChangePassowrdDialog" @update:show="(e) => showChangePassowrdDialog = e"
       :server="selectedServer" />
-    <ServerVolumes :show="showServerVolumesDialog" @update:show="(e) => showServerVolumesDialog = e"
-      :server="selectedServer" />
-    <ServerInterfaces :show="showServerInterfacesDialog" @update:show="(e) => showServerInterfacesDialog = e"
-      :server="selectedServer" @completed="table.refresh()" />
     <ServerUpdateSG :show="showServerUpdateSGDialog" @update:show="(e) => showServerUpdateSGDialog = e"
       :server="selectedServer" />
     <ServerResize :show="showServerResizeDialog" @update:show="(e) => showServerResizeDialog = e" :server="selectedServer"
@@ -209,8 +199,6 @@ import ServerActionDialog from './dialogs/ServerActionDialog.vue';
 import ServerMigrateDialog from './dialogs/ServerMigrateDialog.vue';
 import ServerConsoleLogDialog from './dialogs/ServerConsoleLogDialog.vue';
 import ServerChangePassword from './dialogs/ServerChangePassword.vue';
-import ServerVolumes from './dialogs/ServerVolumes.vue';
-import ServerInterfaces from './dialogs/ServerInterfaces.vue';
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
 import ServerResize from './dialogs/ServerResize.vue';
 import ServerRebuild from './dialogs/ServerRebuild.vue';
@@ -230,7 +218,6 @@ export default {
     ServerActionDialog,
     ServerConsoleLogDialog,
     ServerChangePassword,
-    ServerVolumes, ServerInterfaces,
     ServerUpdateSG, ServerResize, ServerRebuild,
     ServerGroupDialog,
     DeleteComfirmDialog,

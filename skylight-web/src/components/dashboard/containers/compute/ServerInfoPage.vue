@@ -7,13 +7,14 @@
       <v-btn class="ml-1" size="small" variant="outlined" color="info" @click="refreshServer()">刷新</v-btn>
     </v-col>
     <v-col cols="12">
-      <v-tabs v-model="tabIndex" selected-class="bg-white text-primary " bg-color="primary" density="compact">
+      <v-tabs v-model="tabIndex" show-arrows density="compact" selected-class="bg-blue-grey-lighten-1" slider-color="blue-grey-lighten-1" >
         <v-tab>详情</v-tab>
         <v-tab>网卡</v-tab>
         <v-tab>云盘</v-tab>
+        <v-tab>控制台日志</v-tab>
         <v-tab>操作记录</v-tab>
       </v-tabs>
-      <br>
+      <div class="bg-blue-grey-lighten-1" style="height: 2px;"></div>
       <v-window v-model="tabIndex">
         <v-window-item>
           <v-row>
@@ -195,6 +196,9 @@
             @attached-volume="handleAttachedVolumeEvent"/>
         </v-window-item>
         <v-window-item>
+          <card-server-console-log :server-id="server.id" />
+        </v-window-item>
+        <v-window-item>
           <v-card>
             <v-card-title>操作记录</v-card-title>
           </v-card>
@@ -235,6 +239,8 @@ import ServerChangePassword from './dialogs/ServerChangePassword.vue';
 import ServerVolumes from './dialogs/ServerVolumes.vue';
 import BtnAttachInterfaces from '@/components/plugins/button/BtnAttachInterfaces.vue';
 import BtnAttachVolumes from '@/components/plugins/button/BtnAttachVolumes.vue';
+import CardServerConsoleLog from '@/components/plugins/CardServerConsoleLog.vue';
+
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
 import ServerResize from './dialogs/ServerResize.vue';
 import ServerRebuild from './dialogs/ServerRebuild.vue';
@@ -252,6 +258,7 @@ export default {
     ServerConsoleLogDialog,
     ServerChangePassword,
     ServerVolumes, BtnAttachInterfaces, BtnAttachVolumes,
+    CardServerConsoleLog,
     ServerUpdateSG, ServerResize, ServerRebuild,
     ServerGroupDialog,
   },
