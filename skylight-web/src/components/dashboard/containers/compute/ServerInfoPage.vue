@@ -136,7 +136,8 @@
                 <tr v-if="server.flavor">
                   <th>属性</th>
                   <td>
-                    <v-chip label density="compact" class="mr-1" v-for="(value, key) in server.flavor.extra_specs" v-bind:key="key">
+                    <v-chip label density="compact" class="mr-1" v-for="(value, key) in server.flavor.extra_specs"
+                      v-bind:key="key">
                       {{ key }}={{ value }}</v-chip>
                   </td>
                 </tr>
@@ -173,10 +174,12 @@
             class="mb-6" icon="mdi-alert">无网卡</v-alert>
           <v-row>
             <v-col cols="12" md='6' lg="4" class="pa-4" v-for="item in interfaces" :key="item.mac_addr">
-              <server-interface-card :server-id="server.id" :vif="item" @detaching="interfaceDetaching" @detached="interfaceDetached" />
+              <server-interface-card :server-id="server.id" :vif="item" @detached="interfaceDetached" />
             </v-col>
           </v-row>
-          <btn-attach-interfaces :server-id="server.id" />
+          <btn-attach-interfaces :server-id="server.id" @attaching-port="handleAttachingPortEvent"
+            @attached-port="handleAttachedPortEvent" @attaching-net="handleAttachingNetEvent"
+            @attached-net="handleAttachedNetEvent" />
         </v-window-item>
         <v-window-item>
           <v-alert v-if="!volumes || volumes.length == 0" color="warning" density="compact" variant="text" class="mb-6"
@@ -184,9 +187,12 @@
           <v-row>
             <v-col cols="12" md='6' lg="4" class="pa-4" v-for="item in volumes" :key="item.device">
               <server-volume-card :server-id="server.id" :volume="item"
-                :root-device-name="server['OS-EXT-SRV-ATTR:root_device_name']" />
+                :root-device-name="server['OS-EXT-SRV-ATTR:root_device_name']"
+                @detached="handleAttachedVolume" />
             </v-col>
           </v-row>
+          <btn-attach-volumes :server-id="server.id" @attaching-volume="handleAttachingVolumeEvent"
+            @attached-volume="handleAttachedVolumeEvent"/>
         </v-window-item>
         <v-window-item>
           <v-card>
@@ -228,6 +234,7 @@ import ServerConsoleLogDialog from './dialogs/ServerConsoleLogDialog.vue';
 import ServerChangePassword from './dialogs/ServerChangePassword.vue';
 import ServerVolumes from './dialogs/ServerVolumes.vue';
 import BtnAttachInterfaces from '@/components/plugins/button/BtnAttachInterfaces.vue';
+import BtnAttachVolumes from '@/components/plugins/button/BtnAttachVolumes.vue';
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
 import ServerResize from './dialogs/ServerResize.vue';
 import ServerRebuild from './dialogs/ServerRebuild.vue';
@@ -244,7 +251,7 @@ export default {
     ServerActionDialog,
     ServerConsoleLogDialog,
     ServerChangePassword,
-    ServerVolumes, BtnAttachInterfaces,
+    ServerVolumes, BtnAttachInterfaces, BtnAttachVolumes,
     ServerUpdateSG, ServerResize, ServerRebuild,
     ServerGroupDialog,
   },
@@ -330,6 +337,7 @@ export default {
       this.server = await API.server.show(this.serverId);
       this.breadcrumbItems[this.breadcrumbItems.length - 1] = this.server.name;
       this.refreshInterfaces();
+      this.refreshVolumes();
     },
     refreshImage: async function () {
       if (this.image && this.image.id == this.server.image.id) {
@@ -340,13 +348,16 @@ export default {
     refreshInterfaces: async function () {
       this.interfaces = (await API.server.interfaceList(this.serverId)).interfaceAttachments
     },
+    refreshVolumes: async function () {
+      this.volumes = (await API.server.volumeAttachments(this.serverId)).volumeAttachments
+    },
     refresh: async function () {
       await this.refreshServer()
       if (this.server.image && this.server.image.id) {
         await this.refreshImage()
       }
       this.refreshInterfaces()
-      this.volumes = (await API.server.volumeAttachments(this.serverId)).volumeAttachments
+      this.refreshVolumes();
     },
     stop: async function () {
       // TODO: use BtnServerStop
@@ -393,18 +404,40 @@ export default {
         this.refreshImage()
       }
     },
-    interfaceDetaching: function(portId){
-      notify.info(`网卡 ${portId} 卸载中 ...`);
-    },
-    interfaceDetached: function(portId){
-      notify.success(`网卡 ${portId} 卸载成功`);
+    interfaceDetached: function (portId) {
       for (let i in this.interfaces) {
-            if (this.interfaces[i].port_id == portId) {
-              this.interfaces.splice(i, 1)
-                break;
-            }
+        if (this.interfaces[i].port_id == portId) {
+          this.interfaces.splice(i, 1)
+          break;
         }
-    }
+      }
+    },
+    handleAttachingPortEvent: function (data) {
+      notify.info(`网卡 ${data} 挂载中 ...`);
+    },
+    handleAttachedPortEvent: function (data) {
+      this.refreshInterfaces();
+    },
+    handleAttachingNetEvent: function (data) {
+      notify.info(`网络 ${data} 添加中...`);
+    },
+    handleAttachedNetEvent: function (data) {
+      this.refreshInterfaces();
+    },
+    handleAttachedVolume: function (data) {
+      for (let i in this.volumes) {
+        if (this.volumes[i].volumeId == data) {
+          this.volumes.splice(i, 1)
+          break;
+        }
+      }
+    },
+    handleAttachingVolumeEvent: function (data) {
+      notify.info(`卷 ${data} 挂载中 ...`);
+    },
+    handleAttachedVolumeEvent: function (data) {
+      this.refreshVolumes();
+    },
   },
   created() {
     this.serverId = this.$route.params.id

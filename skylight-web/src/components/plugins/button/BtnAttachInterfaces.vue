@@ -3,7 +3,7 @@
         <template v-slot:activator="{ props }">
             <v-btn v-bind="props" color="primary" icon="mdi-plus" variant="text" class="mr-1"></v-btn>
         </template>
-        <v-card title="添加机网卡">
+        <v-card title="添加网卡">
             <template v-slot:append>
                 <btn-router-link router-to='/dashboard/networking' text="网络资源" />
                 <v-btn variant="outlined" color="warning" @click="attach()">挂载</v-btn>
@@ -31,8 +31,6 @@
     </v-dialog>
 </template>
 <script>
-import i18n from '@/assets/app/i18n';
-import { Utils } from '@/assets/app/lib';
 import API from '@/assets/app/api';
 
 import BtnRouterLink from '@/components/plugins/BtnRouterLink.vue';
@@ -43,8 +41,6 @@ export default {
     },
     components: {BtnRouterLink},
     data: () => ({
-        i18n: i18n,
-        Utils: Utils,
         display: false,
         ports: [],
         networks: [],
@@ -53,19 +49,22 @@ export default {
     }),
     methods: {
         attachSelectedPorts: async function () {
-            for (let i in this.selectedPorts) {
-                let item = this.selectedPorts[i];
-                // notify.info(`网卡 ${item} 挂载中`);
+            let attachPorts = this.selectedPorts;
+            for (let i in attachPorts) {
+                let item = attachPorts[i];
+                console.log(this.$emit)
+                this.$emit('attaching-port', item)
                 await API.server.interfaceAttach(this.serverId, { port_id: item })
-                // notify.success(`网卡 ${item} 挂载成功`);
+                this.$emit('attached-port', item)
             }
         },
         attachSelectedNets: async function () {
-            for (let i in this.selectedNetworks) {
-                let item = this.selectedNetworks[i];
-                // notify.info(`网卡 ${item} 挂载中`);
+            let attachNets = this.selectedNetworks;
+            for (let i in attachNets) {
+                let item = attachNets[i];
+                this.$emit('attaching-net', item)
                 await API.server.interfaceAttach(this.serverId, { net_id: item })
-                // notify.success(`网卡 ${item} 挂载成功`);
+                this.$emit('attached-net', item)
             }
         },
         refreshNetworks: async function () {
@@ -75,17 +74,17 @@ export default {
             this.ports = (await API.port.list({ device_id: '+' })).ports
         },
         attach: async function () {
+            this.display = false;
             await this.attachSelectedPorts()
             await this.attachSelectedNets()
         }
-    },
-    created() {
-
     },
     watch: {
         display(newVal) {
             this.display = newVal;
             if (this.display) {
+                this.selectedPorts = [];
+                this.selectedNetworks = [];
                 this.refreshNetworks()
                 this.refreshPorts()
             }

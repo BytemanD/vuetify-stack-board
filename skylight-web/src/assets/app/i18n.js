@@ -95,6 +95,8 @@ const MESSAGES = {
         public: 'public',
         shared: 'shared',
         private: 'private',
+        attach: 'attach',
+        detach: 'detach',
 
     },
     'zh-CN': {
@@ -193,6 +195,9 @@ const MESSAGES = {
         public: '公共',
         shared: '共享',
         private: '私有',
+
+        attach: '挂载',
+        detach: '卸载',
     },
 };
 

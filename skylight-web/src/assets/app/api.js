@@ -884,6 +884,17 @@ export class SkylightAPI {
         }
         return hosts
     }
+    async waitVolumeStatus(volumeId, expectStatus = ['available', 'error']) {
+        let body = {};
+        let status = null;
+        do {
+            if (body.status) { await Utils.sleep(3); }
+            body = (await this.volume.show(volumeId));
+            status = body.status;
+            LOG.debug(`wait volume ${volumeId} status to be ${expectStatus}, now: ${status}`)
+        } while (expectStatus.indexOf(status) < 0)
+        return body
+    }
 }
 
 
