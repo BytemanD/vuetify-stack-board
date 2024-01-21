@@ -3,7 +3,7 @@
     <v-col cols='12'>
       <v-data-table-server density='compact' show-select show-expand single-expand :loading="table.loading"
         :headers="table.headers" :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search"
-        v-model="table.selected" :items-length="totalServers.length" @update:options="pageRefresh">
+        v-model="table.selected" :items-length="totalServers.length" @update:options="pageRefresh" hover>
 
         <template v-slot:top>
           <v-row>
@@ -100,7 +100,7 @@
         </template>
         <template v-slot:[`item.addresses`]="{ item }">
           <v-chip v-if="Object.keys(item.addresses).length > 0" label size="x-small" class="mr-1 mb-1">
-            {{ table.parseFirstAddresses(item).join(' | ')}}
+            {{ table.parseFirstAddresses(item).join(' | ') }}
           </v-chip>
           <span v-if="Object.keys(item.addresses).length > 1">...</span>
         </template>
@@ -121,9 +121,6 @@
             <v-list density='compact'>
               <v-list-item @click="openServerActionDialog(item)">
                 <v-list-item-title>操作记录</v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="openServerConsoleLogDialog(item)">
-                <v-list-item-title>控制台日志</v-list-item-title>
               </v-list-item>
               <v-list-item @click="openChangeServerPasswordDialog(item)">
                 <v-list-item-title>修改密码</v-list-item-title>
@@ -168,8 +165,6 @@
       @update:show="(e) => showChangeNameDialog = e" />
     <ServerActionDialog :show="showServerActionDialog" :server="selectedServer"
       @update:show="(e) => showServerActionDialog = e" />
-    <ServerConsoleLogDialog :show="showServerConsoleLogDialog" @update:show="(e) => showServerConsoleLogDialog = e"
-      :server="selectedServer" />
     <ServerChangePassword :show="showChangePassowrdDialog" @update:show="(e) => showChangePassowrdDialog = e"
       :server="selectedServer" />
     <ServerUpdateSG :show="showServerUpdateSGDialog" @update:show="(e) => showServerUpdateSGDialog = e"
@@ -216,7 +211,6 @@ export default {
     BtnServerResetState,
     ChangeServerNameDialog,
     ServerActionDialog,
-    ServerConsoleLogDialog,
     ServerChangePassword,
     ServerUpdateSG, ServerResize, ServerRebuild,
     ServerGroupDialog,
@@ -232,7 +226,6 @@ export default {
     openServerTopology: false,
 
     showServerActionDialog: false,
-    showServerConsoleLogDialog: false,
     showChangeNameDialog: false,
     showChangePassowrdDialog: false,
     showRenameDialog: false,
@@ -261,7 +254,7 @@ export default {
     },
     refreshTotlaServers: function () {
       let self = this;
-      let filter = {'deleted': this.table.deleted}
+      let filter = { 'deleted': this.table.deleted }
       API.server.list(filter).then((servers) => {
         self.totalServers = servers
       })

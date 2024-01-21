@@ -1,24 +1,27 @@
 <template>
     <v-dialog v-model="display" width="600" scrollable>
         <v-card>
-            <v-card-title class="headline primary lighten-2" primary-title>网络: {{  dialog.network.name || dialog.network.id }}</v-card-title>
+            <v-card-title class="headline primary lighten-2" primary-title>网络: {{ dialog.network.name || dialog.network.id
+            }}</v-card-title>
             <v-card-text>
-                <v-row>
-                    <v-col cols="10">
-                        <v-text-field label="*子网名字" placeholder="请输入子网名" v-model="dialog.name" :error="!dialog.name"></v-text-field>
-                    </v-col>
-                    <v-col cols="2" class="my-auto">
-                        <v-btn text color="primary" @click="dialog.refreshName()">随机名字</v-btn>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-text-field density='compact' outlined  label="CIDR" placeholder="请输入cidr" v-model="dialog.cidr" :error="!dialog.cidr" :rules="[dialog.checkCidr]"></v-text-field>
-                        <v-select density='compact' outlined :items="dialog.ipVersions" label="IP版本" v-model="dialog.ipVersion"></v-select>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-switch density='compact' v-model="dialog.enableDhcp" label="启用DHCP" class="my-auto"></v-switch>
-                    </v-col>
-                </v-row>
-                <v-alert density='compact' outlined type="error" v-if="dialog.errorMessage">[[ dialog.errorMessage ]]</v-alert>
+                <v-text-field label="子网名" placeholder="请输入子网名" v-model="dialog.name" :error="!dialog.name"
+                    :rules="[dialog.checkNameNotNull]">
+                    <template v-slot:append>
+                        <v-btn variant='text' color="primary" @click="dialog.refreshName()">随机名字</v-btn>
+                    </template>
+                </v-text-field>
+                <v-text-field density='compact' outlined label="CIDR" placeholder="请输入cidr" v-model="dialog.cidr"
+                    :error="!dialog.cidr" :rules="[dialog.checkCidr]">
+                </v-text-field>
+
+                <v-radio-group inline hide-details color="info" v-model="dialog.ipVersion">
+                    <template v-slot:prepend>IP版本</template>
+                    <v-radio label="4" value="4"></v-radio>
+                    <v-radio label="6" value="6" class="ml-10"></v-radio>
+                </v-radio-group>
+                <v-switch hide-details color="info" v-model="dialog.enableDhcp">
+                    <template v-slot:prepend>启用DHCP</template>
+                </v-switch>
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
@@ -50,9 +53,6 @@ export default {
             this.display = false;
             this.$emit('completed');
         }
-    },
-    created() {
-
     },
     watch: {
         show(newVal) {

@@ -117,9 +117,9 @@ class DataTable {
         this.items = this.bodyKey ? result[this.bodyKey] : result;
         return result;
     }
-    getSelecedItems(){
+    getSelecedItems() {
         let items = [];
-        for (let i in this.items){
+        for (let i in this.items) {
             if (this.selected.indexOf(this.items[i].id) < 0) {
                 continue
             }
@@ -222,10 +222,11 @@ export class NetDataTable extends DataTable {
         this.subnets = {};
     }
     async refreshSubnets() {
-        let body = await API.subnet.list();
-        // body.subnets.forEach(item => {
-        //     Vue.set(this.subnets, item.id, item)
-        // });
+        // use network.subnets
+        let subnets = (await API.subnet.list()).subnets;
+        subnets.forEach(item => {
+            this.subnets[item.id] = item;
+        })
     }
     async deleteSubnet(subnet_id) {
         let subnet = this.subnets[subnet_id];
@@ -247,11 +248,16 @@ export class NetDataTable extends DataTable {
         }
     }
     async shared(item) {
-        await API.network.put(item.id, { network: { shared: item.shared } })
-        if (item.shared) {
-            Notify.success(`网络 ${item.name} 已设置为共享`)
-        } else {
-            Notify.success(`网络 ${item.name} 已取消共享`)
+        try {
+            await API.network.put(item.id, { network: { shared: !item.shared } })
+            if (item.shared) {
+                Notify.success(`网络 ${item.name} 已设置为共享`)
+            } else {
+                Notify.success(`网络 ${item.name} 已取消共享`)
+            }
+        } catch (e) {
+            item.shared = !item.shared;
+            Notify.error(`网络 ${item.name} 更新失败: ${e}`)
         }
     }
 }
@@ -316,13 +322,13 @@ export class QosPolicyDataTable extends DataTable {
         super([
             { title: 'id', key: 'id' },
             { title: '名字', key: 'name' },
-            { title: '标签', key: 'tags' },
-            { title: 'revision_number', key: 'revision_number' },
+            { title: '修订号', key: 'revision_number' },
             { title: '是否默认', key: 'is_default' },
             { title: '是否共享', key: 'shared' },
             { title: '操作', key: 'actions' },
         ], API.qosPolicy, 'policies');
         this.extendItems = [
+            { title: '标签', key: 'tags' },
             { title: 'rules', key: 'rules' },
             { title: 'created_at', key: 'created_at' },
             { title: 'updated_at', key: 'updated_at' },
@@ -330,14 +336,24 @@ export class QosPolicyDataTable extends DataTable {
         ];
     }
     async updateDefault(item) {
-        let data = { is_default: item.is_default }
-        await API.qosPolicy.put(item.id, { policy: data });
-        Notify.success(`限速规则 ${item.name || item.id} 更新成功`)
+        let data = { is_default: !item.is_default }
+        try {
+            await API.qosPolicy.put(item.id, { policy: data });
+            Notify.success(`限速规则 ${item.name || item.id} 更新成功`)
+        } catch (e) {
+            item.is_default = !item.is_default;
+            Notify.error(`限速规则 ${item.name || item.id} 更新失败: ${e}`)
+        }
     }
     async updateShared(item) {
-        let data = { shared: item.shared }
-        await API.qosPolicy.put(item.id, { policy: data });
-        Notify.success(`限速规则 ${item.name || item.id} 更新成功`)
+        let data = { shared: !item.shared }
+        try {
+            await API.qosPolicy.put(item.id, { policy: data });
+            Notify.success(`限速规则 ${item.name || item.id} 更新成功`)
+        } catch (e) {
+            item.shared = !item.shared;
+            Notify.error(`限速规则 ${item.name || item.id} 更新失败: ${e}`)
+        }
     }
 }
 export class FlavorDataTable extends DataTable {
@@ -387,9 +403,9 @@ export class KeypairDataTable extends DataTable {
         Utils.copyToClipboard(item.public_key)
         Notify.success(`公钥内容已复制`);
     }
-    getSelecedItems(){
+    getSelecedItems() {
         let items = [];
-        for (let i in this.items){
+        for (let i in this.items) {
             if (this.selected.indexOf(this.items[i].name) < 0) {
                 continue
             }

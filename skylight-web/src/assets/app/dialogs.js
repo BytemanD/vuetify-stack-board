@@ -302,7 +302,7 @@ export class NewSubnetDialog extends Dialog {
         this.ipVersions = [4, 6]
         this.enableDhcp = true;
         this.gateway = null;
-        this.ipVersion = 4;
+        this.ipVersion = '4';
         this.network = {};
     }
     async init(network) {
@@ -326,14 +326,14 @@ export class NewSubnetDialog extends Dialog {
             name: this.name,
             network_id: this.network.id,
             cidr: this.cidr,
-            ip_version: this.ipVersion,
+            ip_version: parseInt(this.ipVersion),
             enable_dhcp: this.enableDhcp,
         }
         if (this.gateway) { data.gateway = this.gateway }
         this.errornotify = null;
         try {
             await API.subnet.post({ subnet: data });
-            notify.success(`子网 ${this.params.name} 创建成功`);
+            notify.success(`子网 ${this.name} 创建成功`);
             this.su
         } catch (error) {
             this.errornotify = error.response.data.NeutronError;

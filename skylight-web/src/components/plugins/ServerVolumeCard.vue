@@ -1,5 +1,5 @@
 <template>
-    <v-card class="ma-1" variant="tonal" :title="'挂载路径:' + volume.device">
+    <v-card class="ma-1" variant="tonal" :title="'挂载路径: ' + volume.device">
         <template v-slot:append>
             <v-btn variant="tonal" color="red" size="small" :loading="detaching" v-if="volume.device != rootDeviceName"
                 @click="detach()">卸载</v-btn>
@@ -23,12 +23,10 @@
 
 <script setup>
 import { ref, defineProps } from 'vue';
-
 import API from '@/assets/app/api';
 
 var vol = ref({}), detaching = ref(false);
 const emits = defineEmits(['detaching', 'detached'])
-
 const progs = defineProps({
     serverId: { type: String, required: true, },
     volume: { type: Object, default: {}, required: true, },

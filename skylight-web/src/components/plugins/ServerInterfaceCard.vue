@@ -1,5 +1,5 @@
 <template>
-    <v-card variant="tonal" :title="'MAC地址:' + vif.mac_addr" density="compact">
+    <v-card variant="tonal" :title="'MAC地址: ' + vif.mac_addr" density="compact">
         <template v-slot:append>
             <v-btn variant="tonal" color="red" size="small" @click="detach()" :loading="detaching">{{ $t("detach") }}</v-btn>
         </template>

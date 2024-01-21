@@ -7,16 +7,9 @@
       <v-btn class="ml-1" size="small" variant="outlined" color="info" @click="refreshServer()">刷新</v-btn>
     </v-col>
     <v-col cols="12">
-      <v-tabs v-model="tabIndex" show-arrows density="compact" selected-class="bg-blue-grey-lighten-1" slider-color="blue-grey-lighten-1" >
-        <v-tab>详情</v-tab>
-        <v-tab>网卡</v-tab>
-        <v-tab>云盘</v-tab>
-        <v-tab>控制台日志</v-tab>
-        <v-tab>操作记录</v-tab>
-      </v-tabs>
-      <div class="bg-blue-grey-lighten-1" style="height: 2px;"></div>
-      <v-window v-model="tabIndex">
-        <v-window-item>
+      <tab-windows :tabs="['详情', '网卡', '云盘', '控制台日志', '操作记录']">
+        <template v-slot:window-items>
+          <v-window-item>
           <v-row>
             <v-col cols="12" md="12" lg="6">
               <v-table density="compact" class="text-left">
@@ -203,9 +196,8 @@
             <v-card-title>操作记录</v-card-title>
           </v-card>
         </v-window-item>
-        <v-window-item>
-        </v-window-item>
-      </v-window>
+        </template>
+      </tab-windows>
     </v-col>
     <v-notifications location="bottom right" :timeout="3000" />
   </v-row>
@@ -234,12 +226,12 @@ import ChangeServerNameDialog from './dialogs/ChangeServerNameDialog.vue';
 import ServerActionDialog from './dialogs/ServerActionDialog.vue';
 import ServerMigrateDialog from './dialogs/ServerMigrateDialog.vue';
 import ServerResetStateDialog from './dialogs/ServerResetStateDialog.vue';
-import ServerConsoleLogDialog from './dialogs/ServerConsoleLogDialog.vue';
 import ServerChangePassword from './dialogs/ServerChangePassword.vue';
 import ServerVolumes from './dialogs/ServerVolumes.vue';
 import BtnAttachInterfaces from '@/components/plugins/button/BtnAttachInterfaces.vue';
 import BtnAttachVolumes from '@/components/plugins/button/BtnAttachVolumes.vue';
 import CardServerConsoleLog from '@/components/plugins/CardServerConsoleLog.vue';
+import TabWindows from '@/components/plugins/TabWindows.vue';
 
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
 import ServerResize from './dialogs/ServerResize.vue';
@@ -255,10 +247,11 @@ export default {
     ServerMigrateDialog, ServerEvacuateDialog, ServerResetStateDialog,
     ChangeServerNameDialog,
     ServerActionDialog,
-    ServerConsoleLogDialog,
+
     ServerChangePassword,
     ServerVolumes, BtnAttachInterfaces, BtnAttachVolumes,
     CardServerConsoleLog,
+    TabWindows,
     ServerUpdateSG, ServerResize, ServerRebuild,
     ServerGroupDialog,
   },

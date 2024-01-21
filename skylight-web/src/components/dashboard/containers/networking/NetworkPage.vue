@@ -21,7 +21,7 @@
                         </v-col>
                         <v-col cols="1" class="text-center">
                             <v-btn variant="text" icon="mdi-refresh" color="info"
-                                @click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
+                                @click="refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
                         </v-col>
                     </v-row>
                 </template>
@@ -35,15 +35,15 @@
                         @click="table.adminStateDown(item)"></v-switch>
                 </template>
                 <template v-slot:[`item.shared`]="{ item }">
-                    <v-switch class="my-auto" v-model="item.shared" hide-details @click="table.shared(item)"></v-switch>
+                    <v-checkbox v-model="item.shared" color="info" @click="table.shared(item)"></v-checkbox>
                 </template>
                 <template v-slot:[`item.subnets`]="{ item }">
-                    <template v-for="subnetId in item.subnets">
-                        <v-chip close x-small label color="cyan" v-bind:key="subnetId" @click:close="deleteSubnet(subnetId)"
-                            text-color="white" class="mr-1" v-if="table.subnets[subnetId]">
-                            {{ table.subnets[subnetId].cidr }}
+                    <div v-for="subnetId in item.subnets" v-bind:key="subnetId">
+                        <v-chip closable size='x-small' label color="cyan" @click:close="deleteSubnet(subnetId)"
+                            text-color="white" class="mr-1">
+                            {{ table.subnets[subnetId] && table.subnets[subnetId].cidr }}
                         </v-chip>
-                    </template>
+                    </div>
                     <v-btn size="x-small" variant="text" icon="mdi-plus" color="primary"
                         @click="openNewSubnetDialog(item)"></v-btn>
                 </template>
@@ -98,8 +98,7 @@ export default {
         }
     },
     created() {
-        this.table.refreshSubnets();
-        this.table.refresh();
+        this.refresh();
     }
 };
 </script>

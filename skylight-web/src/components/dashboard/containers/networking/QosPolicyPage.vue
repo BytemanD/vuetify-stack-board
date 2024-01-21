@@ -30,11 +30,11 @@
                     <v-btn size="small" variant="text" color="purple" @click="openQosPolicyRulesDialog(item)">规则管理</v-btn>
                 </template>
                 <template v-slot:[`item.is_default`]="{ item }">
-                    <v-switch hide-details class="my-auto" v-model="item.is_default"
+                    <v-switch hide-details color="info" v-model="item.is_default"
                         @click="table.updateDefault(item)"></v-switch>
                 </template>
                 <template v-slot:[`item.shared`]="{ item }">
-                    <v-switch hide-details class="my-auto" v-model="item.shared"
+                    <v-switch hide-details color="info" class="my-auto" v-model="item.shared"
                         @click="table.updateShared(item)"></v-switch>
                 </template>
                 <template v-slot:expanded-row="{ columns, item }">
