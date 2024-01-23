@@ -3,25 +3,22 @@
         <template v-slot:activator="{ props }">
             <v-btn v-bind="props" icon="mdi-plus" fab color="primary" class="mr-1"></v-btn>
         </template>
-        <v-card>
-            <v-card-title class="headline primary lighten-2" primary-title>新建聚合</v-card-title>
+        <v-card title="新建聚合">
+            <template v-slot:append>
+                <v-btn color="primary" @click="commit()">创建</v-btn>
+            </template>
             <v-card-text>
                 <v-row>
                     <v-col class="my-auto">
-                        <v-text-field label="*名字" placeholder="请输入聚合名" v-model="dialog.name"
-                            :error="!dialog.name"></v-text-field>
-                    </v-col>
-                    <v-col cols="2" class="my-auto">
-                        <v-btn text color="primary" @click="dialog.refreshName()">随机名字</v-btn>
+                        <v-text-field label="名字" placeholder="请输入聚合名" v-model="dialog.name" :error="!dialog.name">
+                            <template v-slot:append>
+                                <v-btn variant='text' color="primary" @click="dialog.refreshName()">随机名字</v-btn>
+                            </template>
+                        </v-text-field>
                     </v-col>
                 </v-row>
                 <v-text-field label="域" placeholder="请输入域名字" v-model="dialog.az"></v-text-field>
             </v-card-text>
-            <v-divider></v-divider>
-            <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="primary" @click="commit()">创建</v-btn>
-            </v-card-actions>
         </v-card>
     </v-dialog>
 </template>

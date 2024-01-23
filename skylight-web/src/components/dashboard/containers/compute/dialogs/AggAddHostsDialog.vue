@@ -1,17 +1,15 @@
 <template>
     <v-dialog v-model="display" width="800">
-        <v-card>
-            <v-card-title class="headline primary lighten-2" primary-title>添加节点</v-card-title>
-            <v-card-text class="mt-1">
-                <v-data-table density='compact' show-select class="mt-1" :headers="dialog.headers" :items="dialog.hosts" :items-per-page="dialog.hypervisorTable.itemsPerPage"
-                :search="dialog.hypervisorTable.search" v-model="dialog.hypervisorTable.selected">
-            </v-data-table>
-        </v-card-text>
-        <v-divider></v-divider>
-        <v-card-actions>
-            <v-spacer></v-spacer>
+        <v-card title="选择节点">
+            <template v-slot:append>
                 <v-btn color="primary" @click="addHosts()">添加</v-btn>
-            </v-card-actions>
+            </template>
+            <v-card-text class="mt-1">
+                <v-data-table density='compact' show-select item-value='hypervisor_hostname' :headers="dialog.headers"
+                    :items="dialog.hosts" :items-per-page="dialog.hypervisorTable.itemsPerPage"
+                    :search="dialog.hypervisorTable.search" v-model="dialog.hypervisorTable.selected">
+                </v-data-table>
+            </v-card-text>
         </v-card>
     </v-dialog>
 </template>
@@ -33,7 +31,7 @@ export default {
         dialog: new AggAddHostsDialog(),
     }),
     methods: {
-        addHosts: async function() {
+        addHosts: async function () {
             await this.dialog.addHosts();
             // this.display = false;
             this.$emit('completed');

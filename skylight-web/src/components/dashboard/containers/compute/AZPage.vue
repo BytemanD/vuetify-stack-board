@@ -7,7 +7,7 @@
             </v-btn-toggle>
         </v-col>
         <v-col cols="12" :hidden="displayType != 0">
-            <v-data-table density='compact' show-select :loading="table.loading" 
+            <v-data-table density='compact' :loading="table.loading" 
                 :headers="table.headers" :items="table.azMap[table.zoneName].hosts" :items-per-page="table.itemsPerPage"
                 :search="table.search" v-model="table.selected">
 

@@ -36,8 +36,8 @@
                     <td :colspan="columns.length - 1">
                         <table>
                             <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
-                                <td><strong>{{ extendItem.text }}:</strong> </td>
-                                <td>{{ item[extendItem.value] }}</td>
+                                <td><strong>{{ extendItem.title }}:</strong> </td>
+                                <td>{{ item[extendItem.key] }}</td>
                             </tr>
                         </table>
                     </td>
@@ -45,8 +45,8 @@
             </v-data-table>
         </v-col>
 
-        <AggHostDialog :show.sync="openAggHostsDialog" :aggregate="editAgg" @completed="table.refresh()" />
-        <AggAddHostsDialog :show.sync="showAggAddHostsDialog" :aggregate="editAgg" @completed="table.refresh()" />
+        <AggHostDialog :show="openAggHostsDialog"  @update:show="(e) => openAggHostsDialog = e" :aggregate="editAgg" @completed="table.refresh()" />
+        <AggAddHostsDialog :show="showAggAddHostsDialog" @update:show="(e) => showAggAddHostsDialog = e" :aggregate="editAgg" @completed="table.refresh()" />
     </v-row>
 </template>
 

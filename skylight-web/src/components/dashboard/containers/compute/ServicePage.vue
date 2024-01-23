@@ -1,7 +1,7 @@
 <template>
     <v-row>
         <v-col cols="12">
-            <v-data-table density='compact' show-select :loading="table.loading" :headers="table.headers"
+            <v-data-table density='compact' :loading="table.loading" :headers="table.headers"
                 :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1"
                 v-model="table.selected">
                 <template v-slot:top>

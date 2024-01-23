@@ -1148,8 +1148,8 @@ export class AggHostsDialog extends Dialog {
         this.selected = [];
         this.hosts = [];
         this.headers = [
-            { text: '节点', value: 'name' },
-            { text: '操作', value: 'actions' }
+            { title: '节点', key: 'name' },
+            { title: '操作', key: 'actions' }
         ];
     }
     refresh() {
@@ -1194,14 +1194,15 @@ export class AggAddHostsDialog extends Dialog {
         this.agg = {};
         this.hypervisorTable = new HypervisortTable();
         this.headers = [
-            { text: 'hostName', value: 'hypervisor_hostname',},
-            { text: 'status', value: 'status'},
-            { text: 'ipAddress', value: 'host_ip'},
+            { title: '主机名', key: 'hypervisor_hostname',},
+            { title: '状态', key: 'status'},
+            { title: 'IP地址', key: 'host_ip'},
         ]
         this.hosts = [];
     }
     async init(agg){
         this.agg = agg;
+        this.hypervisorTable.selected = [];
         this.refresh();
     }
     async refresh(){
@@ -1220,7 +1221,7 @@ export class AggAddHostsDialog extends Dialog {
             return;
         }
         for (let i in this.hypervisorTable.selected) {
-            let host = this.hypervisorTable.selected[i].hypervisor_hostname;
+            let host = this.hypervisorTable.selected[i];
             try {
                 await API.agg.addHost(this.agg.id, host);
                 notify.success(`节点 ${host} 添加成功`);

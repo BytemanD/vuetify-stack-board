@@ -1,12 +1,11 @@
 <template>
-    <v-dialog v-model="display" width="800">
-        <v-card>
-            <v-card-title class="headline primary lighten-2" primary-title>节点管理</v-card-title>
+    <v-dialog v-model="display" width="600">
+        <v-card title="节点管理">
             <v-card-text class="mt-1">
-                <v-data-table density='compact' class="mt-1" :headers="dialog.headers" item-key="name" :items="dialog.hosts" :items-per-page="itemsPerPage"
+                <v-data-table density='compact' :headers="dialog.headers" item-key="name" :items="dialog.hosts" :items-per-page="itemsPerPage"
                     :search="dialog.search" v-model="dialog.selected">
                     <template v-slot:[`item.actions`]="{ item }">
-                        <v-btn icon color="red" @click="removeHost(item.name)"><v-icon>mdi-close</v-icon></v-btn>
+                        <v-btn icon="mdi-close" size="small" variant="text" color="red" @click="removeHost(item.name)"></v-btn>
                     </template>
                 </v-data-table>
             </v-card-text>
