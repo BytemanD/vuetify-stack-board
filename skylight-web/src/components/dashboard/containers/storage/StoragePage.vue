@@ -28,9 +28,10 @@ export default {
 
   data: () => ({
     tabs: [
-      { text: '规格', icon: 'mdi-alpha-v-box' },
+      { text: '卷', icon: 'mdi-alpha-v-box' },
       { text: '快照', icon: 'mdi-alpha-s-box' },
       { text: '备份', icon: 'mdi-alpha-b-box' },
+      { text: '类型', icon: 'mdi-alpha-t-box' },
       { text: '服务', icon: 'mdi-alpha-s-box' },
       { text: '存储池', icon: 'mdi-alpha-p-box' },
     ]

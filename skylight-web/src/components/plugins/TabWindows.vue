@@ -20,6 +20,7 @@ const props = defineProps({
     color: { type: String, default: 'blue-grey-lighten-1' },
     tabs: { type: Array, required: true, },
 })
+const emits = defineEmits(['switchTab'])
 
 var tabIndex = ref(0);
 var tabItems = ref([]);
@@ -46,8 +47,15 @@ watch(
     (newValue, oldValue) => {
         console.log('1111', newValue, oldValue)
         initTabItems()
-    })
-
+    }
+)
+watch(
+    () => tabIndex.value,
+    (newValue, oldValue) => {
+        console.log('1111', newValue, oldValue)
+        emits('switchTab', tabIndex)
+    }
+)
 initTabItems()
 
 

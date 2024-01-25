@@ -614,17 +614,20 @@ export class MigrateDialog extends Dialog {
         return ['ACTIVE', 'PAUSE'].indexOf(server.status.toUpperCase()) >= 0;
     }
     canLiveMigrate(server) {
-        console.log(this.migrateMode)
         if (this.migrateMode == 'auto') {
             return this.isValidLiveMigrateStatus(server);
         }
         if (this.migrateMode == 'live' && this.isValidLiveMigrateStatus(server)) {
             return true;
-        } else if (!this.migrateMode == 'cold' && server.status.toUpperCase() == 'SHUTOFF') {
-            return false;
         } else {
-            throw Error(`虚拟机 ${server.name} 状态异常，无法迁移`)
+            return false
         }
+        
+        // else if (!this.migrateMode == 'cold' && server.status.toUpperCase() == 'SHUTOFF') {
+        //     return false;
+        // } else {
+        //     throw Error(`虚拟机 ${server.name} 状态异常，无法迁移`)
+        // }
     }
     async commit() {
         for (let i in this.servers) {
@@ -2254,11 +2257,15 @@ export class ServerActionEventsDialog extends Dialog {
         this.server = {};
         this.requestId = null;
         this.instanceAction = {};
+        this.loading = false;
     }
     async init(server, requestId) {
+        this.loading = true;
+        this.instanceAction = {};
         this.server = server;
         this.requestId = requestId;
         this.instanceAction = await API.server.actionShow(this.server.id, this.requestId);
+        this.loading = false;
     }
 
     isEventError(event) {

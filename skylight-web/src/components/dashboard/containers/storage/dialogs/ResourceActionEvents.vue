@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="display" width="60" scrollable>
+    <v-dialog v-model="display" width="700" scrollable>
         <v-card>
             <v-card-title class="headline info" primary-title>事件</v-card-title>
             <v-card-subtitle>{{ dialog.resourceAction.action }}</v-card-subtitle>
@@ -9,9 +9,10 @@
                         :class="dialog.isEventError(item) ? 'error lighten-1' : 'success lighten-1'" v-bind:key="i">
                         <v-expansion-panel-title>
                             {{ dialog.formatTime(item.start_time) }} - {{ dialog.formatTime(item.finish_time) }}
-                            <strong class="ml-2">{{ item.event }}</strong> {{ item.result }}
+                            <strong class="mx-4"> {{ item.event }}</strong> {{ item.result }}
                         </v-expansion-panel-title>
                         <v-expansion-panel-text>
+                            <v-chip label color="info">节点: {{ item.host }}</v-chip>
                             <pre class="white--text grey darken-3">{{ item.traceback }}</pre>
                         </v-expansion-panel-text>
                     </v-expansion-panel>

@@ -5,15 +5,13 @@
             <v-card-subtitle>{{ dialog.actions.length }}条记录</v-card-subtitle>
             <v-card-text class="pl-0">
                 <v-timeline side="end" class="ml-0 pl-0">
-                    <v-timeline-item size="x-small" v-for="item in dialog.actions"
+                    <v-timeline-item fill-dot size="x-small" v-for="item in dialog.actions"
                         :dot-color="dialog.isActionError(item) ? 'red' : 'success'"
                         v-bind:key="item.action + '-' + item.request_id">
                         <template v-slot:opposite>{{ item.start_time }}</template>
-                        <div>
-                            <strong>{{ item.action }}</strong>
-                            <v-chip variant="text" density="compact" @click="openServerActionEventsDialog(item.request_id)">
-                                {{ item.request_id }}</v-chip>
-                        </div>
+                        <strong>{{ item.action }}</strong>
+                        <v-chip density="compact" class="ml-4" @click="openServerActionEventsDialog(item.request_id)">
+                            {{ item.request_id }}</v-chip>
                     </v-timeline-item>
                 </v-timeline>
             </v-card-text>

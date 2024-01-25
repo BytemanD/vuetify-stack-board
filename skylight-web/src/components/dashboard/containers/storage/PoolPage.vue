@@ -7,10 +7,7 @@
 
                 <template v-slot:top>
                     <v-row>
-                        <v-col cols="12" md="6" sm="12">
-                            <!-- <v-toolbar density="compact" class="rounded-pill">
-                            </v-toolbar> -->
-                        </v-col>
+                        <v-col cols="12" md="6" sm="12"></v-col>
                         <v-col>
                             <v-text-field density='compact' v-model="table.search" label="搜索" single-line
                                 hide-details></v-text-field>
@@ -48,13 +45,16 @@
 
                 <template v-slot:expanded-row="{ columns, item }">
                     <td :colspan="columns.length - 1">
-                        <tr v-for="(value, key) in item.capabilities" v-bind:key="key">
-                            <template v-if="table.columns.indexOf(key) < 0">
-                                <td class="text-info">{{ key }}:</td>
-                                <td>{{ value }}</td>
-                            </template>
-                        </tr>
+                        <table class="ml-10">
+                            <tr v-for="(value, key) in item.capabilities" v-bind:key="key">
+                                <template v-if="table.columns.indexOf(key) < 0">
+                                    <td><strong>{{ key }}: </strong></td>
+                                    <td>{{ value }}</td>
+                                </template>
+                            </tr>
+                        </table>
                     </td>
+
                 </template>
             </v-data-table>
         </v-col>

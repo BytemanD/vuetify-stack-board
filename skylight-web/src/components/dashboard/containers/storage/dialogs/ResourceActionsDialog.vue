@@ -8,8 +8,8 @@
                         :dot-color="dialog.isActionError(item) == true ? 'error' : 'success'" v-bind:key="item.request_id">
                         <template v-slot:opposite>{{ dialog.formatTime(item.start_time) }}</template>
                         <div>
-                            <strong>{{ item.action }}</strong><br>
-                            <v-chip label density="compact" @click="openResourceActionEventsDialog(item.request_id)">
+                            <strong>{{ item.action }}</strong>
+                            <v-chip density="compact" class="ml-4" @click="openResourceActionEventsDialog(item.request_id)">
                                 {{ item.request_id }}</v-chip>
                         </div>
                     </v-timeline-item>

@@ -44,18 +44,18 @@
                             </template>
                             {{ item.status }}
                         </v-tooltip>
-                        <v-chip v-if="item.bootable == 'true'" size="small" outlined color="info">启动盘</v-chip>
-                        <v-chip v-if="item.multiattach == 'true'" size="small" outlined color="info">共享</v-chip>
+                        <v-chip v-if="item.bootable == 'true'" size="x-small" color="info">启动盘</v-chip>
+                        <v-chip v-if="item.multiattach" size="x-small" color="purple">共享</v-chip>
                     </span>
                 </template>
                 <template v-slot:[`item.image_name`]="{ item }">
-                    <v-chip size="x-small" label v-if="item.volume_image_metadata">{{ item.volume_image_metadata.image_name
-                    }}</v-chip>
+                    <v-chip size="small" variant="text" v-if="item.volume_image_metadata">
+                        {{ item.volume_image_metadata.image_name }}</v-chip>
                 </template>
                 <template v-slot:[`item.actions`]="{ item }">
                     <v-menu offset-y>
                         <template v-slot:activator="{ props }">
-                            <v-btn size="x-small" variant="text" color="purple" v-bind="props"
+                            <v-btn variant="text" color="purple" v-bind="props"
                                 icon="mdi-dots-vertical"></v-btn>
                         </template>
                         <v-list density='compact'>

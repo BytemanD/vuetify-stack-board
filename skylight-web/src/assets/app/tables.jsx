@@ -23,7 +23,7 @@ class DataTable {
         this.extendItems = []
         this.newItemDialog = null;
         this.loading = false;
-        this.columns = this.headers.map((header) => { return header.value });
+        this.columns = this.headers.map((header) => { return header.key });
     }
     async openNewItemDialog() {
         if (this.newItemDialog) {
