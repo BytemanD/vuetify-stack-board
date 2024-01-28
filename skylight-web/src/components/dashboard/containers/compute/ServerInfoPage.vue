@@ -100,15 +100,20 @@
                         v-if="server['OS-EXT-STS:task_state'] && server['OS-EXT-STS:task_state']">
                         {{ server['OS-EXT-STS:task_state'] && $t(server['OS-EXT-STS:task_state']) }}
                         <template v-slot:append>
-                          <v-icon class="mdi-spin" small>mdi-loading</v-icon>
+                          <v-icon class="mdi-spin" size="small">mdi-loading</v-icon>
                         </template>
                       </v-chip>
-                      <v-btn variant="text" color="red">取消热迁移</v-btn>
+                      <v-btn variant="text" color="red" v-if="server.status == 'MIGRATING'">取消热迁移</v-btn>
                     </td>
                   </tr>
                   <tr>
                     <th>进度</th>
-                    <td colspan="2">{{ server.progress }}</td>
+                    <td colspan="2">
+                      <v-progress-linear v-if="server.status == 'MIGRATING'" rounded height="12" color="info"
+                        :model-value="server.progress">
+                        <template v-slot:default="{ value }">{{ value }}</template>
+                      </v-progress-linear>
+                    </td>
                   </tr>
                 </v-table>
               </v-col>
@@ -199,7 +204,7 @@
             <card-server-actions v-if="server" :server-id="server.id" :actions="serverActions" />
           </v-window-item>
           <v-window-item>
-            <migration-table v-if="serverId" :table="migrationTable"/>
+            <migration-table v-if="serverId" :table="migrationTable" />
           </v-window-item>
         </template>
       </tab-windows>

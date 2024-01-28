@@ -624,9 +624,15 @@ export class MigrateDialog extends Dialog {
         }
     }
     async commit() {
+        console.log(111111, this.servers)
         for (let i in this.servers) {
-            let serverId = this.servers[i];
-            let server = (await API.server.show(serverId))
+            let server = {}
+            if (typeof this.servers[i] == 'string' ){
+                server = await API.server.show(serverId)
+            } else {
+                server= this.servers[i]
+            }
+            console.log('server id', server.id)
             if (['ACTIVE', 'SHUTOFF', 'PAUSE'].indexOf(server.status) < 0) {
                 continue
             }

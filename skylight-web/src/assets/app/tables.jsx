@@ -1495,6 +1495,7 @@ export class ImageDataTable extends DataTable {
 export class MigrationDataTable extends DataTable {
     constructor(serverId) {
         super([
+            { title: 'ID', key: 'id' },
             { title: '类型', key: 'migration_type' },
             { title: '实例ID', key: 'instance_uuid' },
             { title: '源节点', key: 'source_compute' },

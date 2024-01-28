@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="dialog.show" width="500">
+    <v-dialog v-model="dialog.show" width="500" scrollable>
         <template v-slot:activator="{ props }">
             <v-btn variant="text" v-bind="props" color="warning" class="ml-1" :disabled="servers.length == 0">迁移</v-btn>
         </template>
@@ -61,12 +61,11 @@ function onUpdatedServer(server) {
     emits('updateServer', server)
 }
 async function migrate() {
-    dialog.servers = [];
+    // dialog.servers = [];
     // TODO: move commit() code to this page
     try {
         await dialog.commit();
-    }
-    catch (error) {
+    } catch (error) {
         notify.warning(error);
         return
     }
