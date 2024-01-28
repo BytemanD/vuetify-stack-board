@@ -1493,21 +1493,34 @@ export class ImageDataTable extends DataTable {
 }
 
 export class MigrationDataTable extends DataTable {
-    constructor() {
+    constructor(serverId) {
         super([
             { title: '类型', key: 'migration_type' },
             { title: '实例ID', key: 'instance_uuid' },
             { title: '源节点', key: 'source_compute' },
             { title: '目的节点', key: 'dest_compute' },
-            { title: '旧规格', key: 'old_instance_type_id' },
-            { title: '新规格', key: 'new_instance_type_id' },
             { title: '开始时间', key: 'created_at' },
             { title: '状态', key: 'status' },
         ], API.migration, 'migrations', '迁移记录');
+        this.serverId = serverId;
+        this.migrationType = null;
+        this.migrationTypes = ['live-migration', 'migration'];
         this.extendItems = [
+            { title: '旧规格', key: 'old_instance_type_id' },
+            { title: '新规格', key: 'new_instance_type_id' },
             { title: '更新时间', key: 'updated_at' },
             { title: 'dest_host', key: 'dest_host' },
         ]
+    }
+    refresh(){
+        let filters = {}
+        if (this.serverId) {
+            filters.instance_uuid = this.serverId;
+        }
+        if (this.migrationType) {
+            filters.migration_type = this.migrationType;
+        }
+        super.refresh(filters)
     }
 }
 

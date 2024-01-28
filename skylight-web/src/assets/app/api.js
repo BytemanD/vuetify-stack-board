@@ -862,20 +862,25 @@ export class SkylightAPI {
         this.actions = new Actions();
         this.version = new Version();
     }
-    getServerHosts(servers) {
+    async getServerHosts(servers) {
         let serverHosts = []
         for (let i in servers) {
-            if (!servers[i]['OS-EXT-SRV-ATTR:host']){
+            let server = servers[i]
+            if (typeof server == 'string') {
+                server = await API.server.show(servers[i])
+            }
+            if (!server['OS-EXT-SRV-ATTR:host']){
                 continue;
             }
-            serverHosts.push(servers[i]['OS-EXT-SRV-ATTR:host'])
+            serverHosts.push(server['OS-EXT-SRV-ATTR:host'])
         }
+        console.log('111111111', serverHosts)
         return serverHosts;
     }
     async getMigratableHosts(servers) {
         let hosts = [];
         let services = await this.computeService.getNovaComputeServices();
-        let serverHosts = this.getServerHosts(servers);
+        let serverHosts = await this.getServerHosts(servers);
         for (let i in services){
             if (serverHosts.indexOf(services[i].host) >= 0 || services[i].state.toUpperCase() != 'UP'){
                 continue

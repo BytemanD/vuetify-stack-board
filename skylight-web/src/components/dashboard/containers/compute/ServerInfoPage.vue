@@ -106,6 +106,10 @@
                       <v-btn variant="text" color="red">取消热迁移</v-btn>
                     </td>
                   </tr>
+                  <tr>
+                    <th>进度</th>
+                    <td colspan="2">{{ server.progress }}</td>
+                  </tr>
                 </v-table>
               </v-col>
               <v-divider></v-divider>
@@ -192,7 +196,10 @@
             <card-server-console-log :server-id="server.id" />
           </v-window-item>
           <v-window-item>
-            <card-server-actions :server-id="server.id" :actions="serverActions" />
+            <card-server-actions v-if="server" :server-id="server.id" :actions="serverActions" />
+          </v-window-item>
+          <v-window-item>
+            <migration-table v-if="serverId" :table="migrationTable"/>
           </v-window-item>
         </template>
       </tab-windows>
@@ -211,7 +218,7 @@ import notify from '@/assets/app/notify';
 import BtnServerReboot from '@/components/plugins/BtnServerReboot.vue';
 import BtnServerMigrate from '@/components/plugins/BtnServerMigrate.vue';
 
-import { ServerTaskWaiter } from '@/assets/app/tables.jsx';
+import { ServerTaskWaiter, MigrationDataTable } from '@/assets/app/tables.jsx';
 
 import ServerTopology from './dialogs/ServerTopology.vue';
 
@@ -231,6 +238,7 @@ import BtnAttachVolumes from '@/components/plugins/button/BtnAttachVolumes.vue';
 import CardServerConsoleLog from '@/components/plugins/CardServerConsoleLog.vue';
 import CardServerActions from '@/components/plugins/CardServerActions.vue';
 import TabWindows from '@/components/plugins/TabWindows.vue';
+import MigrationTable from '@/components/plugins/tables/MigrationTable.vue';
 
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
 import ServerResize from './dialogs/ServerResize.vue';
@@ -253,12 +261,13 @@ export default {
     TabWindows,
     ServerUpdateSG, ServerResize, ServerRebuild,
     ServerGroupDialog,
+    MigrationTable,
   },
 
   data: () => ({
     Utils: Utils,
     i18n: i18n,
-    serveId: "",
+    serverId: "",
     selectedServer: {},
     openServerTopology: false,
 
@@ -282,12 +291,13 @@ export default {
       },
     ],
     tabIndex: 0,
-    tabs: ['详情', '网卡', '云盘', '控制台日志', '操作记录'],
+    tabs: ['详情', '网卡', '云盘', '控制台日志', '操作记录', '迁移记录'],
     server: {},
     image: {},
     interfaces: [],
     volumes: [],
-    serverActions: []
+    serverActions: [],
+    migrationTable: {},
   }),
   methods: {
     loginVnc: async function () {
@@ -353,6 +363,9 @@ export default {
     refreshActions: async function () {
       this.serverActions = (await API.server.actionList(this.serverId)).reverse();
     },
+    refreshMigrations: async function () {
+      this.migrationTable.refresh();
+    },
     refresh: async function () {
       await this.refreshServer()
       if (this.server.image && this.server.image.id) {
@@ -371,6 +384,9 @@ export default {
           break;
         case '操作记录':
           this.refreshActions();
+          break;
+        case '迁移记录':
+          this.refreshMigrations();
           break;
       }
     },
@@ -460,6 +476,7 @@ export default {
   },
   created() {
     this.serverId = this.$route.params.id
+    this.migrationTable = new MigrationDataTable(this.serverId);
     this.breadcrumbItems.push({ title: this.serverId })
     this.refresh()
   }

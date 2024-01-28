@@ -7,12 +7,12 @@
             <v-card-title class="headline warning" primary-title>迁移</v-card-title>
             <v-card-text>
                 <v-radio-group color="info" mandatory label='选择迁移模式' v-model="dialog.migrateMode">
-                    <v-radio label="自动(根据虚拟机状态选择冷迁移还是热迁移)" value="auto"></v-radio>
+                    <v-radio label="自动(根据虚拟机状态选择冷迁移还是热迁移)" message="sfs" value="auto"></v-radio>
                     <v-radio label="热迁移" value="live"></v-radio>
                     <v-radio label="冷迁移" value="cold"></v-radio>
                 </v-radio-group>
-                <v-select clearable :items="dialog.nodes" label="目标节点" class="ml-4" v-model="dialog.host"
-                    @click="dialog.refreshHosts()"></v-select>
+                <v-select :loading="loadingNodes" clearable :items="dialog.nodes" label="目标节点" class="ml-4"
+                    v-model="dialog.host" @click="refreshHosts()"></v-select>
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
@@ -25,7 +25,7 @@
 
 <script setup>
 
-import { reactive, defineProps, defineEmits, watch } from 'vue';
+import { reactive, defineProps, defineEmits, watch, ref } from 'vue';
 import API from '@/assets/app/api';
 import notify from '@/assets/app/notify.js';
 
@@ -39,6 +39,7 @@ const progs = defineProps({
 const emits = defineEmits(['updateServer'])
 
 var dialog = reactive(new MigrateDialog())
+var loadingNodes = ref(false)
 
 watch(() => progs.servers, (newValue, oldValue) => {
     dialog.servers = newValue;
@@ -61,10 +62,6 @@ function onUpdatedServer(server) {
 }
 async function migrate() {
     dialog.servers = [];
-    for (let i in progs.servers) {
-        let serverId = getServerId(progs.servers[i])
-        dialog.servers.push(serverId)
-    }
     // TODO: move commit() code to this page
     try {
         await dialog.commit();
@@ -79,6 +76,12 @@ async function migrate() {
         let waiter = new ServerTaskWaiter(server, onUpdatedServer)
         await waiter.waitMigrated()
     }
+}
+
+async function refreshHosts() {
+    loadingNodes.value = true
+    await dialog.refreshHosts()
+    loadingNodes.value = false
 }
 
 </script>

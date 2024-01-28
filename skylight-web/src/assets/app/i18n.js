@@ -98,6 +98,9 @@ const MESSAGES = {
         attach: 'attach',
         detach: 'detach',
 
+        'migration': 'migration',
+        'live-migration': 'live-migration',
+
     },
     'zh-CN': {
         language: '语言',
@@ -198,6 +201,9 @@ const MESSAGES = {
 
         attach: '挂载',
         detach: '卸载',
+
+        'migration': '迁移',
+        'live-migration': '热迁移',
     },
 };
 

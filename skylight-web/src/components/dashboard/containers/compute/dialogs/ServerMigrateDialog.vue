@@ -7,8 +7,8 @@
         <v-card>
             <v-card-title class="headline warning" primary-title>迁移</v-card-title>
             <v-card-text>
-                <v-switch persistent-hint v-model="dialog.smart" label="智能模式" hint=智能模式根据虚拟机状态选择冷迁移还是热迁移></v-switch>
-                <v-switch hide-details v-model="dialog.liveMigrate" label="热迁移" :disabled="dialog.smart"></v-switch>
+                <v-switch persistent-hint v-model="dialog.smart" color="info" label="智能模式" hint=智能模式根据虚拟机状态选择冷迁移还是热迁移></v-switch>
+                <v-switch hide-details v-model="dialog.liveMigrate" color="info"  label="热迁移" :disabled="dialog.smart"></v-switch>
                 <v-select clearable :items="dialog.nodes" label="目标节点" v-model="dialog.host"
                     @click="dialog.refreshHosts()"></v-select>
             </v-card-text>

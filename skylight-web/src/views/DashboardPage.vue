@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app style="font-size: small;">
     <v-navigation-drawer :rail="navigation.mini" :width="ui.navigationWidth.value" :expand-on-hover="navigation.mini">
       <v-list-item title="Skylight">
         <template v-slot:prepend>

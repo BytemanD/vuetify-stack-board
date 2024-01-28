@@ -622,12 +622,6 @@ export class MigrateDialog extends Dialog {
         } else {
             return false
         }
-        
-        // else if (!this.migrateMode == 'cold' && server.status.toUpperCase() == 'SHUTOFF') {
-        //     return false;
-        // } else {
-        //     throw Error(`虚拟机 ${server.name} 状态异常，无法迁移`)
-        // }
     }
     async commit() {
         for (let i in this.servers) {

@@ -45,14 +45,12 @@ function initTabItems() {
 watch(
     () => props.tabs,
     (newValue, oldValue) => {
-        console.log('1111', newValue, oldValue)
         initTabItems()
     }
 )
 watch(
     () => tabIndex.value,
     (newValue, oldValue) => {
-        console.log('1111', newValue, oldValue)
         emits('switchTab', tabIndex)
     }
 )

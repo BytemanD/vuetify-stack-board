@@ -7,8 +7,8 @@
                 </v-chip>
             </template>
             <template v-slot:[`item.message`]="{ item }">
-                {{ item.message }}
-                <v-icon v-if="isActionError(item)" color="red">mdi-alert-circle</v-icon>
+                <span class="text-red" v-if="isActionError(item)">{{item.message}}</span>
+                <span  v-else>{{item.message}}</span>
             </template>
         </v-data-table>
         <ServerActionEventsDialog :show="showServerActionEventsDialog"
@@ -46,9 +46,9 @@ function isActionError(action) {
     }
 }
 async function openServerActionEventsDialog(requestId) {
-    showServerActionEventsDialog.value = !showServerActionEventsDialog.value;
     actionRequestId.value = requestId;
     server.value = await API.server.show(progs.serverId)
+    showServerActionEventsDialog.value = !showServerActionEventsDialog.value;
 }
 
 </script>

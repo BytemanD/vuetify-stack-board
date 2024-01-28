@@ -34,7 +34,8 @@
                   </v-list>
                 </v-menu>
 
-                <ServerMigrateDialog :servers="table.selected" />
+                <btn-server-migrate :servers="table.selected" @updateServer="updateServer" />
+                <!-- <ServerMigrateDialog :servers="table.selected" /> -->
                 <ServerEvacuateDialog :servers="table.selected" />
                 <btn-server-reset-state :servers="table.selected"
                   @updateServer="(server) => { table.updateItem(server) }" />
@@ -104,8 +105,9 @@
           </v-chip>
           <span v-if="Object.keys(item.addresses).length > 1">...</span>
         </template>
-        <template v-slot:[`item.flavor`]="{ item }"><span class="cyan--text">
-            {{ item.flavor && item.flavor.original_name }}</span></template>
+        <template v-slot:[`item.flavor`]="{ item }">
+          <span class="cyan--text"> {{ item.flavor && item.flavor.original_name }}</span>
+        </template>
         <template v-slot:[`item.image`]="{ item }">
           <span class="text-info">{{ table.imageName[item.image.id] }}</span>
           <template> {{ table.updateImageName(item) }} </template>
@@ -191,8 +193,6 @@ import ChipLink from '@/components/plugins/ChipLink.vue';
 
 import ChangeServerNameDialog from './dialogs/ChangeServerNameDialog.vue';
 import ServerActionDialog from './dialogs/ServerActionDialog.vue';
-import ServerMigrateDialog from './dialogs/ServerMigrateDialog.vue';
-import ServerConsoleLogDialog from './dialogs/ServerConsoleLogDialog.vue';
 import ServerChangePassword from './dialogs/ServerChangePassword.vue';
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
 import ServerResize from './dialogs/ServerResize.vue';
@@ -202,12 +202,13 @@ import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 import BtnServerResetState from '@/components/plugins/button/BtnServerResetState.vue';
 
 import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
+import BtnServerMigrate from '@/components/plugins/BtnServerMigrate.vue';
 
 
 export default {
   components: {
     BtnIcon, ServerTopology, ChipLink,
-    ServerMigrateDialog, ServerEvacuateDialog,
+    BtnServerMigrate, ServerEvacuateDialog,
     BtnServerResetState,
     ChangeServerNameDialog,
     ServerActionDialog,
