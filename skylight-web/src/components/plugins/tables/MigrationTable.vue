@@ -7,9 +7,10 @@
                 <template v-slot:top>
                     <v-row>
                         <v-col></v-col>
-                        <v-col cols="12" md="4" lg="2" class="my-auto text-center">
+                        <v-col cols="12" md="4" lg="3" class="my-auto text-center">
                             <v-spacer></v-spacer>
                             <v-select v-model="table.migrationType" density="compact" clearable hide-details
+                                placeholder="选择类型"
                                 :items="table.migrationTypes" @update:model-value="table.refresh()">
                                 <template v-slot:prepend>类型</template>
                             </v-select>

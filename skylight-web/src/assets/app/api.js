@@ -435,6 +435,9 @@ class Server extends OpenstackProxyAPI {
         let data = { block_migration: "auto", host: host }
         return this.doAction(id, { 'os-migrateLive': data })
     }
+    async liveMigrateAbort (id, migrationId) {
+        return this.delete(`${id}/migrations/${migrationId}`)
+    }
     async migrate(id, host = null) {
         return this.doAction(id, { migrate: { host: host } })
     }

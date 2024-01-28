@@ -58,7 +58,7 @@
               <v-col cols="12" md="12" lg="6">
                 <v-table density="compact" class="text-left">
                   <tr>
-                    <th>实例状态</th>
+                    <th style="min-width: 60px">实例状态</th>
                     <td style="min-width: 120px">
                       <span v-if="server.status == 'ERROR'" class="text-red">{{ server.status }}</span>
                       <span v-else>{{ server.status }}</span>
@@ -95,7 +95,7 @@
                     <th>
                       任务状态
                     </th>
-                    <td colspan="2">
+                    <td>
                       <v-chip density="compact" variant="text" label color="warning"
                         v-if="server['OS-EXT-STS:task_state'] && server['OS-EXT-STS:task_state']">
                         {{ server['OS-EXT-STS:task_state'] && $t(server['OS-EXT-STS:task_state']) }}
@@ -103,19 +103,25 @@
                           <v-icon class="mdi-spin" size="small">mdi-loading</v-icon>
                         </template>
                       </v-chip>
-                      <v-btn variant="text" color="red" v-if="server.status == 'MIGRATING'">取消热迁移</v-btn>
+                      <!-- <v-btn variant="text" color="red" v-if="server.status == 'MIGRATING'">取消热迁移</v-btn> -->
+                    </td>
+                    <td>
+                      <dialog-live-migrate-abort v-if="server.status == 'MIGRATING'" size="small" :items="[server]" />
                     </td>
                   </tr>
-                  <tr>
+                  <!-- <tr v-if="server.status == 'MIGRATING'">
                     <th>进度</th>
                     <td colspan="2">
-                      <v-progress-linear v-if="server.status == 'MIGRATING'" rounded height="12" color="info"
-                        :model-value="server.progress">
-                        <template v-slot:default="{ value }">{{ value }}</template>
+                      <v-progress-linear rounded height="12" color="green-lighten-4" :model-value="server.progress">
+                        <template v-slot:default="{ value }">{{ value }}%</template>
                       </v-progress-linear>
                     </td>
-                  </tr>
+                  </tr> -->
                 </v-table>
+                <v-progress-linear v-if="server.status == 'MIGRATING'" rounded height="12" color="green-lighten-4"
+                  :model-value="server.progress">
+                  <template v-slot:default="{ value }">{{ value }}%</template>
+                </v-progress-linear>
               </v-col>
               <v-divider></v-divider>
               <v-col cols="12" md="12" lg="6">
@@ -244,6 +250,7 @@ import CardServerConsoleLog from '@/components/plugins/CardServerConsoleLog.vue'
 import CardServerActions from '@/components/plugins/CardServerActions.vue';
 import TabWindows from '@/components/plugins/TabWindows.vue';
 import MigrationTable from '@/components/plugins/tables/MigrationTable.vue';
+import DialogLiveMigrateAbort from '@/components/plugins/dialogs/DialogLiveMigrateAbort.vue';
 
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
 import ServerResize from './dialogs/ServerResize.vue';
@@ -254,19 +261,14 @@ import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 export default {
   components: {
     BtnIcon, ServerTopology, ServerInterfaceCard, ServerVolumeCard,
-    BtnServerReboot, BtnServerMigrate,
-    BtnServerResetState, BtnServerRebuild,
+    BtnServerReboot, BtnServerMigrate, BtnServerResetState, BtnServerRebuild,
     ServerMigrateDialog, ServerEvacuateDialog, ServerResetStateDialog,
-    ChangeServerNameDialog,
-    ServerActionDialog,
+    ChangeServerNameDialog, ServerActionDialog,
 
-    ServerChangePassword,
-    ServerVolumes, BtnAttachInterfaces, BtnAttachVolumes,
-    CardServerConsoleLog, CardServerActions,
-    TabWindows,
-    ServerUpdateSG, ServerResize, ServerRebuild,
-    ServerGroupDialog,
-    MigrationTable,
+    ServerChangePassword, ServerVolumes, BtnAttachInterfaces, BtnAttachVolumes,
+    CardServerConsoleLog, CardServerActions, TabWindows, ServerUpdateSG,
+    ServerResize, ServerRebuild, ServerGroupDialog, MigrationTable,
+    DialogLiveMigrateAbort,
   },
 
   data: () => ({
