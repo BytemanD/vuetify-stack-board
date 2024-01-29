@@ -15,7 +15,7 @@
                             </v-toolbar>
                         </v-col>
                         <v-col>
-                            <v-text-field small density='compact' v-model="table.search" label="搜索" single-line
+                            <v-text-field density='compact' v-model="table.search" label="搜索" single-line
                                 hide-details></v-text-field>
                         </v-col>
                         <v-col cols="1">
@@ -30,7 +30,7 @@
                 </template>
 
                 <template v-slot:[`item.extra_specs`]="{ item }">
-                    <v-chip label x-small class="mr-1" v-for="(value, key) in item.extra_specs" v-bind:key="key">
+                    <v-chip label size="x-small" class="mr-1" v-for="(value, key) in item.extra_specs" v-bind:key="key">
                         {{ key }}={{ value }}</v-chip>
                 </template>
                 <template v-slot:expanded-row="{ columns, item }">

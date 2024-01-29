@@ -1400,7 +1400,7 @@ export class NewBackupDialog extends Dialog {
         super();
         this.resource = 'backup';
         this.name = '';
-        this.volume_id = '';
+        this.volume_id = null;
         this.snapshot_id = ''
         this.volumes = [];
         this.description = '';

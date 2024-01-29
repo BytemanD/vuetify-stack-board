@@ -7,18 +7,19 @@
       <v-card-title class="headline primary" primary-title>新建备份</v-card-title>
       <v-card-text>
         <v-row>
-          <v-col cols="10">
+          <v-col cols="12">
             <v-text-field label="名字" placeholder="请输入备份名" v-model="dialog.name"
-              :rules="[dialog.checkNotNull]"></v-text-field>
-          </v-col>
-          <v-col cols="2" class="my-auto">
-            <v-btn text color="primary" @click="dialog.randomName()">随机名字</v-btn>
+              :rules="[dialog.checkNotNull]">
+              <template v-slot:append>
+                <v-btn variant="text" color="primary" @click="dialog.randomName()">随机名字</v-btn>
+              </template>
+            </v-text-field>
           </v-col>
           <v-col>
             <v-select hide-details :items="dialog.volumes" label="请选择卷" item-value="id" :item-props="dialog.itemProps"
               outlined v-model="dialog.volume_id">
             </v-select>
-            <v-switch hide-details v-model="dialog.force" label="强制"></v-switch>
+            <v-switch hide-details v-model="dialog.force" label="强制" color="warning"></v-switch>
           </v-col>
         </v-row>
       </v-card-text>

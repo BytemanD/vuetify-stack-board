@@ -27,15 +27,9 @@
                     </v-row>
                 </template>
 
-                <template v-slot:[`item.status_bootable_multi`]="{ item }">
-                    <v-icon v-if="item.status == 'available'">mdi-link-variant-off</v-icon>
-                    <v-icon v-else-if="item.status == 'in-use'" color="success">mdi-link-variant</v-icon>
-                    <v-icon v-else-if="item.status == 'error'" color="red">mdi-close-circle</v-icon>
-                    <p v-else>{{ item.status }}</p>|
-                    <v-icon v-if="item.bootable == 'true'" color="success">mdi-check</v-icon>
-                    <v-icon v-else color="red">mdi-close</v-icon>|
-                    <v-icon v-if="item.multiattach == 'true'">mdi-check</v-icon>
-                    <v-icon v-else>mdi-close</v-icon>
+                <template v-slot:[`item.status`]="{ item }">
+                    <v-icon v-if="item.status == 'available'" color="success">mdi-check</v-icon>
+                    <span v-else>{{ item.status }}</span>
                 </template>
                 <template v-slot:[`item.image_name`]="{ item }">
                     <v-chip x-small label v-if="item.volume_image_metadata">{{ item.volume_image_metadata.image_name
@@ -46,9 +40,9 @@
                     <td></td>
                     <td :colspan="columns.length - 1">
                         <table>
-                            <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.text">
-                                <td><strong>{{ extendItem.text }}:</strong></td>
-                                <td>{{ item[extendItem.value] }}</td>
+                            <tr v-for="extendItem in table.extendItems" v-bind:key="extendItem.title">
+                                <td><strong>{{ extendItem.title }}:</strong></td>
+                                <td>{{ item[extendItem.key] }}</td>
                             </tr>
                         </table>
                     </td>

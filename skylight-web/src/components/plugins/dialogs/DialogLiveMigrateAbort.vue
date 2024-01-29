@@ -1,7 +1,8 @@
 <template>
   <v-dialog v-model="display" width="500" scrollable persistent>
     <template v-slot:activator="{ props }">
-      <v-btn v-bind="props" color="red" :variant="variant" :size="size" :disabled="disabled">终止热迁移</v-btn>
+      <!-- <btn-live-migrate-abort v-bind="props"/> -->
+      <v-btn v-bind="props" color="red" :variant="variant" :size="size" density="compact">终止</v-btn>
     </template>
     <v-card color="blue-grey-darken-2">
       <v-card-title class="text-red" icon="mdi-alert">{{ title }}</v-card-title>
@@ -33,7 +34,6 @@ const props = defineProps({
   title: { type: String, default: '确认终止热迁移?' },
   variant: { type: String, default: 'text' },
   size: { type: String, default: 'default' },
-  disabled: { type: Boolean, default: false },
   itemValueFunc: { type: Function, },
   items: { type: Array, default: [] },
 })

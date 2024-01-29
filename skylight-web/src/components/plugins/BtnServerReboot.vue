@@ -1,7 +1,7 @@
 <template>
     <v-menu>
         <template v-slot:activator="{ props }">
-            <v-btn color="primary" :variant="variant" v-bind="props" :disabled="servers.length == 0" class="pa-0">
+            <v-btn color="primary" :size="size" :variant="variant" class="ml-1" v-bind="props" :disabled="servers.length == 0">
                 <template v-slot:append>
                     <v-icon>mdi-menu-down</v-icon>
                 </template>
@@ -29,6 +29,7 @@ const emits = defineEmits(['updateServer'])
 const progs = defineProps({
     variant: {type: String, default: 'text'},
     servers: { type: Array, default: [], required: true, },
+    size: { type: String, default: 'default'},
 })
 
 function getServerId(server){

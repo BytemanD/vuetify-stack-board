@@ -1,10 +1,12 @@
 <template>
     <v-dialog v-model="dialog.show" width="900">
         <template v-slot:activator="{ props }">
-            <v-btn variant='text' color="warning" class="ml-1" :disabled="servers.length == 0" v-bind="props">重装</v-btn>
+            <v-btn variant='text' color="warning" class="ml-1" density="compact" :disabled="servers.length == 0" v-bind="props">重装</v-btn>
         </template>
-        <v-card>
-            <v-card-title primary-title>重装系统</v-card-title>
+        <v-card title="重装系统">
+            <template v-slot:append>
+                <v-btn color="warning" @click="commit()">重装</v-btn>
+            </template>
             <v-card-text>
                 <v-text-field class="mb-1" density="compact" readonly hide-details clearable v-model="dialog.imageRef"
                     :label="dialog.imageRef && (selectedImage.name || selectedImage.id)">
@@ -17,11 +19,6 @@
                 </v-text-field>
                 <v-text-field label="描述" v-model="dialog.description"></v-text-field>
             </v-card-text>
-            <v-divider></v-divider>
-            <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="warning" @click="commit()">重装</v-btn>
-            </v-card-actions>
         </v-card>
     </v-dialog>
 </template>

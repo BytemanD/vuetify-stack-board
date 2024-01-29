@@ -1,28 +1,43 @@
 <template>
   <v-row>
-    <v-col cols="6" class="pb-0">
+    <v-col cols="12" md="12" lg="4" class="pb-0">
       <v-breadcrumbs class="pl-0" :items="breadcrumbItems" color="info" density="compact"></v-breadcrumbs>
     </v-col>
-    <v-col cols="6">
-      <v-btn class="ml-1" size="small" variant="outlined" color="info" @click="refresh()">刷新</v-btn>
+    <v-col cols="12" md="12" lg="8" class="pb-0">
+      <v-toolbar density="compact" class="rounded">
+        <btn-server-reset-state :servers="[server]" @update-server="updateServer" />
+        <btn-server-reboot variant="text" :servers="[server]" @updateServer="updateServer" />
+        <v-btn variant="text" color="warning" v-if="this.server.status == 'ACTIVE'" @click="stop()">
+          {{ $t('stop') }}</v-btn>
+        <v-btn variant="text" color="success" v-if="this.server.status == 'SHUTOFF'" @click="start()">
+          {{ $t('start') }}</v-btn>
+        <v-btn variant="text" color="warning" v-if="this.server.status == 'ACTIVE'" @click="pause()">
+          {{ $t('pause') }}</v-btn>
+        <v-btn variant="text" color="success" v-if="this.server.status == 'PAUSED'" @click="unpause()">
+          {{ $t('unpause') }}</v-btn>
+        <btn-server-migrate :servers="[server]" @updateServer="updateServer" />
+        <v-btn variant="text" color="warning">疏散</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn class="ml-1" variant="text" color="info" @click="refresh()">刷新</v-btn>
+      </v-toolbar>
     </v-col>
     <v-col cols="12">
       <tab-windows :tabs="tabs" @switch-tab="handleSwitchTab">
         <template v-slot:window-items>
           <v-window-item>
             <v-row>
-              <v-col cols="12" md="12" lg="6">
-                <v-table density="compact" class="text-left">
+              <v-col cols="12" md="12" lg="8">
+                <table density="compact" class="text-left">
                   <tr>
-                    <th>ID</th>
+                    <th style="min-width: 100px">ID</th>
                     <td>
                       {{ server.id }}
-                      <v-btn variant="text" color="info" @click="loginVnc()">远程登录</v-btn>
+                      <v-btn variant="text" color="info" density="compact" @click="loginVnc()">远程登录</v-btn>
                     </td>
                   </tr>
                   <tr>
                     <th>名字</th>
-                    <td>{{ server.name }}<v-btn variant="text" color="warning">重命名</v-btn></td>
+                    <td>{{ server.name }}<v-btn variant="text" density="compact" color="warning" disabled>重命名</v-btn></td>
                   </tr>
                   <tr>
                     <th>实例名</th>
@@ -38,12 +53,7 @@
                   </tr>
                   <tr>
                     <th>节点</th>
-                    <td>{{ server['OS-EXT-SRV-ATTR:host'] }}
-                      <!-- <v-btn variant="text" color="warning">迁移</v-btn>
-                      <v-btn variant="text" color="warning">热迁移</v-btn> -->
-                      <btn-server-migrate :servers="[server]" @updateServer="updateServer" />
-                      <v-btn variant="text" color="warning">疏散</v-btn>
-                    </td>
+                    <td>{{ server['OS-EXT-SRV-ATTR:host'] }}</td>
                   </tr>
                   <tr>
                     <th>创建时间</th>
@@ -53,48 +63,32 @@
                     <th>更新时间</th>
                     <td>{{ server.updated }}</td>
                   </tr>
-                </v-table>
+                </table>
               </v-col>
-              <v-col cols="12" md="12" lg="6">
-                <v-table density="compact" class="text-left">
+              <v-col cols="12" md="12" lg="4">
+
+                <table density="compact" class="text-left">
                   <tr>
-                    <th style="min-width: 60px">实例状态</th>
-                    <td style="min-width: 120px">
+                    <th style="min-width: 70px">实例状态</th>
+                    <td>
                       <span v-if="server.status == 'ERROR'" class="text-red">{{ server.status }}</span>
                       <span v-else>{{ server.status }}</span>
-                    </td>
-                    <td>
-                      <btn-server-reset-state :servers="[server]" @update-server="updateServer" />
                     </td>
                   </tr>
                   <tr>
                     <th>电源状态</th>
                     <td>
-                      <v-icon size='small' v-if="server['OS-EXT-STS:power_state'] == 1"
-                        color="success">mdi-power-on</v-icon>
-                      <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] == 3"
-                        color="warning">mdi-pause</v-icon>
-                      <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] == 4"
-                        color="red">mdi-power-off</v-icon>
+                      <v-icon size='small' v-if="server['OS-EXT-STS:power_state'] == 1" color="success">
+                        mdi-power-on</v-icon>
+                      <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] == 3" color="warning">
+                        mdi-pause</v-icon>
+                      <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] == 4" color="red">
+                        mdi-power-off</v-icon>
                       <span v-else>UNKOWN</span>
-                    </td>
-                    <td>
-                      <btn-server-reboot :servers="[server]" @updateServer="updateServer" />
-                      <v-btn variant="text" color="warning" v-if="this.server.status == 'ACTIVE'" @click="stop()">
-                        {{ $t('stop') }}</v-btn>
-                      <v-btn variant="text" color="success" v-if="this.server.status == 'SHUTOFF'" @click="start()">
-                        {{ $t('start') }}</v-btn>
-
-                      <v-btn variant="text" color="warning" v-if="this.server.status == 'ACTIVE'" @click="pause()">
-                        {{ $t('pause') }}</v-btn>
-                      <v-btn variant="text" color="success" v-if="this.server.status == 'PAUSED'" @click="unpause()">
-                        {{ $t('unpause') }}</v-btn>
                     </td>
                   </tr>
                   <tr>
-                    <th>
-                      任务状态
-                    </th>
+                    <th>任务状态</th>
                     <td>
                       <v-chip density="compact" variant="text" label color="warning"
                         v-if="server['OS-EXT-STS:task_state'] && server['OS-EXT-STS:task_state']">
@@ -103,34 +97,24 @@
                           <v-icon class="mdi-spin" size="small">mdi-loading</v-icon>
                         </template>
                       </v-chip>
-                      <!-- <v-btn variant="text" color="red" v-if="server.status == 'MIGRATING'">取消热迁移</v-btn> -->
-                    </td>
-                    <td>
-                      <dialog-live-migrate-abort v-if="server.status == 'MIGRATING'" size="small" :items="[server]" />
+                      <dialog-live-migrate-abort v-if="server.status == 'MIGRATING'" :items="[server]" />
                     </td>
                   </tr>
-                  <!-- <tr v-if="server.status == 'MIGRATING'">
-                    <th>进度</th>
-                    <td colspan="2">
-                      <v-progress-linear rounded height="12" color="green-lighten-4" :model-value="server.progress">
-                        <template v-slot:default="{ value }">{{ value }}%</template>
-                      </v-progress-linear>
-                    </td>
-                  </tr> -->
-                </v-table>
-                <v-progress-linear v-if="server.status == 'MIGRATING'" rounded height="12" color="green-lighten-4"
+                </table>
+                <br>
+                <v-progress-linear v-if="server.status == 'MIGRATING'" rounded height="12" color="green-lighten-2"
                   :model-value="server.progress">
                   <template v-slot:default="{ value }">{{ value }}%</template>
                 </v-progress-linear>
               </v-col>
               <v-divider></v-divider>
               <v-col cols="12" md="12" lg="6">
-                <v-table density="compact" class="text-left">
+                <table density="compact" class="text-left">
                   <tr>
-                    <th style="min-width: 100px;">规格</th>
+                    <th style="min-width: 100px">规格</th>
                     <td>
                       {{ server.flavor && server.flavor.original_name }}
-                      <v-btn variant="text" color="warning">变更</v-btn>
+                      <v-btn variant="text" color="warning" density="compact" disabled>变更</v-btn>
                     </td>
                   </tr>
                   <tr>
@@ -146,20 +130,19 @@
                   <tr v-if="server.flavor">
                     <th>属性</th>
                     <td>
-                      <v-chip label density="compact" class="mr-1" v-for="(value, key) in server.flavor.extra_specs"
+                      <v-chip label density="compact" class="mr-1 mt-1" v-for="(value, key) in server.flavor.extra_specs"
                         v-bind:key="key">
                         {{ key }}={{ value }}</v-chip>
                     </td>
                   </tr>
-                </v-table>
+                </table>
               </v-col>
               <v-col cols="12" md="12" lg="6">
-                <v-table density="compact" class="text-left">
+                <table density="compact" class="text-left">
                   <tr>
-                    <th>镜像ID</th>
+                    <th style="min-width: 70px">镜像ID</th>
                     <td>
                       {{ server.image && server.image.id }}
-                      <!-- <v-btn variant="text" color="warning">重装</v-btn> -->
                       <btn-server-rebuild :servers="[server]" @update-server="updateServer" />
                     </td>
                   </tr>
@@ -175,7 +158,16 @@
                     <th>大小</th>
                     <td>{{ image.size }}</td>
                   </tr>
-                </v-table>
+                  <tr v-if="image">
+                    <th>属性</th>
+                    <td>
+                      <template v-for="(value, key) in image">
+                        <v-chip label density="compact" class="mr-1 mt-1" v-if="key.startsWith('hw')" v-bind:key="key">
+                          {{ key }}={{ value }}</v-chip>
+                      </template>
+                    </td>
+                  </tr>
+                </table>
               </v-col>
             </v-row>
           </v-window-item>
@@ -205,6 +197,9 @@
           </v-window-item>
           <v-window-item>
             <card-server-console-log :server-id="server.id" />
+          </v-window-item>
+          <v-window-item>
+            <card-server-console :server-id="server.id" :console-url="consoleUrl" :console-error="consoleError" />
           </v-window-item>
           <v-window-item>
             <card-server-actions v-if="server" :server-id="server.id" :actions="serverActions" />
@@ -247,6 +242,7 @@ import ServerVolumes from './dialogs/ServerVolumes.vue';
 import BtnAttachInterfaces from '@/components/plugins/button/BtnAttachInterfaces.vue';
 import BtnAttachVolumes from '@/components/plugins/button/BtnAttachVolumes.vue';
 import CardServerConsoleLog from '@/components/plugins/CardServerConsoleLog.vue';
+import CardServerConsole from '@/components/plugins/CardServerConsole.vue';
 import CardServerActions from '@/components/plugins/CardServerActions.vue';
 import TabWindows from '@/components/plugins/TabWindows.vue';
 import MigrationTable from '@/components/plugins/tables/MigrationTable.vue';
@@ -266,7 +262,7 @@ export default {
     ChangeServerNameDialog, ServerActionDialog,
 
     ServerChangePassword, ServerVolumes, BtnAttachInterfaces, BtnAttachVolumes,
-    CardServerConsoleLog, CardServerActions, TabWindows, ServerUpdateSG,
+    CardServerConsoleLog, CardServerConsole, CardServerActions, TabWindows, ServerUpdateSG,
     ServerResize, ServerRebuild, ServerGroupDialog, MigrationTable,
     DialogLiveMigrateAbort,
   },
@@ -298,18 +294,36 @@ export default {
       },
     ],
     tabIndex: 0,
-    tabs: ['详情', '网卡', '云盘', '控制台日志', '操作记录', '迁移记录'],
+    tabs: ['详情', '网卡', '云盘', '终端日志', 'VNC', '操作记录', '迁移记录'],
     server: {},
     image: {},
     interfaces: [],
     volumes: [],
     serverActions: [],
     migrationTable: {},
+    consoleUrl: '',
+    consoleError: '',
   }),
   methods: {
     loginVnc: async function () {
-      let body = await API.server.getVncConsole(this.serverId);
-      window.open(body.remote_console.url, '_blank');
+      await this.refreshConsoleUrl()
+      if (this.consoleUrl) {
+        window.open(this.consoleUrl, '_blank');
+      } else {
+        notify.error(this.consoleError)
+      }
+    },
+    refreshConsoleUrl: async function () {
+      try {
+        let body = await API.server.getVncConsole(this.serverId);
+        this.consoleUrl = body.remote_console.url;
+      } catch (e) {
+        if (e.response && e.response.data) {
+          this.consoleError = `无法获取VNC链接: ${JSON.stringify(e.response.data)}`
+        } else {
+          this.consoleError = `无法获取VNC链接: ${e}`
+        }
+      }
     },
     openChangeServerNameDialog: async function (server) {
       this.selectedServer = server;
@@ -382,7 +396,6 @@ export default {
     },
     refreshWindownItem: function () {
       switch (this.tabs[this.tabIndex]) {
-        // ['详情', '网卡', '云盘', '控制台日志', '操作记录'],
         case '网卡':
           this.refreshInterfaces();
           break;
@@ -394,6 +407,9 @@ export default {
           break;
         case '迁移记录':
           this.refreshMigrations();
+          break;
+        case 'VNC':
+          this.refreshConsoleUrl()
           break;
       }
     },
