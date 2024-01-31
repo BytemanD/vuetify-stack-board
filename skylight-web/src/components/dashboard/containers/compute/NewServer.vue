@@ -27,15 +27,17 @@
                             </v-text-field>
                         </v-col>
                         <v-col cols="9" class="mt-0">
-                            <v-text-field class="mb-1" density="compact" readonly v-model="dialog.flavor.name"
-                                :error="!dialog.flavor.id" :messages="dialog.validFlavor()">
+                            <v-text-field class="mb-1" density="compact" readonly
+                                :value="dialog.flavor && dialog.flavor.name" :error="!dialog.flavor.id"
+                                :messages="dialog.validFlavor()">
                                 <template v-slot:prepend>规格</template>
                             </v-text-field>
                             <flavor-table class="ml-10" @select-flavor="(flavor) => { selectFlavor(flavor) }" />
                         </v-col>
                         <v-col cols="9">
-                            <v-text-field class="mb-1" density="compact" readonly v-model="dialog.image.name"
-                                :error="!dialog.image.id" :messages="dialog.validImage()">
+                            <v-text-field class="mb-1" density="compact" readonly
+                                :value="dialog.image && (dialog.image.name || dialog.image.id)" :error="!dialog.image.id"
+                                :messages="dialog.validImage()">
                                 <template v-slot:prepend>镜像</template>
                             </v-text-field>
                             <image-table class="ml-10" @select-image="(image) => { selectImage(image) }" />
@@ -47,9 +49,9 @@
                                         label="创建卷"></v-checkbox>
                                 </v-col>
                                 <v-col>
-                                    <v-select :disabled="!dialog.useBdm" :items="dialog.volumeTypes" clearable density='compact'
-                                        item-title="name" item-value="name" @click="dialog.refreshVolumeTypes()"
-                                        v-model="dialog.volumeType" label="选择卷类型">
+                                    <v-select :disabled="!dialog.useBdm" :items="dialog.volumeTypes" clearable
+                                        density='compact' item-title="name" item-value="name"
+                                        @click="dialog.refreshVolumeTypes()" v-model="dialog.volumeType" label="选择卷类型">
                                     </v-select>
                                 </v-col>
                             </v-row>

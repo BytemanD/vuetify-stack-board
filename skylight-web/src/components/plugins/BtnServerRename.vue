@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="display" width="500">
         <template v-slot:activator="{ props }">
-            <v-btn :variant="variant" :size="size" v-bind="props" color="warning" icon="mdi-pencil-minus"></v-btn>
+            <v-btn :variant="variant" :size="size" v-bind="props" icon="mdi-rename-box"></v-btn>
         </template>
         <v-card>
             <v-card-title>重命名</v-card-title>

@@ -1,5 +1,5 @@
 <template>
-    <v-dialog scrollable v-model="display" width="800">
+    <v-dialog scrollable v-model="display" width="600">
         <template v-slot:activator="{ props }">
             <v-btn v-bind="props" color="primary" icon="mdi-plus" variant="text" class="mr-1"></v-btn>
         </template>

@@ -39,7 +39,7 @@ export default {
     props: {
         serverId: { type: String, required: true },
     },
-    components: {BtnRouterLink},
+    components: { BtnRouterLink },
     data: () => ({
         display: false,
         ports: [],

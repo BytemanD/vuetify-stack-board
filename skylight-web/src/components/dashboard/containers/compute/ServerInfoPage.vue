@@ -17,6 +17,7 @@
           {{ $t('unpause') }}</v-btn>
         <btn-server-migrate :servers="[server]" @updateServer="updateServer" />
         <v-btn variant="text" color="warning">疏散</v-btn>
+        <btn-server-change-pwd v-if="server.name" :server="server" />
         <v-spacer></v-spacer>
         <v-btn class="ml-1" variant="text" color="info" @click="refresh()">刷新</v-btn>
       </v-toolbar>
@@ -38,8 +39,7 @@
                   <tr>
                     <th>名字</th>
                     <td>{{ server.name }}
-                      <btn-server-rename v-if="server.name" size="small" :server="server"
-                        @update-server="updateServer"></btn-server-rename>
+                      <btn-server-rename v-if="server.name" size="small" :server="server" @update-server="updateServer" />
                     </td>
                   </tr>
                   <tr>
@@ -258,6 +258,7 @@ import ServerRebuild from './dialogs/ServerRebuild.vue';
 import ServerEvacuateDialog from './dialogs/ServerEvacuateDialog.vue';
 import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 import BtnServerRename from '@/components/plugins/BtnServerRename.vue';
+import BtnServerChangePwd from '@/components/plugins/BtnServerChangePwd.vue';
 
 export default {
   components: {
@@ -269,7 +270,7 @@ export default {
     ServerChangePassword, ServerVolumes, BtnAttachInterfaces, BtnAttachVolumes,
     CardServerConsoleLog, CardServerConsole, CardServerActions, TabWindows, ServerUpdateSG,
     ServerResize, ServerRebuild, ServerGroupDialog, MigrationTable,
-    DialogLiveMigrateAbort, BtnServerRename,
+    DialogLiveMigrateAbort, BtnServerRename, BtnServerChangePwd,
   },
 
   data: () => ({

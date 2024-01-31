@@ -1,18 +1,19 @@
 <template>
-    <v-dialog v-model="dialog.show" width="900">
+    <v-dialog v-model="dialog.show" width="900" scrollable>
         <template v-slot:activator="{ props }">
-            <v-btn variant='text' color="warning" class="ml-1" density="compact" :disabled="servers.length == 0" v-bind="props">重装</v-btn>
+            <v-btn variant='text' color="warning" class="ml-1" density="compact" :disabled="servers.length == 0"
+                v-bind="props">重装</v-btn>
         </template>
         <v-card title="重装系统">
             <template v-slot:append>
                 <v-btn color="warning" @click="commit()">重装</v-btn>
             </template>
             <v-card-text>
-                <v-text-field class="mb-1" density="compact" readonly hide-details clearable v-model="dialog.imageRef"
-                    :label="dialog.imageRef && (selectedImage.name || selectedImage.id)">
+                <v-text-field class="mb-1" density="compact" readonly hide-details clearable
+                    :value="dialog.imageRef && (selectedImage.name || selectedImage.id)">
                     <template v-slot:prepend>镜像</template>
                 </v-text-field>
-                <image-table @select-image="(image) => { selectImage(image) }" />
+                <image-table class="ml-4" @select-image="(image) => { selectImage(image) }"/>
                 <v-text-field density="compact" label="密码" clearable placeholder="请输入密码" v-model="dialog.password"
                     :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" :type="showPassword ? 'text' : 'password'"
                     @click:append="showPassword = !showPassword">
@@ -24,8 +25,7 @@
 </template>
 
 <script setup>
-
-import { reactive, defineProps, defineEmits, watch } from 'vue';
+import { ref, reactive, defineProps, defineEmits, watch } from 'vue';
 import API from '@/assets/app/api';
 import notify from '@/assets/app/notify.js';
 
@@ -39,6 +39,7 @@ const progs = defineProps({
 })
 const emits = defineEmits(['updateServer'])
 
+var showPassword = ref(false)
 var dialog = reactive(new RebuildDialog())
 var selectedImage = reactive({})
 

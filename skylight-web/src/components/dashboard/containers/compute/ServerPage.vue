@@ -35,7 +35,6 @@
                 </v-menu>
 
                 <btn-server-migrate :servers="table.selected" @updateServer="updateServer" />
-                <!-- <ServerMigrateDialog :servers="table.selected" /> -->
                 <ServerEvacuateDialog :servers="table.selected" />
                 <btn-server-reset-state :servers="table.selected"
                   @updateServer="(server) => { table.updateItem(server) }" />
@@ -106,7 +105,7 @@
           <span v-if="Object.keys(item.addresses).length > 1">...</span>
         </template>
         <template v-slot:[`item.flavor`]="{ item }">
-          <span class="cyan--text"> {{ item.flavor && item.flavor.original_name }}</span>
+          <span class="text-cyan"> {{ item.flavor && item.flavor.original_name }}</span>
         </template>
         <template v-slot:[`item.image`]="{ item }">
           <span class="text-info">{{ table.imageName[item.image.id] }}</span>
@@ -121,12 +120,6 @@
               <v-btn icon="mdi-dots-vertical" size="x-small" color="purple" variant="text" v-bind="props"></v-btn>
             </template>
             <v-list density='compact'>
-              <v-list-item @click="openServerActionDialog(item)">
-                <v-list-item-title>操作记录</v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="openChangeServerPasswordDialog(item)">
-                <v-list-item-title>修改密码</v-list-item-title>
-              </v-list-item>
               <v-list-item @click="openServerUpdateSGDialog(item)">
                 <v-list-item-title>更新安全组</v-list-item-title>
               </v-list-item>
@@ -135,9 +128,6 @@
               </v-list-item>
               <v-list-item @click="openServerResizeDialog(item)">
                 <v-list-item-title class="orange--text">规格变更</v-list-item-title>
-              </v-list-item>
-              <v-list-item @click="openServerRebuildDialog(item)">
-                <v-list-item-title class="orange--text">重建</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
@@ -167,8 +157,6 @@
       @update:show="(e) => showChangeNameDialog = e" />
     <ServerActionDialog :show="showServerActionDialog" :server="selectedServer"
       @update:show="(e) => showServerActionDialog = e" />
-    <ServerChangePassword :show="showChangePassowrdDialog" @update:show="(e) => showChangePassowrdDialog = e"
-      :server="selectedServer" />
     <ServerUpdateSG :show="showServerUpdateSGDialog" @update:show="(e) => showServerUpdateSGDialog = e"
       :server="selectedServer" />
     <ServerResize :show="showServerResizeDialog" @update:show="(e) => showServerResizeDialog = e" :server="selectedServer"
@@ -192,11 +180,8 @@ import ServerTopology from './dialogs/ServerTopology.vue';
 import ChipLink from '@/components/plugins/ChipLink.vue';
 
 import ChangeServerNameDialog from './dialogs/ChangeServerNameDialog.vue';
-import ServerActionDialog from './dialogs/ServerActionDialog.vue';
-import ServerChangePassword from './dialogs/ServerChangePassword.vue';
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
 import ServerResize from './dialogs/ServerResize.vue';
-import ServerRebuild from './dialogs/ServerRebuild.vue';
 import ServerEvacuateDialog from './dialogs/ServerEvacuateDialog.vue';
 import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 import BtnServerResetState from '@/components/plugins/button/BtnServerResetState.vue';
@@ -211,9 +196,7 @@ export default {
     BtnServerMigrate, ServerEvacuateDialog,
     BtnServerResetState,
     ChangeServerNameDialog,
-    ServerActionDialog,
-    ServerChangePassword,
-    ServerUpdateSG, ServerResize, ServerRebuild,
+    ServerUpdateSG, ServerResize,
     ServerGroupDialog,
     DeleteComfirmDialog,
   },
@@ -225,16 +208,9 @@ export default {
     table: new ServerDataTable(),
     selectedServer: {},
     openServerTopology: false,
-
-    showServerActionDialog: false,
     showChangeNameDialog: false,
-    showChangePassowrdDialog: false,
-    showServerVolumesDialog: false,
-    showServerInterfacesDialog: false,
     showServerUpdateSGDialog: false,
     showServerResizeDialog: false,
-    showServerRebuildDialog: false,
-    showServerEventDiallog: false,
     showServerGroupDialog: false,
 
     totalServers: [],
@@ -297,32 +273,9 @@ export default {
       let body = await API.server.getVncConsole(server.id);
       window.open(body.remote_console.url, '_blank');
     },
-    searchByName: async function () {
-      console.log("search by name", this.search)
-    },
     openChangeServerNameDialog: async function (server) {
       this.selectedServer = server;
       this.showChangeNameDialog = !this.showChangeNameDialog;
-    },
-    openServerActionDialog: async function (server) {
-      this.selectedServer = server;
-      this.showServerActionDialog = !this.showServerActionDialog;
-    },
-    openServerConsoleLogDialog: async function (server) {
-      this.selectedServer = server;
-      this.showServerConsoleLogDialog = !this.showServerConsoleLogDialog;
-    },
-    openChangeServerPasswordDialog: async function (server) {
-      this.selectedServer = server;
-      this.showChangePassowrdDialog = !this.showChangePassowrdDialog;
-    },
-    openServerVolumesDialog: async function (server) {
-      this.selectedServer = server;
-      this.showServerVolumesDialog = !this.showServerVolumesDialog;
-    },
-    openServerInterfacesDialog: async function (server) {
-      this.selectedServer = server;
-      this.showServerInterfacesDialog = !this.showServerInterfacesDialog;
     },
     openServerUpdateSGDialog: async function (server) {
       this.selectedServer = server;
@@ -331,10 +284,6 @@ export default {
     openServerResizeDialog: async function (server) {
       this.selectedServer = server;
       this.showServerResizeDialog = !this.showServerResizeDialog;
-    },
-    openServerRebuildDialog: async function (server) {
-      this.selectedServer = server;
-      this.showServerRebuildDialog = !this.showServerRebuildDialog;
     },
     openServerGroupDialog: function (server) {
       this.selectedServer = server;
