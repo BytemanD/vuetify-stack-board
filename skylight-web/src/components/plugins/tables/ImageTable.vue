@@ -24,12 +24,12 @@
           </v-row>
         </template>
 
-        
         <template v-slot:[`item.id`]="{ item }">
           <v-chip v-if="item.id == selectedImage.id" density="compact"
             :color="item.id == selectedImage.id ? 'info' : ''">{{ item.id }}</v-chip>
           <v-chip v-else variant="text">{{ item.id }}</v-chip>
         </template>
+        <template v-slot:[`item.size`]="{ item }"><span class="blue--text">{{ table.humanSize(item) }}</span></template>
       </v-data-table>
       <v-data-table v-else density='compact' :show-select="editable" :show-expand="editable" :loading="table.loading"
         :headers="editable ? table.headers : table.MiniHeaders" :items="table.items"

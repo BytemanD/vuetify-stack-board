@@ -360,16 +360,16 @@ export class FlavorDataTable extends DataTable {
     constructor() {
         super([{ title: 'ID', key: 'id' },
         { title: '名字', key: 'name' },
-        { title: '内存', key: 'ram' },
         { title: 'vcpu', key: 'vcpus' },
+        { title: '内存', key: 'ram' },
         { title: '磁盘', key: 'disk' },
         { title: 'swap', key: 'swap' },
         { title: 'ephemeral', key: 'OS-FLV-EXT-DATA:ephemeral' },
         ], API.flavor, 'flavors', '规格');
         this.MiniHeaders = [
             { title: '名字', key: 'name' },
-            { title: '内存', key: 'ram' },
             { title: 'vcpu', key: 'vcpus' },
+            { title: '内存', key: 'ram' },
         ]
         this.extraSpecsMap = {};
         this.isPublic = true;
@@ -1467,6 +1467,7 @@ export class ImageDataTable extends DataTable {
         this.MiniHeaders = [
             { title: 'ID', key: 'id' },
             { title: '名字', key: 'name' },
+            { title: '大小', key: 'size', align: 'end' },
         ]
     }
     refresh() {

@@ -229,7 +229,6 @@ export default {
     showServerActionDialog: false,
     showChangeNameDialog: false,
     showChangePassowrdDialog: false,
-    showRenameDialog: false,
     showServerVolumesDialog: false,
     showServerInterfacesDialog: false,
     showServerUpdateSGDialog: false,

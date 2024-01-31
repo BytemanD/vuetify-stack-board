@@ -37,7 +37,10 @@
                   </tr>
                   <tr>
                     <th>名字</th>
-                    <td>{{ server.name }}<v-btn variant="text" density="compact" color="warning" disabled>重命名</v-btn></td>
+                    <td>{{ server.name }}
+                      <btn-server-rename v-if="server.name" size="small" :server="server"
+                        @update-server="updateServer"></btn-server-rename>
+                    </td>
                   </tr>
                   <tr>
                     <th>实例名</th>
@@ -241,6 +244,7 @@ import ServerChangePassword from './dialogs/ServerChangePassword.vue';
 import ServerVolumes from './dialogs/ServerVolumes.vue';
 import BtnAttachInterfaces from '@/components/plugins/button/BtnAttachInterfaces.vue';
 import BtnAttachVolumes from '@/components/plugins/button/BtnAttachVolumes.vue';
+
 import CardServerConsoleLog from '@/components/plugins/CardServerConsoleLog.vue';
 import CardServerConsole from '@/components/plugins/CardServerConsole.vue';
 import CardServerActions from '@/components/plugins/CardServerActions.vue';
@@ -253,6 +257,7 @@ import ServerResize from './dialogs/ServerResize.vue';
 import ServerRebuild from './dialogs/ServerRebuild.vue';
 import ServerEvacuateDialog from './dialogs/ServerEvacuateDialog.vue';
 import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
+import BtnServerRename from '@/components/plugins/BtnServerRename.vue';
 
 export default {
   components: {
@@ -264,7 +269,7 @@ export default {
     ServerChangePassword, ServerVolumes, BtnAttachInterfaces, BtnAttachVolumes,
     CardServerConsoleLog, CardServerConsole, CardServerActions, TabWindows, ServerUpdateSG,
     ServerResize, ServerRebuild, ServerGroupDialog, MigrationTable,
-    DialogLiveMigrateAbort,
+    DialogLiveMigrateAbort, BtnServerRename,
   },
 
   data: () => ({

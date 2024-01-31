@@ -27,17 +27,15 @@
                             </v-text-field>
                         </v-col>
                         <v-col cols="9" class="mt-0">
-                            <v-text-field class="mb-1" density="compact" readonly v-model="dialog.flavor.id"
-                                :label="dialog.flavor.name" :error="!dialog.flavor.id"
-                                :messages="dialog.validFlavor()">
+                            <v-text-field class="mb-1" density="compact" readonly v-model="dialog.flavor.name"
+                                :error="!dialog.flavor.id" :messages="dialog.validFlavor()">
                                 <template v-slot:prepend>规格</template>
                             </v-text-field>
                             <flavor-table class="ml-10" @select-flavor="(flavor) => { selectFlavor(flavor) }" />
                         </v-col>
                         <v-col cols="9">
-                            <v-text-field class="mb-1" density="compact" readonly v-model="dialog.image.id"
-                                :label="dialog.image.name" :error="!dialog.image.id"
-                                :messages="dialog.validImage()">
+                            <v-text-field class="mb-1" density="compact" readonly v-model="dialog.image.name"
+                                :error="!dialog.image.id" :messages="dialog.validImage()">
                                 <template v-slot:prepend>镜像</template>
                             </v-text-field>
                             <image-table class="ml-10" @select-image="(image) => { selectImage(image) }" />

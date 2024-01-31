@@ -4,12 +4,27 @@
       <!-- 简单的表格 -->
       <v-data-table v-if="!editable" density='compact' :loading="table.loading" :headers="table.MiniHeaders"
         :items="table.items" :items-per-page="5" :search="table.search" @click:row="selectFlavor" hover>
+        <template v-slot:top>
+          <v-row>
+            <v-col></v-col>
+            <v-col cols="12" lg="6">
+              <v-text-field small density='compact' v-model="table.search" label="搜索" single-line
+                hide-details></v-text-field>
+            </v-col>
+            <v-col cols="1" class="text-center">
+              <v-btn variant="text" icon="mdi-refresh" color="info"
+                v-on:click="table.refresh()"><v-icon>mdi-refresh</v-icon></v-btn>
+            </v-col>
+          </v-row>
+        </template>
+
         <template v-slot:[`item.name`]="{ item }">
           <v-chip v-if="item.name == selectedFlavor.name" density="compact"
           :color="item.name == selectedFlavor.name ? 'info' : ''">
           {{ item.name }}</v-chip>
           <v-chip v-else variant="text">{{ item.name }}</v-chip>
         </template>
+        <template v-slot:[`item.ram`]="{ item }">{{ Utils.humanRam(item.ram) }}</template>
       </v-data-table>
 
       <!-- 详细的表格 -->
