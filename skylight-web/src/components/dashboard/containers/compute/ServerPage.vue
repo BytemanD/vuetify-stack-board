@@ -41,7 +41,7 @@
 
                 <v-spacer></v-spacer>
                 <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除实例?"
-                  @click:comfirm="deleteSelected()" :items="table.getSelecedItems()" />
+                  @click:comfirm="deleteSelected()" :items="table.getSelectedItems()" />
               </v-toolbar>
             </v-col>
             <v-col cols="12" md="3" sm="6">
@@ -161,8 +161,6 @@
       :server="selectedServer" />
     <ServerResize :show="showServerResizeDialog" @update:show="(e) => showServerResizeDialog = e" :server="selectedServer"
       :server-table.sync="table" @completed="table.refresh()" />
-    <ServerRebuild :show="showServerRebuildDialog" @update:show="(e) => showServerRebuildDialog = e"
-      :server="selectedServer" :server-table.sync="table" @completed="table.refresh()" />
     <ServerGroupDialog :show="showServerGroupDialog" @update:show="(e) => showServerGroupDialog = e"
       :server="selectedServer" />
   </v-row>

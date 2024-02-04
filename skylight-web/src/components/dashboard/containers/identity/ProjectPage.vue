@@ -13,7 +13,7 @@
                 <NewProjectDialog @completed="table.refresh()" />
                 <v-spacer></v-spacer>
                 <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除项目?"
-                  @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()"/>
+                  @click:comfirm="table.deleteSelected()" :items="table.getSelectedItems()"/>
               </v-toolbar>
             </v-col>
             <v-col cols="12" md="3" sm="4">

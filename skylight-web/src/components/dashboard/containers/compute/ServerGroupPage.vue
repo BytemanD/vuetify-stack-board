@@ -10,7 +10,7 @@
                             <v-toolbar density="compact" class="rounded-pill">
                                 <v-spacer></v-spacer>
                                 <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除主机组?"
-                                    @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
+                                    @click:comfirm="table.deleteSelected()" :items="table.getSelectedItems()" />
 
                             </v-toolbar>
                         </v-col>

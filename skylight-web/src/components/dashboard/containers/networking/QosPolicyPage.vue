@@ -12,7 +12,7 @@
                                 <NewQosPolicyDialog @completed="table.refresh()" />
                                 <v-spacer></v-spacer>
                                 <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除QoS策略?"
-                                    @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
+                                    @click:comfirm="table.deleteSelected()" :items="table.getSelectedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>

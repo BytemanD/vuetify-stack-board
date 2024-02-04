@@ -11,7 +11,7 @@
                 <NewEndpointDialog @completed="table.refresh()" />
                 <v-spacer></v-spacer>
                 <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除Endpoint?"
-                  @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" :item-value-func="getItemValue" />
+                  @click:comfirm="table.deleteSelected()" :items="table.getSelectedItems()" :item-value-func="getItemValue" />
               </v-toolbar>
             </v-col>
             <v-col cols="12" md="2" sm="12">

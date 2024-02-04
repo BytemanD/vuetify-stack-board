@@ -9,11 +9,11 @@
                         <v-col cols="12" md="6" sm="12">
                             <v-toolbar density="compact" class="rounded-pill ma-0 pa-0">
                                 <NewVolumeVue @completed="table.refresh()" />
-                                <VolumeExtendVue :volumes="table.selected" @completed="table.refresh()"></VolumeExtendVue>
+                                <VolumeExtendVue :volumes="table.getSelectedItems()" @volume-extended="updateVolume"></VolumeExtendVue>
                                 <VolumeStatusResetDialog :volumes="table.selected" @completed="table.refresh()" />
                                 <v-spacer></v-spacer>
                                 <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除卷?"
-                                    @click:comfirm="deleteSelected()" :items="table.getSelecedItems()" />
+                                    @click:comfirm="deleteSelected()" :items="table.getSelectedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>
@@ -91,7 +91,7 @@
 
 <script>
 import API from '@/assets/app/api';
-import { VolumeDataTable } from '@/assets/app/tables.jsx';
+import { VolumeDataTable, VolumeTaskWaiter } from '@/assets/app/tables.jsx';
 import { Utils } from '@/assets/app/lib.js';
 import SETTINGS from '@/assets/app/settings';
 
@@ -157,6 +157,9 @@ export default {
         openResourceActionsDialog(item) {
             this.selectedVolume = item;
             this.showResourceActionsDialog = !this.showResourceActionsDialog;
+        },
+        updateVolume: async function(item) {
+            this.table.updateItem(item)
         }
     },
     created() {

@@ -19,7 +19,7 @@
                                     <v-spacer></v-spacer>
                                     <delete-comfirm-dialog :disabled="dialog.serviceTable.selected.length == 0" title="确定删除安全组?"
                                         @click:comfirm="dialog.serviceTable.deleteSelected()"
-                                        :items="dialog.serviceTable.getSelecedItems()" />
+                                        :items="dialog.serviceTable.getSelectedItems()" />
                                 </v-toolbar>
                             </v-col>
                             <v-col>

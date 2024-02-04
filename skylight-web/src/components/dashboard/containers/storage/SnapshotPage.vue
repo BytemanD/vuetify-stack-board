@@ -15,7 +15,7 @@
                                     :disabled="table.selected.length == 0">状态重置</v-btn>
                                 <v-spacer></v-spacer>
                                 <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除快照?"
-                                    @click:comfirm="table.deleteSelected()" :items="table.getSelecedItems()" />
+                                    @click:comfirm="table.deleteSelected()" :items="table.getSelectedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>

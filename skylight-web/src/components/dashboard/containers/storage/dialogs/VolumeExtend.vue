@@ -6,8 +6,8 @@
     <v-card>
       <v-card-title class="info" primary-title>卷扩容</v-card-title>
       <v-card-text>
-        <v-slider v-model="newSize" color="info" show-ticks="always" tick-size="4" label="新容量(GB)" :min="minNewSize"
-          :max="minNewSize + 100" step="10" :disabled="customNewSize != null && customNewSize != ''">
+        <v-slider v-model="newSize" color="info" show-ticks="always" thumb-label="always" thumb-size="4" label="新容量(GB)"
+          :min="minNewSize" :max="minNewSize + 100" step="10" :disabled="customNewSize != null && customNewSize != ''">
         </v-slider>
         <v-text-field outlined label="自定义大小" suffix="GB" v-model="customNewSize" clearable
           :rules="volumeSizeRules"></v-text-field>
@@ -26,6 +26,7 @@ import { Utils } from '@/assets/app/lib';
 
 import { VolumeStateResetDialog } from '@/assets/app/dialogs';
 import API from '@/assets/app/api';
+import { VolumeTaskWaiter } from '@/assets/app/tables';
 
 export default {
   props: {
@@ -48,28 +49,31 @@ export default {
     commit: async function () {
       for (let volume of this.volumes) {
         API.volume.extend(volume.id, this.customNewSize || this.newSize)
+        let waiter = new VolumeTaskWaiter(volume, this.volumeExtended)
+        waiter.waitExtended()
       }
       this.display = false;
-      this.$emit('completed');
+    },
+    volumeExtended: function (volume) {
+      this.$emit('volumeExtended', volume);
+    },
+    refresh: async function () {
+      this.minNewSize = 0;
+      for (let volume of this.volumes) {
+        this.minNewSize = Math.max(volume.size, this.minNewSize);
+      }
+      this.minNewSize += 10
+      this.newSize = this.minNewSize;
     }
   },
   created() {
 
   },
   watch: {
-    show(newVal) {
-      this.display = newVal;
-      if (this.display) {
-        this.minNewSize = 0;
-        for (let volume of this.volumes) {
-          this.minNewSize = Math.max(volume.size, this.minNewSize);
-        }
-        this.minNewSize += 10
-      }
-    },
     display(newVal) {
-      this.display = newVal;
-      this.$emit("update:show", this.display);
+      if (this.display) {
+        this.refresh()
+      }
     }
   },
 };

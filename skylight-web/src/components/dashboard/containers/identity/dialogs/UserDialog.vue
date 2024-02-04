@@ -16,7 +16,7 @@
                                 <v-toolbar density="compact" class="rounded-pill">
                                     <v-spacer></v-spacer>
                                     <delete-comfirm-dialog :disabled="dialog.table.selected.length == 0" title="确定删除用户?"
-                                        @click:comfirm="dialog.table.deleteSelected()" :items="dialog.table.getSelecedItems()"/>
+                                        @click:comfirm="dialog.table.deleteSelected()" :items="dialog.table.getSelectedItems()"/>
                                 </v-toolbar>
                             </v-col>
                             <v-col>

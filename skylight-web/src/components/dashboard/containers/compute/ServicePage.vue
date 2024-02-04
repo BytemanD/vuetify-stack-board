@@ -12,7 +12,7 @@
                                 <delete-comfirm-dialog :disabled="table.selected.length == 0" title="确定删除计算服务?"
                                     @click:comfirm="table.deleteSelected()"
                                     :item-value-func="(item) => { return item.binary + '@' + item.host }"
-                                    :items="table.getSelecedItems()" />
+                                    :items="table.getSelectedItems()" />
                             </v-toolbar>
                         </v-col>
                         <v-col>

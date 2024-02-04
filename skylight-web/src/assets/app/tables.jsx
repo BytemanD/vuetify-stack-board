@@ -117,7 +117,7 @@ class DataTable {
         this.items = this.bodyKey ? result[this.bodyKey] : result;
         return result;
     }
-    getSelecedItems() {
+    getSelectedItems() {
         let items = [];
         for (let i in this.items) {
             if (this.selected.indexOf(this.items[i].id) < 0) {
@@ -394,7 +394,7 @@ export class KeypairDataTable extends DataTable {
         Utils.copyToClipboard(item.public_key)
         Notify.success(`公钥内容已复制`);
     }
-    getSelecedItems() {
+    getSelectedItems() {
         let items = [];
         for (let i in this.items) {
             if (this.selected.indexOf(this.items[i].name) < 0) {
@@ -1185,7 +1185,7 @@ export class DomainTable extends DataTable {
         // this.newItemDialog = new NewDomainDialog();
     }
     async deleteSelected() {
-        let items = this.getSelecedItems();
+        let items = this.getSelectedItems();
         for (let i in items) {
             let domain = items[i];
             if (domain.enabled) {
@@ -1647,7 +1647,6 @@ export class ServerTaskWaiter {
             }
             this.server[key] = server[key]
         }
-
     }
     async waitServerStatus(expectStatus = ['ACTIVE', 'ERROR']) {
         let expectStatusList = []
@@ -1716,7 +1715,7 @@ export class ServerTaskWaiter {
     async waitRebuilded() {
         let action = "重建"
         // TODO: show server first
-        let srcHost = this.server['OS-EXT-SRV-ATTR:host'];
+        // let srcHost = this.server['OS-EXT-SRV-ATTR:host'];
         await this.waitServerStatus(['ACTIVE', 'SHUTOFF', 'ERROR'])
         if (this.server.status != 'ERROR') {
             Notify.success(`${this.server.name || this.server.id} ${action} 成功`)
@@ -1725,5 +1724,36 @@ export class ServerTaskWaiter {
         }
     }
 }
+
+export class VolumeTaskWaiter {
+    constructor(volume, onUpdatedVolume = null) {
+        this.volume = volume
+        this.onUpdatedVolume = onUpdatedVolume
+    }
+    async updateVolume(volume) {
+        for (var key in volume) {
+            if (this.server[key] == volume[key]) {
+                continue
+            }
+            this.volume[volume] = volume[key]
+        }
+    }
+    async waitExtended() {
+        let action = "扩容"
+        let volume = this.volume
+        do {
+            volume = await API.volume.show(this.volume.id);
+            if (volume.size > this.volume.size) {
+                break
+            }
+            await Utils.sleep(5)
+        } while (true)
+        if (this.onUpdatedVolume) {
+            this.onUpdatedVolume(volume)
+        }
+        Notify.success(`${this.volume.name || this.volume.id} ${action} 成功`)
+    }
+}
+
 
 export default DataTable;
