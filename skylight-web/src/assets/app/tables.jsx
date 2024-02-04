@@ -365,6 +365,7 @@ export class FlavorDataTable extends DataTable {
         { title: '磁盘', key: 'disk' },
         { title: 'swap', key: 'swap' },
         { title: 'ephemeral', key: 'OS-FLV-EXT-DATA:ephemeral' },
+        { title: '操作', key: 'action' },
         ], API.flavor, 'flavors', '规格');
         this.MiniHeaders = [
             { title: '名字', key: 'name' },
@@ -375,18 +376,8 @@ export class FlavorDataTable extends DataTable {
         this.isPublic = true;
     }
 
-    async refreshExtraSpecs() {
-        for (let i in this.items) {
-            let item = this.items[i];
-            let body = await API.flavor.getExtraSpecs(item.id);
-            this.extraSpecsMap[item.id] = body.extra_specs;
-            // Vue.set(this.extraSpecsMap, item.id, body.extra_specs);
-        }
-
-    }
     async refresh() {
         await super.refresh({ is_public: this.isPublic })
-        this.refreshExtraSpecs()
     }
 }
 export class KeypairDataTable extends DataTable {
@@ -784,7 +775,9 @@ export class ComputeServiceTable extends DataTable {
     }
     async forceDown(service) {
         try {
-            await API.computeService.forceDown(service.id, !service.forced_down)
+            let srv = await API.computeService.forceDown(service.id, !service.forced_down)
+            this.updateItem(srv)
+            console.log(srv)
             if (service.forced_down) {
                 Notify.success(`${service.host}:${service.binary} 已强制设为 Down`)
             } else {
@@ -792,32 +785,36 @@ export class ComputeServiceTable extends DataTable {
             }
         } catch (error) {
             console.error(error)
-            Notify.error(`${service.host}:${service.binary} 设置强制down失败`)
+            Notify.error(`${service.host}:${service.binary} 设置失败`)
             service.forced_down = !service.forced_down;
             return;
         }
         // this.refresh();
     }
-    toggleEnable(service) {
+    async toggleEnable(service) {
         let status = service.status;
         if (status == 'enabled') {
             service.status = 'disabled';
-            API.computeService.disable(service.id).then(() => {
+            try {
+                let srv = (await API.computeService.disable(service.id)).service
                 Notify.success(`${service.host}:${service.binary} 已设置为不可用`)
-            }).catch(error => {
+                service = srv
+            } catch(error) {
                 console.error(error);
                 Notify.error(`${service.host}:${service.binary} 设置不可用失败`)
                 service.status = 'enabled';
-            });
+            }
         } else {
             service.status = 'enabled';
-            API.computeService.enable(service.id).then(() => {
+            try {
+                let srv = (await API.computeService.enable(service.id)).service
                 Notify.success(`${service.host}:${service.binary} 已设置为可用`)
-            }).catch(error => {
+                service = srv
+            } catch(error){
                 Notify.error(`${service.host}:${service.binary} 设置可用失败`)
                 service.status = 'enabled';
                 console.error(error)
-            });
+            }
         }
     }
 }

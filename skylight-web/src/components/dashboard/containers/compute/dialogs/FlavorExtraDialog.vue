@@ -1,17 +1,17 @@
 <template>
-    <v-dialog v-model="display" width="800">
+    <v-dialog v-model="display" width="800" scrollable>
         <v-card>
-            <v-card-title class="headline primary" primary-title>设置规格属性</v-card-title>
+            <v-card-title class="headline primary" primary-title>规格属性</v-card-title>
             <v-card-text>
                 <v-row>
                     <v-col cols="6">
                         <h4>属性</h4>
-                        <v-chip label small closable class="mr-1 mt-1 info" v-for="(value, key) in dialog.extraSpecs"
+                        <v-chip label size="small" closable class="mr-1 mt-1 info" v-for="(value, key) in dialog.extraSpecs"
                             v-bind:key="key" @click:close="deleteExtra(key)">{{ key }}={{ value }}</v-chip>
                     </v-col>
                     <v-col cols="6">
                         <h4>快速添加常用属性</h4>
-                        <v-chip label small closable close-icon="mdi-plus" class="mr-1 mb-1"
+                        <v-chip label size="small" closable close-icon="mdi-plus" class="mr-1 mb-1"
                             v-for="item in dialog.customizeExtras" v-bind:key="item.key"
                             @click:close="addExtra(item)">{{ item.key }}={{ item.value }}
                         </v-chip>
@@ -22,8 +22,9 @@
                             v-model="dialog.newExtraSpecs"></v-textarea>
                     </v-col>
                     <v-col cols="2">
-                        <v-btn class="primary" @click="addNewExtraSpecs()">添加</v-btn>
+                        <v-btn color="primary"  @click="addNewExtraSpecs()">添加</v-btn>
                     </v-col>
+                    <br>
                 </v-row>
             </v-card-text>
         </v-card>

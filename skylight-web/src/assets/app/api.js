@@ -254,16 +254,13 @@ class ComputeService extends Restfulclient {
     constructor() { super('/computing/os-services') }
 
     async forceDown(id, down = true) {
-        let resp = await this.put(`${id}`, { forced_down: down });
-        return resp.data;
+        return (await this.put(`${id}`, { forced_down: down })).service
     }
     async disable(id) {
-        let resp = await this.put(`${id}`, { status: 'disabled' });
-        return resp.data;
+        return (await this.put(`${id}`, { status: 'disabled' })).service
     }
     async enable(id) {
-        let resp = await this.put(`${id}`, { status: 'enabled' });
-        return resp.data;
+        return (await this.put(`${id}`, { status: 'enabled' })).service
     }
     async getNovaComputeServices() {
         return (await this.list({ binary: 'nova-compute' })).services

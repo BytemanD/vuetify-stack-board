@@ -1,7 +1,7 @@
 <template>
     <v-row>
         <v-col cols="12">
-            <v-data-table density='compact' :loading="table.loading" :headers="table.headers"
+            <v-data-table density='compact' :loading="table.loading" :headers="table.headers" show-select
                 :items="table.items" :items-per-page="table.itemsPerPage" :search="table.search" class="elevation-1"
                 v-model="table.selected">
                 <template v-slot:top>
@@ -26,9 +26,17 @@
                 </template>
 
                 <template v-slot:[`item.status`]="{ item }">
-                    <v-switch class="my-auto" hide-details color="success" true-value="enabled" false-value="disabled"
-                        v-model="item.status" :disabled="item.binary != 'nova-compute'"
-                        @click="table.toggleEnable(item)"></v-switch>
+                    <v-switch v-if="item.status == 'enabled'" class="my-auto" hide-details color="success"
+                        true-value="enabled" false-value="disabled" v-model="item.status"
+                        :disabled="item.binary != 'nova-compute'" @click="table.toggleEnable(item)"></v-switch>
+                    <v-tooltip location="top" v-else>
+                        <template v-slot:activator="{ props }">
+                            <v-switch v-bind="props" class="my-auto" hide-details color="success" true-value="enabled"
+                                false-value="disabled" v-model="item.status" :disabled="item.binary != 'nova-compute'"
+                                @click="table.toggleEnable(item)"></v-switch>
+                        </template>
+                        {{ item.disabled_reason || '未知' }}
+                    </v-tooltip>
                 </template>
                 <template v-slot:[`item.forced_down`]="{ item }">
                     <v-switch class="my-auto" v-model="item.forced_down" hide-details color="warning"
