@@ -16,6 +16,8 @@ from skylight.common import utils
 from skylight.common.db import api as db_api
 from skylight.openstack import proxy
 
+import requests
+
 
 LOG = log.getLogger()
 CONF = conf.CONF
@@ -93,12 +95,11 @@ class Cluster(application.BaseReqHandler, GetContext):
         cluster = data.get('cluster', {})
         LOG.debug('add cluster: {}', data)
         try:
-            identity = proxy.OpenstackV3AuthProxy(cluster.get('authUrl'),
-                                                  cluster.get('authProject'),
-                                                  cluster.get('authUser'),
-                                                  cluster.get('authPassword'))
-            identity.auth_plugin.update_auth_token(
-                fetch_max_version=CONF.openstack.fetch_max_version)
+            identity = proxy.OpenstackProxy(cluster.get('authUrl'),
+                                            cluster.get('authProject'),
+                                            cluster.get('authUser'),
+                                            cluster.get('authPassword'))
+            identity.auth_plugin.update_auth_token()
             db_api.create_cluster(cluster.get('name'), cluster.get('authUrl'),
                                   cluster.get('authProject'),
                                   cluster.get('authUser'),
@@ -129,11 +130,11 @@ class ClusterRegions(application.BaseReqHandler, GetContext):
             clusterId = int(clusterId)
 
         cluster = db_api.get_cluster_by_id(clusterId)
-        cluster_proxy = proxy.OpenstackV3AuthProxy(cluster.auth_url,
-                                                   cluster.auth_project,
-                                                   cluster.auth_user,
-                                                   cluster.auth_password)
-        cluster_proxy.update_auth_token()
+        cluster_proxy = proxy.OpenstackProxy(cluster.auth_url,
+                                             cluster.auth_project,
+                                             cluster.auth_user,
+                                             cluster.auth_password)
+        cluster_proxy.auth_plugin.update_auth_token()
         return {'regions': cluster_proxy.get_catalog_regions()}
 
 
@@ -176,12 +177,11 @@ class AuthInfo(BaseReqHandler):
     def get(self):
         context = self._get_context()
         cluster_proxy = proxy.get_proxy(context)
-        cluster_proxy.get_project_id()
         self.set_status(200)
         self.finish({
             'auth_info': {
-                'project': cluster_proxy.get_project(),
-                'user': cluster_proxy.get_user(),
+                'project': cluster_proxy.auth_plugin.get_project(),
+                'user': cluster_proxy.auth_plugin.get_user(),
             }
         })
 
@@ -193,7 +193,7 @@ class OpenstackProxyBase(BaseReqHandler):
             self.request.body
 
     @abc.abstractmethod
-    def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
+    def get_proxy_method(self, proxy_driver: proxy.OpenstackProxy):
         raise ImportError()
 
     def _get_proxy_headers(self):
@@ -207,32 +207,30 @@ class OpenstackProxyBase(BaseReqHandler):
 
     def do_proxy(self, method, url):
         # sourcery skip: extract-method, use-named-expression
-        LOG.debug('do proxy  {} {}', method, url)
         context = self._get_context()
 
         if not context.cluster_id:
             return 400, {'message': 'Cluster id not found in context'}
 
-        try:
-            cluster_proxy = proxy.get_proxy(context)
-            query = urlparse(self.request.uri).query
-            if query:
-                url += f'?{query}'
-            proxy_headers = self._get_proxy_headers()
-            for i in range(2):
+        cluster_proxy = proxy.get_proxy(context)
+        query = urlparse(self.request.uri).query
+        if query:
+            url += f'?{query}'
+        proxy_headers = self._get_proxy_headers()
+        for retry in range(CONF.openstack.unauth_retry_times + 1):
+            try:
                 resp = self.get_proxy_method(cluster_proxy)(
                     method=method, url=url, data=self._request_body(),
                     headers=proxy_headers)
-                if resp.status_code == 401 and i == 0:
+                return resp.status_code, resp.content
+            except requests.HTTPError as e:
+                if e.response.status_code == 401 and \
+                   retry < CONF.openstack.unauth_retry_times:
                     LOG.warning("Unauthorized, headers: {}, update auth token",
                                 cluster_proxy.get_header())
-                    cluster_proxy.update_auth_token(fetch_max_version=False)
-                    LOG.debug("new headers: {}", cluster_proxy.get_header())
-                    continue
-                break
-            return resp.status_code, resp.content
-        except exceptions.EndpointNotFound as e:
-            return 404, {'error': str(e)}
+                    cluster_proxy.auth_plugin.update_auth_token()
+                else:
+                    raise
 
     @utils.with_response()
     def get(self, url):
@@ -257,19 +255,19 @@ class OpenstackProxyBase(BaseReqHandler):
 
 class KeystoneProxy(OpenstackProxyBase):
 
-    def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
+    def get_proxy_method(self, proxy_driver: proxy.OpenstackProxy):
         return proxy_driver.proxy_keystone
 
 
 class NovaProxy(OpenstackProxyBase):
 
-    def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
+    def get_proxy_method(self, proxy_driver: proxy.OpenstackProxy):
         return proxy_driver.proxy_nova
 
 
 class GlanceProxy(OpenstackProxyBase):
 
-    def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
+    def get_proxy_method(self, proxy_driver: proxy.OpenstackProxy):
         return proxy_driver.proxy_glance
 
     def is_upload_file(self):
@@ -321,13 +319,13 @@ class GlanceProxy(OpenstackProxyBase):
 
 class CinderProxy(OpenstackProxyBase):
 
-    def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
+    def get_proxy_method(self, proxy_driver: proxy.OpenstackProxy):
         return proxy_driver.proxy_cinder
 
 
 class NeutronProxy(OpenstackProxyBase):
 
-    def get_proxy_method(self, proxy_driver: proxy.OpenstackV3AuthProxy):
+    def get_proxy_method(self, proxy_driver: proxy.OpenstackProxy):
         return proxy_driver.proxy_neutron
 
 

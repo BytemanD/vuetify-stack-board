@@ -1,9 +1,11 @@
+import json
 import os
 import re
 import subprocess
-from pbr import version
+import time
 import queue
 import functools
+from pbr import version
 
 import requests
 from easy2use.common import pkg
@@ -123,6 +125,10 @@ def with_response(return_code=200):
                 resp = func(self, *args, **kwargs)
             except exceptions.ApiException:
                 raise
+            except exceptions.EndpointNotFound as e:
+                resp = 404, json.dumps({'error': str(e)})
+            except requests.HTTPError as e:
+                resp = e.response.status_code, e.response.json()
             except Exception as e:
                 LOG.exception(e)
                 resp = 500, f'Internal Server error: {str(e)}'
@@ -184,3 +190,17 @@ def download(url, cache=False):
     downloader.download(url)
     LOG.info(_('download success'))
     return file_path
+
+
+def log_proxy(func):
+
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        LOG.info('do proxy {} {}', kwargs.get('method'), kwargs.get('url'))
+        start_time = time.time()
+        ret = func(self, *args, **kwargs)
+        LOG.debug('proxy {} {}, spend: {:.2f}', kwargs.get('method'),
+                  kwargs.get('url'), time.time() - start_time)
+        return ret
+
+    return wrapper

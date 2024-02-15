@@ -21,7 +21,7 @@ export default {
         },
         density: {
             type: String,
-            default: '',
+            default: 'compact',
         },
         label: {
             type: String,

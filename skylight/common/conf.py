@@ -25,6 +25,7 @@ class OpenstackOptions(cfg2.OptionGroup):
     default_region = cfg2.Option('default_region', default='RegionOne')
     keystone_api_version = cfg2.Option('keystone_api_version', default='v3')
     micro_versions = cfg2.ListOption('micro_versions', default=[])
+    unauth_retry_times = cfg2.IntOption('unauth_retry_times', default=1)
 
 
 class WebOptions(cfg2.OptionGroup):
@@ -34,7 +35,8 @@ class WebOptions(cfg2.OptionGroup):
 class AppConf(cfg2.TomlConfig):
     debug = cfg2.BoolOption('debug', default=True)
     log_file = cfg2.Option('log_file', default=None)
-    workers = cfg2.IntOption('workers', default=8081)
+    port = cfg2.IntOption('port', default=8081)
+    workers = cfg2.IntOption('workers', default=None)
     data_path = cfg2.Option('data_path', default='/etc/skylight')
     enable_cross_domain = cfg2.BoolOption('enable_cross_domain', default=False)
     index_redirect = cfg2.Option('index_redirect', default='/welcome.html')

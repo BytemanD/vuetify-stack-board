@@ -1,32 +1,26 @@
-from functools import lru_cache
-from skylight.common import log
-import re
-import time
-import json
-from urllib import parse
 import requests
 
 from skylight.common import conf
+from skylight.common import utils
 from skylight.common import context
-from skylight.common import exceptions
 from skylight.common.db import api
+from skylight.common import log
 from skylight.openstack import v3_auth
 
 LOG = log.getLogger()
 CONF = conf.CONF
 
 PROXY_MAP = {}
-REG_API_VERSION = re.compile(r'.*/v[\d.]')
 
 
-class OpenstackV3AuthProxy(object):
+class OpenstackProxy(object):
 
     def __init__(self, auth_url, auth_project, auth_user, auth_password,
                  domain_name=None, region=None):
-        self.auth_token = {}
         self.endpoints = {}
         self._catalog = []
         self._micro_versions: dict = {}
+        self.session = requests.Session()
 
         for api_version in CONF.openstack.micro_versions:
             service, version = api_version.split(':')
@@ -35,31 +29,9 @@ class OpenstackV3AuthProxy(object):
             auth_url, auth_user, auth_project, auth_password,
             domain_name or 'Default', region=region)
 
-    def get_token(self):
-        if 'token' not in self.auth_token or \
-           time.time() >= self.auth_token.get('expires_at'):
-            self.update_auth_token(
-                fetch_max_version=CONF.openstack.fetch_max_version)
-        return self.auth_token.get('token')
-
-    def get_project_id(self):
-        if 'project' not in self.auth_token:
-            self.auth_plugin.update_auth_token()
-        return self.auth_token.get('project', {}).get('id')
-
-    def get_project(self):
-        if 'project' not in self.auth_token:
-            self.auth_plugin.update_auth_token()
-        return self.auth_token.get('project', {})
-
-    def get_user(self):
-        if 'user' not in self.auth_token:
-            self.auth_plugin.update_auth_token()
-        return self.auth_token.get('user', {})
-
     def is_connectable(self):
         try:
-            requests.get(self.auth_url, timeout=5)
+            self.session.get(self.auth_plugin.auth_url, timeout=5)
             return True
         except requests.exceptions.ConnectionError:
             return False
@@ -82,28 +54,37 @@ class OpenstackV3AuthProxy(object):
 
     def get_header(self) -> dict:
         headers = {'Content-Type': 'application/json'}
-        self.auth_plugin.auth_request(headers)
-        if self._micro_versions:
+
+        if self.auth_plugin.micro_versions:
             headers['OpenStack-API-Version'] = ','.join([
-                f'{k}:{v}' for k, v in self._micro_versions.items()
+                f'{k}:{v}' for k, v in self.auth_plugin.micro_versions.items()
             ])
         return headers
 
     def proxy_keystone(self, method='GET', url=None, data=None, headers=None):
-        endpoint = self.auth_plugin.get_endpoint(
-            'keystone', defualt_version=CONF.openstack.keystone_api_version)
-        proxy_url = f"{endpoint}{url or '/'}"
+        proxy_url = self.auth_plugin.make_request_url(
+            'keystone', url, version=CONF.openstack.keystone_api_version)
         return self._proxy_openstack(method, proxy_url, data=data,
                                      headers=headers)
 
+    @property
+    def micro_versions(self):
+        return self.auth_plugin.micro_versions
+
+    def get_compute_max_version(self):
+        resp = self._proxy_openstack('GEt',
+                                     self.auth_plugin.get_endpoint('nova'))
+        resp.raise_for_status()
+        return resp.json().get('version', {}).get('version')
+
+    @utils.log_proxy
     def proxy_nova(self, method='GET', url=None, data=None, headers=None):
-        endpoint = self.auth_plugin.get_endpoint(
-            'nova', defualt_version=CONF.openstack.nova_api_version)
-        proxy_url = f"{endpoint}{url or '/'}"
-        if 'compute' in self._micro_versions:
-            headers = headers or {}
-            headers['X-OpenStack-Nova-API-Version'] = \
-                self._micro_versions.get("compute")
+        proxy_url = self.auth_plugin.make_request_url(
+            'nova', url, version=CONF.openstack.nova_api_version)
+        headers = {}
+        micro_version = self.get_micro_version('nova')
+        if micro_version:
+            headers['X-OpenStack-Nova-API-Version'] = micro_version
         return self._proxy_openstack(method, proxy_url, data=data,
                                      headers=headers)
 
@@ -112,27 +93,27 @@ class OpenstackV3AuthProxy(object):
         headers.update({'Content-Type': 'application/octet-stream'})
 
         LOG.info('uploading image {}', url)
-        resp = requests.put(f"{self.auth_plugin.get_endpoint('glance')}{url or '/'}",
-                            headers=headers, data=image_chunk)
+        proxy_url = self.auth_plugin.make_request_url(
+            'glance', url, version=CONF.openstack.glance_api_version)
+
+        resp = self.session.put(proxy_url, headers=headers, data=image_chunk)
         LOG.info('uploaded image {}', url)
         return resp
 
     def proxy_glance(self, method='GET', url=None, data=None, headers=None):
-        endpoint = self.auth_plugin.get_endpoint(
-            'glance', defualt_version=CONF.openstack.glance_api_version)
-        proxy_url = f"{endpoint }{url or '/'}"
+        proxy_url = self.auth_plugin.make_request_url(
+            'glance', url, version=CONF.openstack.glance_api_version)
         return self._proxy_openstack(method, proxy_url, data=data,
                                      headers=headers)
 
     def proxy_neutron(self, method='GET', url=None, data=None, headers=None):
-        endpoint = self.auth_plugin.get_endpoint(
-            'neutron', defual_version=CONF.openstack.neutron_api_version)
-        proxy_url = f"{endpoint}{url or '/'}"
+        proxy_url = self.auth_plugin.make_request_url(
+            'neutron', url, version=CONF.openstack.neutron_api_version)
         return self._proxy_openstack(method, proxy_url, data=data,
                                      headers=headers)
 
     def proxy_cinder(self, method='GET', url=None, data=None, headers=None):
-        proxy_url = f"{self.auth_plugin.get_endpoint('cinderv2')}{url or '/'}"
+        proxy_url = self.auth_plugin.make_request_url('cinderv2', url)
         return self._proxy_openstack(method, proxy_url, data=data,
                                      headers=headers)
 
@@ -140,13 +121,16 @@ class OpenstackV3AuthProxy(object):
         proxy_headers = self.get_header()
         if headers:
             proxy_headers.update(headers)
-        self.auth_token
-        return requests.request(method, proxy_url, data=data,
-                                headers=proxy_headers)
+
+        self.auth_plugin.auth_request(proxy_headers)
+        resp = self.session.request(method, proxy_url, data=data,
+                                    headers=proxy_headers)
+        resp.raise_for_status()
+        return resp
 
     def get_catalog_regions(self):
         regions = []
-        for service in self._catalog:
+        for service in self.auth_plugin._catalog:
             for endpoint in service.get('endpoints', []):
                 if endpoint.get('interface') != 'public':
                     continue
@@ -155,21 +139,27 @@ class OpenstackV3AuthProxy(object):
                 break
         return regions
 
+    def get_micro_version(self, service: str):
+        if CONF.openstack.fetch_max_version:
+            if service == 'nova' and 'nova' not in self.micro_versions:
+                resp = self._proxy_openstack(
+                    'GET', self.auth_plugin.get_endpoint('nova').geturl())
+                self._micro_versions['compute'] = resp.json().get(
+                    'version', {}).get('version')
+        return self._micro_versions['compute']
 
-def get_proxy(ctxt: context.RequestContext) -> OpenstackV3AuthProxy:
+
+def get_proxy(ctxt: context.RequestContext) -> OpenstackProxy:
     global PROXY_MAP
     if ctxt.cluster_id not in PROXY_MAP or \
        not PROXY_MAP[ctxt.cluster_id].get(ctxt.region):
 
         cluster = api.get_cluster_by_id(ctxt.cluster_id)
-        cluster_proxy = OpenstackV3AuthProxy(cluster.auth_url,
-                                             cluster.auth_project,
-                                             cluster.auth_user,
-                                             cluster.auth_password,
-                                             region=ctxt.region)
-        cluster_proxy.auth_plugin.update_auth_token(
-            fetch_max_version=CONF.openstack.fetch_max_version
-        )
+        cluster_proxy = OpenstackProxy(cluster.auth_url, cluster.auth_project,
+                                       cluster.auth_user,
+                                       cluster.auth_password,
+                                       region=ctxt.region)
+        cluster_proxy.auth_plugin.update_auth_token()
         PROXY_MAP.setdefault(ctxt.cluster_id, {})
         PROXY_MAP[ctxt.cluster_id][ctxt.region] = cluster_proxy
 

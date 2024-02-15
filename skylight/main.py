@@ -142,9 +142,7 @@ def upgrade(image, cache, yes, debug):
 @click.option('--admin-password', help=_("Init admin password"))
 @click.option('--develop', is_flag=True,
               help=_("Run serve with develop mode"))
-@click.option('-p', '--port', type=int, default=8081,
-              help=_("Run serve with specified port. Default: 8081"))
-def serve(port, develop, admin_password, enable_cross_domain,
+def serve(develop, admin_password, enable_cross_domain,
           update_config_json, template, static, verbose):
     if system.OS.is_windows():
         # NOTE(fjboy) For windows host, MIME type of .js file is
@@ -154,8 +152,6 @@ def serve(port, develop, admin_password, enable_cross_domain,
     conf.load_configs()
     if enable_cross_domain:
         CONF.enable_cross_domain = True
-    if port:
-        CONF.port = port
 
     log.basic_config(verbose_count=len(verbose))
     if static and not pathlib.Path(static).exists():

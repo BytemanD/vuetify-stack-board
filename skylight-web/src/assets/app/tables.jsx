@@ -1723,6 +1723,16 @@ export class ServerTaskWaiter {
             Notify.error(`${this.server.name || this.server.id} ${action} 失败`)
         }
     }
+    async waitResized(oldFlavorName) {
+        let action = "规格变更"
+        // TODO: show server first
+        await this.waitServerStatus(['ACTIVE', 'SHUTOFF', 'ERROR'])
+        if (this.server.flavor.original_name != oldFlavorName) {
+            Notify.success(`${this.server.name || this.server.id} ${action} 成功`)
+        } else {
+            Notify.error(`${this.server.name || this.server.id} ${action} 失败`)
+        }
+    }
 }
 
 export class VolumeTaskWaiter {

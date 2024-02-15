@@ -57,7 +57,6 @@ class Restfulclient {
 
     }
     _getErrorMsg(response) {
-        console.error(response)
         let errorData = response ? response.data : {};
         if (errorData.badRequest && errorData.badRequest.message) {
             return errorData.badRequest.message
@@ -96,9 +95,8 @@ class Restfulclient {
                 reqUrl, body, { headers: this.getHeaders() });
             return resp
         } catch (e) {
-            console.error(e);
-            MESSAGE.error(this._getErrorMsg(e.response))
-            throw e
+            console.error(this._getErrorMsg(e.response));
+            throw Error(this._getErrorMsg(e.response))
         }
     }
     async post(body, url = null) {

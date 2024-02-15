@@ -29,8 +29,8 @@
           </v-row>
         </template>
 
-        <template v-slot:[`item.service_name`]="{ item }">{{ serviceMap[item.service_id].name }}</template>
-        <template v-slot:[`item.service_type`]="{ item }">{{ serviceMap[item.service_id].type }}</template>
+        <template v-slot:[`item.service_name`]="{ item }">{{ serviceMap[item.service_id] && serviceMap[item.service_id].name }}</template>
+        <template v-slot:[`item.service_type`]="{ item }">{{ serviceMap[item.service_id] &&  serviceMap[item.service_id].type }}</template>
 
       </v-data-table>
     </v-col>

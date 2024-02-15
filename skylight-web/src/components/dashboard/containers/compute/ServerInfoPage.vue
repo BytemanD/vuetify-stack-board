@@ -117,7 +117,8 @@
                     <th style="min-width: 100px">规格</th>
                     <td>
                       {{ server.flavor && server.flavor.original_name }}
-                      <v-btn variant="text" color="warning" density="compact" disabled>变更</v-btn>
+                      <!-- <v-btn variant="text" color="warning" density="compact" disabled>变更</v-btn> -->
+                      <btn-server-resize :server="server" @update-server="updateServer" />
                     </td>
                   </tr>
                   <tr>
@@ -253,12 +254,12 @@ import MigrationTable from '@/components/plugins/tables/MigrationTable.vue';
 import DialogLiveMigrateAbort from '@/components/plugins/dialogs/DialogLiveMigrateAbort.vue';
 
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
-import ServerResize from './dialogs/ServerResize.vue';
 import ServerRebuild from './dialogs/ServerRebuild.vue';
 import ServerEvacuateDialog from './dialogs/ServerEvacuateDialog.vue';
 import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 import BtnServerRename from '@/components/plugins/BtnServerRename.vue';
 import BtnServerChangePwd from '@/components/plugins/BtnServerChangePwd.vue';
+import BtnServerResize from '@/components/plugins/BtnServerResize.vue';
 
 export default {
   components: {
@@ -269,8 +270,8 @@ export default {
 
     ServerChangePassword, ServerVolumes, BtnAttachInterfaces, BtnAttachVolumes,
     CardServerConsoleLog, CardServerConsole, CardServerActions, TabWindows, ServerUpdateSG,
-    ServerResize, ServerRebuild, ServerGroupDialog, MigrationTable,
-    DialogLiveMigrateAbort, BtnServerRename, BtnServerChangePwd,
+    ServerRebuild, ServerGroupDialog, MigrationTable,
+    DialogLiveMigrateAbort, BtnServerRename, BtnServerChangePwd, BtnServerResize,
   },
 
   data: () => ({

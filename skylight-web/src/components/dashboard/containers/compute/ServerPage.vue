@@ -157,8 +157,6 @@
       @update:show="(e) => showChangeNameDialog = e" />
     <ServerUpdateSG :show="showServerUpdateSGDialog" @update:show="(e) => showServerUpdateSGDialog = e"
       :server="selectedServer" />
-    <ServerResize :show="showServerResizeDialog" @update:show="(e) => showServerResizeDialog = e" :server="selectedServer"
-      :server-table.sync="table" @completed="table.refresh()" />
     <ServerGroupDialog :show="showServerGroupDialog" @update:show="(e) => showServerGroupDialog = e"
       :server="selectedServer" />
   </v-row>
@@ -177,7 +175,6 @@ import ChipLink from '@/components/plugins/ChipLink.vue';
 
 import ChangeServerNameDialog from './dialogs/ChangeServerNameDialog.vue';
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
-import ServerResize from './dialogs/ServerResize.vue';
 import ServerEvacuateDialog from './dialogs/ServerEvacuateDialog.vue';
 import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 import BtnServerResetState from '@/components/plugins/button/BtnServerResetState.vue';
@@ -192,7 +189,7 @@ export default {
     BtnServerMigrate, ServerEvacuateDialog,
     BtnServerResetState,
     ChangeServerNameDialog,
-    ServerUpdateSG, ServerResize,
+    ServerUpdateSG,
     ServerGroupDialog,
     DeleteComfirmDialog,
   },
@@ -206,7 +203,6 @@ export default {
     openServerTopology: false,
     showChangeNameDialog: false,
     showServerUpdateSGDialog: false,
-    showServerResizeDialog: false,
     showServerGroupDialog: false,
 
     totalServers: [],
