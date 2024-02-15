@@ -8,5 +8,8 @@ requests
 jinja2
 bs4
 sqlalchemy
+click
+loguru
+
 dataclasses>=0.6; python_version < '3.7'
 https://github.com/fjboy/easy-to-use/releases/download/dev/easy2use-1.0.6.dev12-py3-none-any.whl

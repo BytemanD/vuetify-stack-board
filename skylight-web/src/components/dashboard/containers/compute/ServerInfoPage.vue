@@ -6,7 +6,7 @@
     <v-col cols="12" md="12" lg="8" class="pb-0">
       <v-toolbar density="compact" class="rounded">
         <btn-server-reset-state :servers="[server]" @update-server="updateServer" />
-        <btn-server-reboot variant="text" :servers="[server]" @updateServer="updateServer" />
+        <btn-server-reboot variant="text" :servers="[server]" @updateServer="updateServer"/>
         <v-btn variant="text" color="warning" v-if="this.server.status == 'ACTIVE'" @click="stop()">
           {{ $t('stop') }}</v-btn>
         <v-btn variant="text" color="success" v-if="this.server.status == 'SHUTOFF'" @click="start()">
@@ -278,20 +278,6 @@ export default {
     i18n: i18n,
     serverId: "",
     selectedServer: {},
-    openServerTopology: false,
-
-    showServerActionDialog: false,
-    showServerConsoleLogDialog: false,
-    showChangeNameDialog: false,
-    showChangePassowrdDialog: false,
-    showRenameDialog: false,
-    showServerVolumesDialog: false,
-    showServerInterfacesDialog: false,
-    showServerUpdateSGDialog: false,
-    showServerResizeDialog: false,
-    showServerRebuildDialog: false,
-    showServerEventDiallog: false,
-    showServerGroupDialog: false,
 
     breadcrumbItems: [
       {
@@ -330,46 +316,6 @@ export default {
           this.consoleError = `无法获取VNC链接: ${e}`
         }
       }
-    },
-    openChangeServerNameDialog: async function (server) {
-      this.selectedServer = server;
-      this.showChangeNameDialog = !this.showChangeNameDialog;
-    },
-    openServerActionDialog: async function (server) {
-      this.selectedServer = server;
-      this.showServerActionDialog = !this.showServerActionDialog;
-    },
-    openServerConsoleLogDialog: async function (server) {
-      this.selectedServer = server;
-      this.showServerConsoleLogDialog = !this.showServerConsoleLogDialog;
-    },
-    openChangeServerPasswordDialog: async function (server) {
-      this.selectedServer = server;
-      this.showChangePassowrdDialog = !this.showChangePassowrdDialog;
-    },
-    openServerVolumesDialog: async function (server) {
-      this.selectedServer = server;
-      this.showServerVolumesDialog = !this.showServerVolumesDialog;
-    },
-    openServerInterfacesDialog: async function (server) {
-      this.selectedServer = server;
-      this.showServerInterfacesDialog = !this.showServerInterfacesDialog;
-    },
-    openServerUpdateSGDialog: async function (server) {
-      this.selectedServer = server;
-      this.showServerUpdateSGDialog = !this.showServerUpdateSGDialog;
-    },
-    openServerResizeDialog: async function (server) {
-      this.selectedServer = server;
-      this.showServerResizeDialog = !this.showServerResizeDialog;
-    },
-    openServerRebuildDialog: async function (server) {
-      this.selectedServer = server;
-      this.showServerRebuildDialog = !this.showServerRebuildDialog;
-    },
-    openServerGroupDialog: function (server) {
-      this.selectedServer = server;
-      this.showServerGroupDialog = !this.showServerGroupDialog;
     },
     refreshServer: async function () {
       this.server = await API.server.show(this.serverId);

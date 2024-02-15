@@ -1,13 +1,13 @@
 from datetime import datetime
 from datetime import timedelta
-import logging
+from skylight.common import log
 import uuid
 
 from skylight.common import conf
 from skylight.common.db import api as db_api
 
 CONF = conf.CONF
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger()
 
 
 def new_token():
@@ -22,7 +22,7 @@ def valid_token(token):
         return False
     delta = datetime.now() - t.issue_at
     if delta.total_seconds() >= CONF.token_expired:
-        LOG.warning('token %s is expired', token)
+        LOG.warning('token {} is expired', token)
         return False
 
     if delta.total_seconds() >= CONF.token_expired / 2:

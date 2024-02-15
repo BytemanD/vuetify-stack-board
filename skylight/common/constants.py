@@ -1,3 +1,5 @@
+import re
+
 NAME = 'skylight'
 
 AUTH = 'BytemanD'
@@ -9,3 +11,5 @@ IMAGE_TAGS_API = f'https://hub.docker.com/v2/namespaces/{IMAGE_NAMESPACE}' \
                  f'/repositories/{NAME}/tags'
 
 ADMIN_PASSWORD = 'skylight123'
+
+REG_API_VERSION = re.compile(r'.*/v[\d.]')

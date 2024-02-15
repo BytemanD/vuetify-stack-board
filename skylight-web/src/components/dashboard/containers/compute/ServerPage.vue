@@ -155,8 +155,6 @@
     <ServerTopology :show="openServerTopology" />
     <ChangeServerNameDialog :show="showChangeNameDialog" :server="selectedServer"
       @update:show="(e) => showChangeNameDialog = e" />
-    <ServerActionDialog :show="showServerActionDialog" :server="selectedServer"
-      @update:show="(e) => showServerActionDialog = e" />
     <ServerUpdateSG :show="showServerUpdateSGDialog" @update:show="(e) => showServerUpdateSGDialog = e"
       :server="selectedServer" />
     <ServerResize :show="showServerResizeDialog" @update:show="(e) => showServerResizeDialog = e" :server="selectedServer"

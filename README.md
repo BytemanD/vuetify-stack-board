@@ -56,11 +56,13 @@ npm run build
 
 2. 启动后端服务:
    ```
-   python3 skylight/main.py serve --dev
+   export PYTHONPATH=./
+   python3 skylight/main.py serve --develop -c
    ```
 3. 启动前端服务:
    ```
    cd skylight-web
+   npm install
    npm run dev
    ```
 

@@ -1,55 +1,62 @@
 import os
 import socket
-import logging
+import pathlib
 
 from easy2use.globals import cfg
+from easy2use.globals import cfg2
 
-LOG = logging.getLogger(__name__)
+from skylight.common import log
+from skylight.common import exceptions
+
+LOG = log.getLogger()
 
 CONF = cfg.CONF
 DEFAULT_HOST = socket.gethostname()
 
-default_options = [
-    cfg.BooleanOption('debug', default=False),
-    cfg.Option('log_file', default=None),
-    cfg.IntOption('port', default=8081),
-    cfg.IntOption('workers', default=None),
-    cfg.Option('data_path', default='/etc/skylight'),
-    cfg.BooleanOption('enable_cross_domain', default=False),
-    cfg.Option('index_redirect', default='/welcome.html'),
-    cfg.IntOption('token_expired', default=3600),
-]
 
-openstack_options = [
-    cfg.Option('domain_name', default='Default'),
-    cfg.IntOption('expires_time', default=60 * 60),
-    cfg.BooleanOption('fetch_max_version', default=True),
-    cfg.MapOption('api_version', default={}),
-    cfg.Option('keystone_api_version', default='v3'),
-    cfg.Option('cinder_api_version', default='v2'),
-    cfg.Option('glance_api_version', default='v2'),
-    cfg.Option('nova_api_version', default='v2.1'),
-    cfg.Option('neutron_api_version', default='v2.0'),
-    cfg.Option('default_region', default='RegionOne'),
-]
-
-web_options = [
-    cfg.ListOption(name='stylesheet', default=None),
-]
+class OpenstackOptions(cfg2.OptionGroup):
+    domain_name = cfg2.Option('domain_name', default='Default')
+    expires_time = cfg2.IntOption('expires_time', default=60 * 60)
+    fetch_max_version = cfg2.BoolOption('fetch_max_version', default=True)
+    cinder_api_version = cfg2.Option('cinder_api_version', default='v2')
+    glance_api_version = cfg2.Option('glance_api_version', default='v2')
+    nova_api_version = cfg2.Option('nova_api_version', default='v2.1')
+    neutron_api_version = cfg2.Option('neutron_api_version', default='v2.0')
+    default_region = cfg2.Option('default_region', default='RegionOne')
+    keystone_api_version = cfg2.Option('keystone_api_version', default='v3')
+    micro_versions = cfg2.ListOption('micro_versions', default=[])
 
 
-def load_configs():
-    for file in [os.path.join('etc', 'skylight.conf'),
-                 '/etc/skylight/skylight.conf']:
+class WebOptions(cfg2.OptionGroup):
+    stylesheet = cfg2.ListOption(name='stylesheet', default=None)
+
+
+class AppConf(cfg2.TomlConfig):
+    debug = cfg2.BoolOption('debug', default=True)
+    log_file = cfg2.Option('log_file', default=None)
+    workers = cfg2.IntOption('workers', default=8081)
+    data_path = cfg2.Option('data_path', default='/etc/skylight')
+    enable_cross_domain = cfg2.BoolOption('enable_cross_domain', default=False)
+    index_redirect = cfg2.Option('index_redirect', default='/welcome.html')
+    token_expired = cfg2.IntOption('token_expired', default=3600)
+
+    openstack = OpenstackOptions()
+    web = WebOptions()
+
+
+def load_configs(conf_file=None):
+    conf_files = [conf_file] if conf_file else [
+        pathlib.Path('etc', 'skylight.toml').absolute(),
+        '/etc/skylight/skylight.toml',
+    ]
+    for file in conf_files:
         if not os.path.exists(file):
             continue
-        LOG.info('Load config file from %s', file)
         CONF.load(file)
         break
     else:
-        LOG.warning('config file not found')
+        raise exceptions.ConfileNotExists(
+            files=[str(f) for f in conf_files])
 
 
-CONF.register_opts(default_options)
-CONF.register_opts(openstack_options, group='openstack')
-CONF.register_opts(web_options, group='web')
+CONF: AppConf = AppConf()

@@ -4,19 +4,19 @@
 # port = 80
 # workers = 
 # use_cdn = False
-# data_path = /etc/vstackboard
+# data_path = '/etc/vstackboard'
 
 [openstack]
-# domain_name = Default
+# domain_name = 'Default'
 # expires_time = 3600
 # api_version = 
 # cinder_api_version = v2
 # fetch_max_version = true
-# default_region = RegionOne
+# default_region = 'RegionOne'
 
 [web]
 # 自定义静态文件链接，例如:
 # https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900
 # https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css
 # https://jsdelivr.codeqihan.com/npm/@mdi/font@latest/css/materialdesignicons.min.css
-stylesheet =
+stylesheet = ''

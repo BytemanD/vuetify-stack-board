@@ -1,18 +1,22 @@
+import os
 import re
+import subprocess
 from pbr import version
 import queue
-import logging
 import functools
 
 import requests
 from easy2use.common import pkg
+from easy2use.system import OS
+from easy2use.downloader.urllib import driver
 
 from skylight.common import constants
 from skylight.common import exceptions
+from skylight.common import log
 from skylight.common.i18n import _
 from skylight.common.db import api
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger()
 
 
 def get_version():
@@ -24,16 +28,16 @@ def check_last_version():
     try:
         releases = requests.get(constants.RELEASES_API).json()
     except Exception as e:
-        LOG.error('Check releases failed, %s', e)
+        LOG.error('Check releases failed, {}', e)
         return
 
     if not releases:
         LOG.info('No release found.')
         return
     current_version = get_version()
-    LOG.debug(_('Current version is: %s'), current_version)
+    LOG.debug(_('Current version is: {}'), current_version)
     latest = releases[0]
-    LOG.debug(_('Latest release version: %s'), latest.get('tag_name'))
+    LOG.debug(_('Latest release version: {}'), latest.get('tag_name'))
 
     v1 = pkg.PackageVersion(current_version)
     v2 = pkg.PackageVersion(latest.get('tag_name'))
@@ -51,14 +55,14 @@ def check_last_image_version():
     try:
         tags = requests.get(constants.IMAGE_TAGS_API).json().get('results')
     except Exception as e:
-        LOG.error('get tags failed, %s', e)
+        LOG.error('get tags failed, {}', e)
         return
 
     if not tags:
         LOG.info('no repository tags found.')
         return
     current_version = get_version()
-    LOG.debug(_('Current version is: %s'), current_version)
+    LOG.debug(_('Current version is: {}'), current_version)
 
     v1 = pkg.PackageVersion(current_version)
 
@@ -95,7 +99,7 @@ class ImageChunk(object):
         if self.chunks.empty() and self.all_cached():
             return None
         chunk = self.chunks.get()
-        LOG.info('read chunk, empty: %s all cached: %s',
+        LOG.info('read chunk, empty: {} all cached: {}',
                  self.chunks.empty(), self.all_cached())
 
         api.add_image_chunk_readed(self.image_id, chunk[1])
@@ -132,7 +136,7 @@ def with_response(return_code=200):
                 body = resp
 
             if status >= 400:
-                LOG.error('request error, response body: %s', body)
+                LOG.error('request error, response body: {}', body)
 
             self.set_status(status)
             if body:
@@ -141,3 +145,42 @@ def with_response(return_code=200):
         return wrapper
 
     return _response
+
+
+def upgrade_from_image():
+    latest_version = check_last_image_version()
+    if not latest_version:
+        print(_('The current version is the latest.'))
+        return
+
+    msg = f'{_("A new image is available:")} ' \
+        f'{latest_version.get("version")}'
+    print('\n' + msg + '\n')
+
+
+def pip_install(file_path, force=False):
+    install_cmd = ['pip3', 'install', file_path]
+    if force:
+        install_cmd.append('--force-reinstall')
+    LOG.info(_('start to install {}'), ' '.join(install_cmd))
+    status, output = subprocess.getstatusoutput(' '.join(install_cmd))
+    if status != 0:
+        LOG.error(_('Install Output: {}'), output)
+        raise exceptions.PipInstallFailed(package=file_path,
+                                          cmd=' '.join(install_cmd))
+
+
+def download(url, cache=False):
+    file_path = os.path.basename(url)
+    tmp_dir = OS.is_windows() and os.getenv('TMP') or '/tmp'
+    cached_file = os.path.join(tmp_dir, '/tmp')
+    if cache and os.path.exists(cached_file):
+        LOG.warning('use cache: {}', cached_file)
+        return cached_file
+
+    downloader = driver.Urllib3Driver(progress=True,
+                                      cached_file=tmp_dir)
+    LOG.info(_('download from {}'), url)
+    downloader.download(url)
+    LOG.info(_('download success'))
+    return file_path

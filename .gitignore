@@ -138,7 +138,7 @@ skylight/static/cdn.zip
 skylight/static/include
 
 etc/skylight.db
-etc/skylight.conf
+etc/skylight.yaml
 i18n/locale
 i18n/*.mo
 skylight/locale

@@ -1,6 +1,5 @@
 import abc
 import json
-import logging
 import re
 import threading
 from urllib.parse import urlparse
@@ -9,6 +8,7 @@ from tornado import web
 from easy2use.web import application
 
 from skylight.common import conf
+from skylight.common import log
 from skylight.common import token
 from skylight.common import context
 from skylight.common import exceptions
@@ -17,7 +17,7 @@ from skylight.common.db import api as db_api
 from skylight.openstack import proxy
 
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger()
 CONF = conf.CONF
 
 CONF_DB_API = None
@@ -33,7 +33,7 @@ class GetContext(object):
             self._get_header('X-Cluster-Id'),
             region=self._get_header('X-Region')
         )
-        LOG.debug('context: %s', req_context)
+        LOG.debug('context: {}', req_context)
         if not req_context.cluster_id:
             raise exceptions.ApiException(400, 'cluster id is none')
         return req_context
@@ -91,13 +91,14 @@ class Cluster(application.BaseReqHandler, GetContext):
     def post(self):
         data = json.loads(self.request.body)
         cluster = data.get('cluster', {})
-        LOG.debug('add cluster: %s', data)
+        LOG.debug('add cluster: {}', data)
         try:
             identity = proxy.OpenstackV3AuthProxy(cluster.get('authUrl'),
                                                   cluster.get('authProject'),
                                                   cluster.get('authUser'),
                                                   cluster.get('authPassword'))
-            identity.update_auth_token()
+            identity.auth_plugin.update_auth_token(
+                fetch_max_version=CONF.openstack.fetch_max_version)
             db_api.create_cluster(cluster.get('name'), cluster.get('authUrl'),
                                   cluster.get('authProject'),
                                   cluster.get('authUser'),
@@ -165,7 +166,7 @@ class Tasks(BaseReqHandler):
             self.set_status(204)
             self.finish()
         except Exception:
-            LOG.exception('delete image chunk %s faield', task_id)
+            LOG.exception('delete image chunk {} faield', task_id)
             self.set_status(400)
             self.finish()
 
@@ -206,7 +207,7 @@ class OpenstackProxyBase(BaseReqHandler):
 
     def do_proxy(self, method, url):
         # sourcery skip: extract-method, use-named-expression
-        LOG.debug('do proxy  %s %s', method, url)
+        LOG.debug('do proxy  {} {}', method, url)
         context = self._get_context()
 
         if not context.cluster_id:
@@ -223,11 +224,10 @@ class OpenstackProxyBase(BaseReqHandler):
                     method=method, url=url, data=self._request_body(),
                     headers=proxy_headers)
                 if resp.status_code == 401 and i == 0:
-                    logging.warning("Unauthorized, headers: %s, update auth "
-                                    "token", cluster_proxy.get_header())
+                    LOG.warning("Unauthorized, headers: {}, update auth token",
+                                cluster_proxy.get_header())
                     cluster_proxy.update_auth_token(fetch_max_version=False)
-                    logging.debug("new headers: %s",
-                                  cluster_proxy.get_header())
+                    LOG.debug("new headers: {}", cluster_proxy.get_header())
                     continue
                 break
             return resp.status_code, resp.content
@@ -286,7 +286,7 @@ class GlanceProxy(OpenstackProxyBase):
                 url, self.request.headers.get('x-image-meta-size'))
             UPLOADING_IMAGES[url] = image_chunk
 
-            LOG.info('image %s start thread %s', url, image_chunk.size)
+            LOG.info('image {} start thread {}', url, image_chunk.size)
             cluster_proxy = proxy.get_proxy(self._get_context())
             upload_thread = threading.Thread(
                 target=cluster_proxy.proxy_glance_upload,
@@ -300,13 +300,13 @@ class GlanceProxy(OpenstackProxyBase):
     def proxy_glance_upload(self, url):
         image_chunk = self._get_image_chunck(url)
         content_length = self.request.headers.get('Content-Length')
-        LOG.info('image %s add chunk, size=%s', url, content_length)
+        LOG.info('image {} add chunk, size={}', url, content_length)
         image_chunk.add(self.request.body, int(content_length))
         db_api.add_image_chunk_cached(
             image_chunk.image_id, int(content_length))
 
         if image_chunk.all_cached() and url in UPLOADING_IMAGES:
-            LOG.info('image %s all cached, waitting for upload', url)
+            LOG.info('image {} all cached, waitting for upload', url)
 
         self.set_status(204)
         self.finish()
@@ -341,7 +341,7 @@ class Actions(web.RequestHandler, GetContext):
 
     def post(self):
         data = json.loads(self.request.body)
-        LOG.debug('action body: %s', data)
+        LOG.debug('action body: {}', data)
         if 'checkLastVersion' in data:
             self.check_update()
 
@@ -366,7 +366,7 @@ class Login(BaseReqHandler):
     def post(self):
         data = json.loads(self.request.body)
         auth = data.get('auth', {})
-        LOG.debug('user login: %s', auth.get('username'))
+        LOG.debug('user login: {}', auth.get('username'))
         user = db_api.get_user(auth.get('username'))
         if not user or user.password != auth.get('password'):
             return 403, f'auth failed for user {auth.get("username")}'

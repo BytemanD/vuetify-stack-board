@@ -1,6 +1,6 @@
 from datetime import datetime
 import os
-import logging
+from skylight.common import log
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -12,7 +12,7 @@ from skylight.common import constants
 from skylight.common import dbconf
 
 CONF = conf.CONF
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger()
 ENGINE = None
 SESSION = None
 
@@ -24,7 +24,7 @@ def init(admin_password=None):
     ENGINE = create_engine(f'sqlite:///{DB_FILE}')
     SESSION = scoped_session(sessionmaker(bind=ENGINE))
 
-    LOG.info('database file is %s', DB_FILE)
+    LOG.info('database file is {}', DB_FILE)
     if not os.path.exists(CONF.data_path):
         os.makedirs(CONF.data_path)
     models.Base.metadata.create_all(ENGINE, checkfirst=True)

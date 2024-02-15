@@ -1,6 +1,5 @@
 import enum
 import os
-import logging
 
 from xmlrpc.client import boolean
 from requests import session
@@ -9,10 +8,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Enum
-
 from easy2use.common import customconfig
 
-LOG = logging.getLogger(__name__)
+from skylight.common import log
+
+LOG = log.getLogger()
 
 TABLE_NAME = 'configs'
 DB_FILE = None
@@ -99,7 +99,7 @@ class DBApi(object):
             value = int(value)
         elif config.type == 2:
             if not isinstance(value, bool):
-                LOG.warning('value %s is not bool type')
+                LOG.warning('value {} is not bool type')
                 if isinstance(value, str):
                     value = value.lower() in ['true', '1', 'yes', 'on']
                 else:
