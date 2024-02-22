@@ -692,7 +692,7 @@ export class EvacuateDialog extends Dialog {
         for (let i in this.servers) {
             let item = this.servers[i];
             if (['ACTIVE', 'SHUTOFF', 'ERROR'].indexOf(item.status) < 0) {
-                notify.warning(`虚拟机 ${item.name} 状态异常，无法疏散`, 1)
+                notify.warning(`虚拟机 ${item.name || item.id} 状态异常，无法疏散`, 1)
                 continue
             }
             await this.evacuateServer(item);

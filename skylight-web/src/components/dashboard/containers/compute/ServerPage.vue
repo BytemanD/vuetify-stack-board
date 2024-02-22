@@ -17,9 +17,9 @@
                   class="pa-0">
                   {{ $t('stop') }}
                 </v-btn>
-                <btn-server-reboot variant="text" :servers="table.selected" @updateServer="updateServer"/>
+                <btn-server-reboot :servers="table.selected" @updateServer="updateServer"/>
                 <btn-server-migrate :servers="table.selected" @updateServer="updateServer" />
-                <ServerEvacuateDialog :servers="table.selected" />
+                <btn-server-evacuate :servers="table.selected" @updateServer="updateServer" />
                 <btn-server-reset-state :servers="table.selected"
                   @updateServer="(server) => { table.updateItem(server) }" />
 
@@ -158,25 +158,25 @@ import ServerTopology from './dialogs/ServerTopology.vue';
 import ChipLink from '@/components/plugins/ChipLink.vue';
 import ChangeServerNameDialog from './dialogs/ChangeServerNameDialog.vue';
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
-import ServerEvacuateDialog from './dialogs/ServerEvacuateDialog.vue';
 import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
 import BtnServerResetState from '@/components/plugins/button/BtnServerResetState.vue';
 
 import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import BtnServerMigrate from '@/components/plugins/BtnServerMigrate.vue';
 import BtnServerReboot from '@/components/plugins/BtnServerReboot.vue';
+import BtnServerEvacuate from '@/components/plugins/BtnServerEvacuate.vue';
 
 
 export default {
   components: {
     BtnIcon, ServerTopology, ChipLink,
-    BtnServerMigrate, ServerEvacuateDialog,
+    BtnServerMigrate,
     BtnServerResetState,
     ChangeServerNameDialog,
     ServerUpdateSG,
     ServerGroupDialog,
     DeleteComfirmDialog,
-    BtnServerReboot,
+    BtnServerReboot, BtnServerEvacuate,
   },
 
   data: () => ({

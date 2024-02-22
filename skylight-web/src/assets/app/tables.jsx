@@ -777,7 +777,6 @@ export class ComputeServiceTable extends DataTable {
         try {
             let srv = await API.computeService.forceDown(service.id, !service.forced_down)
             this.updateItem(srv)
-            console.log(srv)
             if (service.forced_down) {
                 Notify.success(`${service.host}:${service.binary} 已强制设为 Down`)
             } else {
@@ -789,17 +788,18 @@ export class ComputeServiceTable extends DataTable {
             service.forced_down = !service.forced_down;
             return;
         }
-        // this.refresh();
     }
     async toggleEnable(service) {
         let status = service.status;
         if (status == 'enabled') {
             service.status = 'disabled';
+            let disabledReason = 'disabled by skylight'
             try {
-                let srv = (await API.computeService.disable(service.id)).service
+                let srv = await API.computeService.disable(service.id, disabledReason)
                 Notify.success(`${service.host}:${service.binary} 已设置为不可用`)
-                service = srv
-            } catch(error) {
+                service.status = srv.status;
+                service.disabled_reason = disabledReason
+            } catch (error) {
                 console.error(error);
                 Notify.error(`${service.host}:${service.binary} 设置不可用失败`)
                 service.status = 'enabled';
@@ -810,7 +810,7 @@ export class ComputeServiceTable extends DataTable {
                 let srv = (await API.computeService.enable(service.id)).service
                 Notify.success(`${service.host}:${service.binary} 已设置为可用`)
                 service = srv
-            } catch(error){
+            } catch (error) {
                 Notify.error(`${service.host}:${service.binary} 设置可用失败`)
                 service.status = 'enabled';
                 console.error(error)
@@ -1511,7 +1511,7 @@ export class MigrationDataTable extends DataTable {
             { title: 'dest_host', key: 'dest_host' },
         ]
     }
-    refresh(){
+    refresh() {
         let filters = {}
         if (this.serverId) {
             filters.instance_uuid = this.serverId;
@@ -1701,8 +1701,7 @@ export class ServerTaskWaiter {
             Notify.error(`${this.server.name || this.server.id} ${action} 失败`)
         }
     }
-    async waitMigrated() {
-        let action = "迁移"
+    async waitMigrated(action="迁移") {
         // TODO: show server first
         let srcHost = this.server['OS-EXT-SRV-ATTR:host'];
         await this.waitServerStatus(['ACTIVE', 'SHUTOFF', 'ERROR'])
@@ -1711,6 +1710,9 @@ export class ServerTaskWaiter {
         } else {
             Notify.error(`${this.server.name || this.server.id} ${action} 失败`)
         }
+    }
+    async waitEvacuated() {
+        await this.waitMigrated("疏散")
     }
     async waitRebuilded() {
         let action = "重建"
@@ -1724,16 +1726,16 @@ export class ServerTaskWaiter {
         }
     }
     async waitResized(oldFlavorName) {
-        let action = "规格变更"
-        // TODO: show server first
-        await this.waitServerStatus(['ACTIVE', 'SHUTOFF', 'ERROR'])
-        if (this.server.flavor.original_name != oldFlavorName) {
-            Notify.success(`${this.server.name || this.server.id} ${action} 成功`)
-        } else {
-            Notify.error(`${this.server.name || this.server.id} ${action} 失败`)
+            let action = "规格变更"
+            // TODO: show server first
+            await this.waitServerStatus(['ACTIVE', 'SHUTOFF', 'ERROR'])
+            if (this.server.flavor.original_name != oldFlavorName) {
+                Notify.success(`${this.server.name || this.server.id} ${action} 成功`)
+            } else {
+                Notify.error(`${this.server.name || this.server.id} ${action} 失败`)
+            }
         }
     }
-}
 
 export class VolumeTaskWaiter {
     constructor(volume, onUpdatedVolume = null) {

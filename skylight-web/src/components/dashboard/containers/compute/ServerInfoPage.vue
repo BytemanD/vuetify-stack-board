@@ -6,7 +6,7 @@
     <v-col cols="12" md="12" lg="8" class="pb-0">
       <v-toolbar density="compact" class="rounded">
         <btn-server-reset-state :servers="[server]" @update-server="updateServer" />
-        <btn-server-reboot variant="text" :servers="[server]" @updateServer="updateServer"/>
+        <btn-server-reboot variant="text" :servers="[server]" @updateServer="updateServer" />
         <v-btn variant="text" color="warning" v-if="this.server.status == 'ACTIVE'" @click="stop()">
           {{ $t('stop') }}</v-btn>
         <v-btn variant="text" color="success" v-if="this.server.status == 'SHUTOFF'" @click="start()">
@@ -16,7 +16,7 @@
         <v-btn variant="text" color="success" v-if="this.server.status == 'PAUSED'" @click="unpause()">
           {{ $t('unpause') }}</v-btn>
         <btn-server-migrate :servers="[server]" @updateServer="updateServer" />
-        <v-btn variant="text" color="warning">疏散</v-btn>
+        <btn-server-evacuate :servers="[server]" @updateServer="updateServer" />
         <btn-server-change-pwd v-if="server.name" :server="server" />
         <v-spacer></v-spacer>
         <v-btn class="ml-1" variant="text" color="info" @click="refresh()">刷新</v-btn>
@@ -225,8 +225,6 @@ import API from '@/assets/app/api';
 import { Utils } from '@/assets/app/lib';
 import notify from '@/assets/app/notify';
 
-import BtnServerReboot from '@/components/plugins/BtnServerReboot.vue';
-import BtnServerMigrate from '@/components/plugins/BtnServerMigrate.vue';
 
 import { ServerTaskWaiter, MigrationDataTable } from '@/assets/app/tables.jsx';
 
@@ -239,7 +237,6 @@ import BtnServerRebuild from '@/components/plugins/button/BtnServerRebuild.vue';
 
 import ChangeServerNameDialog from './dialogs/ChangeServerNameDialog.vue';
 import ServerActionDialog from './dialogs/ServerActionDialog.vue';
-import ServerMigrateDialog from './dialogs/ServerMigrateDialog.vue';
 import ServerResetStateDialog from './dialogs/ServerResetStateDialog.vue';
 import ServerChangePassword from './dialogs/ServerChangePassword.vue';
 import ServerVolumes from './dialogs/ServerVolumes.vue';
@@ -255,23 +252,26 @@ import DialogLiveMigrateAbort from '@/components/plugins/dialogs/DialogLiveMigra
 
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
 import ServerRebuild from './dialogs/ServerRebuild.vue';
-import ServerEvacuateDialog from './dialogs/ServerEvacuateDialog.vue';
 import ServerGroupDialog from './dialogs/ServerGroupDialog.vue';
+import BtnServerReboot from '@/components/plugins/BtnServerReboot.vue';
+import BtnServerMigrate from '@/components/plugins/BtnServerMigrate.vue';
 import BtnServerRename from '@/components/plugins/BtnServerRename.vue';
 import BtnServerChangePwd from '@/components/plugins/BtnServerChangePwd.vue';
 import BtnServerResize from '@/components/plugins/BtnServerResize.vue';
+import BtnServerEvacuate from '@/components/plugins/BtnServerEvacuate.vue';
 
 export default {
   components: {
     BtnIcon, ServerTopology, ServerInterfaceCard, ServerVolumeCard,
     BtnServerReboot, BtnServerMigrate, BtnServerResetState, BtnServerRebuild,
-    ServerMigrateDialog, ServerEvacuateDialog, ServerResetStateDialog,
+    ServerResetStateDialog,
     ChangeServerNameDialog, ServerActionDialog,
 
     ServerChangePassword, ServerVolumes, BtnAttachInterfaces, BtnAttachVolumes,
     CardServerConsoleLog, CardServerConsole, CardServerActions, TabWindows, ServerUpdateSG,
     ServerRebuild, ServerGroupDialog, MigrationTable,
     DialogLiveMigrateAbort, BtnServerRename, BtnServerChangePwd, BtnServerResize,
+    BtnServerEvacuate,
   },
 
   data: () => ({
