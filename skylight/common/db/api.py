@@ -20,6 +20,7 @@ SESSION = None
 def init(admin_password=None):
     global DB_FILE, ENGINE, SESSION
 
+    LOG.info('data path: {}', CONF.data_path)
     DB_FILE = os.path.join(CONF.data_path, 'skylight.db')
     ENGINE = create_engine(f'sqlite:///{DB_FILE}')
     SESSION = scoped_session(sessionmaker(bind=ENGINE))

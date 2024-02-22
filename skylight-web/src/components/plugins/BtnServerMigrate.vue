@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="dialog.show" width="500" scrollable>
+    <v-dialog v-model="dialog.show" width="600" scrollable>
         <template v-slot:activator="{ props }">
             <v-btn variant="text" v-bind="props" color="warning" class="ml-1" :disabled="servers.length == 0">迁移</v-btn>
         </template>
@@ -11,8 +11,10 @@
                     <v-radio label="热迁移" value="live"></v-radio>
                     <v-radio label="冷迁移" value="cold"></v-radio>
                 </v-radio-group>
-                <v-select :loading="loadingNodes" clearable :items="dialog.nodes" label="目标节点" class="ml-4"
-                    v-model="dialog.host" @click="refreshHosts()"></v-select>
+                <v-select :loading="loadingNodes" clearable :items="dialog.nodes" placeholder="请选择目标节点"
+                    v-model="dialog.host" @click="refreshHosts()">
+                    <template v-slot:prepend>目标节点</template>
+                </v-select>
             </v-card-text>
             <v-divider></v-divider>
             <v-card-actions>
@@ -66,6 +68,7 @@ async function migrate() {
     try {
         await dialog.commit();
     } catch (error) {
+        console.error(error)
         notify.warning(error);
         return
     }

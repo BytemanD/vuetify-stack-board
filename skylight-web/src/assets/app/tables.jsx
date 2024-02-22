@@ -1662,7 +1662,7 @@ export class ServerTaskWaiter {
             let server = await API.server.show(this.server.id);
             this.updateServer(server)
             if (this.onUpdatedServer) {
-                this.onUpdatedServer(this.server)
+                this.onUpdatedServer(server)
             }
             if (this.server['OS-EXT-STS:task_state'] != oldTaskState) {
                 oldTaskState = this.server['OS-EXT-STS:task_state'];

@@ -11,7 +11,7 @@
                 </v-select>
                 <v-text-field label="Region" placeholder="请输入Region" v-model="dialog.region" :error="!dialog.region">
                 </v-text-field>
-                <v-text-field label="URL" placeholder="请输入URL,例如: http://service:1111/v2" v-model="dialog.url"
+                <v-text-field label="URL" placeholder="请输入URL,例如: http://service:8080/v2" v-model="dialog.url"
                     :error="!dialog.url">
                 </v-text-field>
                 <v-combobox v-model="dialog.interfaces" :items="dialog.INTERFACES" label="接口类型" chips multiple></v-combobox>

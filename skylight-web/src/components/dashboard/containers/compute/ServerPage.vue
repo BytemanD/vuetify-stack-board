@@ -17,23 +17,7 @@
                   class="pa-0">
                   {{ $t('stop') }}
                 </v-btn>
-                <v-menu>
-                  <template v-slot:activator="{ props }">
-                    <v-btn color="primary" v-bind="props" :disabled="table.selected.length == 0" class="pa-0">
-                      <v-icon>mdi-menu</v-icon>
-                      {{ $t('reboot') }}
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <v-list-item @click="table.rebootSelected('SOFT')">
-                      <v-list-item-title>软重启</v-list-item-title>
-                    </v-list-item>
-                    <v-list-item @click="table.rebootSelected('HARD')">
-                      <v-list-item-title>硬重启</v-list-item-title>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-
+                <btn-server-reboot variant="text" :servers="table.selected" @updateServer="updateServer"/>
                 <btn-server-migrate :servers="table.selected" @updateServer="updateServer" />
                 <ServerEvacuateDialog :servers="table.selected" />
                 <btn-server-reset-state :servers="table.selected"
@@ -172,7 +156,6 @@ import { ServerDataTable } from '@/assets/app/tables.jsx';
 
 import ServerTopology from './dialogs/ServerTopology.vue';
 import ChipLink from '@/components/plugins/ChipLink.vue';
-
 import ChangeServerNameDialog from './dialogs/ChangeServerNameDialog.vue';
 import ServerUpdateSG from './dialogs/ServerUpdateSG.vue';
 import ServerEvacuateDialog from './dialogs/ServerEvacuateDialog.vue';
@@ -181,6 +164,7 @@ import BtnServerResetState from '@/components/plugins/button/BtnServerResetState
 
 import DeleteComfirmDialog from '@/components/plugins/dialogs/DeleteComfirmDialog.vue';
 import BtnServerMigrate from '@/components/plugins/BtnServerMigrate.vue';
+import BtnServerReboot from '@/components/plugins/BtnServerReboot.vue';
 
 
 export default {
@@ -192,6 +176,7 @@ export default {
     ServerUpdateSG,
     ServerGroupDialog,
     DeleteComfirmDialog,
+    BtnServerReboot,
   },
 
   data: () => ({
@@ -243,19 +228,15 @@ export default {
       this.table.refresh(filter)
       this.refreshTotlaServers()
     },
-    updateServer: async function () {
-      if (!this.selectedServer.id) {
+    updateServer: async function (server) {
+      if (!server.id) {
         console.warn('server id is null');
         return;
       }
-      let newServer = (await API.server.show(this.selectedServer.id)).server;
       for (let i in this.table.items) {
-        if (this.table.items[i].id == this.selectedServer.id) {
-          for (let key in this.table.items[i]) {
-            if (!newServer[key]) {
-              continue;
-            }
-            this.table.items[i][key] = newServer[key];
+        if (this.table.items[i].id == server.id) {
+          for (let key in server) {
+            this.table.items[i][key] = server[key];
           }
           break;
         }

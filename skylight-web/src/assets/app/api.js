@@ -872,7 +872,6 @@ export class SkylightAPI {
             }
             serverHosts.push(server['OS-EXT-SRV-ATTR:host'])
         }
-        console.log('111111111', serverHosts)
         return serverHosts;
     }
     async getMigratableHosts(servers) {

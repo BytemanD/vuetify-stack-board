@@ -7,8 +7,10 @@ import API, {
 } from './api.js';
 import SETTINGS from './settings.js';
 import { Utils, LOG, CONST } from './lib.js';
-import { BackupTable, VolumeDataTable, UserTable, RegionDataTable,
-    ServiceTable, HypervisortTable, } from './tables.jsx';
+import {
+    BackupTable, VolumeDataTable, UserTable, RegionDataTable,
+    ServiceTable, HypervisortTable,
+} from './tables.jsx';
 import {
     imageTable,
     snapshotTable,
@@ -63,15 +65,15 @@ class Dialog {
     formatTime(dateTime) {
         return dateTime ? Utils.parseUTCToLocal(dateTime) : '';
     }
-    itemProps(item){
+    itemProps(item) {
         return { name: item.name, title: item.id, subtitle: item.name }
     }
-    validName(){
+    validName() {
         if (!this.name) { return '名字不能为空' }
     }
-    valid(){
+    valid() {
         let msg = this.validName()
-        if (msg){
+        if (msg) {
             throw Error(msg)
         }
     }
@@ -235,7 +237,7 @@ export class NewRoleDialog extends Dialog {
     }
     async commit() {
         if (!this.name) {
-           throw Error('角色名必须指定')
+            throw Error('角色名必须指定')
         }
         let data = { name: this.name }
         if (this.domainId) {
@@ -279,7 +281,7 @@ export class NewNetworkDialog extends Dialog {
         }
         if (this.params.networkType) { data['provider:network_type'] = this.params.networkType }
         if (this.params.segId) { data['provider:segmentation_id'] = this.params.segId }
-        if (this.params.qosPolicy ) { data.qos_policy = this.params.qosPolicy }
+        if (this.params.qosPolicy) { data.qos_policy = this.params.qosPolicy }
         if (this.params.dnsDomain) { data.dns_domain = this.params.dnsDomain }
         if (this.params.azHint) { data.availability_zone_hints = [this.params.azHint] }
 
@@ -475,7 +477,7 @@ export class ServerInterfaceDialog extends Dialog {
                     detached = false;
                 }
             }
-            if (!detached){
+            if (!detached) {
                 Utils.sleep(5)
             }
         } while (!detached)
@@ -581,7 +583,7 @@ export class ResizeDialog extends Dialog {
         }
     }
     async commit() {
-        if (Utils.isEmpty(this.flavorRef)){
+        if (Utils.isEmpty(this.flavorRef)) {
             notify.warning('请选择规格');
             return;
         }
@@ -624,15 +626,13 @@ export class MigrateDialog extends Dialog {
         }
     }
     async commit() {
-        console.log(111111, this.servers)
-        for (let i in this.servers) {
+        for (let s of this.servers) {
             let server = {}
-            if (typeof this.servers[i] == 'string' ){
-                server = await API.server.show(serverId)
+            if (typeof s == 'string') {
+                server = await API.server.show(s)
             } else {
-                server= this.servers[i]
+                server = s
             }
-            console.log('server id', server.id)
             if (['ACTIVE', 'SHUTOFF', 'PAUSE'].indexOf(server.status) < 0) {
                 continue
             }
@@ -643,7 +643,7 @@ export class MigrateDialog extends Dialog {
                 await API.server.migrate(server.id, this.host);
                 notify.info(`实例 ${server.name} 冷迁移中`)
             }
-            if (this.serverTable){
+            if (this.serverTable) {
                 this.serverTable.waitServerMigrated(server);
             }
         }
@@ -711,10 +711,10 @@ export class NewClusterDialog extends Dialog {
         this.hidePassword = true;
     }
     async commit() {
-        if (!this.name) {throw Error("环境名不能为空")}
-        if (!this.authProject) {throw Error("租户名不能为空");}
-        if (!this.authUser) {throw Error("用户名不能为空");}
-        if (!this.authPassword) {throw Error("用户密码不能为空");}
+        if (!this.name) { throw Error("环境名不能为空") }
+        if (!this.authProject) { throw Error("租户名不能为空"); }
+        if (!this.authUser) { throw Error("用户名不能为空"); }
+        if (!this.authPassword) { throw Error("用户密码不能为空"); }
 
         let data = {
             name: this.name,
@@ -746,7 +746,7 @@ export class NewServerDialog extends Dialog {
     constructor(serverTable) {
         super({
             name: '', netId: null,
-            nums: [1,1], az: null, host: null,
+            nums: [1, 1], az: null, host: null,
             password: ''
         });
         this.flavor = {};
@@ -770,8 +770,8 @@ export class NewServerDialog extends Dialog {
         this.volumeSizeMin = SETTINGS.openstack.getItem('volumeSizeMin').value;
         this.description = null;
         this.imageHeaders = [
-            {title: 'ID', key: 'id'},
-            {title: '名字', key: 'name'},
+            { title: 'ID', key: 'id' },
+            { title: '名字', key: 'name' },
         ]
     }
     async refresPorts() {
@@ -812,18 +812,18 @@ export class NewServerDialog extends Dialog {
         }
         this.securityGroups = (await API.sg.list({ tenant_id: this.authInfo.project.id })).security_groups;
     }
-    validImage(){
+    validImage() {
         if (!this.image.id) { return '请选择镜像' }
     }
-    validFlavor(){
+    validFlavor() {
         if (!this.flavor.id) { return '请选择规格' }
     }
-    valid(){
+    valid() {
         super.valid()
         let msg = this.validImage()
-        if (msg) {throw Error(msg)}
+        if (msg) { throw Error(msg) }
         msg = this.validFlavor()
-        if (msg) {throw Error(msg)}
+        if (msg) { throw Error(msg) }
     }
     async commit() {
         try {
@@ -871,7 +871,7 @@ export class ServerGroupDialog extends Dialog {
         this.server = {};
         this.serverGroup = {}
     }
-    async init(server){
+    async init(server) {
         this.server = server;
         let serverGroup = await API.server.getServerGroup(this.server.id);
         this.serverGroup = serverGroup || {}
@@ -1004,7 +1004,7 @@ export class FlavorExtraDialog extends Dialog {
         if (Object.keys(this.extraSpecs).indexOf(item.key) >= 0 && this.extraSpecs[item.key] == item.value) {
             notify.error(`属性 ${item.key} 已经存在`)
             return
-        } 
+        }
         let extraSpecs = {}
         extraSpecs[item.key] = item.value;
         await API.flavor.updateExtras(this.flavor.id, extraSpecs);
@@ -1197,30 +1197,30 @@ export class AggAddHostsDialog extends Dialog {
         this.agg = {};
         this.hypervisorTable = new HypervisortTable();
         this.headers = [
-            { title: '主机名', key: 'hypervisor_hostname',},
-            { title: '状态', key: 'status'},
-            { title: 'IP地址', key: 'host_ip'},
+            { title: '主机名', key: 'hypervisor_hostname', },
+            { title: '状态', key: 'status' },
+            { title: 'IP地址', key: 'host_ip' },
         ]
         this.hosts = [];
     }
-    async init(agg){
+    async init(agg) {
         this.agg = agg;
         this.hypervisorTable.selected = [];
         this.refresh();
     }
-    async refresh(){
+    async refresh() {
         await this.hypervisorTable.refresh();
         this.hosts = [];
-        for (let i in this.hypervisorTable.items){
+        for (let i in this.hypervisorTable.items) {
             let hypervisor = this.hypervisorTable.items[i];
-            if (this.agg.hosts.indexOf(hypervisor.hypervisor_hostname) >= 0){
+            if (this.agg.hosts.indexOf(hypervisor.hypervisor_hostname) >= 0) {
                 continue;
             }
             this.hosts.push(hypervisor);
         }
     }
     async addHosts() {
-        if (this.hypervisorTable.selected.length == 0){
+        if (this.hypervisorTable.selected.length == 0) {
             return;
         }
         for (let i in this.hypervisorTable.selected) {
@@ -1341,9 +1341,9 @@ export class NewVolumeDialog extends Dialog {
         for (let i in creatingVolumes) {
             let volume = creatingVolumes[i];
             let volumeBody = await API.volume.waitVolumeStatus(volume.id);
-            if (volumeBody.status == 'available'){
+            if (volumeBody.status == 'available') {
                 notify.success(`卷 ${volume.name || volume.id} 创建成功`);
-            }else {
+            } else {
                 notify.error(`卷 ${volume.name || volume.id} 创建失败`);
             }
         }
@@ -1785,7 +1785,7 @@ export class QosPolicyRules extends Dialog {
         this.qosPolicy = qosPolicy;
         this.refresh();
     }
-    async refresh(){
+    async refresh() {
         this.selected = [];
         this.qosPolicy = (await API.qosPolicy.show(this.qosPolicy.id)).policy;
     }
@@ -1814,7 +1814,7 @@ export class NewQosPolicyRule extends Dialog {
             return;
         }
         for (let i in this.directions) {
-            if (Utils.isEmpty(this.maxKbps) && Utils.isEmpty(this.maxBurstKbps)){
+            if (Utils.isEmpty(this.maxKbps) && Utils.isEmpty(this.maxBurstKbps)) {
                 continue
             }
             try {
@@ -1829,7 +1829,7 @@ export class NewQosPolicyRule extends Dialog {
     }
     async createPpsRule() {
         for (let i in this.directions) {
-            if (Utils.isEmpty(this.maxKpps) && Utils.isEmpty(this.maxBurstKpps)){
+            if (Utils.isEmpty(this.maxKpps) && Utils.isEmpty(this.maxBurstKpps)) {
                 continue
             }
             try {
@@ -1843,7 +1843,7 @@ export class NewQosPolicyRule extends Dialog {
         }
     }
     async commit() {
-        if (! this.maxKbps || this.maxKbps == '') {
+        if (!this.maxKbps || this.maxKbps == '') {
             throw Error('请设置 max kbps');
         }
         if (this.types.indexOf(this.BPS) < 0) {
@@ -1941,7 +1941,7 @@ export class SGRulesDialog extends Dialog {
             { title: '方向', key: 'direction' },
             { title: '协议', key: 'protocol' },
             { title: '以太网类型', key: 'ethertype' },
-            { title: '端口范围', key: 'port_range',},
+            { title: '端口范围', key: 'port_range', },
             { title: '目标IP前缀', key: 'remote_ip_prefix' },
         ];
         this.extendItems = [
@@ -1968,7 +1968,7 @@ export class SGRulesDialog extends Dialog {
         notify.success(`规则删除成功`);
         this.securityGroup = await this.getSecurityGroup(this.securityGroup.id);
     }
-    async refresh(){
+    async refresh() {
         this.selected = [];
         this.securityGroup = await this.getSecurityGroup(this.securityGroup.id);
     }
@@ -2060,10 +2060,10 @@ export class TenantUsageDialog extends Dialog {
         this.start = '2022-11-13T00:00:00'
         this.end = null;
         this.dateRangeList = [
-            {value: CONST.USAGE_LAST_1_DAY, text: i18n.global.t(CONST.USAGE_LAST_1_DAY)},
-            {value: CONST.USAGE_LAST_7_DAY, text: i18n.global.t(CONST.USAGE_LAST_7_DAY)},
-            {value: CONST.USAGE_LAST_6_MONTHES, text: i18n.global.t(CONST.USAGE_LAST_6_MONTHES)},
-            {value: CONST.USAGE_LAST_1_YEAR, text: i18n.global.t(CONST.USAGE_LAST_1_YEAR)},
+            { value: CONST.USAGE_LAST_1_DAY, text: i18n.global.t(CONST.USAGE_LAST_1_DAY) },
+            { value: CONST.USAGE_LAST_7_DAY, text: i18n.global.t(CONST.USAGE_LAST_7_DAY) },
+            { value: CONST.USAGE_LAST_6_MONTHES, text: i18n.global.t(CONST.USAGE_LAST_6_MONTHES) },
+            { value: CONST.USAGE_LAST_1_YEAR, text: i18n.global.t(CONST.USAGE_LAST_1_YEAR) },
         ]
         this.dateRange = this.dateRangeList[0].value;
         this.echarts = {};
@@ -2175,10 +2175,10 @@ export class TenantUsageDialog extends Dialog {
             diskUsageData.push([endDate, parseInt(tenantUsage.total_local_gb_usage || 0)]);
             serverUsageData.push([endDate, tenantUsage.server_usages ? tenantUsage.server_usages.length : 0]);
 
-            vcpuChart.setOption({series: {data: vcpuUsageData}})
-            memChart.setOption({series: {data: memUsageData}})
-            diskChart.setOption({series: {data: diskUsageData}})
-            serverChart.setOption({series: {data: serverUsageData}})
+            vcpuChart.setOption({ series: { data: vcpuUsageData } })
+            memChart.setOption({ series: { data: memUsageData } })
+            diskChart.setOption({ series: { data: diskUsageData } })
+            serverChart.setOption({ series: { data: serverUsageData } })
 
         }
         this._humanMemMb(memChart, memUsageData, minMem, memOption);
@@ -2331,7 +2331,7 @@ export class ServerConsoleLogDialog extends Dialog {
         if (this.length == null) {
             this.length = 10;
         }
-        let length = parseInt(this.length ) + 10;
+        let length = parseInt(this.length) + 10;
         await this.refreshConsoleLog(length);
         this.length = length;
     }
@@ -2443,9 +2443,9 @@ export class ImagePropertiesDialog extends Dialog {
         this.properties = {};
         this.propertyContent = null;
         this.customizeProperties = [
-            {key: 'hw_qemu_guest_agent', value: 'true'},
-            {key: 'hw_disk_bus', value: 'scsi'},
-            {key: 'hw_disk_bus', value: 'virtio'},
+            { key: 'hw_qemu_guest_agent', value: 'true' },
+            { key: 'hw_disk_bus', value: 'scsi' },
+            { key: 'hw_disk_bus', value: 'virtio' },
         ];
     }
     async init(image) {
