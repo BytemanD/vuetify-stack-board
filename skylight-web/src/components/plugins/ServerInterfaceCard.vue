@@ -1,32 +1,42 @@
 <template>
     <v-card variant="tonal" :title="'MAC地址: ' + vif.mac_addr" density="compact">
         <template v-slot:append>
-            <v-btn variant="tonal" color="red" size="small" @click="detach()" :loading="detaching">{{ $t("detach") }}</v-btn>
+            <v-btn variant="tonal" color="red" size="small" @click="detach()" :loading="detaching">
+                {{ $t("detach") }}</v-btn>
         </template>
         <v-card-subtitle>ID: {{ vif.port_id }}</v-card-subtitle>
         <v-card-text>
-            <v-table density="compact" class="text-left">
-                <tr>
-                    <td>状态</td>
-                    <td>{{ vif.port_state }}</td>
-                </tr>
-                <tr>
-                    <td>IP地址</td>
-                    <td>
-                        <v-chip size="small" class="mr-1" label v-for="fixedIp in vif.fixed_ips" :key="fixedIp.ip_address">
-                            {{ fixedIp.ip_address }}
-                        </v-chip>
-                    </td>
-                </tr>
-                <tr>
-                    <td>VNIC 类型</td>
-                    <td>{{ port['binding:vnic_type'] }}</td>
-                </tr>
-                <tr>
-                    <td>VIF 类型</td>
-                    <td>{{ port['binding:vif_type'] }}</td>
-                </tr>
-            </v-table>
+            <v-row>
+                <v-col>
+                    <v-table density="compact" class="text-left">
+                        <tr>
+                            <td>状态</td>
+                            <td>{{ vif.port_state }}</td>
+                        </tr>
+                        <tr>
+                            <td>IP地址</td>
+                            <td>
+                                <v-chip size="small" class="mr-1" label v-for="fixedIp in vif.fixed_ips"
+                                    :key="fixedIp.ip_address">
+                                    {{ fixedIp.ip_address }}
+                                </v-chip>
+                            </td>
+                        </tr>
+                    </v-table>
+                </v-col>
+                <v-col>
+                    <v-table density="compact" class="text-left">
+                        <tr>
+                            <td>VNIC 类型</td>
+                            <td>{{ port['binding:vnic_type'] }}</td>
+                        </tr>
+                        <tr>
+                            <td>VIF 类型</td>
+                            <td>{{ port['binding:vif_type'] }}</td>
+                        </tr>
+                    </v-table>
+                </v-col>
+            </v-row>
         </v-card-text>
     </v-card>
 </template>
@@ -61,7 +71,7 @@ async function detach() {
             }
         }
         if (!detached) {
-            Utils.sleep(5)
+            await Utils.sleep(2)
         } else {
             break
         }

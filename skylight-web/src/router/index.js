@@ -32,6 +32,11 @@ const routes = [
     component: () => import('@/views/Welcome.vue'),
   },
   {
+    path: '/dashboard/server/new',
+    name: 'NewServer',
+    component: () => import('@/components/dashboard/containers/compute/NewServer.vue'),
+  },
+  {
     path: '/dashboard',
     name: 'Dashboard',
     component: () => import('@/views/DashboardPage.vue'),

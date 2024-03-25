@@ -176,6 +176,10 @@
             </v-row>
           </v-window-item>
           <v-window-item>
+            <v-chip color="info">总数： {{ interfaces.length }}</v-chip>
+            <btn-attach-interfaces :server-id="server.id" @attaching-port="handleAttachingPortEvent"
+              @attached-port="handleAttachedPortEvent" @attaching-net="handleAttachingNetEvent"
+              @attached-net="handleAttachedNetEvent" />
             <v-alert v-if="!interfaces || interfaces.length == 0" color="warning" density="compact" variant="text"
               class="mb-6" icon="mdi-alert">无网卡</v-alert>
             <v-row>
@@ -183,11 +187,11 @@
                 <server-interface-card :server-id="server.id" :vif="item" @detached="interfaceDetached" />
               </v-col>
             </v-row>
-            <btn-attach-interfaces :server-id="server.id" @attaching-port="handleAttachingPortEvent"
-              @attached-port="handleAttachedPortEvent" @attaching-net="handleAttachingNetEvent"
-              @attached-net="handleAttachedNetEvent" />
           </v-window-item>
           <v-window-item>
+            <v-chip color="info">总数： {{ volumes.length }}</v-chip>
+            <btn-attach-volumes :server-id="server.id" @attaching-volume="handleAttachingVolumeEvent"
+              @attached-volume="handleAttachedVolumeEvent" />
             <v-alert v-if="!volumes || volumes.length == 0" color="warning" density="compact" variant="text" class="mb-6"
               icon="mdi-alert">无云盘</v-alert>
             <v-row>
@@ -196,8 +200,6 @@
                   :root-device-name="server['OS-EXT-SRV-ATTR:root_device_name']" @detached="handleAttachedVolume" />
               </v-col>
             </v-row>
-            <btn-attach-volumes :server-id="server.id" @attaching-volume="handleAttachingVolumeEvent"
-              @attached-volume="handleAttachedVolumeEvent" />
           </v-window-item>
           <v-window-item>
             <card-server-console-log :server-id="server.id" />
@@ -329,10 +331,10 @@ export default {
       this.image = await API.image.show(this.server.image.id)
     },
     refreshInterfaces: async function () {
-      this.interfaces = (await API.server.interfaceList(this.serverId)).interfaceAttachments
+      this.interfaces = await API.server.interfaceList(this.serverId)
     },
     refreshVolumes: async function () {
-      this.volumes = (await API.server.volumeAttachments(this.serverId)).volumeAttachments
+      this.volumes = await API.server.volumeAttachments(this.serverId)
     },
     refreshActions: async function () {
       this.serverActions = (await API.server.actionList(this.serverId)).reverse();

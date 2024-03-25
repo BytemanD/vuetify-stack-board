@@ -24,7 +24,7 @@
               v-model="dialog.params.size"></v-text-field>
           </v-col>
           <v-col cols="2">
-            <v-text-field hide-details label="数量" placeholder="请输入新建数量" v-model="dialog.params.nums" density='compact'
+            <v-text-field hide-details label="数量" placeholder="请输入新建数量" type="number" v-model="dialog.params.nums" density='compact'
               outlined>
             </v-text-field>
           </v-col>

@@ -414,13 +414,13 @@ class Server extends OpenstackProxyAPI {
             `${id}/os-volume_attachments`);
     }
     async volumeAttachments(id) {
-        return this.get(`${id}/os-volume_attachments`);
+        return (await this.get(`${id}/os-volume_attachments`)).volumeAttachments;
     }
     async volumeDetach(id, volumeId) {
         return await this.delete(`${id}/os-volume_attachments/${volumeId}`);
     }
     async interfaceList(id) {
-        return await this.get(`${id}/os-interface`);
+        return (await this.get(`${id}/os-interface`)).interfaceAttachments;
     }
     async interfaceAttach(id, vif) {
         // NOTE vif e.g. {net_id: <netId>} or {port_id: <portId>}

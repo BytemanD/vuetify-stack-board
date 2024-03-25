@@ -820,9 +820,9 @@ export class NewServerDialog extends Dialog {
     }
     valid() {
         super.valid()
-        let msg = this.validImage()
+        let msg = this.validFlavor()
         if (msg) { throw Error(msg) }
-        msg = this.validFlavor()
+        msg = this.validImage()
         if (msg) { throw Error(msg) }
     }
     async commit() {

@@ -52,7 +52,6 @@ export default {
             let attachPorts = this.selectedPorts;
             for (let i in attachPorts) {
                 let item = attachPorts[i];
-                console.log(this.$emit)
                 this.$emit('attaching-port', item)
                 await API.server.interfaceAttach(this.serverId, { port_id: item })
                 this.$emit('attached-port', item)

@@ -9,7 +9,7 @@
           <v-row>
             <v-col cols="12" md="7" sm="12">
               <v-toolbar density="compact" class="rounded-pill">
-                <v-btn icon="mdi-plus" color="primary" @click="() => $router.push('/dashboard/server/new')"></v-btn>
+                <v-btn icon="mdi-plus" color="primary" @click="() => {newServer()}"></v-btn>
                 <v-spacer></v-spacer>
                 <v-btn color="success" @click="table.startSelected()" :disabled="table.selected.length == 0" class="pa-0">
                   {{ $t('start') }}</v-btn>
@@ -245,6 +245,10 @@ export default {
     loginVnc: async function (server) {
       let body = await API.server.getVncConsole(server.id);
       window.open(body.remote_console.url, '_blank');
+    },
+    newServer: function(){
+      const { href } = this.$router.resolve({path: '/dashboard/server/new'});
+      window.open(href, '_blank');
     },
     openChangeServerNameDialog: async function (server) {
       this.selectedServer = server;
