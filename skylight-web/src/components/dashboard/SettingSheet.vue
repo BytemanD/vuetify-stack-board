@@ -12,36 +12,34 @@
                 </v-toolbar-items>
             </v-toolbar>
             <v-card-text>
-                <v-row>
-                    <v-col cols="2">
-                        <v-tabs v-model="tab" direction="vertical" color="primary">
-                            <v-tab v-for="group in SETTINGS" :value="group.name" :key="group.name">
-                                <strong>{{ $t(group.name) }}</strong>
-                            </v-tab>
-                        </v-tabs>
-                    </v-col>
-                    <v-col cols="10">
-                        <v-window v-model="tab">
-                            <v-window-item v-for="group in SETTINGS" :value="group.name" :key="group.name">
-                                <v-row>
-                                    <v-col cols="12" lg="6" v-for="(item, key) in group.items" v-bind:key="key">
-                                        <v-select density='compact' outlined v-bind:key="key" v-if="item.choises"
-                                            :label="$t(key)" :items="item.choises" v-model="item.value" hide-details>
-                                        </v-select>
-                                        <v-switch color="info" density='compact' v-else-if="item.type == Boolean" :label="$t(key)"
-                                            v-model="item.value"></v-switch>
-                                        <div v-else-if="item.type == 'label'" style="width: 4000;">
-                                            {{ $t(key) }}: <v-chip density='compact' color="info">{{ item.value }}</v-chip>
-                                        </div>
-                                        <v-text-field outlined density='compact' v-else :label="$t(key)"
-                                            v-model="item.value">
-                                        </v-text-field>
-                                    </v-col>
-                                </v-row>
-                            </v-window-item>
-                        </v-window>
-                    </v-col>
-                </v-row>
+                <v-col>
+                    <v-tabs v-model="tab" show-arrows selected-class="bg-blue" slider-color="blue" density="compact">
+                        <v-tab v-for="group in SETTINGS" :value="group.name" :key="group.name">
+                            <strong>{{ $t(group.name) }}</strong>
+                        </v-tab>
+                    </v-tabs>
+                    <div class="bg-blue" style="height: 2px;"></div>
+                </v-col>
+                <v-window v-model="tab" class="px-10">
+                    <v-window-item v-for="group in SETTINGS" :value="group.name" :key="group.name">
+                        <v-row>
+                            <v-col cols="12" lg="3" v-for="(item, key) in group.items" v-bind:key="key">
+                                <v-select v-if="item.choises" density='compact' outlined v-bind:key="key"
+                                    :label="$t(key)" :items="item.choises" v-model="item.value" hide-details>
+                                </v-select>
+                                <v-switch v-else-if="item.type == Boolean" color="info" density='compact'
+                                    class="ml-2" :label="$t(key)" v-model="item.value"></v-switch>
+                                <div v-else-if="item.type == 'label'" style="width: 4000;">
+                                    {{ $t(key) }}:
+                                    <v-chip density='compact' color="info">{{ item.value }}</v-chip>
+                                </div>
+                                <v-text-field outlined density='compact' v-else :label="$t(key)"
+                                    v-model="item.value">
+                                </v-text-field>
+                            </v-col>
+                        </v-row>
+                    </v-window-item>
+                </v-window>
             </v-card-text>
             <v-card-actions>
                 <v-alert variant="text" density='compact' type="warning">{{ $t('refreshAfterChanged') }}</v-alert>
@@ -108,4 +106,3 @@ export default {
     },
 }
 </script>
-  

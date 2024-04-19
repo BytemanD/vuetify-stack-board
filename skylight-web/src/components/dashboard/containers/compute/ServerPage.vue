@@ -9,15 +9,16 @@
           <v-row>
             <v-col cols="12" md="7" sm="12">
               <v-toolbar density="compact" class="rounded-pill">
-                <v-btn icon="mdi-plus" color="primary" @click="() => {newServer()}"></v-btn>
+                <v-btn icon="mdi-plus" color="primary" @click="() => { newServer() }"></v-btn>
                 <v-spacer></v-spacer>
-                <v-btn color="success" @click="table.startSelected()" :disabled="table.selected.length == 0" class="pa-0">
+                <v-btn color="success" @click="table.startSelected()" :disabled="table.selected.length == 0"
+                  class="pa-0">
                   {{ $t('start') }}</v-btn>
                 <v-btn color="warning" v-on:click="table.stopSelected()" :disabled="table.selected.length == 0"
                   class="pa-0">
                   {{ $t('stop') }}
                 </v-btn>
-                <btn-server-reboot :servers="table.selected" @updateServer="updateServer"/>
+                <btn-server-reboot :servers="table.selected" @updateServer="updateServer" />
                 <btn-server-migrate :servers="table.selected" @updateServer="updateServer" />
                 <btn-server-evacuate :servers="table.selected" @updateServer="updateServer" />
                 <btn-server-reset-state :servers="table.selected"
@@ -49,12 +50,7 @@
         </template>
 
         <template v-slot:[`item.name`]="{ item }">
-          <chip-link hide-link-icon color="default" density="compact" :link="'/dashboard/server/' + item.id"
-            :label="item.name" />
-          <v-icon @click="openChangeServerNameDialog(item)" size="x-small">mdi-pencil-minus</v-icon>
-          <v-icon @click="loginVnc(item)" size="x-small" icon>mdi-console</v-icon>
-        </template>
-        <template v-slot:[`item.status`]="{ item }">
+          <!-- 状态 -->
           <template v-if="item.status">
             <v-chip v-if="item.status.toUpperCase() == 'DELETED'" size='small' label color="red">已删除</v-chip>
             <v-icon v-else-if="item.status.toUpperCase() == 'ACTIVE'" size='small'
@@ -63,7 +59,8 @@
               color="warning">mdi-stop-circle</v-icon>
             <v-icon v-else-if="item.status.toUpperCase() == 'PAUSED'" size='small'
               color="warning">mdi-pause-circle</v-icon>
-            <v-icon v-else-if="item.status.toUpperCase() == 'ERROR'" size='small' color="red">mdi-alpha-x-circle</v-icon>
+            <v-icon v-else-if="item.status.toUpperCase() == 'ERROR'" size='small'
+              color="red">mdi-alpha-x-circle</v-icon>
             <v-icon v-else-if="item.status.toUpperCase() == 'HARD_REBOOT'" size='small' color="warning"
               class="mdi-spin">mdi-rotate-right</v-icon>
             <v-icon
@@ -71,14 +68,19 @@
               color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
             <span v-else>{{ item.status.toUpperCase() }}</span>
           </template>
-          <template v-if="item['OS-EXT-STS:task_state'] && item['OS-EXT-STS:task_state'] != ''">
-            <v-chip size="x-small" variant="text">{{ $t(item['OS-EXT-STS:task_state']) }}</v-chip>
-          </template>
+          <chip-link hide-link-icon color="default" density="compact" :link="'/dashboard/server/' + item.id"
+            :label="item.name" />
+          <v-icon @click="openChangeServerNameDialog(item)" size="x-small">mdi-pencil-minus</v-icon>
+          <v-icon @click="loginVnc(item)" size="x-small" icon>mdi-console</v-icon>
+        </template>
+        <template v-slot:[`item.task_status`]="{ item }">
+          <v-chip size="x-small" variant="text" color="warning">
+            {{ item['OS-EXT-STS:task_state'] && $t(item['OS-EXT-STS:task_state']) }}</v-chip>
         </template>
         <template v-slot:[`item.power_state`]="{ item }">
-          <v-icon size='small' v-if="item['OS-EXT-STS:power_state'] == 1" color="success">mdi-power-on</v-icon>
+          <v-icon size='small' v-if="item['OS-EXT-STS:power_state'] == 1" color="success">mdi-power</v-icon>
           <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] == 3" color="warning">mdi-pause</v-icon>
-          <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] == 4" color="red">mdi-power-off</v-icon>
+          <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] == 4" color="red">mdi-power</v-icon>
           <v-icon size='small' v-else-if="item['OS-EXT-STS:power_state'] != 0" color="warning"
             class="mdi-spin">mdi-loading</v-icon>
         </template>
@@ -246,8 +248,8 @@ export default {
       let body = await API.server.getVncConsole(server.id);
       window.open(body.remote_console.url, '_blank');
     },
-    newServer: function(){
-      const { href } = this.$router.resolve({path: '/dashboard/server/new'});
+    newServer: function () {
+      const { href } = this.$router.resolve({ path: '/dashboard/server/new' });
       window.open(href, '_blank');
     },
     openChangeServerNameDialog: async function (server) {

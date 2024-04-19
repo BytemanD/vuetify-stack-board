@@ -109,8 +109,8 @@ export class AppSettings {
         this.ui = new SettingGroup(
             'uiSettings',
             {
-                language: new Setting(navigator.language, { choises: LANGUAGE, onChangeCallback: I18N.setDisplayLang }),
                 themeDark: new BooleanSetting(false),
+                language: new Setting(navigator.language, { choises: LANGUAGE, onChangeCallback: I18N.setDisplayLang }),
                 navigatorWidth: new NumberSetting(180, { choises: [180, 200, 220, 240, 260, 280, 300] }),
                 messagePosition: new Setting(NOTIFY_POSITION[0], { choises: NOTIFY_POSITION }),
                 consoleLogWidth: new NumberSetting(1000, { choises: [800, 1000, 1200, 1400, 1600] }),
@@ -121,10 +121,11 @@ export class AppSettings {
             'openstackSettings',
             {
                 defaultRegion: new Setting('RegionOne'),
-                bootWithVolume: new BooleanSetting(true),
                 volumeSizeDefault: new NumberSetting(40, { 'choises': [1, 10, 20, 30, 40, 50] }),
+                dataVolumeSizeDefault: new NumberSetting(50),
                 volumeSizeMin: new NumberSetting(40, { 'choises': [1, 10, 20, 30, 40, 50] }),
                 imageUploadBlockSize: new NumberSetting(10, { 'choises': [1, 5, 10, 20, 40, 80, 160] }),
+                bootWithVolume: new BooleanSetting(true),
                 supportResourceAction: new BooleanSetting(false),
             }
             

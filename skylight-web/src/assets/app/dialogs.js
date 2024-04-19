@@ -1308,7 +1308,8 @@ export class UpdateServerSG extends Dialog {
 export class NewVolumeDialog extends Dialog {
     constructor() {
         super({
-            size: 10, nums: 1, image: null, type: null, snapshot: null,
+            size: SETTINGS.openstack.getItem('dataVolumeSizeDefault').value,
+            nums: 1, image: null, type: null, snapshot: null,
             snapshots: [], images: [], types: []
         })
         this.resource = 'volume';

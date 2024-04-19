@@ -440,7 +440,7 @@ export class ServerDataTable extends DataTable {
         { title: '规格', key: 'flavor' },
         { title: '镜像', key: 'image' },
         { title: 'IP地址', key: 'addresses' },
-        { title: '状态', key: 'status' },
+        { title: '任务', key: 'task_status' },
         { title: '电源', key: 'power_state' },
         { title: '操作', key: 'action' },
         ], API.server, 'servers', '实例');

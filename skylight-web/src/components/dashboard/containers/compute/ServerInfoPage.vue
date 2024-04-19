@@ -39,7 +39,8 @@
                   <tr>
                     <th>名字</th>
                     <td>{{ server.name }}
-                      <btn-server-rename v-if="server.name" size="small" :server="server" @update-server="updateServer" />
+                      <btn-server-rename v-if="server.name" size="small" :server="server"
+                        @update-server="updateServer" />
                     </td>
                   </tr>
                   <tr>
@@ -82,11 +83,11 @@
                     <th>电源状态</th>
                     <td>
                       <v-icon size='small' v-if="server['OS-EXT-STS:power_state'] == 1" color="success">
-                        mdi-power-on</v-icon>
+                        mdi-power</v-icon>
                       <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] == 3" color="warning">
                         mdi-pause</v-icon>
                       <v-icon size='small' v-else-if="server['OS-EXT-STS:power_state'] == 4" color="red">
-                        mdi-power-off</v-icon>
+                        mdi-power</v-icon>
                       <span v-else>UNKOWN</span>
                     </td>
                   </tr>
@@ -124,7 +125,8 @@
                   <tr>
                     <!-- <td>{{ server.flavor && server.flavor.original_name }}</td> -->
                     <th>CPU & 内存</th>
-                    <td>{{ server.flavor && server.flavor.vcpus || 0 }}核 {{ server.flavor && server.flavor.ram || 0 }} MB
+                    <td>{{ server.flavor && server.flavor.vcpus || 0 }}核 {{ server.flavor && server.flavor.ram || 0 }}
+                      MB
                     </td>
                   </tr>
                   <tr>
@@ -134,8 +136,8 @@
                   <tr v-if="server.flavor">
                     <th>属性</th>
                     <td>
-                      <v-chip label density="compact" class="mr-1 mt-1" v-for="(value, key) in server.flavor.extra_specs"
-                        v-bind:key="key">
+                      <v-chip label density="compact" class="mr-1 mt-1"
+                        v-for="(value, key) in server.flavor.extra_specs" v-bind:key="key">
                         {{ key }}={{ value }}</v-chip>
                     </td>
                   </tr>
@@ -192,8 +194,8 @@
             <v-chip color="info">总数： {{ volumes.length }}</v-chip>
             <btn-attach-volumes :server-id="server.id" @attaching-volume="handleAttachingVolumeEvent"
               @attached-volume="handleAttachedVolumeEvent" />
-            <v-alert v-if="!volumes || volumes.length == 0" color="warning" density="compact" variant="text" class="mb-6"
-              icon="mdi-alert">无云盘</v-alert>
+            <v-alert v-if="!volumes || volumes.length == 0" color="warning" density="compact" variant="text"
+              class="mb-6" icon="mdi-alert">无云盘</v-alert>
             <v-row>
               <v-col cols="12" md='6' lg="4" class="pa-4" v-for="item in volumes" :key="item.device">
                 <server-volume-card :server-id="server.id" :volume="item"

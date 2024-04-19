@@ -1,7 +1,5 @@
 <template>
-  <v-col>
-    <image-table editable />
-  </v-col>
+  <image-table editable />
 </template>
 
 <script>
