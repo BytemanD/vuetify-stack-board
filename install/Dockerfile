@@ -1,4 +1,4 @@
-FROM python:3.9.0-slim
+FROM python:3.12.0
 
 ARG BACKEND_PACKAGE_NAME
 ARG FRONTEND_PACKAGE_NANME
@@ -10,9 +10,9 @@ COPY requirements.txt /tmp
 
 RUN mkdir -p ~/.pip/ \
     && mv /tmp/pip.conf ~/.pip \
-    && python -m pip install --upgrade pip \
-    && python -m pip install -r /tmp/requirements.txt \
-    && python -m pip install /tmp/$BACKEND_PACKAGE_NAME \
+    && python -m pip install --progress-bar off --upgrade pip \
+    && python -m pip install --progress-bar off -r /tmp/requirements.txt \
+    && python -m pip install --progress-bar off /tmp/$BACKEND_PACKAGE_NAME \
     && rm -rf /tmp/$PACKAGE_NAME /tmp/requirements.txt \
     && python -m pip cache purge
 RUN mkdir -p /etc/skylight && touch /etc/skylight/skylight.conf
