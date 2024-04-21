@@ -123,7 +123,7 @@ class OpenstackProxy(object):
             proxy_headers.update(headers)
 
         self.auth_plugin.auth_request(proxy_headers)
-        resp = self.session.request(method, proxy_url, data=data,
+        resp = self.session.request(method, proxy_url, timeout=60, data=data,
                                     headers=proxy_headers)
         resp.raise_for_status()
         return resp

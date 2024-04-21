@@ -124,7 +124,7 @@ export default {
     },
     context: {
       clusterId: localStorage.getItem('clusterId'),
-      region: {},
+      region: null,
     },
     clusterTable: new ClusterTable(),
     regionTable: new RegionTable(),

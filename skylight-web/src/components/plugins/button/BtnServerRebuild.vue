@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="dialog.show" width="900" scrollable>
         <template v-slot:activator="{ props }">
-            <v-btn variant='text' color="warning" class="ml-1" density="compact" :disabled="servers.length == 0"
+            <v-btn variant='tonal' color="warning" class="ml-1" density="compact" :disabled="servers.length == 0"
                 v-bind="props">重装</v-btn>
         </template>
         <v-card title="重装系统">

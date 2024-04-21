@@ -130,7 +130,7 @@ def upgrade(image, cache, yes, debug):
 
 @main.command()
 @click.option('-v', '--verbose', is_flag=True, multiple=True,
-              help=_("The path of static files"))
+              help=_("Show verbose log"))
 @click.option('--static', default='skylight-web/dist/static',
               help=_("The path of static files"))
 @click.option('--template', default='skylight-web/dist',

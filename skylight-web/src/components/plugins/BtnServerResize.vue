@@ -1,13 +1,15 @@
 <template>
     <v-dialog v-model="display" width="800" scrollable>
         <template v-slot:activator="{ props }">
-            <v-btn variant="text" v-bind="props" color="warning" class="ml-1" :disabled="!server.name">变更</v-btn>
+            <v-btn variant="tonal" v-bind="props" density="compact" color="warning" class="ml-1"
+                :disabled="!server.name">变更</v-btn>
         </template>
         <v-card>
             <v-card-title class="headline warning">规格变更</v-card-title>
             <v-card-subtitle>当前规格: {{ server.flavor.original_name }} </v-card-subtitle>
             <v-card-text>
-                <v-text-field class="mb-1" density="compact" readonly v-model="selectedFlavor.name" :rules="[validFlavor]">
+                <v-text-field class="mb-1" density="compact" readonly v-model="selectedFlavor.name"
+                    :rules="[validFlavor]">
                     <template v-slot:prepend>规格</template>
                 </v-text-field>
                 <flavor-table @select-flavor="(flavor) => { selectFlavor(flavor) }" />
@@ -70,9 +72,9 @@ function validFlavor(value) {
     return true
 }
 watch(display, (newValue) => {
-  if (newValue == true){
-    selectedFlavor.value = {}
-  }
+    if (newValue == true) {
+        selectedFlavor.value = {}
+    }
 })
 
 async function resize() {

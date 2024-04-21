@@ -215,6 +215,11 @@ const MESSAGES = {
 
         'migration': '迁移',
         'live-migration': '热迁移',
+
+        'ACTIVE': '运行中',
+        'ERROR': '错误',
+        'HARD_REBOOT': '硬重启',
+        'REBOOT': '软重启',
     },
 };
 

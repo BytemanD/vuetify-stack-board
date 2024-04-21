@@ -1,7 +1,7 @@
 <template>
     <v-dialog v-model="dialog.show" width="600" scrollable>
         <template v-slot:activator="{ props }">
-            <v-btn variant="text" v-bind="props" color="warning" class="ml-1" :disabled="servers.length == 0">迁移</v-btn>
+            <v-btn variant="text" prepend-icon="mdi-menu" v-bind="props" color="warning" class="ml-1" :disabled="servers.length == 0">迁移</v-btn>
         </template>
         <v-card>
             <v-card-title class="headline warning" primary-title>迁移</v-card-title>

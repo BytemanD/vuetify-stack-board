@@ -199,7 +199,7 @@ def log_proxy(func):
         LOG.info('do proxy {} {}', kwargs.get('method'), kwargs.get('url'))
         start_time = time.time()
         ret = func(self, *args, **kwargs)
-        LOG.debug('proxy {} {}, spend: {:.2f}', kwargs.get('method'),
+        LOG.info('proxy {} {}, spend: {:.2f}', kwargs.get('method'),
                   kwargs.get('url'), time.time() - start_time)
         return ret
 

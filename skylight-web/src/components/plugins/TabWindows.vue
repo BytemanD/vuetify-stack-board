@@ -8,7 +8,9 @@
         </v-tabs>
         <div :class="'bg-' + color" style="height: 2px;"></div>
         <v-window v-model="tabIndex" class="mt-2">
-            <slot name="window-items"></slot>
+            <v-col >
+                <slot name="window-items"></slot>
+            </v-col>
         </v-window>
     </v-col>
 </template>

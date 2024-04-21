@@ -51,31 +51,29 @@
 
         <template v-slot:[`item.name`]="{ item }">
           <!-- 状态 -->
-          <template v-if="item.status">
-            <v-chip v-if="item.status.toUpperCase() == 'DELETED'" size='small' label color="red">已删除</v-chip>
-            <v-icon v-else-if="item.status.toUpperCase() == 'ACTIVE'" size='small'
-              color="success">mdi-play-circle</v-icon>
-            <v-icon v-else-if="item.status.toUpperCase() == 'SHUTOFF'" size='small'
-              color="warning">mdi-stop-circle</v-icon>
-            <v-icon v-else-if="item.status.toUpperCase() == 'PAUSED'" size='small'
-              color="warning">mdi-pause-circle</v-icon>
-            <v-icon v-else-if="item.status.toUpperCase() == 'ERROR'" size='small'
-              color="red">mdi-alpha-x-circle</v-icon>
-            <v-icon v-else-if="item.status.toUpperCase() == 'HARD_REBOOT'" size='small' color="warning"
-              class="mdi-spin">mdi-rotate-right</v-icon>
-            <v-icon
-              v-else-if="['REBOOT', 'BUILD', 'REBUILD', 'RESIZE', 'VERIFY_RESIZE', 'MIGRATING'].indexOf(item.status.toUpperCase()) >= 0"
-              color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
-            <span v-else>{{ item.status.toUpperCase() }}</span>
-          </template>
-          <chip-link hide-link-icon color="default" density="compact" :link="'/dashboard/server/' + item.id"
-            :label="item.name" />
-          <v-icon @click="openChangeServerNameDialog(item)" size="x-small">mdi-pencil-minus</v-icon>
-          <v-icon @click="loginVnc(item)" size="x-small" icon>mdi-console</v-icon>
-        </template>
-        <template v-slot:[`item.task_status`]="{ item }">
-          <v-chip size="x-small" variant="text" color="warning">
-            {{ item['OS-EXT-STS:task_state'] && $t(item['OS-EXT-STS:task_state']) }}</v-chip>
+          <chip-link v-if="item.status" hide-link-icon color="default" density="compact"
+            :link="'/dashboard/server/' + item.id" :label="item.name">
+            <template v-slot:append>
+              <div class="ml-1">
+                <v-chip v-if="item.status.toUpperCase() == 'DELETED'" size='small' label color="red">已删除</v-chip>
+                <v-icon v-else-if="item.status.toUpperCase() == 'ACTIVE'" color="success">mdi-play</v-icon>
+                <v-icon v-else-if="item.status.toUpperCase() == 'SHUTOFF'" color="warning">mdi-stop</v-icon>
+                <v-icon v-else-if="item.status.toUpperCase() == 'PAUSED'" color="warning">mdi-pause</v-icon>
+                <v-icon v-else-if="item.status.toUpperCase() == 'ERROR'" size='small'
+                  color="red">mdi-alpha-x-circle</v-icon>
+                <v-icon v-else-if="item.status.toUpperCase() == 'HARD_REBOOT'" size='small' color="warning"
+                  class="mdi-spin">mdi-rotate-right</v-icon>
+                <v-icon
+                  v-else-if="['REBOOT', 'BUILD', 'REBUILD', 'RESIZE', 'VERIFY_RESIZE', 'MIGRATING'].indexOf(item.status.toUpperCase()) >= 0"
+                  color="warning" class="mdi-spin">mdi-rotate-right</v-icon>
+                <span v-else>{{ item.status.toUpperCase() }}</span>
+              </div>
+            </template>
+          </chip-link>
+
+          <div v-if='item["OS-EXT-STS:task_state"]' class="text-warning text-center">
+            {{ $t(item["OS-EXT-STS:task_state"]) }} ...
+          </div>
         </template>
         <template v-slot:[`item.power_state`]="{ item }">
           <v-icon size='small' v-if="item['OS-EXT-STS:power_state'] == 1" color="success">mdi-power</v-icon>
@@ -96,16 +94,22 @@
         <template v-slot:[`item.image`]="{ item }">
           <span class="text-info">{{ table.imageName[item.image.id] }}</span>
           <template> {{ table.updateImageName(item) }} </template>
-          <v-icon size="x-small"
+          <v-icon size="x-small" class="ml-1"
             v-if="item['os-extended-volumes:volumes_attached'] && item['os-extended-volumes:volumes_attached'].length > 0">
             mdi-cloud</v-icon>
         </template>
         <template v-slot:[`item.action`]="{ item }">
+          <v-btn @click="openChangeServerNameDialog(item)" size="x-small" icon="mdi-pencil-minus"
+            variant="text"></v-btn>
+          <v-btn @click="loginVnc(item)" size="x-small" icon="mdi-console" variant="text"></v-btn>
           <v-menu offset-y>
             <template v-slot:activator="{ props }">
               <v-btn icon="mdi-dots-vertical" size="x-small" color="purple" variant="text" v-bind="props"></v-btn>
             </template>
             <v-list density='compact'>
+              <v-list-item @click="openServerUpdateSGDialog(item)">
+                <v-list-item-title>重命名</v-list-item-title>
+              </v-list-item>
               <v-list-item @click="openServerUpdateSGDialog(item)">
                 <v-list-item-title>更新安全组</v-list-item-title>
               </v-list-item>
