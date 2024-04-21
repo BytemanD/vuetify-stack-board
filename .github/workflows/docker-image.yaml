@@ -11,6 +11,10 @@ jobs:
   build_push_docker_image:
     runs-on: ubuntu-latest
     steps:
+    # - name: 升级
+    #   run: |
+    #     apt-get update -y
+
     - name: 拉取项目代码
       uses: actions/checkout@v2
       with:
@@ -21,7 +25,8 @@ jobs:
         cd skylight-web
         sudo apt-get install -y npm nodejs
         # sudo npm install -g @vue/cli @vue/cli-service @vue/cli-plugin-babel > /dev/null
-        sudo npm install > /dev/null
+        sudo npm audit fix
+        sudo npm install --fix-missing > /dev/null
 
     - name: 构建vue项目
       run: |

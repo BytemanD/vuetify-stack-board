@@ -111,7 +111,6 @@
                     </table>
                   </v-card-text>
                 </v-card>
-
                 <v-card density="compact" class="mt-1" title="规格">
                   <template v-slot:append>
                     <btn-server-resize :server="server" @update-server="updateServer" />
